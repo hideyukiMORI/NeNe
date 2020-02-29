@@ -1,0 +1,16 @@
+Options +Includes
+AddHandler server-parsed html
+
+
+Options +FollowSymLinks
+
+
+AddType "application/json; charset=UTF-8" .json
+
+
+
+RewriteEngine On
+RewriteBase /
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule !\.(pdf|ico|gif|css|html|xml)$ /index.php
