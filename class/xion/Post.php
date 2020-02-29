@@ -23,7 +23,7 @@ class Post extends RequestVariables
 {
     /**
      * Set value
-     * Get $_GET and set it to an internal variable.
+     * Get $_POST and set it to an internal variable.
      */
     protected function setValues()
     {
