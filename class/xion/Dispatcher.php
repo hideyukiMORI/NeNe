@@ -18,7 +18,7 @@ class Dispatcher
      * Then generate the controller class and execute the action.
      * If there is no corresponding class, the error message string is returned.
      */
-    public function dispatch($controller, $action)
+    final public function dispatch($controller, $action)
     {
         /* ========== SET CONTROLLER ========== */
         define('APP_CONTROLLER', $controller);
@@ -54,7 +54,7 @@ class Dispatcher
      * @param   string  $controller Controller name.
      * @return  ControllerBase  $ControllerBase     Controller alias specified by argument.
      */
-    private function getControllerInstance($controller)
+    final private function getControllerInstance($controller)
     {
         $className = ucfirst(strtolower($controller)).'Controller';
         $className = '\\Nene\\Controller\\'.$className;
