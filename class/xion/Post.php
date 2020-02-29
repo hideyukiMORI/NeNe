@@ -25,7 +25,7 @@ class Post extends RequestVariables
      * Set value
      * Get $_POST and set it to an internal variable.
      */
-    protected function setValues()
+    final protected function setValues()
     {
         foreach ($_POST as $key => $value) {
             $this->_values[$key] = $value;

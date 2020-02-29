@@ -25,7 +25,7 @@ class QueryString extends RequestVariables
      * Set value
      * Get $_GET and set it to an internal variable.
      */
-    protected function setValues()
+    final protected function setValues()
     {
         foreach ($_GET as $key => $value) {
             $this->_values[$key] = $value;
