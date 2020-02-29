@@ -1,0 +1,17 @@
+{
+    "autoload": {
+		"psr-4": {
+			"Nene\\Init\\"      : "class/init/",
+			"Nene\\Controller\\": "class/controller/",
+			"Nene\\Model\\"     : "class/model/",
+			"Nene\\Database\\"  : "class/db/",
+			"Nene\\Func\\"      : "class/func/",
+			"Nene\\Xion\\"      : "class/xion/"
+        }
+    },
+    "require": {
+        "guzzlehttp/guzzle": "~6.2",
+        "monolog/monolog": "^1.21",
+        "smarty/smarty" : "dev-trunk"
+   }
+}
