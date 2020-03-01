@@ -34,6 +34,10 @@ define('DB_COLUMN_NAME_CREATED',    'created_at');                  // COLUMN NA
 define('DB_COLUMN_NAME_UPDATED',    'updated_at');                  // COLUMN NAME OF ROW UPDATE DATE
 define('DB_AUTO_CREATED_STAMP',     true);                          // WHETHER TO SET THE CREATION DATE AUTOMATICALLY
 define('DB_AUTO_UPDATED_STAMP',     true);                          // WHETHER TO SET THE UPDATE DATE AUTOMATICALLY
+define('DB_NUM_PREFIX',             'numPrefix_');                  // WORKAROUND WHEN THE COLUMN NAME STARTS WITH A NUMBER FOR SOME REASON.
+define('DB_IS_PHYSICAL_DELETE',     true);                          // WHETHER TO DELETE PHYSICALLY
+
+
 
 
 
