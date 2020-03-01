@@ -29,6 +29,14 @@ define('DB_PASS',           '');
 define('DB_HOST',           'localhost');
 define('DB_NAME',           'nene-php');
 
+// DATABASE
+define('DB_COLUMN_NAME_CREATED',    'created_at');                  // COLUMN NAME OF ROW CREATION DATE
+define('DB_COLUMN_NAME_UPDATED',    'updated_at');                  // COLUMN NAME OF ROW UPDATE DATE
+define('DB_AUTO_CREATED_STAMP',     true);                          // WHETHER TO SET THE CREATION DATE AUTOMATICALLY
+define('DB_AUTO_UPDATED_STAMP',     true);                          // WHETHER TO SET THE UPDATE DATE AUTOMATICALLY
+
+
+
 // DEFINE DIR
 define('DIR_ROOT',          dirname(dirname(__FILE__)).'/');        // ROOT DIR
 define('DOCUMENT_ROOT',     DIR_ROOT.'htdocs/');                    // DOCUMENT DIR
