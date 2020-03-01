@@ -21,6 +21,7 @@ define('CONNECT',           'sessionConnect');                      // SESSION C
 define('OWN_DOMAIN',        'localhost');                           // DOMAIN
 define('URI_ROOT',          '/');                                   // ROOT URI
 define('LAYERS_NUM',        1);                                     // NUMBER OF LAYERS
+define('LOGOUT_URI',        '/');                                   // URI TO MOVE TO AFTER LOGOUT
 
 // DATABASE CONNECTION SETUP
 define('DB_USER',           'root');
