@@ -14,7 +14,7 @@ use Nene\Xion as Xion;
 /**
  * Model abstract class.
  *
- * Super class of all models.
+ * Super class of all controller.
  * Implements model common methods.
  *
  * @author HideyukiMORI
