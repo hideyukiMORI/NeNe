@@ -143,7 +143,7 @@ abstract class DataModelBase
      *
      * Validate parameters.
      *
-     * @param mix $param The value to validate.
+     * @param mixed $param The value to validate.
      * @param array $valudateArray An array of validation conditions.
      * @return bool Validation results.
      */
