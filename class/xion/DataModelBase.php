@@ -187,6 +187,12 @@ abstract class DataModelBase
                         break 2;
                     }
                     break;
+                case 'bool':
+                    if ($param != 1 && $param != 0) {
+                        $flag = false;
+                        break 2;
+                    }
+                    break;
                 default:
                     break;
             }
