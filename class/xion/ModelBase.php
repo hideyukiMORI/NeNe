@@ -16,14 +16,14 @@ use Nene\Xion as Xion;
  *
  * Super class of all controller.
  * Implements model common methods.
- *
- * @author HideyukiMORI
  */
 abstract class ModelBase
 {
     protected $LOGGER;
     protected $CLASS;
     protected $ERROR_CODE;
+
+
 
     /**
      * CONSTRUCTOR.
