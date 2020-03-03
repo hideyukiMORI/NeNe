@@ -12,9 +12,26 @@ body {
     color: #222;
     /* font-family: 游ゴシック体, 'Yu Gothic', YuGothic, 'ヒラギノ角ゴシック Pro', 'Hiragino Kaku Gothic Pro', メイリオ, Meiryo, Osaka, 'ＭＳ Ｐゴシック', 'MS PGothic', sans-serif; */
     font-family: -apple-system, blinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+    margin: 0;
+    padding: 16px;
 }
+
 
 .contents {
     background-color: #ffffff;
     min-height: 480px;
 }
+
+
+
+
+
+
+
+footer {
+    margin: 32px 0px 16px;
+}
+
+
+
+
