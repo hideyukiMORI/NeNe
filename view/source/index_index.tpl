@@ -3,7 +3,7 @@
 
 
                 <p class="information">
-                    This framework is produced by Ayane International.
+                    This framework is produced by AYANE International.
                 </p>
 
                 <div>
