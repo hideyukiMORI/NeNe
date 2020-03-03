@@ -6,6 +6,11 @@
                     This framework is produced by Ayane International.
                 </p>
 
+                <div>
+                    {$t_contents}
+                </div>
+
+
 
 
 {include file='footer.tpl'}
