@@ -14,12 +14,22 @@ namespace Nene\Xion;
 class Dispatcher
 {
     /**
-     * Receives the controller name and action name as arguments and autoloads.
+     * Parse the controller name and action name from the URI and autoload.
      * Then generate the controller class and execute the action.
      * If there is no corresponding class, the error message string is returned.
+     * If there is no corresponding class, 404 Not Found is returned.
      */
-    final public function dispatch($controller, $action)
+    final public function dispatch()
     {
+        $param = ltrim($_SERVER['REQUEST_URI'], '/');
+        $param = rtrim($param, '/');
+        $params = [];
+        if ($param != '') {
+            $params = explode('/', $param);
+        }
+        $controller = (LAYERS_NUM < count($params)) ? $params[LAYERS_NUM] : 'index';
+        $action = ((LAYERS_NUM + 1) < count($params)) ? $params[LAYERS_NUM + 1] : 'index';
+
         /* ========== SET CONTROLLER ========== */
         define('APP_CONTROLLER', $controller);
         $controllerInstance = $this->getControllerInstance($controller);
