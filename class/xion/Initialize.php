@@ -16,6 +16,7 @@ class Initialize
 {
     /**
      * CONSTRUCTOR
+     * Load various definition files.
      */
     final public function __construct()
     {
