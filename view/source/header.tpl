@@ -1,3 +1,3 @@
             <header>
-                <h2>{$t_siteTitle} API</h2>
+                <h2>{$t_header_title}</h2>
             </header>

@@ -34,6 +34,7 @@ class IndexController extends ControllerBase
      */
     public function indexAction()
     {
+        $this->setTitle('Hello NeNe-PHP!!');
         $this->VIEW->setValue('t_contents', 'Hello NeNe-PHP!!!');
     }
 }

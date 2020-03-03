@@ -3,7 +3,7 @@
 
 
                 <p class="information">
-                    This API is managed by {$t_companyName}
+                    This framework is produced by Ayane International.
                 </p>
 
 

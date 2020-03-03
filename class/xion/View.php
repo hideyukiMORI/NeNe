@@ -81,7 +81,7 @@ class View
      */
     final public function setTitle(string $p_title)
     {
-        $this->smarty->assign('t_title', $p_title);
+        $this->smarty->assign('t_title', SITE_TITLE_PRE.$p_title.SITE_TITLE_SUFFIX);
     }
 
 
