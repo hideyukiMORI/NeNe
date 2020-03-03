@@ -25,17 +25,20 @@ use Nene\Func           as Func;
  */
 abstract class ControllerBase
 {
-    protected $request;                     // Request
-    protected $method;                      // Request method.
-    protected $controller = 'index';        // Controller name.
-    protected $action = 'index';            // Action name.
-    protected $SESSION_CHECK = true;        // Session check flag.
-    protected $LOGGER;                      // Monolog.
-    protected $ERROR_CODE;                  // Error code.
-    protected $REQUEST_JSON;                // Rest post.
-    protected $OUTPUT_JSON_STYLE = 'json';  // Json format at rest
-    protected $refController;               // Referrer controller name
-    protected $refAction;                   // Referrer action name
+    protected $request;                             // Request
+    protected $method;                              // Request method.
+    protected $controller = 'index';                // Controller name.
+    protected $action = 'index';                    // Action name.
+    protected $TITLE = SITE_TITLE;                  // Site title.
+    protected $HEADER_TITLE = SITE_HEADER_TITLE;    // Site header title.
+    protected $VIEW;                                // View management class.
+    protected $SESSION_CHECK = true;                // Session check flag.
+    protected $LOGGER;                              // Monolog.
+    protected $ERROR_CODE;                          // Error code.
+    protected $REQUEST_JSON;                        // Rest post.
+    protected $OUTPUT_JSON_STYLE = 'json';          // Json format at rest
+    protected $refController;                       // Referrer controller name
+    protected $refAction;                           // Referrer action name
 
 
 
@@ -46,6 +49,7 @@ abstract class ControllerBase
     {
         $this->request          = new Request();
         $this->method           = $_SERVER["REQUEST_METHOD"];
+        $this->VIEW             = View::getInstance();
         $this->LOGGER           = Log::getInstance();
         $this->ERROR_CODE       = Xion\ErrorCode::getInstance();
         $this->refController    = $_SESSION['global']['referer']['controller'] ?? '';
@@ -86,8 +90,8 @@ abstract class ControllerBase
         } else {
             $this->setCSS();
             $this->setJS();
-            $this->VIEW->setTitle($title);
-            $this->VIEW->setValue('t_siteTitle',            SITE_TITLE);
+            $this->VIEW->setTitle($this->TITLE);
+            $this->VIEW->setValue('t_header_title',         $this->HEADER_TITLE);
             $this->VIEW->setValue('t_copyright',            COPYRIGHT);
             $this->VIEW->setValue('t_root',                 URI_ROOT);
             $this->VIEW->setValue('t_appVersion',           VERSION);
@@ -104,13 +108,25 @@ abstract class ControllerBase
 
     /**
      * preAction
-     *
      * Executed before the main process of run.
      *
-     * @author  HideyukiMORI
      */
     protected function preAction()
     {
+    }
+
+
+
+    /**
+     * Set title.
+     * Sets the page title property of the controller.
+     *
+     * @param string  $title  Page title.
+     * @return void
+     */
+    protected function setTitle($title)
+    {
+        $this->TITLE = $title;
     }
 
 
@@ -141,7 +157,6 @@ abstract class ControllerBase
        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER)) == true) {
            $template = APP_CONTROLLER;
        }
-       $templateFile = ;
        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER.'_'.APP_ACTION)) == true) {
            $template = APP_CONTROLLER.'_'.APP_ACTION;
        }
@@ -161,7 +176,7 @@ abstract class ControllerBase
         if (file_exists(sprintf('%scss/%s.css', DOCUMENT_ROOT, APP_CONTROLLER)) == true) {
             $this->VIEW->addCSS(APP_CONTROLLER);
         }
-        if (file_exists(sprintf('%scss/%s_%s.css', DOCUMENT_ROOT, APP_CONTROLLER, APP_ACTION)$file) == true) {
+        if (file_exists(sprintf('%scss/%s_%s.css', DOCUMENT_ROOT, APP_CONTROLLER, APP_ACTION)) == true) {
             $this->VIEW->addCSS(APP_CONTROLLER.'_'.APP_ACTION);
         }
     }
@@ -208,7 +223,7 @@ abstract class ControllerBase
                 $return = [
                     'status'        => 'failure',
                     'errorCode'     => $errorCode,
-                    'errorMessage'  => $errorMessage;
+                    'errorMessage'  => $errorMessage];
                 Func\Json::outputArrayToJson($return, $this->OUTPUT_JSON_STYLE, filter_input(INPUT_GET, 'callback'), $this->SESSION_CHECK);
             }
         } else {
