@@ -35,6 +35,9 @@ class IndexController extends ControllerBase
     public function indexAction()
     {
         $this->setTitle('Hello NeNe-PHP!!');
+        $userMapper = new Database\UserMapper();
+        $user = $userMapper->find(1);
+
         $this->VIEW->setValue('t_contents', 'Hello NeNe-PHP!!!');
     }
 }

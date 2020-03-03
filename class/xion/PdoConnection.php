@@ -19,16 +19,24 @@ class PdoConnection
      */
     final private function __construct()
     {
-        /* CONNECTION SETUP */
-        $db_user = DB_USER; // DATABASE USER
-        $db_pass = DB_PASS; // DATABASE PASSWORD
-        $db_host = DB_HOST; // DATABASE HOST
-        $db_name = DB_NAME; // DATABASE NAME
+        /* CHECK DATABASE TYPE */
+        if(!in_array(DB_TYPE, ['MySQL', 'SQLite3'])) {
+            echo('There is an error in the Database type setting. Check the configuration file.');
+            exit();
+        }
+
         /* CREATE DB OBJECT */
         try {
-            $this->connection = new PDO('mysql:host='.$db_host.'; dbname='.$db_name, $db_user, $db_pass);
-            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->connection->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+            switch(DB_TYPE) {
+                case 'MySQL':
+                    $this->connection = new PDO('mysql:host='.DB_HOST.'; dbname='.DB_NAME, DB_USER, DB_PASS);
+                    $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    $this->connection->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+                    break;
+                case 'SQLite3':
+                    $this->connection = new PDO('sqlite:'.DB_DIR.DB_FILE);
+                    break;
+            }
         } catch (PDOException $e) {
             die('Connection failed : '.$e->getMessage());
             exit();

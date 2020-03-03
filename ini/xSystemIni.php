@@ -23,7 +23,19 @@ define('URI_ROOT',          '/');                                   // ROOT URI
 define('LAYERS_NUM',        1);                                     // NUMBER OF LAYERS
 define('LOGOUT_URI',        '/');                                   // URI TO MOVE TO AFTER LOGOUT
 
+// DEFINE DIR
+define('DIR_ROOT',          dirname(dirname(__FILE__)).'/');        // ROOT DIR
+define('DOCUMENT_ROOT',     DIR_ROOT.'htdocs/');                    // DOCUMENT DIR
+define('URI_CSS',           URI_ROOT.'css/');                       // CSS URI
+define('URI_JS',            URI_ROOT.'js/');                        // JS URI
+define('URI_IMG',           'https://'.OWN_DOMAIN);                 // IMAGE DIR URI
+
+
+
 // DATABASE CONNECTION SETUP
+define('DB_TYPE',           'SQLite3');                             // TYPE [MySQL|SQLite3]
+define('DB_DIR',            DIR_ROOT.'data/');                      // DATABASE DIRECTORY WHEN USING SQLITE3
+define('DB_FILE',           'nene.db');                             // DATABASE FILE NAME WHEN USING SQLITE3
 define('DB_USER',           'root');
 define('DB_PASS',           '');
 define('DB_HOST',           'localhost');
@@ -41,12 +53,6 @@ define('DB_IS_PHYSICAL_DELETE',     true);                          // WHETHER T
 
 
 
-// DEFINE DIR
-define('DIR_ROOT',          dirname(dirname(__FILE__)).'/');        // ROOT DIR
-define('DOCUMENT_ROOT',     DIR_ROOT.'htdocs/');                    // DOCUMENT DIR
-define('URI_CSS',           URI_ROOT.'css/');                       // CSS URI
-define('URI_JS',            URI_ROOT.'js/');                        // JS URI
-define('URI_IMG',           'https://'.OWN_DOMAIN);                 // IMAGE DIR URI
 
 
 
