@@ -1,19 +1,21 @@
 @charset "utf-8";
 
+/* ========== BASIC ========== */
 
 
-
-
+html {
+    font-size: 62.5%;
+}
 
 
 
 body {
     background-color: #FFF;
     color: #222;
-    /* font-family: 游ゴシック体, 'Yu Gothic', YuGothic, 'ヒラギノ角ゴシック Pro', 'Hiragino Kaku Gothic Pro', メイリオ, Meiryo, Osaka, 'ＭＳ Ｐゴシック', 'MS PGothic', sans-serif; */
-    font-family: -apple-system, blinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+    font-family: 'Nunito', sans-serif;
     margin: 0;
     padding: 16px;
+    font-size: 1.4em;
 }
 
 
