@@ -9,7 +9,7 @@
                 <div>
                     {$t_contents}
                 </div>
-
+                {include file='./components/loginform.tpl'}
 
 
 
