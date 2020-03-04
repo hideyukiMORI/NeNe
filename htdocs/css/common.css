@@ -4,7 +4,6 @@
 
 
 html {
-    font-size: 62.5%;
 }
 
 body {
@@ -22,6 +21,7 @@ body {
 }
 
 footer {
+    font-size: 1.2rem;
     margin: 32px 0px 16px;
 }
 
@@ -38,13 +38,42 @@ form > div {
 }
 form label {
     font-size: 0.8rem;
+    margin-bottom: 4px;
 }
 form small {
     font-size: 0.9rem;
 }
 form input {
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+    height: 2.5rem;
+    line-height: 1.5;
     margin-bottom: 4px;
+    padding: 10px;
 }
+form button {
+    border-radius: 3px;
+    height: 2.5rem;
+    line-height: 1.5;
+    margin-bottom: 4px;
+    padding: 10px;
+}
+
+.input__w-255 {
+    width: 255px;
+}
+.input__w-128 {
+    width: 128px;
+}
+form button:hover {
+    background-color: black;
+    border-color: black;
+    color: white;
+    cursor: pointer;
+}
+
+
 
 
 
