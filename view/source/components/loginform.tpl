@@ -1,5 +1,5 @@
 
-<form id="c_loginform" class="c__loginform">
+<form id="c__loginform" class="c__loginform">
 
     <div class="loginform__user-id_block">
         <label for="loginform__user-id">USER ID*</label>

@@ -7,32 +7,53 @@ html {
     font-size: 62.5%;
 }
 
-
-
 body {
     background-color: #FFF;
     color: #222;
     font-family: 'Nunito', sans-serif;
+    font-size: 1.4em;
     margin: 0;
     padding: 16px;
-    font-size: 1.4em;
 }
-
 
 .contents {
     background-color: #ffffff;
     min-height: 480px;
 }
 
-
-
-
-
-
-
 footer {
     margin: 32px 0px 16px;
 }
+
+
+
+/* ========== FORM ========== */
+form input,
+form label,
+form small {
+    display: block;
+}
+form > div {
+    margin-bottom: 12px;
+}
+form label {
+    font-size: 0.8rem;
+}
+form small {
+    font-size: 0.9rem;
+}
+form input {
+    margin-bottom: 4px;
+}
+
+
+
+/* ========== COMPONENTS ==========*/
+/* loginform */
+.c__loginform {
+    margin-top: 32px;
+}
+
 
 
 
