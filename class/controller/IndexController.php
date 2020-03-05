@@ -35,6 +35,7 @@ class IndexController extends ControllerBase
     public function indexAction()
     {
         $this->setTitle('Hello NeNe-PHP!!');
+        $this->VIEW->addJS('https://cdn.jsdelivr.net/npm/vue/dist/vue.js');
         $userMapper = new Database\UserMapper();
         $user = $userMapper->find(1);
 

@@ -89,6 +89,7 @@ class View
     /**
      * Add css
      * Add the style sheet to use.
+     * If the passed argument is a URL, register that URL. Otherwise, register the file in the CSS directory.
      *
      * @param string $p_css Style sheet file name.
      * @return void
@@ -96,7 +97,11 @@ class View
     final public function addCSS(string $p_css)
     {
         if (strlen($p_css) > 0) {
-            $this->cssArray[] = 'css/'.$p_css;
+            if (filter_var( $p_css, FILTER_VALIDATE_URL )) {
+                $this->cssArray[] = $p_css;
+            } else {
+                $this->cssArray[] = 'css/'.$p_css;
+            }
         }
     }
 
@@ -112,9 +117,11 @@ class View
     {
         $cssArray = [];
         foreach ($this->cssArray as $filename) {
-            if (file_exists(DOCUMENT_ROOT.$filename.'.css')){
+            if (filter_var( $filename, FILTER_VALIDATE_URL )) {
+                $cssArray[] = ['filename' => $filename, 'filetime' => $fileTime];
+            } else if (file_exists(DOCUMENT_ROOT.$filename.'.css')){
                 $fileTime = filemtime(DOCUMENT_ROOT . $filename.'.css');
-                $cssArray[] = array('filename' => $filename, 'filetime' => $fileTime);
+                $cssArray[] = ['filename' => URI_ROOT.$filename, 'filetime' => ''];
             }
         }
         $this->setValues('t_css', $cssArray);
@@ -132,7 +139,11 @@ class View
     final public function addJS(string $p_js)
     {
         if (strlen($p_js) > 0) {
-            $this->jsArray[] = 'js/'.$p_js;
+            if (filter_var( $p_js, FILTER_VALIDATE_URL )) {
+                $this->jsArray[] = $p_js;
+            } else {
+                $this->jsArray[] = 'js/'.$p_js;
+            }
         }
     }
 
@@ -148,9 +159,11 @@ class View
     {
         $jsArray = [];
         foreach ($this->jsArray as $filename) {
-            if (file_exists(DOCUMENT_ROOT.$filename.'.js')){
+            if (filter_var( $filename, FILTER_VALIDATE_URL )) {
+                $jsArray[] = ['filename' => $filename, 'filetime' => $fileTime];
+            } else if (file_exists(DOCUMENT_ROOT.$filename.'.js')){
                 $fileTime = filemtime(DOCUMENT_ROOT . $filename.'.js');
-                $jsArray[] = array('filename' => $filename, 'filetime' => $fileTime);
+                $jsArray[] = ['filename' => URI_ROOT.$filename, 'filetime' => $fileTime];
             }
         }
         $this->setValues('t_js', $jsArray);
