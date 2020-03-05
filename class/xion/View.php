@@ -100,7 +100,7 @@ class View
             if (filter_var( $p_css, FILTER_VALIDATE_URL )) {
                 $this->cssArray[] = $p_css;
             } else {
-                $this->cssArray[] = 'css/'.$p_css;
+                $this->cssArray[] = "css/{$p_css}.css";
             }
         }
     }
@@ -118,10 +118,10 @@ class View
         $cssArray = [];
         foreach ($this->cssArray as $filename) {
             if (filter_var( $filename, FILTER_VALIDATE_URL )) {
-                $cssArray[] = ['filename' => $filename, 'filetime' => $fileTime];
-            } else if (file_exists(DOCUMENT_ROOT.$filename.'.css')){
-                $fileTime = filemtime(DOCUMENT_ROOT . $filename.'.css');
-                $cssArray[] = ['filename' => URI_ROOT.$filename, 'filetime' => ''];
+                $cssArray[] = $filename;
+            } else if (file_exists(DOCUMENT_ROOT.$filename)){
+                $fileTime = filemtime(DOCUMENT_ROOT . $filename);
+                $cssArray[] = URI_ROOT.$filename.'?'.$fileTime;
             }
         }
         $this->setValues('t_css', $cssArray);
@@ -142,7 +142,7 @@ class View
             if (filter_var( $p_js, FILTER_VALIDATE_URL )) {
                 $this->jsArray[] = $p_js;
             } else {
-                $this->jsArray[] = 'js/'.$p_js;
+                $this->jsArray[] = "js/{$p_js}.js";
             }
         }
     }
@@ -160,10 +160,10 @@ class View
         $jsArray = [];
         foreach ($this->jsArray as $filename) {
             if (filter_var( $filename, FILTER_VALIDATE_URL )) {
-                $jsArray[] = ['filename' => $filename, 'filetime' => $fileTime];
-            } else if (file_exists(DOCUMENT_ROOT.$filename.'.js')){
-                $fileTime = filemtime(DOCUMENT_ROOT . $filename.'.js');
-                $jsArray[] = ['filename' => URI_ROOT.$filename, 'filetime' => $fileTime];
+                $jsArray[] = $filename;
+            } else if (file_exists(DOCUMENT_ROOT.$filename)){
+                $fileTime = filemtime(DOCUMENT_ROOT . $filename);
+                $jsArray[] = URI_ROOT.$filename.'?'.$fileTime;
             }
         }
         $this->setValues('t_js', $jsArray);
