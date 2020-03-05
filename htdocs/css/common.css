@@ -20,6 +20,9 @@ body {
 .content {
     padding: 16px;
 }
+.hidden {
+    display: none;
+}
 
 footer {
     font-size: 1.2rem;
