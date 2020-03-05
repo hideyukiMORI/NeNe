@@ -17,6 +17,6 @@
         <button type="button" id="loginform__submite-btn" class="loginform__submite input__w-128">LOGIN</button>
         {include file='../components/loading-spinner-button.tpl'}
     </div>
-
+    {{ message }}
 </form>
 
