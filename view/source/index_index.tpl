@@ -9,7 +9,9 @@
                 <div>
                     {$t_contents}
                 </div>
-                {include file='./components/loginform.tpl'}
+                <div id="app" class="hidden">
+                    {include file='./components/loginform.tpl'}
+                </div>
 
 
 
