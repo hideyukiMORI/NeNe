@@ -40,5 +40,8 @@ class IndexController extends ControllerBase
         $user = $userMapper->find(1);
 
         $this->VIEW->setValue('t_contents', 'Hello NeNe-PHP!!!');
+
+
     }
+
 }
