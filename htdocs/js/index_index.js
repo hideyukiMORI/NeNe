@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('app').classList.remove('hidden');
         },
         methods: {
-            onSubmit: function() {
+            onSubmit: function(event) {
                 console.log('submit!!');
             }
         }
