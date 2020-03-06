@@ -19,7 +19,9 @@ body {
 .hidden {
     display: none;
 }
-
+.error {
+    color: red;
+}
 footer {
     font-size: 1.2rem;
     margin: 32px 0px 16px;

@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
             formUserId:     '',
             formUserIdMsg:  '',
             formUserPass:   '',
-            formUserPassMsg:'',
+            formUserPassMsg:'.',
             isConnect:      false,
         },
         created() {
