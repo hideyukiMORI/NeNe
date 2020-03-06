@@ -1,4 +1,5 @@
 <?php
+
 namespace Nene\Xion;
 
 use Nene\Model          as Model;
@@ -68,7 +69,7 @@ abstract class ControllerBase
         if (APP_CONTROLLER != 'debug') {
             $_SESSION['global']['referer']['controller']    = APP_CONTROLLER;
             $_SESSION['global']['referer']['action']        = APP_ACTION;
-            $this->LOGGER->addInfo('ACCESS : '.APP_CONTROLLER.'::'.APP_ACTION);
+            $this->LOGGER->addInfo('ACCESS : ' . APP_CONTROLLER . '::' . APP_ACTION);
         }
         if (APP_ACTION_MODE == 'Rest' && $this->method == 'POST') {
             $this->REQUEST_JSON = Func\Json::inputPostJsonToArray();
@@ -81,7 +82,7 @@ abstract class ControllerBase
             $this->sessionCheck();
         }
 
-        $methodName = sprintf('%s'.APP_ACTION_MODE, APP_ACTION);
+        $methodName = sprintf('%s' . APP_ACTION_MODE, APP_ACTION);
         $return = $this->$methodName();
 
         if (APP_ACTION_MODE == 'Rest') {
@@ -97,7 +98,7 @@ abstract class ControllerBase
             $this->VIEW->setValue('t_appVersion',           VERSION);
             $this->VIEW->setValue('t_controller',           APP_CONTROLLER);
             $this->VIEW->setValue('t_action',               APP_ACTION);
-            $this->VIEW->setValue('t_controller_action',    APP_CONTROLLER.'_'.APP_ACTION);
+            $this->VIEW->setValue('t_controller_action',    APP_CONTROLLER . '_' . APP_ACTION);
             $this->VIEW->setValue('t_debugMode',            DUBUG_MODE);
             $this->VIEW->setValue('t_login_mode',           $this->SESSION_CHECK);
             $this->VIEW->execute();
@@ -153,14 +154,14 @@ abstract class ControllerBase
      */
     final protected function setTemplate()
     {
-       $template = 'common';
-       if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER)) == true) {
-           $template = APP_CONTROLLER;
-       }
-       if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER.'_'.APP_ACTION)) == true) {
-           $template = APP_CONTROLLER.'_'.APP_ACTION;
-       }
-       $this->VIEW->setTemplate($template.'.tpl');
+        $template = 'common';
+        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER)) == true) {
+            $template = APP_CONTROLLER;
+        }
+        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER . '_' . APP_ACTION)) == true) {
+            $template = APP_CONTROLLER . '_' . APP_ACTION;
+        }
+        $this->VIEW->setTemplate($template . '.tpl');
     }
 
 
@@ -177,7 +178,7 @@ abstract class ControllerBase
             $this->VIEW->addCSS(APP_CONTROLLER);
         }
         if (file_exists(sprintf('%scss/%s_%s.css', DOCUMENT_ROOT, APP_CONTROLLER, APP_ACTION)) == true) {
-            $this->VIEW->addCSS(APP_CONTROLLER.'_'.APP_ACTION);
+            $this->VIEW->addCSS(APP_CONTROLLER . '_' . APP_ACTION);
         }
     }
 
@@ -197,7 +198,7 @@ abstract class ControllerBase
         }
         $file = sprintf('%sjs/%s_%s.js', DOCUMENT_ROOT, APP_CONTROLLER, APP_ACTION);
         if (file_exists($file) == true) {
-            $this->VIEW->addJS(APP_CONTROLLER.'_'.APP_ACTION);
+            $this->VIEW->addJS(APP_CONTROLLER . '_' . APP_ACTION);
         }
     }
 
@@ -213,7 +214,7 @@ abstract class ControllerBase
      */
     final protected function sessionCheck()
     {
-        if(($_SESSION['xion']['login_mode'] ?? '') != 'login') {
+        if (($_SESSION['xion']['login_mode'] ?? '') != 'login') {
             $this->logout();
             if (APP_ACTION_MODE != 'Rest') {
                 $this->location(LOGOUT_URI);
@@ -223,7 +224,8 @@ abstract class ControllerBase
                 $return = [
                     'status'        => 'failure',
                     'errorCode'     => $errorCode,
-                    'errorMessage'  => $errorMessage];
+                    'errorMessage'  => $errorMessage
+                ];
                 Func\Json::outputArrayToJson($return, $this->OUTPUT_JSON_STYLE, filter_input(INPUT_GET, 'callback'), $this->SESSION_CHECK);
             }
         } else {
@@ -275,9 +277,9 @@ abstract class ControllerBase
     final protected function location(string $uri, bool $flag = true)
     {
         if ($flag) {
-            $uri = URI_ROOT.$uri;
+            $uri = URI_ROOT . $uri;
         }
-        header('Location: '.$uri);
+        header('Location: ' . $uri);
         exit();
     }
 }
