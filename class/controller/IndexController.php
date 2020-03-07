@@ -37,10 +37,11 @@ class IndexController extends ControllerBase
         $this->setTitle('Hello NeNe-PHP!!');
         $this->VIEW->addJS('https://cdn.jsdelivr.net/npm/vue/dist/vue.js');
         $userMapper = new Database\UserMapper();
-        $user = $userMapper->findtest(1);
+        $user = $userMapper->find(1);
 
         $this->VIEW->setValue('t_contents', 'Hello NeNe-PHP!!!');
 
+        /* GINA TEST */
 
     }
 
