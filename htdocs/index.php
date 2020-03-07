@@ -1,7 +1,9 @@
 <?php
 namespace Nene;
 
-ini_set('display_errors', 1);               // DISPLAY ERROR
+use Nene\Xion as Xion;
+
+ini_set('display_errors', '1');             // DISPLAY ERROR
 error_reporting(E_ALL);                     // ERROR REPORT
 session_cache_expire(180);                  // SESSION => 3H
 
@@ -20,7 +22,7 @@ session_cache_expire(180);                  // SESSION => 3H
  */
 require_once '../vendor/autoload.php';       // AUTO LOAD
 
-new Xion\Initialize();
+Xion\Initialize::setIni();
 $dispatcher = new Xion\Dispatcher();
 $dispatcher->dispatch();
 exit();

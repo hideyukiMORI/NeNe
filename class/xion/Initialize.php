@@ -20,7 +20,15 @@ class Initialize
      */
     final public function __construct()
     {
+    }
+
+
+
+    final public static function setIni() {
         require_once '../ini/xSystemIni.php';       // SYSTEM INITIALIZE
         require_once '../ini/xSiteIni.php';         // SITE INITIALIZE
     }
+
+
+
 }
