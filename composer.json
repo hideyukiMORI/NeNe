@@ -13,5 +13,8 @@
         "guzzlehttp/guzzle": "~6.2",
         "monolog/monolog": "^1.21",
         "smarty/smarty" : "dev-trunk"
-   }
+   },
+    "require-dev": {
+        "phan/phan": "^2.5"
+    }
 }
