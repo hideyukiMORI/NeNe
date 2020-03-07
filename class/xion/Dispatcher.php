@@ -13,6 +13,18 @@ namespace Nene\Xion;
  */
 class Dispatcher
 {
+
+
+
+    /**
+     * CONSTRUCTOR.
+     */
+    public function __construct()
+    {
+    }
+
+
+
     /**
      * Parse the controller name and action name from the URI and autoload.
      * Then generate the controller class and execute the action.
