@@ -15,6 +15,15 @@ document.addEventListener('DOMContentLoaded', function() {
         methods: {
             onSubmit: function() {
                 console.log('submit!!');
+                console.log(this.formUserId);
+                if (this.formUserId.length == 0) {
+                    this.formUserIdMsg = 'USER ID is required.';
+                    return;
+                }
+                if (this.formUserPass.length == 0) {
+                    this.formUserPassMsg = 'PASSWORD is required.';
+                    return;
+                }
             }
         }
     });

@@ -3,13 +3,13 @@
 
     <div class="loginform__user-id_block">
         <label for="loginform__user-id">USER ID*</label>
-        <input id="loginform__user-id" name="loginform__user-id" maxlength="255" class="input__w-255" placeholder="USER ID" type="text" required>
+        <input id="loginform__user-id" name="loginform__user-id" maxlength="255" class="input__w-255" placeholder="USER ID" type="text" v-model="formUserId" required>
         <small><div id="loginform__user-id_msg" class="loginform__user-id_msg error" v-if="formUserIdMsg.length > 0">{{ formUserIdMsg }}</div></small>
     </div>
 
     <div class="loginform__user-pass_block">
         <label for="loginform__user-pass">PASSWORD*</label>
-        <input id="loginform__user-pass" name="loginform__user-pass" type="password" maxlength="64" class="input__w-255" placeholder="PASSWORD" minlength="6" required>
+        <input id="loginform__user-pass" name="loginform__user-pass" type="password" maxlength="64" class="input__w-255" placeholder="PASSWORD" minlength="6" v-model="formUserPass" required>
         <small><div id="loginform__user-pass_msg" class="loginform__user-pass_msg error" v-if="formUserPassMsg.length > 0">{{ formUserPassMsg }}</div>Please enter at least 6 alphanumeric characters up to 64 characters.</small>
     </div>
 
