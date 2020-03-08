@@ -81,7 +81,9 @@ class Dispatcher
         $className = ucfirst(strtolower($controller)).'Controller';
         $className = '\\Nene\\Controller\\'.$className;
         if (false == class_exists($className)) {
-            return;
+            header('HTTP/1.0 404 Not Found');
+            echo file_get_contents(DIR_ROOT.'/404.html');
+            exit;
         }
         $controllerInstarnce = new $className();
         return $controllerInstarnce;

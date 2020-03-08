@@ -9,7 +9,7 @@ namespace Nene\Xion;
  */
 
 /**
- * Initialize the settings 
+ * Initialize the settings
  */
 
 class Initialize
