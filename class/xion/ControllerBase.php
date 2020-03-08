@@ -86,7 +86,7 @@ abstract class ControllerBase
         $return = $this->$methodName();
 
         if (APP_ACTION_MODE == 'Rest') {
-            Func\Json::outputArrayToJson($return, $this->OUTPUT_JSON_STYLE, filter_input(INPUT_GET, 'callback'), $this->SESSION_CHECK);
+            Func\Json::outputArrayToJson($return, $this->OUTPUT_JSON_STYLE, filter_input(INPUT_GET, 'callback') ?: '', $this->SESSION_CHECK);
             return $return;
         } else {
             $this->setCSS();

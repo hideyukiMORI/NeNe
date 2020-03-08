@@ -20,7 +20,7 @@ define('CONNECT',           'sessionConnect');                      // SESSION C
 // ROOTING
 define('OWN_DOMAIN',        'localhost');                           // DOMAIN
 define('URI_ROOT',          '/');                                   // ROOT URI
-define('LAYERS_NUM',        1);                                     // NUMBER OF LAYERS
+define('LAYERS_NUM',        0);                                     // NUMBER OF LAYERS
 define('LOGOUT_URI',        '/');                                   // URI TO MOVE TO AFTER LOGOUT
 
 // DEFINE DIR

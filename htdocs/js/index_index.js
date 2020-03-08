@@ -30,6 +30,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.formUserPassMsg = 'Password must be at least 6 characters';
                     return;
                 }
+
+                let params = new FormData();
+                params.append('user_id', this.formUserId);
+                params.append('user_pass', this.formUserPass);
+                fetch('/session/login', {
+                    method: 'POST',
+                    credentials:'same-origin',
+                    body: params
+                }).then(res => res.json())
+                    .then(response => {
+                        console.log(response);
+                    }).catch(error => {
+                        console.log(error);
+                    });
             }
         }
     });

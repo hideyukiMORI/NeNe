@@ -34,6 +34,14 @@ class SessionController extends ControllerBase
      */
     public function loginRest() : array
     {
-        return ([]);
+        sleep(1);
+        $user_id     = filter_input(INPUT_POST, 'user_id');
+        $user_pass   = filter_input(INPUT_POST, 'user_pass');
+        return ([
+                'status'    => 'success',
+                'user_id'   => $user_id,
+                'user_pass' => $user_pass,
+                'errorCode' => '']
+        );
     }
 }
