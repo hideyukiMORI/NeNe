@@ -23,6 +23,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (this.formUserPass.length == 0) {
                     this.formUserPassMsg = 'PASSWORD is required.';
                     return;
+                } else if (this.formUserPass.length > 64) {
+                    this.formUserPassMsg = 'Please enter a password within 64 characters.';
+                    return;
+                } else if (this.formUserPass.length < 6) {
+                    this.formUserPassMsg = 'Password must be at least 6 characters';
+                    return;
                 }
             }
         }

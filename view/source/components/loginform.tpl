@@ -9,7 +9,7 @@
 
     <div class="loginform__user-pass_block">
         <label for="loginform__user-pass">PASSWORD*</label>
-        <input id="loginform__user-pass" name="loginform__user-pass" type="password" maxlength="64" class="input__w-255" placeholder="PASSWORD" minlength="6" v-model="formUserPass" required>
+        <input id="loginform__user-pass" name="loginform__user-pass" type="password"  class="input__w-255" placeholder="PASSWORD" v-model="formUserPass" required>
         <small><div id="loginform__user-pass_msg" class="loginform__user-pass_msg error" v-if="formUserPassMsg.length > 0">{{ formUserPassMsg }}</div>Please enter at least 6 alphanumeric characters up to 64 characters.</small>
     </div>
 
