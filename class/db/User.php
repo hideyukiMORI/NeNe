@@ -52,7 +52,7 @@ class User extends DataModelBase
             'is_deleted'        => ['required' => true, 'bool' => true]
         ];
         if ($prop == '') {
-            foreach($validateArray as $key => $val) {
+            foreach ($validateArray as $key => $val) {
                 if (!$this->doValid($this->$key, $val)) {
                     return($key);
                 }

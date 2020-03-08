@@ -22,9 +22,8 @@ class UserMapper extends DataMapperBase
     const TARGET_TABLE = 'users';
     const KEY_SID = 'id';
 
-    final public function findByUserID() {
+    final public function findByUserID()
+    {
         return ([]);
     }
-
-
 }

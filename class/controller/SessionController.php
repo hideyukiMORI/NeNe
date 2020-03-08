@@ -1,5 +1,4 @@
 <?php
-
 namespace Nene\Controller;
 
 use Nene\Model as Model;

@@ -51,8 +51,8 @@ class Json
             'Result' => true,
             'Data'   => $jsonArray
         ];
-        if($style == 'jsonp') {
-            if($callback == NULL || !$callback) {
+        if ($style == 'jsonp') {
+            if ($callback == null || !$callback) {
                 $callback = 'jsonCallback';
             }
             $json = json_encode($responseArray, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);

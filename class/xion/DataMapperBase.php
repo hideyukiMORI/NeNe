@@ -108,9 +108,14 @@ abstract class DataMapperBase
         }
         foreach ($data as $row) {
             if (!$row instanceof $modelClass) {
-                throw new InvalidArgumentException('DATA MAPPER ERROR. Not an instance of the specified "'.$modelClass.'" class.');
-            } else if (!$row->isValid()) {
-                throw new InvalidArgumentException('DATA MAPPER ERROR. The specified "'.$modelClass.'.'.$row->isValid().'" is in violation of validation');
+                throw new InvalidArgumentException(
+                    'DATA MAPPER ERROR. Not an instance of the specified "'.$modelClass.'" class.'
+                );
+            } elseif (!$row->isValid()) {
+                throw new InvalidArgumentException(
+                    'DATA MAPPER ERROR. The specified "'.$modelClass.'.'.
+                    $row->isValid().'" is in violation of validation'
+                );
             }
             foreach ($column as $key => $val) {
                 $col = preg_replace('/^'.DB_NUM_PREFIX.'/', '', $key);
@@ -153,9 +158,13 @@ abstract class DataMapperBase
         }
         foreach ($data as $row) {
             if (!$row instanceof $modelClass) {
-                throw new InvalidArgumentException('DATA MAPPER ERROR. Not an instance of the specified "'.$modelClass.'" class.');
-            } else if (!$row->isValid()) {
-                throw new InvalidArgumentException('DATA MAPPER ERROR. The specified "'.$modelClass.'.'.$row->isValid().'" is in violation of validation');
+                throw new InvalidArgumentException(
+                    'DATA MAPPER ERROR. Not an instance of the specified "'.$modelClass.'" class.'
+                );
+            } elseif (!$row->isValid()) {
+                throw new InvalidArgumentException('DATA MAPPER ERROR. The specified "'.
+                    $modelClass.'.'.$row->isValid().'" is in violation of validation'
+                );
             }
             foreach ($column as $key => $val) {
                 $col = preg_replace('/^'.DB_NUM_PREFIX.'/', '', $key);

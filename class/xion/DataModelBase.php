@@ -147,10 +147,11 @@ abstract class DataModelBase
      * @param array $valudateArray An array of validation conditions.
      * @return bool Validation results.
      */
-    protected function doValid($param, $validateArray) {
+    protected function doValid($param, $validateArray)
+    {
         $flag = true;
-        foreach($validateArray as $key => $value) {
-            switch($key) {
+        foreach ($validateArray as $key => $value) {
+            switch ($key) {
                 case 'required':
                     if (empty($param)) {
                         $flag = false;
@@ -211,7 +212,8 @@ abstract class DataModelBase
      * @param string $postProp  POST parameter name.
      * @return void
      */
-    public function setFillteredPost($prop, $postProp = '') {
+    public function setFillteredPost($prop, $postProp = '')
+    {
         $postProp = $postProp == '' ? $prop : $postProp;
         $this->set($prop, (string)filter_input(INPUT_POST, $postProp));
     }
@@ -225,11 +227,12 @@ abstract class DataModelBase
      * If the createion stamp has not been set, set the creation stamp in the format of "HmdHi".
      * And set the update stamp in the format of "HmdHi".
      */
-    public function setNow() {
+    public function setNow()
+    {
         if (strlen($this->created_at) <= 1) {
-            $this->created_at = current_time('YmdHi');
+            $this->created_at = date('YmdHi');
         }
-        $this->updated_at = current_time('YmdHi');
+        $this->updated_at = date('YmdHi');
         return;
     }
 

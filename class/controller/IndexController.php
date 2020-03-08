@@ -42,7 +42,5 @@ class IndexController extends ControllerBase
         $this->VIEW->setValue('t_contents', 'Hello NeNe-PHP!!!');
 
         /* GINA TEST */
-
     }
-
 }
