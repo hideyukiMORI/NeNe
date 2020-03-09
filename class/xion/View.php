@@ -17,11 +17,11 @@ use PDOStatement;
  */
 class View
 {
-    private static $instance;        // INSTANCE VARIABLE
-    public  $smarty;                 // SMARTY OBJECT
-    private $template;               // TEMPLATE FILE NAME
-    private $cssArray = [];          // CSS FILE NAME ARRAY
-    private $jsArray  = [];          // JAVASCRIPT FILE NAME ARRAY
+    private static $instance;   // INSTANCE VARIABLE
+    public $smarty;             // SMARTY OBJECT
+    private $template;          // TEMPLATE FILE NAME
+    private $cssArray = [];     // CSS FILE NAME ARRAY
+    private $jsArray  = [];     // JAVASCRIPT FILE NAME ARRAY
 
 
 
@@ -258,6 +258,6 @@ class View
      */
     final public function __clone()
     {
-        throw new RuntimeException('Clone is not allowed against '.get_class($this));
+        throw new \RuntimeException('Clone is not allowed against '.get_class($this));
     }
 }

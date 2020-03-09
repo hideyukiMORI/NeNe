@@ -24,11 +24,9 @@ class Initialize
 
 
 
-    final public static function setIni() {
+    final public static function init()
+    {
         require_once '../ini/xSystemIni.php';       // SYSTEM INITIALIZE
         require_once '../ini/xSiteIni.php';         // SITE INITIALIZE
     }
-
-
-
 }

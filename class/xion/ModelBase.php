@@ -3,6 +3,7 @@ namespace Nene\Xion;
 
 use Nene\Model;
 use Nene\Xion as Xion;
+use Logger;
 
 /**
  * AYANE : ayane.co.jp
@@ -30,7 +31,7 @@ abstract class ModelBase
      */
     public function __construct()
     {
-        $this->LOGGER = Logger::getInstance();
+        $this->LOGGER = Log::getInstance();
         $classPathArray = explode('\\', get_class($this));
         $this->CLASS = 'Model\\'.end($classPathArray);
         if (APP_CONTROLLER != 'debug' && APP_CONTROLLER != 'stub') {

@@ -29,6 +29,9 @@ abstract class DataMapperBase
     protected $CLASS;
     protected $ERROR_CODE;
 
+    const MODEL_CLASS = '';
+    const TARGET_TABLE = '';
+    const KEY_SID = '';
 
 
     /**
@@ -86,7 +89,7 @@ abstract class DataMapperBase
         $fields = array();
         $values = array();
         $column = $this->getTableColumn(static::KEY_SID);
-        foreach ($column as $key => $val) {
+        foreach ($column as $key) {
             $key = preg_replace('/^'.DB_NUM_PREFIX.'/', '', $key);
             $fields[] = $key;
             $values[] = ':'.$key;
@@ -108,22 +111,22 @@ abstract class DataMapperBase
         }
         foreach ($data as $row) {
             if (!$row instanceof $modelClass) {
-                throw new InvalidArgumentException(
+                throw new \InvalidArgumentException(
                     'DATA MAPPER ERROR. Not an instance of the specified "'.$modelClass.'" class.'
                 );
             } elseif (!$row->isValid()) {
-                throw new InvalidArgumentException(
+                throw new \InvalidArgumentException(
                     'DATA MAPPER ERROR. The specified "'.$modelClass.'.'.
                     $row->isValid().'" is in violation of validation'
                 );
             }
-            foreach ($column as $key => $val) {
+            foreach ($column as $key) {
                 $col = preg_replace('/^'.DB_NUM_PREFIX.'/', '', $key);
                 $stmt->bindValue(':'.$col, $row->$key);
             }
             try {
                 $stmt->execute();
-            } catch (PDOException $e) {
+            } catch (\PDOException $e) {
                 echo $e->getMessage();
                 exit();
             }
@@ -158,22 +161,22 @@ abstract class DataMapperBase
         }
         foreach ($data as $row) {
             if (!$row instanceof $modelClass) {
-                throw new InvalidArgumentException(
+                throw new \InvalidArgumentException(
                     'DATA MAPPER ERROR. Not an instance of the specified "'.$modelClass.'" class.'
                 );
             } elseif (!$row->isValid()) {
-                throw new InvalidArgumentException('DATA MAPPER ERROR. The specified "'.
+                throw new \InvalidArgumentException('DATA MAPPER ERROR. The specified "'.
                     $modelClass.'.'.$row->isValid().'" is in violation of validation'
                 );
             }
-            foreach ($column as $key => $val) {
+            foreach ($column as $key) {
                 $col = preg_replace('/^'.DB_NUM_PREFIX.'/', '', $key);
                 $stmt->bindValue(':'.$col, $row->$key);
             }
             $stmt->bindValue(':'.static::KEY_SID, $row->{static::KEY_SID});
             try {
                 $stmt->execute();
-            } catch (PDOException $e) {
+            } catch (\PDOException $e) {
                 echo $e->getMessage();
                 exit();
             }
@@ -203,12 +206,12 @@ abstract class DataMapperBase
             }
             foreach ($data as $row) {
                 if (!$row instanceof $modelClass) {
-                    throw new InvalidArgumentException('DATA MAPPER ERROR. Not an instance of the specified "'.$modelClass.'" class.');
+                    throw new \InvalidArgumentException('DATA MAPPER ERROR. Not an instance of the specified "'.$modelClass.'" class.');
                 }
                 $key_sid = $row->{static::KEY_SID};
                 try {
                     $stmt->execute();
-                } catch (PDOException $e) {
+                } catch (\PDOException $e) {
                     echo $e->getMessage();
                     exit();
                 }
@@ -235,7 +238,7 @@ abstract class DataMapperBase
         $stmt->bindParam(':'.static::KEY_SID, $sid, PDO::PARAM_INT);
         try {
             $stmt->execute();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             echo $e->getMessage();
             exit();
         }
@@ -259,7 +262,7 @@ abstract class DataMapperBase
                 WHERE 1
                 ORDER BY '.static::KEY_SID.'
             ');
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             echo $e->getMessage();
             exit();
         }
@@ -284,7 +287,7 @@ abstract class DataMapperBase
         $stmt->bindParam(':'.static::KEY_SID, $sid, PDO::PARAM_INT);
         try {
             $stmt->execute();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             echo $e->getMessage();
             exit();
         }
@@ -306,7 +309,7 @@ abstract class DataMapperBase
                 SELECT COUNT(*) FROM '.static::TARGET_TABLE.'
                 WHERE 1
             ');
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             echo $e->getMessage();
             exit();
         }

@@ -5,7 +5,6 @@ namespace Nene\Xion;
 use Nene\Model          as Model;
 use Nene\Database       as Database;
 use Nene\Xion           as Xion;
-use Nene\Xion\Logger    as Logger;
 use Nene\Func           as Func;
 
 /**
@@ -73,7 +72,7 @@ abstract class ControllerBase
         }
         if (APP_ACTION_MODE == 'Rest' && $this->method == 'POST') {
             $this->REQUEST_JSON = Func\Json::inputPostJsonToArray();
-        } else if (APP_ACTION_MODE == 'Action') {
+        } elseif (APP_ACTION_MODE == 'Action') {
             $this->setTemplate();
         }
         $this->preAction();
@@ -86,21 +85,26 @@ abstract class ControllerBase
         $return = $this->$methodName();
 
         if (APP_ACTION_MODE == 'Rest') {
-            Func\Json::outputArrayToJson($return, $this->OUTPUT_JSON_STYLE, filter_input(INPUT_GET, 'callback') ?: '', $this->SESSION_CHECK);
+            Func\Json::outputArrayToJson(
+                $return,
+                $this->OUTPUT_JSON_STYLE,
+                filter_input(INPUT_GET, 'callback') ?: '',
+                $this->SESSION_CHECK
+            );
             return $return;
         } else {
             $this->setCSS();
             $this->setJS();
             $this->VIEW->setTitle($this->TITLE);
-            $this->VIEW->setValue('t_header_title'          , $this->HEADER_TITLE);
-            $this->VIEW->setValue('t_copyright'             , COPYRIGHT);
-            $this->VIEW->setValue('t_root'                  , URI_ROOT);
-            $this->VIEW->setValue('t_appVersion'            , VERSION);
-            $this->VIEW->setValue('t_controller'            , APP_CONTROLLER);
-            $this->VIEW->setValue('t_action'                , APP_ACTION);
-            $this->VIEW->setValue('t_controller_action'     , APP_CONTROLLER . '_' . APP_ACTION);
-            $this->VIEW->setValue('t_debugMode'             , DUBUG_MODE);
-            $this->VIEW->setValue('t_login_mode'            , $this->SESSION_CHECK);
+            $this->VIEW->setValue('t_header_title', $this->HEADER_TITLE);
+            $this->VIEW->setValue('t_copyright', COPYRIGHT);
+            $this->VIEW->setValue('t_root', URI_ROOT);
+            $this->VIEW->setValue('t_appVersion', VERSION);
+            $this->VIEW->setValue('t_controller', APP_CONTROLLER);
+            $this->VIEW->setValue('t_action', APP_ACTION);
+            $this->VIEW->setValue('t_controller_action', APP_CONTROLLER . '_' . APP_ACTION);
+            $this->VIEW->setValue('t_debugMode', DUBUG_MODE);
+            $this->VIEW->setValue('t_login_mode', $this->SESSION_CHECK);
             $this->VIEW->execute();
         }
     }

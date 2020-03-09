@@ -32,18 +32,42 @@ try {
 echo('The database was created successfully.'.PHP_EOL);
 
 
-$db->exec('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT, updated_at TEXT, user_id TEXT, user_pass TEXT, user_name TEXT, e_mail TEXT, is_deleted INTEGER)');
+$db->exec(<<<_SQL_
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at TEXT,
+    updated_at TEXT,
+    user_id TEXT,
+    user_pass TEXT,
+    user_name TEXT,
+    e_mail TEXT,
+    is_deleted INTEGER
+)
+_SQL_);
 $res = $db->query("SELECT COUNT(*) FROM users WHERE user_id = 'admin'");
 $count = $res->fetchColumn();
 if ($count == 0) {
-    $res = $db->query("INSERT INTO users (created_at, updated_at, user_id, user_pass, user_name, e_mail, is_deleted) values (".date('YmdHis').", ".date('YmdHis').", 'admin', 'admin', 'admin', '', 0)");
+    $date = date('YmdHis');
+    $res = $db->query(<<<_SQL_
+INSERT INTO users (
+    created_at,
+    updated_at,
+    user_id, user_pass,
+    user_name,
+    e_mail, is_deleted
+) values (
+    {$date},
+    {$date},
+    'admin',
+    'admin',
+    'admin',
+    '',
+    0
+)
+_SQL_);
     echo('The "admin" account has been added. The password is "admin".'.PHP_EOL.PHP_EOL);
 } else {
     echo('The admin account already exists in the user table.'.PHP_EOL.PHP_EOL);
 }
 
-
-
-
 echo('Processing has been completed. Thank you very much.');
-

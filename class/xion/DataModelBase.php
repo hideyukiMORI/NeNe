@@ -139,6 +139,18 @@ abstract class DataModelBase
 
 
     /**
+     * Validate
+     * If the property is not specified, validate all schemas.
+     * If the property is specified, validate the value passed in the argument and return the result.
+     *
+     * @param string $prop  Validation target. If not specified, all schemas.
+     * @param string $value  The value you want to validate.
+     */
+    abstract public function validate($prop = '', $value = '');
+
+
+
+    /**
      * Do valid
      *
      * Validate parameters.

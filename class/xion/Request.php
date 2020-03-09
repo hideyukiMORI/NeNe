@@ -41,7 +41,7 @@ class Request
     /**
      * Get POST
      * Get the value of $_POST
-     * 
+     *
      * @param string|null $key  Parameter name.
      */
     final public function getPost(string $key = null)

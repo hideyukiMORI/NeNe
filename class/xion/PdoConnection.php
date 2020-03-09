@@ -20,7 +20,7 @@ class PdoConnection
     final private function __construct()
     {
         /* CHECK DATABASE TYPE */
-        if(!in_array(DB_TYPE, ['MySQL', 'SQLite3'])) {
+        if (!in_array(DB_TYPE, ['MySQL', 'SQLite3'])) {
             echo('There is an error in the Database type setting. Check the configuration file.');
             exit();
         }
@@ -37,7 +37,7 @@ class PdoConnection
                     $this->connection = new PDO('sqlite:'.DB_DIR.DB_FILE);
                     break;
             }
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             die('Connection failed : '.$e->getMessage());
             exit();
         }
@@ -67,6 +67,6 @@ class PdoConnection
      */
     final public function __clone()
     {
-        throw new RuntimeException('Clone is not allowed against '.get_class($this));
+        throw new \RuntimeException('Clone is not allowed against '.get_class($this));
     }
 }

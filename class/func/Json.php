@@ -45,8 +45,12 @@ class Json
      * @param array $jsonArray Array that you want to convert to JSON format.
      * @return void
      */
-    final public static function outputArrayToJson(array $jsonArray, string $style = 'jsonp', string $callback = 'jsonCallback', bool $session = false)
-    {
+    final public static function outputArrayToJson(
+        array $jsonArray,
+        string $style = 'jsonp',
+        string $callback = 'jsonCallback',
+        bool $session = false
+    ) {
         $responseArray = [
             'Result' => true,
             'Data'   => $jsonArray

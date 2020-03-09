@@ -48,6 +48,6 @@ class Log
      */
     final public function __clone()
     {
-        throw new RuntimeException('Clone is not allowed against '.get_class($this));
+        throw new \RuntimeException('Clone is not allowed against '.get_class($this));
     }
 }
