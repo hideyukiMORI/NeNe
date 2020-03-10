@@ -1,7 +1,9 @@
+            </div>
+        </div>
+
 
 
         <footer>
-        <hr>
             <small class="copyright">&copy; {$t_copyright}</small>
         </footer>
 {foreach from=$t_js item=js}        <script type="text/javascript" src="{$js}"></script>
@@ -9,5 +11,5 @@
 
 
 
-</body>
+    </body>
 </html>

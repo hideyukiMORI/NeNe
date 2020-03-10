@@ -36,6 +36,7 @@ class View
         $this->smarty->config_dir   = DIR_SMARTY_CONFIG;        // CONFIG DIR
         $this->smarty->escape_html  = true;
         $this->addCSS('common');
+        $this->addCSS('components');
         $this->addJS('common');
         $this->setValue('t_contents', '');
     }

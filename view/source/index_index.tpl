@@ -3,14 +3,13 @@
 
 
                 <p class="information">
-                    This framework is produced by AYANE International.
+                    {$t_contents}
                 </p>
 
-                <div>
-                    {$t_contents}
-                </div>
-                <div id="app" class="hidden">
-                    {include file='./components/loginform.tpl'}
+                <div class="login__form_block">
+                    <div id="app" class="hidden">
+                        {include file='./components/loginform.tpl'}
+                    </div>
                 </div>
 
 
