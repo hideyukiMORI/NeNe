@@ -14,8 +14,8 @@
     </div>
 
     <div id="loginform__submit-btn_block" class="loginform__submite-btn_block">
-        <button type="submit" id="loginform__submite-btn" class="loginform__submit input__w-100p">LOGIN</button>
-        {include file='../components/loading-spinner-button.tpl'}
+        {include file='../components/loading-spinner.tpl' vif='isConnect'}
+        <button type="submit" id="loginform__submite-btn" class="loginform__submit input__w-100p" :disabled="isConnect">LOGIN</button>
     </div>
 </form>
 

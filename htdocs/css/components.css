@@ -2,5 +2,119 @@
 
 /* ========== COMPONENTS ==========*/
 /* loginform */
-.c__loginform {
+
+
+
+
+
+/* ========== LOADING SPINNER ==========*/
+.c__spinner {
+    height: 30px;
+    margin-bottom: 4px;
+    position: relative;
+}
+.c__spinner .box {
+    height: 30px;
+    position: absolute;
+    top: -100px;
+    width: 100%;
+}
+.c__spinner .spinner {
+    font-size: 10px;
+    height: 20px;
+    margin: -100px auto 0;
+    text-align: center;
+    width: 50px;
+}
+.c__spinner .spinner > div {
+    animation: sk-stretchdelay 1.2s infinite ease-in-out;
+    background: #FBC02D;
+    display: inline-block;
+    height: 100%;
+    width: 6px;
+    -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+}
+.c__spinner .spinner .rect1 {
+    animation-delay: -1.1s;
+    -webkit-animation-delay: -1.1s;
+}
+.c__spinner .spinner .rect2 {
+    animation-delay: -1.1s;
+    -webkit-animation-delay: -1.1s;
+}
+.c__spinner .spinner .rect3 {
+    animation-delay: -1.0s;
+    -webkit-animation-delay: -1.0s;
+}
+.c__spinner .spinner .rect4 {
+    animation-delay: -0.9s;
+    -webkit-animation-delay: -0.9s;
+}
+.c__spinner .spinner .rect5 {
+    animation-delay: -0.8s;
+    -webkit-animation-delay: -0.8s;
+}
+@-webkit-keyframes sk-stretchdelay {
+    0%, 40%, 100% { -webkit-transform: scaleY(0.4) }  
+    20% { -webkit-transform: scaleY(1.0) }
+}
+@keyframes sk-stretchdelay {
+    0%, 40%, 100% { 
+        transform: scaleY(0.4);
+        -webkit-transform: scaleY(0.4);
+    }  20% { 
+        transform: scaleY(1.0);
+        -webkit-transform: scaleY(1.0);
+    }
+}
+.c__spinner .sk-circle {
+    background: #FBC02D;
+    border-radius:100%;
+    height: 10px;
+    left:-16px;
+    margin: 100px auto;
+    position: relative;
+    width: 10px;
+    -webkit-animation: sk 1.2s infinite ease-in-out;
+}
+@keyframes sk {
+    1% {
+        top: 3px;
+    }
+    3% {
+        top: 4px;
+    }
+    5% {
+        top: -8px;
+    }
+    10% {
+        left: -10px;
+    }
+    20% {
+       top: -12px;
+    }
+    30% {
+       left:16px;
+    }
+    35% {
+       top:5px;
+    }
+    45% {
+       top:-3px;
+    }
+    50% {
+       top:-3px;
+    }
+    60% {
+       top:-4px;
+    }
+    70% {
+       top:4px;
+    }
+    80% {
+       top:4px;
+    }
+    90% {
+       top:4px;
+    }
 }

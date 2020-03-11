@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 this.formUserPassMsg = '';
+                this.isConnect = true;
                 let params = new FormData();
                 params.append('user_id', this.formUserId);
                 params.append('user_pass', this.formUserPass);
@@ -41,8 +42,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: params
                 }).then(res => res.json())
                     .then(response => {
+                        this.isConnect = false;
                         console.log(response);
                     }).catch(error => {
+                        this.isConnect = false;
                         console.log(error);
                     });
             }
