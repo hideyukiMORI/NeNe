@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.formUserIdMsg = 'USER ID is required.';
                     return;
                 }
+                this.formUserIdMsg = '';
                 if (this.formUserPass.length == 0) {
                     this.formUserPassMsg = 'PASSWORD is required.';
                     return;
@@ -30,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.formUserPassMsg = 'Password must be at least 6 characters';
                     return;
                 }
-
+                this.formUserPassMsg = '';
                 let params = new FormData();
                 params.append('user_id', this.formUserId);
                 params.append('user_pass', this.formUserPass);
