@@ -98,6 +98,7 @@ abstract class ControllerBase
             $this->VIEW->setTitle($this->TITLE);
             $this->VIEW->setValue('t_header_title', $this->HEADER_TITLE);
             $this->VIEW->setValue('t_copyright', COPYRIGHT);
+            $this->VIEW->setValue('t_copyright_url', COPYRIGHT_URL);
             $this->VIEW->setValue('t_root', URI_ROOT);
             $this->VIEW->setValue('t_appVersion', VERSION);
             $this->VIEW->setValue('t_controller', APP_CONTROLLER);

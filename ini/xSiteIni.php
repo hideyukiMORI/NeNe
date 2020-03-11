@@ -16,3 +16,4 @@ define('SITE_TITLE_PRE', '');
 define('SITE_TITLE_SUFFIX', '');
 define('SITE_HEADER_TITLE', 'NeNe-PHP');
 define('COPYRIGHT', '2020 AYANE.');
+define('COPYRIGHT_URL', 'https://ayane.co.jp');

@@ -54,11 +54,16 @@ header h2 {
 
 /* ========== HEADER ========== */
 footer {
-    color: #eee;
+    color: #44d1b2;
     font-size: 1.1rem;
     margin: 16px 0px 16px;
     text-align: center;
 }
+footer a {
+    color: #44d1b2;
+    text-decoration:  none;
+}
+
 
 
 
