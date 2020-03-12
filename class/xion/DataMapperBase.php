@@ -124,12 +124,7 @@ abstract class DataMapperBase
                 $col = preg_replace('/^'.DB_NUM_PREFIX.'/', '', $key);
                 $stmt->bindValue(':'.$col, $row->$key);
             }
-            try {
-                $stmt->execute();
-            } catch (\PDOException $e) {
-                echo $e->getMessage();
-                exit();
-            }
+            $stmt = $this->execute($stmt);
             $row->{static::KEY_SID} = $this->DB->lastInsertId();
         }
         return $row->{static::KEY_SID};
@@ -174,12 +169,7 @@ abstract class DataMapperBase
                 $stmt->bindValue(':'.$col, $row->$key);
             }
             $stmt->bindValue(':'.static::KEY_SID, $row->{static::KEY_SID});
-            try {
-                $stmt->execute();
-            } catch (\PDOException $e) {
-                echo $e->getMessage();
-                exit();
-            }
+            $stmt = $this->execute($stmt);
         }
     }
 
@@ -209,12 +199,7 @@ abstract class DataMapperBase
                     throw new \InvalidArgumentException('DATA MAPPER ERROR. Not an instance of the specified "'.$modelClass.'" class.');
                 }
                 $key_sid = $row->{static::KEY_SID};
-                try {
-                    $stmt->execute();
-                } catch (\PDOException $e) {
-                    echo $e->getMessage();
-                    exit();
-                }
+                $stmt = $this->execute($stmt);
             }
         }
     }
@@ -236,12 +221,7 @@ abstract class DataMapperBase
             LIMIT 1
         ');
         $stmt->bindParam(':'.static::KEY_SID, $sid, PDO::PARAM_INT);
-        try {
-            $stmt->execute();
-        } catch (\PDOException $e) {
-            echo $e->getMessage();
-            exit();
-        }
+        $stmt = $this->execute($stmt);
         $stmt = $this->_decorate($stmt);
         return $stmt->fetch();
     }
@@ -256,16 +236,11 @@ abstract class DataMapperBase
      */
     public function findALL()
     {
-        try {
-            $stmt = $this->DB->query('
-                SELECT * FROM '.static::TARGET_TABLE.'
-                WHERE 1
-                ORDER BY '.static::KEY_SID.'
-            ');
-        } catch (\PDOException $e) {
-            echo $e->getMessage();
-            exit();
-        }
+        $stmt = $this->executeQuery('
+            SELECT * FROM '.static::TARGET_TABLE.'
+            WHERE 1
+            ORDER BY '.static::KEY_SID.'
+        ');
         return $this->_decorate($stmt);
     }
 
@@ -285,12 +260,7 @@ abstract class DataMapperBase
             WHERE '.static::KEY_SID.' =:'.static::KEY_SID.'
         ');
         $stmt->bindParam(':'.static::KEY_SID, $sid, PDO::PARAM_INT);
-        try {
-            $stmt->execute();
-        } catch (\PDOException $e) {
-            echo $e->getMessage();
-            exit();
-        }
+        $stmt = $this->execute($stmt);
         return $stmt->fetchColumn();
     }
 
@@ -304,16 +274,51 @@ abstract class DataMapperBase
      */
     public function countALL()
     {
+        $stmt = $this->executeQuery('
+            SELECT COUNT(*) FROM '.static::TARGET_TABLE.'
+            WHERE 1
+        ');
+        return $stmt->fetchColumn();
+    }
+
+
+
+    /**
+     * EXECUTE
+     * Try to execute stmt.
+     *
+     * @param   PDOStatement $stmt  PDOStatement you want to try.
+     * @return  PDOStatement        PDOStatement after try.
+     */
+    final public function execute(PDOStatement $stmt)
+    {
         try {
-            $stmt = $this->DB->query('
-                SELECT COUNT(*) FROM '.static::TARGET_TABLE.'
-                WHERE 1
-            ');
+            $stmt->execute();
         } catch (\PDOException $e) {
             echo $e->getMessage();
             exit();
         }
-        return $stmt->fetchColumn();
+        return $stmt;
+    }
+
+
+
+    /**
+     * EXECUTE QUERY
+     * Try to query execute stmt.
+     *
+     * @param   string @query       Query statement.
+     * @return  PDOStatement        PDOStatement after try.
+     */
+    final public function executeQuery(string $query)
+    {
+        try {
+            $stmt = $this->DB->query($query);
+        } catch (\PDOException $e) {
+            echo $e->getMessage();
+            exit();
+        }
+        return $stmt;
     }
 
 
@@ -342,10 +347,10 @@ abstract class DataMapperBase
      * DECORATE
      * Set fetch mode to convert to the specified class.
      *
-     * @param  PDOStatement $stmt PDOStatement instance.
-     * @return PDOStatement  Instance of PDOStatement after setting.
+     * @param  \PDOStatement $stmt PDOStatement instance.
+     * @return \PDOStatement  Instance of PDOStatement after setting.
      */
-    protected function _decorate(PDOStatement $stmt)
+    protected function _decorate(\PDOStatement $stmt)
     {
         $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, static::MODEL_CLASS);
         return $stmt;
@@ -357,10 +362,10 @@ abstract class DataMapperBase
      * ASSOCIATIVE ARRAY
      * Set fetch mode to convert to associative array.
      *
-     * @param  PDOStatement $stmt PDOStatement instance.
-     * @return PDOStatement  Instance of PDOStatement after setting.
+     * @param  \PDOStatement $stmt PDOStatement instance.
+     * @return \PDOStatement  Instance of PDOStatement after setting.
      */
-    protected function _assoc(PDOStatement $stmt)
+    protected function _assoc(\PDOStatement $stmt)
     {
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         return $stmt;
