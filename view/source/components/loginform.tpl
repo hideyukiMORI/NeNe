@@ -10,7 +10,7 @@
     <div class="loginform__user-pass_block">
         <label for="loginform__user-pass">PASSWORD*</label>
         <input id="loginform__user-pass" name="loginform__user-pass" type="password"  class="input__w-100p" placeholder="PASSWORD" v-model="formUserPass" required>
-        <small><div id="loginform__user-pass_msg" class="loginform__user-pass_msg error" v-if="formUserPassMsg.length > 0">{{ formUserPassMsg }}</div>Please enter at least 6 alphanumeric characters up to 64 characters.</small>
+        <small><div id="loginform__user-pass_msg" class="loginform__user-pass_msg error" v-if="formUserPassMsg.length > 0">{{ formUserPassMsg }}</div>Please enter at least 5 alphanumeric characters up to 64 characters.</small>
     </div>
 
     <div id="loginform__submit-btn_block" class="loginform__submite-btn_block">
