@@ -52,7 +52,7 @@ class ErrorCode
     final public function getErrorText(string $errorcode) : string
     {
         if (array_key_exists($errorcode, $this->ERROR_CODE)) {
-            return $this->ERROR_CODE[$errorcode]['message'];
+            return $this->ERROR_CODE[$errorcode];
         } else {
             return 'Error code ['.$errorcode.'] is not defined.';
         }
