@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (this.formUserPass.length > 64) {
                     this.formUserPassMsg = 'Please enter a password within 64 characters.';
                     return;
-                } else if (this.formUserPass.length < 6) {
+                } else if (this.formUserPass.length < 5) {
                     this.formUserPassMsg = 'Password must be at least 6 characters';
                     return;
                 }
