@@ -33,9 +33,19 @@ class SessionController extends ControllerBase
      */
     public function loginRest() : array
     {
-        sleep(10);
+        sleep(3);
         $user_id     = filter_input(INPUT_POST, 'user_id');
         $user_pass   = filter_input(INPUT_POST, 'user_pass');
+        $userMapper = new Database\UserMapper();
+        $count = $userMapper->checkLogin($user_id, $user_pass);
+        if ($count == 0) {
+            $errorCode = 'LOGIN-FAILED';
+            return ([
+                    'status'        => 'failure',
+                    'errorCode'     => $errorCode,
+                    'errorMessage'  => $this->ERROR_CODE->getErrorText($errorCode)]
+            );
+        }
         return ([
                 'status'    => 'success',
                 'user_id'   => $user_id,
