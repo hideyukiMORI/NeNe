@@ -1,4 +1,5 @@
 <?php
+
 namespace Nene\Xion;
 
 use Smarty;
@@ -49,7 +50,7 @@ class View
      *
      * @return View Singleton class for display management.
      */
-    final public static function getInstance() : View
+    final public static function getInstance(): View
     {
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -82,7 +83,7 @@ class View
      */
     final public function setTitle(string $p_title)
     {
-        $this->smarty->assign('t_title', SITE_TITLE_PRE.$p_title.SITE_TITLE_SUFFIX);
+        $this->smarty->assign('t_title', SITE_TITLE_PRE . $p_title . SITE_TITLE_SUFFIX);
     }
 
 
@@ -98,7 +99,7 @@ class View
     final public function addCSS(string $p_css)
     {
         if (strlen($p_css) > 0) {
-            if (filter_var( $p_css, FILTER_VALIDATE_URL )) {
+            if (filter_var($p_css, FILTER_VALIDATE_URL)) {
                 $this->cssArray[] = $p_css;
             } else {
                 $this->cssArray[] = "css/{$p_css}.css";
@@ -118,11 +119,11 @@ class View
     {
         $cssArray = [];
         foreach ($this->cssArray as $filename) {
-            if (filter_var( $filename, FILTER_VALIDATE_URL )) {
+            if (filter_var($filename, FILTER_VALIDATE_URL)) {
                 $cssArray[] = $filename;
-            } else if (file_exists(DOCUMENT_ROOT.$filename)){
+            } else if (file_exists(DOCUMENT_ROOT . $filename)) {
                 $fileTime = filemtime(DOCUMENT_ROOT . $filename);
-                $cssArray[] = URI_ROOT.$filename.'?'.$fileTime;
+                $cssArray[] = URI_ROOT . $filename . '?' . $fileTime;
             }
         }
         $this->setValues('t_css', $cssArray);
@@ -140,7 +141,7 @@ class View
     final public function addJS(string $p_js)
     {
         if (strlen($p_js) > 0) {
-            if (filter_var( $p_js, FILTER_VALIDATE_URL )) {
+            if (filter_var($p_js, FILTER_VALIDATE_URL)) {
                 $this->jsArray[] = $p_js;
             } else {
                 $this->jsArray[] = "js/{$p_js}.js";
@@ -160,11 +161,11 @@ class View
     {
         $jsArray = [];
         foreach ($this->jsArray as $filename) {
-            if (filter_var( $filename, FILTER_VALIDATE_URL )) {
+            if (filter_var($filename, FILTER_VALIDATE_URL)) {
                 $jsArray[] = $filename;
-            } else if (file_exists(DOCUMENT_ROOT.$filename)){
+            } else if (file_exists(DOCUMENT_ROOT . $filename)) {
                 $fileTime = filemtime(DOCUMENT_ROOT . $filename);
-                $jsArray[] = URI_ROOT.$filename.'?'.$fileTime;
+                $jsArray[] = URI_ROOT . $filename . '?' . $fileTime;
             }
         }
         $this->setValues('t_js', $jsArray);
@@ -226,7 +227,7 @@ class View
     {
         $this->setCSS();
         $this->setJS();
-        $this->smarty->display($this->smarty->template_dir[0].''.$this->template);
+        $this->smarty->display($this->smarty->template_dir[0] . '' . $this->template);
     }
 
 
@@ -245,7 +246,7 @@ class View
         $this->setTemplate('error.tpl');
         $this->setValue('t_root', URI_ROOT);
         $this->setValue('t_controller', APP_CONTROLLER);
-        $this->setValue('t_controller_action', APP_CONTROLLER.'_'.APP_ACTION);
+        $this->setValue('t_controller_action', APP_CONTROLLER . '_' . APP_ACTION);
         $this->execute();
         exit;
     }
@@ -259,6 +260,6 @@ class View
      */
     final public function __clone()
     {
-        throw new \RuntimeException('Clone is not allowed against '.get_class($this));
+        throw new \RuntimeException('Clone is not allowed against ' . get_class($this));
     }
 }
