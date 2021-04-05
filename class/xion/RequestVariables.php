@@ -1,9 +1,10 @@
 <?php
+
 namespace Nene\Xion;
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -62,7 +63,7 @@ abstract class RequestVariables
      * @param string $key   Parameter name.
      * @return bool
      */
-    public function has(string $key) : bool
+    public function has(string $key): bool
     {
         if (array_key_exists($key, $this->_values) == false) {
             return false;

@@ -1,9 +1,10 @@
 <?php
+
 namespace Nene\Func;
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -33,7 +34,7 @@ class Text
      * @param string    $class  Class name.
      * @return string  HTML tags generated.
      */
-    final public static function getLink(string $text, string $link, bool $blank = false, string $class = '') : string
+    final public static function getLink(string $text, string $link, bool $blank = false, string $class = ''): string
     {
         $blankHTML = $blank ? ' target="_blank" rel="noopener noreferrer"' : '';
         $linkHTML = strlen($link) > 0 ? "<a href=\"{$link}\"{$blankHTML} {$class}>{$text}</a>" : $text;

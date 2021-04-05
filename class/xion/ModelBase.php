@@ -1,4 +1,5 @@
 <?php
+
 namespace Nene\Xion;
 
 use Nene\Model;
@@ -7,7 +8,7 @@ use Logger;
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -33,9 +34,9 @@ abstract class ModelBase
     {
         $this->LOGGER = Log::getInstance();
         $classPathArray = explode('\\', get_class($this));
-        $this->CLASS = 'Model\\'.end($classPathArray);
+        $this->CLASS = 'Model\\' . end($classPathArray);
         if (APP_CONTROLLER != 'debug' && APP_CONTROLLER != 'stub') {
-            $this->LOGGER->addInfo('NEW : '.$this->CLASS);
+            $this->LOGGER->addInfo('NEW : ' . $this->CLASS);
         }
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
     }
@@ -45,7 +46,8 @@ abstract class ModelBase
     /**
      * check login
      */
-    final protected function checkLogin() {
+    final protected function checkLogin()
+    {
         $login = $_SESSION['xion']['login_mode'] ?? '';
         if ($login != 'login') {
             return false;
@@ -63,7 +65,7 @@ abstract class ModelBase
      * @param string $errorcode Error code string.
      * @return string error message.
      */
-    final protected function errorCode(string $errorcode) : string
+    final protected function errorCode(string $errorcode): string
     {
         return $this->ERROR_CODE->getErrorText($errorcode);
     }
@@ -77,11 +79,11 @@ abstract class ModelBase
     {
         $user_id = $_SESSION['xion']['user_id'] ?? '';
 
-        $log = date('[Y-m-d H:i:s]').' '.
-                $user_id.' '.
-                APP_CONTROLLER.'   '.
-                APP_ACTION.'   '.
-                $API . PHP_EOL;
+        $log = date('[Y-m-d H:i:s]') . ' ' .
+            $user_id . ' ' .
+            APP_CONTROLLER . '   ' .
+            APP_ACTION . '   ' .
+            $API . PHP_EOL;
         file_put_contents(ACCESS_LOG_PATH, $log, FILE_APPEND);
     }
 }

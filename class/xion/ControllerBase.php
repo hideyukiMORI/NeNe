@@ -10,7 +10,7 @@ use Nene\Func           as Func;
 /**
  * AYANE
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */

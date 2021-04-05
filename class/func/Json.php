@@ -1,9 +1,10 @@
 <?php
+
 namespace Nene\Func;
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -28,7 +29,7 @@ class Json
      *
      * @return array Return the input POST data that was casted json to array.
      */
-    final public static function inputPostJsonToArray() : array
+    final public static function inputPostJsonToArray(): array
     {
         $postJson   = file_get_contents('php://input');
         $jsonArray  = json_decode($postJson, true);
@@ -61,7 +62,7 @@ class Json
             }
             $json = json_encode($responseArray, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
             header("Content-type: application/x-javascript");
-            echo $callback.'('.$json.')';
+            echo $callback . '(' . $json . ')';
         } else {
             $json = json_encode($responseArray);
             header('Content-Type: application/json; charset=utf-8');

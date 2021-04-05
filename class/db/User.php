@@ -1,11 +1,12 @@
 <?php
+
 namespace Nene\Database;
 
 use Nene\Xion\DataModelBase as DataModelBase;
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -54,12 +55,12 @@ class User extends DataModelBase
         if ($prop == '') {
             foreach ($validateArray as $key => $val) {
                 if (!$this->doValid($this->$key, $val)) {
-                    return($key);
+                    return ($key);
                 }
             }
         } else if (in_array($prop, $validateArray, true)) {
             if (!$this->doValid($value, $validateArray[$prop])) {
-                    return(false);
+                return (false);
             }
         }
         return true;
@@ -75,6 +76,6 @@ class User extends DataModelBase
      */
     public function isValid()
     {
-        return($this->validate() === true ?: false);
+        return ($this->validate() === true ?: false);
     }
 }

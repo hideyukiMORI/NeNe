@@ -1,9 +1,10 @@
 <?php
+
 namespace Nene\Xion;
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -46,22 +47,24 @@ class Dispatcher
         define('APP_CONTROLLER', $controller);
         $controllerInstance = $this->getControllerInstance($controller);
         if ($controllerInstance === null) {
-            return('Controller ['.$controller.'] is not defined.');
+            return ('Controller [' . $controller . '] is not defined.');
         }
 
         /* ========== SET ACTION ========== */
         define('APP_ACTION', $action);
-        if (method_exists($controllerInstance, $action.'Action')
-            && method_exists($controllerInstance, $action.'Rest')) {
-            echo $action.'Action'.' and '.$action.'Rest Duplicate';
+        if (
+            method_exists($controllerInstance, $action . 'Action')
+            && method_exists($controllerInstance, $action . 'Rest')
+        ) {
+            echo $action . 'Action' . ' and ' . $action . 'Rest Duplicate';
             exit();
-        } elseif (method_exists($controllerInstance, $action.'Action')) {
+        } elseif (method_exists($controllerInstance, $action . 'Action')) {
             define('APP_ACTION_MODE', 'Action');
-        } elseif (method_exists($controllerInstance, $action.'Rest')) {
+        } elseif (method_exists($controllerInstance, $action . 'Rest')) {
             define('APP_ACTION_MODE', 'Rest');
         } else {
             header('HTTP/1.0 404 Not Found');
-            echo file_get_contents(DIR_ROOT.'/404.html');
+            echo file_get_contents(DIR_ROOT . '/404.html');
             exit;
         }
         $controllerInstance->run();
@@ -78,11 +81,11 @@ class Dispatcher
      */
     final private function getControllerInstance($controller)
     {
-        $className = ucfirst(strtolower($controller)).'Controller';
-        $className = '\\Nene\\Controller\\'.$className;
+        $className = ucfirst(strtolower($controller)) . 'Controller';
+        $className = '\\Nene\\Controller\\' . $className;
         if (false == class_exists($className)) {
             header('HTTP/1.0 404 Not Found');
-            echo file_get_contents(DIR_ROOT.'/404.html');
+            echo file_get_contents(DIR_ROOT . '/404.html');
             exit;
         }
         $controllerInstarnce = new $className();

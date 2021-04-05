@@ -1,4 +1,5 @@
 <?php
+
 namespace Nene\Xion;
 
 use Nene\Database   as Database;
@@ -10,7 +11,7 @@ use \PDO;
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -42,10 +43,10 @@ abstract class DataMapperBase
         $this->DB = PdoConnection::getInstance();
         $this->LOGGER = Log::getInstance();
         $classPathArray = explode('\\', get_class($this));
-        $this->CLASS = 'Database\\'.end($classPathArray);
+        $this->CLASS = 'Database\\' . end($classPathArray);
 
         if (APP_CONTROLLER != 'debug' && APP_CONTROLLER != 'stub') {
-            $this->LOGGER->addInfo('NEW : '.$this->CLASS);
+            $this->LOGGER->addInfo('NEW : ' . $this->CLASS);
         }
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
     }
@@ -61,7 +62,7 @@ abstract class DataMapperBase
      * @param bool $is_exclude_date   Whether to exclude the creation date and update date of the database row.
      * @return array Column name array.
      */
-    public function getTableColumn($key_sid, $is_exclude_date = false) : array
+    public function getTableColumn($key_sid, $is_exclude_date = false): array
     {
         $classNAME  = get_class($this);
         $DataMODEL  = str_replace('Mapper', '', $classNAME);
@@ -90,21 +91,21 @@ abstract class DataMapperBase
         $values = array();
         $column = $this->getTableColumn(static::KEY_SID);
         foreach ($column as $key) {
-            $key = preg_replace('/^'.DB_NUM_PREFIX.'/', '', $key);
+            $key = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
             $fields[] = $key;
-            $values[] = ':'.$key;
+            $values[] = ':' . $key;
         }
 
-        $created_at     = DB_AUTO_CREATED_STAMP ? ','.DB_COLUMN_NAME_CREATED : '';
+        $created_at     = DB_AUTO_CREATED_STAMP ? ',' . DB_COLUMN_NAME_CREATED : '';
         $created_stamp  = DB_AUTO_CREATED_STAMP ? ',NOW()' : '';
-        $updated_at     = DB_AUTO_UPDATED_STAMP ? ','.DB_COLUMN_NAME_UPDATED : '';
+        $updated_at     = DB_AUTO_UPDATED_STAMP ? ',' . DB_COLUMN_NAME_UPDATED : '';
         $updated_stamp  = DB_AUTO_UPDATED_STAMP ? ',NOW()' : '';
 
         $stmt = $this->DB->prepare(sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
             static::TARGET_TABLE,
-            implode(',', $fields).$created_at.$updated_at,
-            implode(',', $values).$created_stamp.$updated_stamp
+            implode(',', $fields) . $created_at . $updated_at,
+            implode(',', $values) . $created_stamp . $updated_stamp
         ));
         if (!is_array($data)) {
             $data = [$data];
@@ -112,17 +113,17 @@ abstract class DataMapperBase
         foreach ($data as $row) {
             if (!$row instanceof $modelClass) {
                 throw new \InvalidArgumentException(
-                    'DATA MAPPER ERROR. Not an instance of the specified "'.$modelClass.'" class.'
+                    'DATA MAPPER ERROR. Not an instance of the specified "' . $modelClass . '" class.'
                 );
             } elseif (!$row->isValid()) {
                 throw new \InvalidArgumentException(
-                    'DATA MAPPER ERROR. The specified "'.$modelClass.'.'.
-                    $row->isValid().'" is in violation of validation'
+                    'DATA MAPPER ERROR. The specified "' . $modelClass . '.' .
+                        $row->isValid() . '" is in violation of validation'
                 );
             }
             foreach ($column as $key) {
-                $col = preg_replace('/^'.DB_NUM_PREFIX.'/', '', $key);
-                $stmt->bindValue(':'.$col, $row->$key);
+                $col = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
+                $stmt->bindValue(':' . $col, $row->$key);
             }
             $stmt = $this->execute($stmt);
             $row->{static::KEY_SID} = $this->DB->lastInsertId();
@@ -143,11 +144,11 @@ abstract class DataMapperBase
         $modelClass = static::MODEL_CLASS;
         $column = $this->getTableColumn(static::KEY_SID);
         foreach ($column as $key => $val) {
-            $key = preg_replace('/^'.DB_NUM_PREFIX.'/', '', $key);
-            $param[] = $key.'=:'.$key;
+            $key = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
+            $param[] = $key . '=:' . $key;
         }
         $stmt = $this->DB->prepare(sprintf(
-            'UPDATE %s SET %s WHERE '.static::KEY_SID.' =:'.static::KEY_SID.' ',
+            'UPDATE %s SET %s WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID . ' ',
             static::TARGET_TABLE,
             implode(',', $param)
         ));
@@ -157,18 +158,19 @@ abstract class DataMapperBase
         foreach ($data as $row) {
             if (!$row instanceof $modelClass) {
                 throw new \InvalidArgumentException(
-                    'DATA MAPPER ERROR. Not an instance of the specified "'.$modelClass.'" class.'
+                    'DATA MAPPER ERROR. Not an instance of the specified "' . $modelClass . '" class.'
                 );
             } elseif (!$row->isValid()) {
-                throw new \InvalidArgumentException('DATA MAPPER ERROR. The specified "'.
-                    $modelClass.'.'.$row->isValid().'" is in violation of validation'
+                throw new \InvalidArgumentException(
+                    'DATA MAPPER ERROR. The specified "' .
+                        $modelClass . '.' . $row->isValid() . '" is in violation of validation'
                 );
             }
             foreach ($column as $key) {
-                $col = preg_replace('/^'.DB_NUM_PREFIX.'/', '', $key);
-                $stmt->bindValue(':'.$col, $row->$key);
+                $col = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
+                $stmt->bindValue(':' . $col, $row->$key);
             }
-            $stmt->bindValue(':'.static::KEY_SID, $row->{static::KEY_SID});
+            $stmt->bindValue(':' . static::KEY_SID, $row->{static::KEY_SID});
             $stmt = $this->execute($stmt);
         }
     }
@@ -187,8 +189,8 @@ abstract class DataMapperBase
         if (DB_IS_PHYSICAL_DELETE) {
             $modelClass = static::MODEL_CLASS;
             $stmt = $this->DB->prepare('
-                DELETE FROM '.static::TARGET_TABLE.'
-                WHERE '.static::KEY_SID.' = ?
+                DELETE FROM ' . static::TARGET_TABLE . '
+                WHERE ' . static::KEY_SID . ' = ?
             ');
             $stmt->bindParam(1, $key_sid, PDO::PARAM_INT);
             if (!is_array($data)) {
@@ -196,7 +198,7 @@ abstract class DataMapperBase
             }
             foreach ($data as $row) {
                 if (!$row instanceof $modelClass) {
-                    throw new \InvalidArgumentException('DATA MAPPER ERROR. Not an instance of the specified "'.$modelClass.'" class.');
+                    throw new \InvalidArgumentException('DATA MAPPER ERROR. Not an instance of the specified "' . $modelClass . '" class.');
                 }
                 $key_sid = $row->{static::KEY_SID};
                 $stmt = $this->execute($stmt);
@@ -216,11 +218,11 @@ abstract class DataMapperBase
     public function find($sid)
     {
         $stmt = $this->DB->prepare('
-            SELECT * FROM '.static::TARGET_TABLE.'
-            WHERE   '.static::KEY_SID.' =:'.static::KEY_SID.'
+            SELECT * FROM ' . static::TARGET_TABLE . '
+            WHERE   ' . static::KEY_SID . ' =:' . static::KEY_SID . '
             LIMIT 1
         ');
-        $stmt->bindParam(':'.static::KEY_SID, $sid, PDO::PARAM_INT);
+        $stmt->bindParam(':' . static::KEY_SID, $sid, PDO::PARAM_INT);
         $stmt = $this->execute($stmt);
         $stmt = $this->_decorate($stmt);
         return $stmt->fetch();
@@ -237,9 +239,9 @@ abstract class DataMapperBase
     public function findALL()
     {
         $stmt = $this->executeQuery('
-            SELECT * FROM '.static::TARGET_TABLE.'
+            SELECT * FROM ' . static::TARGET_TABLE . '
             WHERE 1
-            ORDER BY '.static::KEY_SID.'
+            ORDER BY ' . static::KEY_SID . '
         ');
         return $this->_decorate($stmt);
     }
@@ -256,10 +258,10 @@ abstract class DataMapperBase
     public function countSID($sid)
     {
         $stmt = $this->DB->prepare('
-            SELECT COUNT(*) FROM '.static::TARGET_TABLE.'
-            WHERE '.static::KEY_SID.' =:'.static::KEY_SID.'
+            SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
+            WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID . '
         ');
-        $stmt->bindParam(':'.static::KEY_SID, $sid, PDO::PARAM_INT);
+        $stmt->bindParam(':' . static::KEY_SID, $sid, PDO::PARAM_INT);
         $stmt = $this->execute($stmt);
         return $stmt->fetchColumn();
     }
@@ -275,7 +277,7 @@ abstract class DataMapperBase
     public function countALL()
     {
         $stmt = $this->executeQuery('
-            SELECT COUNT(*) FROM '.static::TARGET_TABLE.'
+            SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
             WHERE 1
         ');
         return $stmt->fetchColumn();

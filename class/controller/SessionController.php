@@ -1,4 +1,5 @@
 <?php
+
 namespace Nene\Controller;
 
 use Nene\Model as Model;
@@ -8,7 +9,7 @@ use Nene\Database as Database;
 /**
  * AYANE
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -31,7 +32,7 @@ class SessionController extends ControllerBase
      *
      * @return array
      */
-    public function loginRest() : array
+    public function loginRest(): array
     {
         sleep(3);
         $user_id     = filter_input(INPUT_POST, 'user_id');
@@ -41,16 +42,16 @@ class SessionController extends ControllerBase
         if ($count == 0) {
             $errorCode = 'LOGIN-FAILED';
             return ([
-                    'status'        => 'failure',
-                    'errorCode'     => $errorCode,
-                    'errorMessage'  => $this->ERROR_CODE->getErrorText($errorCode)]
-            );
+                'status'        => 'failure',
+                'errorCode'     => $errorCode,
+                'errorMessage'  => $this->ERROR_CODE->getErrorText($errorCode)
+            ]);
         }
         return ([
-                'status'    => 'success',
-                'user_id'   => $user_id,
-                'user_pass' => $user_pass,
-                'errorCode' => '']
-        );
+            'status'    => 'success',
+            'user_id'   => $user_id,
+            'user_pass' => $user_pass,
+            'errorCode' => ''
+        ]);
     }
 }

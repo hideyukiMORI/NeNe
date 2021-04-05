@@ -12,7 +12,7 @@ session_start();                            // SESSION START
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */

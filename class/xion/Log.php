@@ -1,4 +1,5 @@
 <?php
+
 namespace Nene\Xion;
 
 use Monolog\Logger;
@@ -6,7 +7,7 @@ use Monolog\Handler\StreamHandler;
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -48,6 +49,6 @@ class Log
      */
     final public function __clone()
     {
-        throw new \RuntimeException('Clone is not allowed against '.get_class($this));
+        throw new \RuntimeException('Clone is not allowed against ' . get_class($this));
     }
 }

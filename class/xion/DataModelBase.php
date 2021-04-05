@@ -1,11 +1,12 @@
 <?php
+
 namespace Nene\Xion;
 
 use Nene\Xion as Xion;
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -46,9 +47,9 @@ abstract class DataModelBase
     {
         $this->LOGGER = Log::getInstance();
         $classPathArray = explode('\\', get_class($this));
-        $this->CLASS = 'Database\\'.end($classPathArray);
+        $this->CLASS = 'Database\\' . end($classPathArray);
         if (APP_CONTROLLER != 'debug' && APP_CONTROLLER != 'stub') {
-            $this->LOGGER->addInfo('NEW : '.$this->CLASS);
+            $this->LOGGER->addInfo('NEW : ' . $this->CLASS);
         }
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
     }
@@ -62,7 +63,7 @@ abstract class DataModelBase
         } elseif (isset(static::$_schema[$prop])) {
             return null;
         } else {
-            echo 'DATA MODEL ERROR. Unable to get parameters. The property "'.$prop.'" may not be defined.';
+            echo 'DATA MODEL ERROR. Unable to get parameters. The property "' . $prop . '" may not be defined.';
             throw new \InvalidArgumentException('GET ' . $prop . ' IS DISABLE.');
             exit();
         }
@@ -70,14 +71,14 @@ abstract class DataModelBase
 
 
 
-    public function __isset($prop) : bool
+    public function __isset($prop): bool
     {
         return isset($this->_data[$prop]);
     }
 
 
 
-    public function set($prop, $val) : bool
+    public function set($prop, $val): bool
     {
         if (!$this->validate($prop, $val)) {
             return false;
@@ -91,7 +92,7 @@ abstract class DataModelBase
     public function __set($prop, $val)
     {
         if (!isset(static::$_schema[$prop])) {
-            echo 'DATA MODEL ERROR. Unable to set parameters. The property "'.$prop.'" may not be defined.';
+            echo 'DATA MODEL ERROR. Unable to set parameters. The property "' . $prop . '" may not be defined.';
             throw new \InvalidArgumentException('SET ' . $prop . ' IS DISABLE.');
             exit();
         }
@@ -109,7 +110,7 @@ abstract class DataModelBase
             case self::INTEGER:
                 return $this->_data[$prop] = (int) $val;
             case self::DOUBLE:
-                return $this->_data[$prop] = (double) $val;
+                return $this->_data[$prop] = (float) $val;
             case self::STRING:
             default:
                 return $this->_data[$prop] = (string) $val;
@@ -118,7 +119,7 @@ abstract class DataModelBase
 
 
 
-    public function toArray() : array
+    public function toArray(): array
     {
         return $this->_data;
     }

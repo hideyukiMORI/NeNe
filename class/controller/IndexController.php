@@ -1,4 +1,5 @@
 <?php
+
 namespace Nene\Controller;
 
 use Nene\Model as Model;
@@ -8,7 +9,7 @@ use Nene\Database as Database;
 /**
  * AYANE
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -40,6 +41,5 @@ class IndexController extends ControllerBase
         $user = $userMapper->find(1);
 
         $this->VIEW->setValue('t_contents', 'This framework is produced by AYANE International.');
-
     }
 }

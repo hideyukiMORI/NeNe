@@ -1,9 +1,10 @@
 <?php
+
 namespace Nene\Xion;
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -49,12 +50,12 @@ class ErrorCode
      * @param  string   $errorcode  ERROR CODE
      * @return string   ERROR TEXT
      */
-    final public function getErrorText(string $errorcode) : string
+    final public function getErrorText(string $errorcode): string
     {
         if (array_key_exists($errorcode, $this->ERROR_CODE)) {
             return $this->ERROR_CODE[$errorcode];
         } else {
-            return 'Error code ['.$errorcode.'] is not defined.';
+            return 'Error code [' . $errorcode . '] is not defined.';
         }
     }
 
@@ -65,6 +66,6 @@ class ErrorCode
      */
     final public function __clone()
     {
-        throw new \RuntimeException('Clone is not allowed against '.get_class($this));
+        throw new \RuntimeException('Clone is not allowed against ' . get_class($this));
     }
 }

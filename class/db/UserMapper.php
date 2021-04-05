@@ -1,4 +1,5 @@
 <?php
+
 namespace Nene\Database;
 
 use Nene\Xion\DataMapperBase as DataMapperBase;
@@ -7,7 +8,7 @@ use PDO;
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
  * @author hideyuki MORI
  */
@@ -40,7 +41,7 @@ class UserMapper extends DataMapperBase
     final public function checkLogin(string $user_id, string $user_pass)
     {
         $stmt = $this->DB->prepare('
-            SELECT COUNT(*) FROM '.static::TARGET_TABLE.'
+            SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
             WHERE   user_id =:user_id
             AND     user_pass =:user_pass
             LIMIT 1
