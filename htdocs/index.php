@@ -1,4 +1,5 @@
 <?php
+
 namespace Nene;
 
 use Nene\Xion as Xion;
