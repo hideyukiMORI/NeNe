@@ -10,7 +10,7 @@
  * @author    hideyukiMORI <info@ayane.co.jp>
  * @copyright 2021 AYANE
  * @license   https://choosealicense.com/no-permission/ NO LICENSE
- * @link      https://konyacorp.com/
+ * @link      https://ayane.co.jp/
  */
 
 /**
