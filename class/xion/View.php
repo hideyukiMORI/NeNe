@@ -121,7 +121,7 @@ class View
         foreach ($this->cssArray as $filename) {
             if (filter_var($filename, FILTER_VALIDATE_URL)) {
                 $cssArray[] = $filename;
-            } else if (file_exists(DOCUMENT_ROOT . $filename)) {
+            } elseif (file_exists(DOCUMENT_ROOT . $filename)) {
                 $fileTime = filemtime(DOCUMENT_ROOT . $filename);
                 $cssArray[] = URI_ROOT . $filename . '?' . $fileTime;
             }
@@ -163,7 +163,7 @@ class View
         foreach ($this->jsArray as $filename) {
             if (filter_var($filename, FILTER_VALIDATE_URL)) {
                 $jsArray[] = $filename;
-            } else if (file_exists(DOCUMENT_ROOT . $filename)) {
+            } elseif (file_exists(DOCUMENT_ROOT . $filename)) {
                 $fileTime = filemtime(DOCUMENT_ROOT . $filename);
                 $jsArray[] = URI_ROOT . $filename . '?' . $fileTime;
             }
