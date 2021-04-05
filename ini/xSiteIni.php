@@ -2,9 +2,15 @@
 
 /**
  * AYANE : ayane.co.jp
- * powerd by NENE.
+ * powered by NENE.
  *
- * @author hideyuki MORI
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://konyacorp.com/
  */
 
 /**
