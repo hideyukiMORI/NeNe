@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * AYANE : ayane.co.jp
+ * powered by NENE.
+ *
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
+ */
+
 namespace Nene\Xion;
 
 use Nene\Model          as Model;
@@ -104,7 +117,7 @@ abstract class ControllerBase
             $this->VIEW->setValue('t_controller', APP_CONTROLLER);
             $this->VIEW->setValue('t_action', APP_ACTION);
             $this->VIEW->setValue('t_controller_action', APP_CONTROLLER . '_' . APP_ACTION);
-            $this->VIEW->setValue('t_debugMode', DUBUG_MODE);
+            $this->VIEW->setValue('t_debugMode', DEBUG_MODE);
             $this->VIEW->setValue('t_login_mode', $this->SESSION_CHECK);
             $this->VIEW->execute();
         }
@@ -239,7 +252,7 @@ abstract class ControllerBase
                 );
             }
         } else {
-            $this->setUserInfo($_SESSION['xion']['user_id']);
+            // $this->setUserInfo($_SESSION['xion']['user_id']);
         }
     }
 
@@ -252,13 +265,13 @@ abstract class ControllerBase
      *
      * @return void
      */
-    final protected function setUserInfo($userId)
-    {
-        $userMapper = new Database\UserMapper();
-        $userInfo = $userMapper->findByUserID($userId);
-        $_SESSION['xion']['user_info'] = $userInfo->toArray();
-        $_SESSION['xion']['login_mode'] = 'login';
-    }
+    // final protected function setUserInfo($userId)
+    // {
+    //     $userMapper = new Database\UserMapper();
+    //     $userInfo = $userMapper->findByUserID($userId);
+    //     $_SESSION['xion']['user_info'] = $userInfo->toArray();
+    //     $_SESSION['xion']['login_mode'] = 'login';
+    // }
 
 
 
