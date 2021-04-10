@@ -28,8 +28,8 @@ const LAYERS_NUM = 0;                                   // NUMBER OF LAYERS
 const LOGOUT_URI = '/';                                 // URI TO MOVE TO AFTER LOGOUT
 
 // DEFINE DIR
-define('DIR_ROOT', dirname(dirname(__FILE__)) . '/');     // ROOT DIR
-const DOCUMENT_ROOT = DIR_ROOT;                         // DOCUMENT DIR
+define('DIR_ROOT', dirname(dirname(__FILE__)) . '/');   // ROOT DIR
+const DOCUMENT_ROOT = DIR_ROOT . 'htdocs/';             // DOCUMENT DIR
 const URI_CSS = URI_ROOT . 'css/';                      // CSS URI
 const URI_JS = URI_ROOT . 'js/';                        // JS URI
 const URI_IMG = 'https://' . OWN_DOMAIN;                // IMAGE DIR URI
