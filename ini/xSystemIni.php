@@ -10,61 +10,63 @@
  * @author    hideyukiMORI <info@ayane.co.jp>
  * @copyright 2021 AYANE
  * @license   https://choosealicense.com/no-permission/ NO LICENSE
- * @link      https://konyacorp.com/
+ * @link      https://ayane.co.jp/
  */
 
 // PHP CORE SETTING
 
 // APP SETTING
-define('VERSION', '0.0.0.1');                           // APPLICATION VERSION
-define('DEBUG_MODE', 1);                                // DEBUG MODE 1=ON / 0=OFF
-define('LOG_LEVEL', 'INFO');                            // EMERGENCY / INFO
-define('CONNECT', 'sessionConnect');                    // SESSION CONNECTION NAME
+const VERSION = '0.0.0.1';                              // APPLICATION VERSION
+const DEBUG_MODE = 1;                                   // DEBUG MODE 1=ON / 0=OFF
+const LOG_LEVEL = 'INFO';                               // EMERGENCY / INFO
+const CONNECT = 'sessionConnect';                       // SESSION CONNECTION NAME
 
 // ROOTING
-define('OWN_DOMAIN', 'localhost');                      // DOMAIN
-define('URI_ROOT', '/');                                // ROOT URI
-define('LAYERS_NUM', 0);                                // NUMBER OF LAYERS
-define('LOGOUT_URI', '/');                              // URI TO MOVE TO AFTER LOGOUT
+const OWN_DOMAIN = 'localhost';                         // DOMAIN
+const URI_ROOT = '/';                                   // ROOT URI
+const LAYERS_NUM = 0;                                   // NUMBER OF LAYERS
+const LOGOUT_URI = '/';                                 // URI TO MOVE TO AFTER LOGOUT
 
 // DEFINE DIR
 define('DIR_ROOT', dirname(dirname(__FILE__)) . '/');     // ROOT DIR
-define('DOCUMENT_ROOT', DIR_ROOT . 'htdocs/');            // DOCUMENT DIR
-define('URI_CSS', URI_ROOT . 'css/');                     // CSS URI
-define('URI_JS', URI_ROOT . 'js/');                       // JS URI
-define('URI_IMG', 'https://' . OWN_DOMAIN);               // IMAGE DIR URI
+const DOCUMENT_ROOT = DIR_ROOT;                         // DOCUMENT DIR
+const URI_CSS = URI_ROOT . 'css/';                      // CSS URI
+const URI_JS = URI_ROOT . 'js/';                        // JS URI
+const URI_IMG = 'https://' . OWN_DOMAIN;                // IMAGE DIR URI
 
 
 
 // DATABASE CONNECTION SETUP
-define('DB_TYPE', 'SQLite3');                           // TYPE [MySQL|SQLite3]
-define('DB_DIR', DIR_ROOT . 'data/');                     // DATABASE DIRECTORY WHEN USING SQLITE3
-define('DB_FILE', 'nene.db');                           // DATABASE FILE NAME WHEN USING SQLITE3
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'nene-php');
+const DB_TYPE = 'SQLite3';                           // TYPE [MySQL|SQLite3]
+const DB_DIR = DIR_ROOT . 'data/';                     // DATABASE DIRECTORY WHEN USING SQLITE3
+const DB_FILE = 'nene.db';                           // DATABASE FILE NAME WHEN USING SQLITE3
+const DB_USER = 'root';
+const DB_PASS = '';
+const DB_HOST = 'localhost';
+const DB_NAME = 'nene-php';
 
 // DATABASE
-define('DB_COLUMN_NAME_CREATED', 'created_at');         // COLUMN NAME OF ROW CREATION DATE
-define('DB_COLUMN_NAME_UPDATED', 'updated_at');         // COLUMN NAME OF ROW UPDATE DATE
-define('DB_AUTO_CREATED_STAMP', true);                  // WHETHER TO SET THE CREATION DATE AUTOMATICALLY
-define('DB_AUTO_UPDATED_STAMP', true);                  // WHETHER TO SET THE UPDATE DATE AUTOMATICALLY
-define('DB_NUM_PREFIX', 'numPrefix_');                  // WORKAROUND WHEN THE COLUMN NAME STARTS WITH A NUMBER FOR SOME REASON.
-define('DB_IS_PHYSICAL_DELETE', true);                  // WHETHER TO DELETE PHYSICALLY
+const DB_COLUMN_NAME_CREATED = 'created_at';            // COLUMN NAME OF ROW CREATION DATE
+const DB_COLUMN_NAME_UPDATED = 'updated_at';            // COLUMN NAME OF ROW UPDATE DATE
+const DB_AUTO_CREATED_STAMP = true;                     // WHETHER TO SET THE CREATION DATE AUTOMATICALLY
+const DB_AUTO_UPDATED_STAMP = true;                     // WHETHER TO SET THE UPDATE DATE AUTOMATICALLY
+// WORKAROUND WHEN THE COLUMN NAME STARTS WITH A NUMBER FOR SOME REASON.
+const DB_NUM_PREFIX = 'numPrefix_';
+const DB_IS_PHYSICAL_DELETE = true;                     // WHETHER TO DELETE PHYSICALLY
 
 
 
 // OUTPUT
-define('JSON_OUTPUT', true);                            // JSON OUTPUT
-define('ERROR_CODE_PATH', DOCUMENT_ROOT . 'message/error_code.js'); // ERROR CODE PATH
+const JSON_OUTPUT = true;                               // JSON OUTPUT
+const ERROR_CODE_PATH = DOCUMENT_ROOT . 'message/error_code.js'; // ERROR CODE PATH
 
 // LOG
-define('LOG_PATH', DIR_ROOT . 'log/');                    // LOGGING PATH
-define('APP_LOG_PATH', LOG_PATH . 'debug.log');           // LOGGING PATH
-define('ACCESS_LOG_PATH', LOG_PATH . 'access.log');       // ACCESS PATH
+const LOG_PATH = DIR_ROOT . 'log/';                     // LOGGING PATH
+const APP_LOG_PATH = LOG_PATH . 'debug.log';            // APP LOG PATH
+const ACCESS_LOG_PATH = LOG_PATH . 'access.log';        // ACCESS LOG PATH
+const ERROR_LOG_PATH = LOG_PATH . 'error.log';          // ERROR LOG PATH
 
 // VIEW
-define('DIR_SMARTY_TEMPLATE', DIR_ROOT . 'view/source');  // SMARTY TEMPLATE
-define('DIR_SMARTY_COMPILE', DIR_ROOT . 'view/compile');  // SMARTY TEMPLATE COMPILE
-define('DIR_SMARTY_CONFIG', DIR_ROOT . 'view/config');    // SMARTY CONFIG
+const DIR_SMARTY_TEMPLATE = DIR_ROOT . 'view/source';   // SMARTY TEMPLATE
+const DIR_SMARTY_COMPILE = DIR_ROOT . 'view/compile';   // SMARTY TEMPLATE COMPILE
+const DIR_SMARTY_CONFIG = DIR_ROOT . 'view/config';     // SMARTY CONFIG
