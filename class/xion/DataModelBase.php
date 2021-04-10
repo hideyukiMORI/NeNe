@@ -32,8 +32,8 @@ abstract class DataModelBase
     const STRING        = 'string';
     const DATETIME      = 'dateTime';
     const DATE          = 'date';
-    protected $_data    = [];
-    protected static $_schema  = [];
+    protected $data    = [];
+    protected static $schema  = [];
     protected $LOGGER;
     protected $CLASS;
     protected $ERROR_CODE;
@@ -49,7 +49,7 @@ abstract class DataModelBase
         $classPathArray = explode('\\', get_class($this));
         $this->CLASS = 'Database\\' . end($classPathArray);
         if (APP_CONTROLLER != 'debug' && APP_CONTROLLER != 'stub') {
-            $this->LOGGER->addInfo('NEW : ' . $this->CLASS);
+            $this->LOGGER->addDebug('NEW : ' . $this->CLASS);
         }
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
     }
@@ -58,9 +58,9 @@ abstract class DataModelBase
 
     public function __get($prop)
     {
-        if (isset($this->_data[$prop])) {
-            return $this->_data[$prop];
-        } elseif (isset(static::$_schema[$prop])) {
+        if (isset($this->data[$prop])) {
+            return $this->data[$prop];
+        } elseif (isset(static::$schema[$prop])) {
             return null;
         } else {
             echo 'DATA MODEL ERROR. Unable to get parameters. The property "' . $prop . '" may not be defined.';
@@ -73,7 +73,7 @@ abstract class DataModelBase
 
     public function __isset($prop): bool
     {
-        return isset($this->_data[$prop]);
+        return isset($this->data[$prop]);
     }
 
 
@@ -91,29 +91,29 @@ abstract class DataModelBase
 
     public function __set($prop, $val)
     {
-        if (!isset(static::$_schema[$prop])) {
+        if (!isset(static::$schema[$prop])) {
             echo 'DATA MODEL ERROR. Unable to set parameters. The property "' . $prop . '" may not be defined.';
             throw new \InvalidArgumentException('SET ' . $prop . ' IS DISABLE.');
             exit();
         }
 
-        $schema = static::$_schema[$prop];
+        $schema = static::$schema[$prop];
         $type = gettype($val);
         if ($type === $schema) {
-            $this->_data[$prop] = $val;
+            $this->data[$prop] = $val;
             return;
         }
 
         switch ($schema) {
             case self::BOOLEAN:
-                return $this->_data[$prop] = (bool) $val;
+                return $this->data[$prop] = (bool) $val;
             case self::INTEGER:
-                return $this->_data[$prop] = (int) $val;
+                return $this->data[$prop] = (int) $val;
             case self::DOUBLE:
-                return $this->_data[$prop] = (float) $val;
+                return $this->data[$prop] = (float) $val;
             case self::STRING:
             default:
-                return $this->_data[$prop] = (string) $val;
+                return $this->data[$prop] = (string) $val;
         }
     }
 
@@ -121,7 +121,7 @@ abstract class DataModelBase
 
     public function toArray(): array
     {
-        return $this->_data;
+        return $this->data;
     }
 
 
@@ -157,7 +157,7 @@ abstract class DataModelBase
      * Validate parameters.
      *
      * @param mixed $param The value to validate.
-     * @param array $valudateArray An array of validation conditions.
+     * @param array $validateArray An array of validation conditions.
      * @return bool Validation results.
      */
     protected function doValid($param, $validateArray)
@@ -217,15 +217,15 @@ abstract class DataModelBase
 
 
     /**
-     * Set filltered POST.
+     * Set filtered POST.
      *
-     * Set the POST data obtained from fillter_input to the specified parameter.
+     * Set the POST data obtained from filter_input to the specified parameter.
      *
      * @param string $prop  Object parameter name.
      * @param string $postProp  POST parameter name.
      * @return void
      */
-    public function setFillteredPost($prop, $postProp = '')
+    public function setFilteredPost($prop, $postProp = '')
     {
         $postProp = $postProp == '' ? $prop : $postProp;
         $this->set($prop, (string)filter_input(INPUT_POST, $postProp));
@@ -237,7 +237,7 @@ abstract class DataModelBase
      * Set now.
      *
      * Use this method when the creation date and update date of the database row are string type for some reason.
-     * If the createion stamp has not been set, set the creation stamp in the format of "HmdHi".
+     * If the creation stamp has not been set, set the creation stamp in the format of "HmdHi".
      * And set the update stamp in the format of "HmdHi".
      */
     public function setNow()
@@ -253,6 +253,6 @@ abstract class DataModelBase
 
     public function getSchema()
     {
-        return static::$_schema;
+        return static::$schema;
     }
 }

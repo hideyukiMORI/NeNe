@@ -1,13 +1,19 @@
 <?php
 
-namespace Nene\Xion;
-
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
  *
- * @author hideyuki MORI
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
  */
+
+namespace Nene\Xion;
 
 /**
  * Dispatches controllers and models.
@@ -15,16 +21,12 @@ namespace Nene\Xion;
 class Dispatcher
 {
 
-
-
     /**
      * CONSTRUCTOR.
      */
     public function __construct()
     {
     }
-
-
 
     /**
      * Parse the controller name and action name from the URI and autoload.
@@ -52,10 +54,13 @@ class Dispatcher
 
         /* ========== SET ACTION ========== */
         define('APP_ACTION', $action);
-        if (
-            method_exists($controllerInstance, $action . 'Action')
-            && method_exists($controllerInstance, $action . 'Rest')
-        ) {
+        if (method_exists(
+            $controllerInstance,
+            $action . 'Action'
+        ) && method_exists(
+            $controllerInstance,
+            $action . 'Rest'
+        )) {
             echo $action . 'Action' . ' and ' . $action . 'Rest Duplicate';
             exit();
         } elseif (method_exists($controllerInstance, $action . 'Action')) {
@@ -69,8 +74,6 @@ class Dispatcher
         }
         $controllerInstance->run();
     }
-
-
 
     /**
      * Determine the class file name from the controller name passed as an argument,
@@ -88,7 +91,7 @@ class Dispatcher
             echo file_get_contents(DIR_ROOT . '/404.html');
             exit;
         }
-        $controllerInstarnce = new $className();
-        return $controllerInstarnce;
+        $controllerInstance = new $className();
+        return $controllerInstance;
     }
 }

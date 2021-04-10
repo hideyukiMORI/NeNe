@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * AYANE : ayane.co.jp
+ * powered by NENE.
+ *
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
+ */
+
 namespace Nene\Xion;
 
 use Nene\Database   as Database;
@@ -8,13 +21,6 @@ use Nene\Xion\Log   as Log;
 use Nene\Func       as Func;
 use \PDOStatement;
 use \PDO;
-
-/**
- * AYANE : ayane.co.jp
- * powered by NENE.
- *
- * @author hideyuki MORI
- */
 
 /**
  * Abstract class for data mapper
@@ -34,7 +40,6 @@ abstract class DataMapperBase
     const TARGET_TABLE = '';
     const KEY_SID = '';
 
-
     /**
      * CONSTRUCTOR
      */
@@ -46,12 +51,10 @@ abstract class DataMapperBase
         $this->CLASS = 'Database\\' . end($classPathArray);
 
         if (APP_CONTROLLER != 'debug' && APP_CONTROLLER != 'stub') {
-            $this->LOGGER->addInfo('NEW : ' . $this->CLASS);
+            $this->LOGGER->addDebug('NEW : ' . $this->CLASS);
         }
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
     }
-
-
 
     /**
      * Get table columns.
@@ -76,12 +79,10 @@ abstract class DataMapperBase
         return $column;
     }
 
-
-
     /**
      * INSERT
      *
-     * @param  mixed $data  The data object you want to insert into the database.
+     * @param  object $data  The data object you want to insert into the database.
      * @return int  Primary key sequence ID assigned by auto increment.
      */
     public function insert($data)
@@ -131,12 +132,10 @@ abstract class DataMapperBase
         return $row->{static::KEY_SID};
     }
 
-
-
     /**
      * UPDATE
      *
-     * @param  mixed $data  Data object to update the database.
+     * @param  object $data  Data object to update the database.
      * @return void
      */
     public function update($data)
@@ -175,13 +174,11 @@ abstract class DataMapperBase
         }
     }
 
-
-
     /**
      * DELETE
      * To do a logical delete, use the update method or add logic to this method.
      *
-     * @param  mixed $data  Data object to update the database.
+     * @param  object $data  Data object to update the database.
      * @return void
      */
     public function delete($data)
@@ -192,21 +189,22 @@ abstract class DataMapperBase
                 DELETE FROM ' . static::TARGET_TABLE . '
                 WHERE ' . static::KEY_SID . ' = ?
             ');
-            $stmt->bindParam(1, $key_sid, PDO::PARAM_INT);
+            $stmt->bindParam(1, static::KEY_SID, PDO::PARAM_INT);
             if (!is_array($data)) {
                 $data = [$data];
             }
             foreach ($data as $row) {
                 if (!$row instanceof $modelClass) {
-                    throw new \InvalidArgumentException('DATA MAPPER ERROR. Not an instance of the specified "' . $modelClass . '" class.');
+                    throw new \InvalidArgumentException(
+                        'DATA MAPPER ERROR. Not an instance of the specified "' .
+                            $modelClass . '" class.'
+                    );
                 }
                 $key_sid = $row->{static::KEY_SID};
                 $stmt = $this->execute($stmt);
             }
         }
     }
-
-
 
     /**
      * FIND
@@ -224,11 +222,9 @@ abstract class DataMapperBase
         ');
         $stmt->bindParam(':' . static::KEY_SID, $sid, PDO::PARAM_INT);
         $stmt = $this->execute($stmt);
-        $stmt = $this->_decorate($stmt);
+        $stmt = $this->decorate($stmt);
         return $stmt->fetch();
     }
-
-
 
     /**
      * Find all
@@ -243,10 +239,8 @@ abstract class DataMapperBase
             WHERE 1
             ORDER BY ' . static::KEY_SID . '
         ');
-        return $this->_decorate($stmt);
+        return $this->decorate($stmt);
     }
-
-
 
     /**
      * COUNT
@@ -266,8 +260,6 @@ abstract class DataMapperBase
         return $stmt->fetchColumn();
     }
 
-
-
     /**
      * Count all
      * Returns the number of rows in a database table.
@@ -282,8 +274,6 @@ abstract class DataMapperBase
         ');
         return $stmt->fetchColumn();
     }
-
-
 
     /**
      * EXECUTE
@@ -303,8 +293,6 @@ abstract class DataMapperBase
         return $stmt;
     }
 
-
-
     /**
      * EXECUTE QUERY
      * Try to query execute stmt.
@@ -322,8 +310,6 @@ abstract class DataMapperBase
         }
         return $stmt;
     }
-
-
 
     /**
      * Get search array
@@ -343,8 +329,6 @@ abstract class DataMapperBase
         return $searchArray;
     }
 
-
-
     /**
      * DECORATE
      * Set fetch mode to convert to the specified class.
@@ -352,13 +336,11 @@ abstract class DataMapperBase
      * @param  \PDOStatement $stmt PDOStatement instance.
      * @return \PDOStatement  Instance of PDOStatement after setting.
      */
-    protected function _decorate(\PDOStatement $stmt)
+    protected function decorate(\PDOStatement $stmt)
     {
         $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, static::MODEL_CLASS);
         return $stmt;
     }
-
-
 
     /**
      * ASSOCIATIVE ARRAY
@@ -367,13 +349,11 @@ abstract class DataMapperBase
      * @param  \PDOStatement $stmt PDOStatement instance.
      * @return \PDOStatement  Instance of PDOStatement after setting.
      */
-    protected function _assoc(\PDOStatement $stmt)
+    protected function assoc(\PDOStatement $stmt)
     {
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         return $stmt;
     }
-
-
 
     /**
      * JSON ERROR CODE

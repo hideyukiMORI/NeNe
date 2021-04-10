@@ -19,7 +19,7 @@ class User extends DataModelBase
 
 
 
-    protected static $_schema = [
+    protected static $schema = [
         'id'            => parent::INTEGER,
         'created_at'    => parent::DATETIME,
         'updated_at'    => parent::DATETIME,
@@ -58,7 +58,7 @@ class User extends DataModelBase
                     return ($key);
                 }
             }
-        } else if (in_array($prop, $validateArray, true)) {
+        } elseif (in_array($prop, $validateArray, true)) {
             if (!$this->doValid($value, $validateArray[$prop])) {
                 return (false);
             }
@@ -70,7 +70,7 @@ class User extends DataModelBase
 
     /**
      * Is valid.
-     * Returns the result of object validation as a booleani.
+     * Returns the result of object validation as a boolean.
      *
      * @return bool
      */

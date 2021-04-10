@@ -21,14 +21,6 @@ use Nene\Xion           as Xion;
 use Nene\Func           as Func;
 
 /**
- * AYANE
- * AYANE : ayane.co.jp
- * powered by NENE.
- *
- * @author hideyuki MORI
- */
-
-/**
  * Controller abstract class.
  *
  * Super class of all controller.
@@ -46,14 +38,14 @@ abstract class ControllerBase
     protected $HEADER_TITLE = SITE_HEADER_TITLE;    // Site header title.
     protected $VIEW;                                // View management class.
     protected $SESSION_CHECK = true;                // Session check flag.
-    protected $LOGGER;                              // Monolog.
+    protected $LOGGER;                              // Monolog information log.
+    protected $ACCESS_LOGGER;                       // Monolog access log.
+    protected $ERROR_LOGGER;                        // Monolog error log.
     protected $ERROR_CODE;                          // Error code.
     protected $REQUEST_JSON;                        // Rest post.
     protected $OUTPUT_JSON_STYLE = 'json';          // Json format at rest
     protected $refController;                       // Referrer controller name
     protected $refAction;                           // Referrer action name
-
-
 
     /**
      * CONSTRUCTOR.
@@ -63,13 +55,13 @@ abstract class ControllerBase
         $this->request          = new Request();
         $this->method           = $_SERVER["REQUEST_METHOD"];
         $this->VIEW             = View::getInstance();
-        $this->LOGGER           = Log::getInstance();
+        $this->LOGGER           = Log::getInstance('information');
+        $this->ACCESS_LOGGER    = Log::getInstance('access');
+        $this->ERROR_LOGGER     = Log::getInstance('error');
         $this->ERROR_CODE       = Xion\ErrorCode::getInstance();
         $this->refController    = $_SESSION['global']['referer']['controller'] ?? '';
         $this->refAction        = $_SESSION['global']['referer']['action'] ?? '';
     }
-
-
 
     /**
      * run
@@ -81,7 +73,13 @@ abstract class ControllerBase
         if (APP_CONTROLLER != 'debug') {
             $_SESSION['global']['referer']['controller']    = APP_CONTROLLER;
             $_SESSION['global']['referer']['action']        = APP_ACTION;
-            $this->LOGGER->addInfo('ACCESS : ' . APP_CONTROLLER . '::' . APP_ACTION);
+            $this->ACCESS_LOGGER->addInfo(
+                'ACCESS : ' . APP_CONTROLLER . '::' . APP_ACTION,
+                [
+                    $_SERVER['HTTP_USER_AGENT'] ?? '',
+                    $_SERVER['HTTP_REFERER'] ?? ''
+                ]
+            );
         }
         if (APP_ACTION_MODE == 'Rest' && $this->method == 'POST') {
             $this->REQUEST_JSON = Func\Json::inputPostJsonToArray();
@@ -123,8 +121,6 @@ abstract class ControllerBase
         }
     }
 
-
-
     /**
      * preAction
      * Executed before the main process of run.
@@ -133,8 +129,6 @@ abstract class ControllerBase
     protected function preAction()
     {
     }
-
-
 
     /**
      * Set title.
@@ -148,8 +142,6 @@ abstract class ControllerBase
         $this->TITLE = $title;
     }
 
-
-
     /**
      * Set output format of json
      *
@@ -161,8 +153,6 @@ abstract class ControllerBase
     {
         $this->OUTPUT_JSON_STYLE = $style == 'jsonp' ? 'jsonp' : 'json';
     }
-
-
 
     /**
      * setTemplate
@@ -182,8 +172,6 @@ abstract class ControllerBase
         $this->VIEW->setTemplate($template . '.tpl');
     }
 
-
-
     /**
      * setCSS
      *
@@ -199,8 +187,6 @@ abstract class ControllerBase
             $this->VIEW->addCSS(APP_CONTROLLER . '_' . APP_ACTION);
         }
     }
-
-
 
     /**
      * setJS
@@ -219,8 +205,6 @@ abstract class ControllerBase
             $this->VIEW->addJS(APP_CONTROLLER . '_' . APP_ACTION);
         }
     }
-
-
 
     /**
      * sessionCheck
@@ -256,8 +240,6 @@ abstract class ControllerBase
         }
     }
 
-
-
     /**
      * setUserInfo
      *
@@ -273,8 +255,6 @@ abstract class ControllerBase
     //     $_SESSION['xion']['login_mode'] = 'login';
     // }
 
-
-
     /**
      * logout
      *
@@ -286,8 +266,6 @@ abstract class ControllerBase
     {
         unset($_SESSION['xion']);
     }
-
-
 
     /**
      * Move URL.
