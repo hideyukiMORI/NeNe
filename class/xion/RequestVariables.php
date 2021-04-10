@@ -1,13 +1,19 @@
 <?php
 
-namespace Nene\Xion;
-
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
  *
- * @author hideyuki MORI
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
  */
+
+namespace Nene\Xion;
 
 /**
  * Abstract class of request variable class.
@@ -17,7 +23,7 @@ namespace Nene\Xion;
  */
 abstract class RequestVariables
 {
-    protected $_values;
+    protected $values;
 
     /**
      * CONSTRUCTOR.
@@ -27,16 +33,12 @@ abstract class RequestVariables
         $this->setValues();
     }
 
-
-
     /**
      * Set values
      *
      * Initialize the value
      */
     abstract protected function setValues();
-
-
 
     /**
      * Get value.
@@ -48,14 +50,12 @@ abstract class RequestVariables
     {
         $ret = null;
         if ($key == null) {
-            $ret = $this->_values;
+            $ret = $this->values;
         } elseif ($this->has($key) == true) {
-            $ret = $this->_values[$key];
+            $ret = $this->values[$key];
         }
         return $ret;
     }
-
-
 
     /**
      * Check for the existence of a value.
@@ -65,7 +65,7 @@ abstract class RequestVariables
      */
     public function has(string $key): bool
     {
-        if (array_key_exists($key, $this->_values) == false) {
+        if (array_key_exists($key, $this->values) == false) {
             return false;
         }
         return true;

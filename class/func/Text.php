@@ -1,13 +1,19 @@
 <?php
 
-namespace Nene\Func;
-
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
  *
- * @author hideyuki MORI
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
  */
+
+namespace Nene\Func;
 
 /**
  * String common function
@@ -22,8 +28,6 @@ class Text
     {
     }
 
-
-
     /**
      * getLink
      * generate and return A tag.
@@ -32,6 +36,7 @@ class Text
      * @param string    $link   Link destination URL.
      * @param bool      $blank  Whether to open in a separate window.
      * @param string    $class  Class name.
+     *
      * @return string  HTML tags generated.
      */
     final public static function getLink(string $text, string $link, bool $blank = false, string $class = ''): string

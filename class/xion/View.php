@@ -1,16 +1,22 @@
 <?php
 
-namespace Nene\Xion;
-
-use Smarty;
-use PDOStatement;
-
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
  *
- * @author hideyuki MORI
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
  */
+
+namespace Nene\Xion;
+
+use Smarty;
+use PDOStatement;
 
 /**
  * VIEW
@@ -23,8 +29,6 @@ class View
     private $template;          // TEMPLATE FILE NAME
     private $cssArray = [];     // CSS FILE NAME ARRAY
     private $jsArray  = [];     // JAVASCRIPT FILE NAME ARRAY
-
-
 
     /**
      * CONSTRUCTOR.
@@ -42,8 +46,6 @@ class View
         $this->setValue('t_contents', '');
     }
 
-
-
     /**
      * Get instance.
      * Returns the display management singleton class.
@@ -58,8 +60,6 @@ class View
         return self::$instance;
     }
 
-
-
     /**
      * Set template
      * Set the template file.
@@ -72,8 +72,6 @@ class View
         $this->template = $p_template;
     }
 
-
-
     /**
      * Set title
      * Set the title name of the page.
@@ -85,8 +83,6 @@ class View
     {
         $this->smarty->assign('t_title', SITE_TITLE_PRE . $p_title . SITE_TITLE_SUFFIX);
     }
-
-
 
     /**
      * Add css
@@ -106,8 +102,6 @@ class View
             }
         }
     }
-
-
 
     /**
      * Set css
@@ -129,8 +123,6 @@ class View
         $this->setValues('t_css', $cssArray);
     }
 
-
-
     /**
      * Add javascript
      * Add javascript to be used.
@@ -148,8 +140,6 @@ class View
             }
         }
     }
-
-
 
     /**
      * Set javascript
@@ -171,8 +161,6 @@ class View
         $this->setValues('t_js', $jsArray);
     }
 
-
-
     /**
      * Set value.
      * Set the value in the template.
@@ -185,8 +173,6 @@ class View
     {
         $this->smarty->assign($p_target, $p_value);
     }
-
-
 
     /**
      * Set values.
@@ -201,8 +187,6 @@ class View
         $this->smarty->assign($p_target, $p_value);
     }
 
-
-
     /**
      * Set object.
      *
@@ -214,8 +198,6 @@ class View
     {
         $this->smarty->assign($p_target, $p_value);
     }
-
-
 
     /**
      * Execute Display
@@ -229,8 +211,6 @@ class View
         $this->setJS();
         $this->smarty->display($this->smarty->template_dir[0] . '' . $this->template);
     }
-
-
 
     /**
      * Display error
@@ -250,8 +230,6 @@ class View
         $this->execute();
         exit;
     }
-
-
 
     /**
      * Copy inhibit.

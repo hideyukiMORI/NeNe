@@ -1,22 +1,25 @@
 <?php
 
-namespace Nene\Func;
-
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
  *
- * @author hideyuki MORI
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
  */
+
+namespace Nene\Func;
 
 /**
  * Common functions related to Json
  */
 class Json
 {
-
-
-
     /**
      * CONSTRUCTOR.
      */
@@ -37,13 +40,12 @@ class Json
         return $jsonArray;
     }
 
-
-
     /**
      * Output Array to Json.
      * Output the argument that was casted array to json.
      *
      * @param array $jsonArray Array that you want to convert to JSON format.
+     *
      * @return void
      */
     final public static function outputArrayToJson(
@@ -71,21 +73,20 @@ class Json
         exit();
     }
 
-
-
     /**
      * Output Error in JSON format.
      *
      * @param string $errorCode     Error code.
      * @param string $errorMessage  Error message.
+     *
      * @return void
      */
     final public static function outputErrorInJson(string $errorCode, string $errorMessage)
     {
         $responseArray = [
-            'Resul' => false,
-            'Error' => [
-                'ErrorCode' => $errorCode,
+            'Result' => false,
+            'Error'  => [
+                'ErrorCode'    => $errorCode,
                 'ErrorMessage' => $errorMessage
             ]
         ];

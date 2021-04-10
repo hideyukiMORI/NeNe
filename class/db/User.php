@@ -1,24 +1,27 @@
 <?php
 
-namespace Nene\Database;
-
-use Nene\Xion\DataModelBase as DataModelBase;
-
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
  *
- * @author hideyuki MORI
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
  */
+
+namespace Nene\Database;
+
+use Nene\Xion\DataModelBase as DataModelBase;
 
 /**
  * User account model.
  */
 class User extends DataModelBase
 {
-
-
-
     protected static $schema = [
         'id'            => parent::INTEGER,
         'created_at'    => parent::DATETIME,
@@ -29,8 +32,6 @@ class User extends DataModelBase
         'e_mail'        => parent::STRING,
         'is_deleted'    => parent::STRING
     ];
-
-
 
     /**
      * Validate
@@ -65,8 +66,6 @@ class User extends DataModelBase
         }
         return true;
     }
-
-
 
     /**
      * Is valid.

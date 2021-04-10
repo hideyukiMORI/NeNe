@@ -1,15 +1,21 @@
 <?php
 
-namespace Nene\Xion;
-
-use Nene\Xion as Xion;
-
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
  *
- * @author hideyuki MORI
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
  */
+
+namespace Nene\Xion;
+
+use Nene\Xion as Xion;
 
 /**
  * Abstract class for data model
@@ -38,8 +44,6 @@ abstract class DataModelBase
     protected $CLASS;
     protected $ERROR_CODE;
 
-
-
     /**
      * CONSTRUCTOR.
      */
@@ -54,8 +58,6 @@ abstract class DataModelBase
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
     }
 
-
-
     public function __get($prop)
     {
         if (isset($this->data[$prop])) {
@@ -69,14 +71,10 @@ abstract class DataModelBase
         }
     }
 
-
-
     public function __isset($prop): bool
     {
         return isset($this->data[$prop]);
     }
-
-
 
     public function set($prop, $val): bool
     {
@@ -86,8 +84,6 @@ abstract class DataModelBase
         $this->__set($prop, $val);
         return true;
     }
-
-
 
     public function __set($prop, $val)
     {
@@ -117,14 +113,10 @@ abstract class DataModelBase
         }
     }
 
-
-
     public function toArray(): array
     {
         return $this->data;
     }
-
-
 
     public function fromArray(array $arr)
     {
@@ -133,11 +125,7 @@ abstract class DataModelBase
         }
     }
 
-
-
     abstract public function isValid();
-
-
 
     /**
      * Validate
@@ -148,8 +136,6 @@ abstract class DataModelBase
      * @param string $value  The value you want to validate.
      */
     abstract public function validate($prop = '', $value = '');
-
-
 
     /**
      * Do valid
@@ -214,8 +200,6 @@ abstract class DataModelBase
         return $flag;
     }
 
-
-
     /**
      * Set filtered POST.
      *
@@ -230,8 +214,6 @@ abstract class DataModelBase
         $postProp = $postProp == '' ? $prop : $postProp;
         $this->set($prop, (string)filter_input(INPUT_POST, $postProp));
     }
-
-
 
     /**
      * Set now.
@@ -248,8 +230,6 @@ abstract class DataModelBase
         $this->updated_at = date('YmdHi');
         return;
     }
-
-
 
     public function getSchema()
     {

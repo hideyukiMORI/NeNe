@@ -4,33 +4,31 @@ ini_set('display_errors', 1);               // DISPLAY ERROR
 error_reporting(E_ALL);                     // ERROR REPORT
 session_cache_expire(180);                  // SESSION => 3H
 
-
-echo('Welcome NeNe-PHP CLI!!!'.PHP_EOL.PHP_EOL);
-echo('Do you want to initialize SQLite? (Y/N)'.PHP_EOL);
+echo ('Welcome NeNe-PHP CLI!!!' . PHP_EOL . PHP_EOL);
+echo ('Do you want to initialize SQLite? (Y/N)' . PHP_EOL);
 
 $il = trim(fgets(STDIN));
 if ($il !== 'Y' && $il !== 'y') {
-    echo('OK. Bye!'.PHP_EOL.PHP_EOL);
+    echo ('OK. Bye!' . PHP_EOL . PHP_EOL);
     exit();
 }
 
-echo('Yes, initialize SQLite.'.PHP_EOL);
+echo ('Yes, initialize SQLite.' . PHP_EOL);
 
 try {
     $db = new PDO('sqlite:./data/nene.db');
     if (!$db) {
-        echo('Oops. Database creation failed.'.PHP_EOL);
-        echo('Bye!'.PHP_EOL.PHP_EOL);
+        echo ('Oops. Database creation failed.' . PHP_EOL);
+        echo ('Bye!' . PHP_EOL . PHP_EOL);
         exit();
     }
 } catch (Exception $e) {
-    echo('CONNECT ERROR.'.PHP_EOL);
-    echo($e->getMessage().PHP_EOL);
+    echo ('CONNECT ERROR.' . PHP_EOL);
+    echo ($e->getMessage() . PHP_EOL);
     exit();
 }
 
-echo('The database was created successfully.'.PHP_EOL);
-
+echo ('The database was created successfully.' . PHP_EOL);
 
 $db->exec(<<<_SQL_
 CREATE TABLE IF NOT EXISTS users (
@@ -65,9 +63,9 @@ INSERT INTO users (
     0
 )
 _SQL_);
-    echo('The "admin" account has been added. The password is "admin".'.PHP_EOL.PHP_EOL);
+    echo ('The "admin" account has been added. The password is "admin".' . PHP_EOL . PHP_EOL);
 } else {
-    echo('The admin account already exists in the user table.'.PHP_EOL.PHP_EOL);
+    echo ('The admin account already exists in the user table.' . PHP_EOL . PHP_EOL);
 }
 
-echo('Processing has been completed. Thank you very much.');
+echo ('Processing has been completed. Thank you very much.');

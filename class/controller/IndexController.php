@@ -1,18 +1,23 @@
 <?php
 
+/**
+ * AYANE : ayane.co.jp
+ * powered by NENE.
+ *
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
+ */
+
 namespace Nene\Controller;
 
 use Nene\Model as Model;
 use Nene\Xion\ControllerBase;
 use Nene\Database as Database;
-
-/**
- * AYANE
- * AYANE : ayane.co.jp
- * powered by NENE.
- *
- * @author hideyuki MORI
- */
 
 /**
  * IndexController
@@ -23,8 +28,6 @@ class IndexController extends ControllerBase
     {
         $this->SESSION_CHECK = false;
     }
-
-
 
     /**
      * INDEX
@@ -37,8 +40,8 @@ class IndexController extends ControllerBase
     {
         $this->setTitle('Hello NeNe-PHP!!');
         $this->VIEW->addJS('https://cdn.jsdelivr.net/npm/vue/dist/vue.js');
-        $userMapper = new Database\UserMapper();
-        $user = $userMapper->find(1);
+        // $userMapper = new Database\UserMapper();
+        // $user = $userMapper->find(1);
 
         $this->VIEW->setValue('t_contents', 'This framework is produced by AYANE International.');
     }

@@ -1,13 +1,19 @@
 <?php
 
-namespace Nene\Xion;
-
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
  *
- * @author hideyuki MORI
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
  */
+
+namespace Nene\Xion;
 
 /**
  * Request Class
@@ -23,21 +29,19 @@ namespace Nene\Xion;
  */
 class Request
 {
-    private $_post;     // POST
-    private $_query;    // GET
-    private $_param;    // URI
+    private $post;     // POST
+    private $query;    // GET
+    private $param;    // URI
 
     /**
      * CONSTRUCTOR.
      */
     public function __construct()
     {
-        $this->_post    = new Post();
-        $this->_query   = new QueryString();
-        $this->_param   = new UrlParameter();
+        $this->post    = new Post();
+        $this->query   = new QueryString();
+        $this->param   = new UrlParameter();
     }
-
-
 
     /**
      * Get POST
@@ -48,15 +52,13 @@ class Request
     final public function getPost(string $key = null)
     {
         if ($key == null) {
-            return $this->_post->get();
+            return $this->post->get();
         }
-        if ($this->_post->has($key) == false) {
+        if ($this->post->has($key) == false) {
             return;
         }
-        return $this->_post->get($key);
+        return $this->post->get($key);
     }
-
-
 
     /**
      * Get Query
@@ -67,15 +69,13 @@ class Request
     public function getQuery(string $key = null)
     {
         if ($key == null) {
-            return $this->_query->get();
+            return $this->query->get();
         }
-        if ($this->_query->has($key) == false) {
+        if ($this->query->has($key) == false) {
             return;
         }
-        return $this->_query->get($key);
+        return $this->query->get($key);
     }
-
-
 
     /**
      * Get param
@@ -86,11 +86,11 @@ class Request
     public function getParam(string $key = null)
     {
         if ($key == null) {
-            return $this->_param->get();
+            return $this->param->get();
         }
-        if ($this->_param->has($key) == false) {
+        if ($this->param->has($key) == false) {
             return;
         }
-        return $this->_param->get($key);
+        return $this->param->get($key);
     }
 }

@@ -1,13 +1,19 @@
 <?php
 
-namespace Nene\Xion;
-
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
  *
- * @author hideyuki MORI
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
  */
+
+namespace Nene\Xion;
 
 /**
  * Share error code with javascript.
@@ -30,8 +36,6 @@ class ErrorCode
         $this->ERROR_CODE   = $error_array;
     }
 
-
-
     /**
      * GET INSTANCE
      */
@@ -43,23 +47,20 @@ class ErrorCode
         return self::$instance;
     }
 
-
-
     /**
      * Get error text.
-     * @param  string   $errorcode  ERROR CODE
+     * @param  string   $errorCode  ERROR CODE
+     *
      * @return string   ERROR TEXT
      */
-    final public function getErrorText(string $errorcode): string
+    final public function getErrorText(string $errorCode): string
     {
-        if (array_key_exists($errorcode, $this->ERROR_CODE)) {
-            return $this->ERROR_CODE[$errorcode];
+        if (array_key_exists($errorCode, $this->ERROR_CODE)) {
+            return $this->ERROR_CODE[$errorCode];
         } else {
-            return 'Error code [' . $errorcode . '] is not defined.';
+            return 'Error code [' . $errorCode . '] is not defined.';
         }
     }
-
-
 
     /**
      * Copy inhibit.

@@ -1,18 +1,23 @@
 <?php
 
+/**
+ * AYANE : ayane.co.jp
+ * powered by NENE.
+ *
+ * PHP Version >= 7.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @link      https://ayane.co.jp/
+ */
+
 namespace Nene\Database;
 
 use Nene\Xion\DataMapperBase as DataMapperBase;
 use Nene\Database;
 use PDO;
-
-/**
- * AYANE : ayane.co.jp
- * powered by NENE.
- *
- * @author hideyuki MORI
- */
-
 
 /**
  * User account data mapper.
@@ -28,17 +33,16 @@ class UserMapper extends DataMapperBase
         return ([]);
     }
 
-
-
     /**
      * CheckLogin
      * Check accounts by user ID and user pass.
      *
      * @param string $user_id       UserID
      * @param string $user_pass     UserPASS
+     *
      * @return int                  User verification result.
      */
-    final public function checkLogin(string $user_id, string $user_pass)
+    final public function checkLogin(string $user_id, string $user_pass): int
     {
         $stmt = $this->DB->prepare('
             SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
