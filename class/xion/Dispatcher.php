@@ -82,7 +82,7 @@ class Dispatcher
      * @param   string  $controller Controller name.
      * @return  ControllerBase  $ControllerBase     Controller alias specified by argument.
      */
-    final private function getControllerInstance($controller)
+    private function getControllerInstance($controller)
     {
         $className = ucfirst(strtolower($controller)) . 'Controller';
         $className = '\\Nene\\Controller\\' . $className;
