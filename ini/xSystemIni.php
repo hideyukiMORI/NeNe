@@ -70,3 +70,4 @@ const ERROR_LOG_PATH = LOG_PATH . 'error.log';          // ERROR LOG PATH
 const DIR_SMARTY_TEMPLATE = DIR_ROOT . 'view/source';   // SMARTY TEMPLATE
 const DIR_SMARTY_COMPILE = DIR_ROOT . 'view/compile';   // SMARTY TEMPLATE COMPILE
 const DIR_SMARTY_CONFIG = DIR_ROOT . 'view/config';     // SMARTY CONFIG
+const DIR_SMARTY_PLUGINS = DIR_ROOT . 'view/plugins';   // SMARTY PLUGIN
