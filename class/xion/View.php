@@ -223,6 +223,21 @@ class View
     }
 
     /**
+     * Set data object.
+     *
+     * @param array $dataArray  Pass the data to vue.js.
+     * @return object
+     */
+    final public function setDataObject(array $dataArray)
+    {
+        $this->smarty->assign(
+            't_dataObject',
+            '<script type="text/javascript">const dataObject = ' . json_encode($dataArray) . '</script>'
+        );
+        return self::$instance;
+    }
+
+    /**
      * Execute Display
      * Output page.
      *
