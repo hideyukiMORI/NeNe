@@ -290,4 +290,19 @@ abstract class ControllerBase
         header('Location: ' . $uri);
         exit();
     }
+
+    /**
+     * NotFound.
+     *
+     * Output 404 page.
+     *
+     * @param   string  URI
+     * @param   bool    In service or not (true = inside service | false = outside).
+     */
+    final protected function notFound()
+    {
+        header('HTTP/1.0 404 Not Found');
+        echo file_get_contents(DIR_ROOT . '/404.html');
+        exit;
+    }
 }
