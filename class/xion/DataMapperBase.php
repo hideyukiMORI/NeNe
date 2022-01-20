@@ -201,9 +201,8 @@ abstract class DataMapperBase
             $modelClass = static::MODEL_CLASS;
             $stmt = $this->DB->prepare('
                 DELETE FROM ' . static::TARGET_TABLE . '
-                WHERE ' . static::KEY_SID . ' = ?
+                WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID . '
             ');
-            $stmt->bindParam(1, static::KEY_SID, PDO::PARAM_INT);
             if (!is_array($data)) {
                 $data = [$data];
             }
@@ -215,10 +214,13 @@ abstract class DataMapperBase
                     );
                 }
                 $key_sid = $row->{static::KEY_SID};
+                $stmt->bindParam(':' . static::KEY_SID, $key_sid, PDO::PARAM_INT);
                 $stmt = $this->execute($stmt);
             }
         }
     }
+
+
 
     /**
      * FIND
