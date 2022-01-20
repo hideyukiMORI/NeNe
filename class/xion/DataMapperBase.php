@@ -89,16 +89,19 @@ abstract class DataMapperBase
     /**
      * INSERT
      *
-     * @param  object $data  The data object you want to insert into the database.
+     * @param  object $data      The data object you want to insert into the database.
+     * @param  string $className The target class name.
+     *
      * @return int  Primary key sequence ID assigned by auto increment.
      */
-    public function insert($data)
+    public function insert($data, $className = '')
     {
         $modelClass = static::MODEL_CLASS;
+        $targetClassName = $className === '' ? get_class($this) : $className;
         $fields = array();
         $values = array();
-        $column = $this->getTableColumn(static::KEY_SID);
-        foreach ($column as $key) {
+        $column = $this->getTableColumn(static::KEY_SID, DB_COLUMN_TIMESTAMP, $targetClassName);
+        foreach ($column as $key => $var) {
             $key = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
             $fields[] = $key;
             $values[] = ':' . $key;
@@ -126,10 +129,10 @@ abstract class DataMapperBase
             } elseif (!$row->isValid()) {
                 throw new \InvalidArgumentException(
                     'DATA MAPPER ERROR. The specified "' . $modelClass . '.' .
-                        $row->isValid() . '" is in violation of validation'
+                        $row->validate() . '" is in violation of validation'
                 );
             }
-            foreach ($column as $key) {
+            foreach ($column as $key => $var) {
                 $col = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
                 $stmt->bindValue(':' . $col, $row->$key);
             }
@@ -138,6 +141,8 @@ abstract class DataMapperBase
         }
         return $row->{static::KEY_SID};
     }
+
+
 
     /**
      * UPDATE
