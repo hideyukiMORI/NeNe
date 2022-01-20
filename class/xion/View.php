@@ -36,9 +36,10 @@ class View
     final private function __construct()
     {
         $this->smarty = new Smarty();                           // SMARTY OBJECT
-        $this->smarty->template_dir = DIR_SMARTY_TEMPLATE;      // TEMPLATE DIR
-        $this->smarty->compile_dir  = DIR_SMARTY_COMPILE;       // TEMPLATE COMPILE DIR
-        $this->smarty->config_dir   = DIR_SMARTY_CONFIG;        // CONFIG DIR
+        $this->smarty->template_dir  = DIR_SMARTY_TEMPLATE;     // TEMPLATE DIR
+        $this->smarty->compile_dir   = DIR_SMARTY_COMPILE;      // TEMPLATE COMPILE DIR
+        $this->smarty->config_dir    = DIR_SMARTY_CONFIG;       // CONFIG DIR
+        $this->smarty->addPluginsDir(DIR_SMARTY_PLUGINS);       // PLUGINS DIR
         $this->smarty->escape_html  = true;
         $this->addCSS('common');
         $this->addCSS('components');
