@@ -197,15 +197,29 @@ class View
     }
 
     /**
-     * Set object.
+     * Set PDOStatement.
      *
-     * @param object $p_target  Target variable name in template file.
-     * @param string $p_value   The object to set.
-     * @return void
+     * @param string $p_target  Target variable name in template file.
+     * @param object $p_value   The PDOStatement to set.
+     * @return object
      */
-    final public function setObject(string $p_target, PDOStatement $p_value)
+    final public function setPDOStatement(string $p_target, PDOStatement $p_value)
     {
         $this->smarty->assign($p_target, $p_value);
+        return self::$instance;
+    }
+
+    /**
+     * Set data model.
+     *
+     * @param string        $p_target  Target variable name in template file.
+     * @param DataModelBase $p_value   The data model to set.
+     * @return object
+     */
+    final public function setObject(string $p_target, DataModelBase $p_value)
+    {
+        $this->smarty->assign($p_target, $p_value);
+        return self::$instance;
     }
 
     /**
