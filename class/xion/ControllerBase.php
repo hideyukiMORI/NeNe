@@ -106,18 +106,18 @@ abstract class ControllerBase
         } else {
             $this->setCSS();
             $this->setJS();
-            $this->VIEW->setTitle($this->TITLE);
-            $this->VIEW->setValue('t_header_title', $this->HEADER_TITLE);
-            $this->VIEW->setValue('t_copyright', COPYRIGHT);
-            $this->VIEW->setValue('t_copyright_url', COPYRIGHT_URL);
-            $this->VIEW->setValue('t_root', URI_ROOT);
-            $this->VIEW->setValue('t_appVersion', VERSION);
-            $this->VIEW->setValue('t_controller', APP_CONTROLLER);
-            $this->VIEW->setValue('t_action', APP_ACTION);
-            $this->VIEW->setValue('t_controller_action', APP_CONTROLLER . '_' . APP_ACTION);
-            $this->VIEW->setValue('t_debugMode', DEBUG_MODE);
-            $this->VIEW->setValue('t_login_mode', $this->SESSION_CHECK);
-            $this->VIEW->execute();
+            $this->VIEW->setTitle($this->TITLE)
+                ->setValue('t_header_title', $this->HEADER_TITLE)
+                ->setValue('t_copyright', COPYRIGHT)
+                ->setValue('t_copyright_url', COPYRIGHT_URL)
+                ->setValue('t_root', URI_ROOT)
+                ->setValue('t_appVersion', VERSION)
+                ->setValue('t_controller', APP_CONTROLLER)
+                ->setValue('t_action', APP_ACTION)
+                ->setValue('t_controller_action', APP_CONTROLLER . '_' . APP_ACTION)
+                ->setValue('t_debugMode', DEBUG_MODE)
+                ->setValue('t_login_mode', $this->SESSION_CHECK)
+                ->execute();
         }
     }
 
