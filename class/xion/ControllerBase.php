@@ -183,8 +183,11 @@ abstract class ControllerBase
         if (file_exists(sprintf('%scss/%s.css', DOCUMENT_ROOT, APP_CONTROLLER)) == true) {
             $this->VIEW->addCSS(APP_CONTROLLER);
         }
-        if (file_exists(sprintf('%scss/%s_%s.css', DOCUMENT_ROOT, APP_CONTROLLER, APP_ACTION)) == true) {
-            $this->VIEW->addCSS(APP_CONTROLLER . '_' . APP_ACTION);
+        if (file_exists(sprintf('%scss/%s/common.css', DOCUMENT_ROOT, APP_CONTROLLER)) == true) {
+            $this->VIEW->addCSS(APP_CONTROLLER . '/common');
+        }
+        if (file_exists(sprintf('%scss/%s/%s.css', DOCUMENT_ROOT, APP_CONTROLLER, APP_ACTION)) == true) {
+            $this->VIEW->addCSS(APP_CONTROLLER . '/' . APP_ACTION);
         }
     }
 

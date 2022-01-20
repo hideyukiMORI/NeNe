@@ -42,7 +42,7 @@ class View
         $this->smarty->addPluginsDir(DIR_SMARTY_PLUGINS);       // PLUGINS DIR
         $this->smarty->escape_html  = true;
         $this->addCSS('common');
-        $this->addCSS('components');
+        $this->addCSS('components/common');
         $this->addJS('common');
         $this->setValue('t_contents', '');
     }
@@ -210,7 +210,7 @@ class View
     }
 
     /**
-     * Set data model.
+     * Set data model object.
      *
      * @param string        $p_target  Target variable name in template file.
      * @param DataModelBase $p_value   The data model to set.
