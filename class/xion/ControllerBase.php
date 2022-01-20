@@ -166,8 +166,8 @@ abstract class ControllerBase
         if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER)) == true) {
             $template = APP_CONTROLLER;
         }
-        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER . '_' . APP_ACTION)) == true) {
-            $template = APP_CONTROLLER . '_' . APP_ACTION;
+        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER . '/' . APP_ACTION)) == true) {
+            $template = APP_CONTROLLER . '/' . APP_ACTION;
         }
         $this->VIEW->setTemplate($template . '.tpl');
     }

@@ -8,7 +8,7 @@
 
                 <div class="login__form_block">
                     <div id="app" class="hidden">
-                        {include file='./components/loginform.tpl'}
+                        {include file='../components/loginform.tpl'}
                     </div>
                 </div>
 
