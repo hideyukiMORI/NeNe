@@ -203,9 +203,13 @@ abstract class ControllerBase
         if (file_exists($file) == true) {
             $this->VIEW->addJS(APP_CONTROLLER);
         }
-        $file = sprintf('%sjs/%s_%s.js', DOCUMENT_ROOT, APP_CONTROLLER, APP_ACTION);
+        $file = sprintf('%sjs/%s/common.js', DOCUMENT_ROOT, APP_CONTROLLER);
         if (file_exists($file) == true) {
-            $this->VIEW->addJS(APP_CONTROLLER . '_' . APP_ACTION);
+            $this->VIEW->addJS(APP_CONTROLLER . '/common');
+        }
+        $file = sprintf('%sjs/%s/%s.js', DOCUMENT_ROOT, APP_CONTROLLER, APP_ACTION);
+        if (file_exists($file) == true) {
+            $this->VIEW->addJS(APP_CONTROLLER . '/' . APP_ACTION);
         }
     }
 
