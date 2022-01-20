@@ -40,6 +40,7 @@ abstract class DataMapperBase
     const TARGET_TABLE = '';
     const KEY_SID = '';
 
+
     /**
      * CONSTRUCTOR
      */
@@ -56,19 +57,23 @@ abstract class DataMapperBase
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
     }
 
+
+
     /**
      * Get table columns.
      *
      * Returns non-primary key column names.
      *
-     * @param string $key_sid   Column name for sequence ID of auto increment.
-     * @param bool $is_exclude_date   Whether to exclude the creation date and update date of the database row.
+     * @param string $key_sid         Column name for sequence ID of auto increment.
+     * @param bool   $is_exclude_date Whether to exclude the creation date and update date of the database row.
+     * @param string $className       The target class name.
+     *
      * @return array Column name array.
      */
-    public function getTableColumn($key_sid, $is_exclude_date = false): array
+    public function getTableColumn($key_sid, $is_exclude_date = false, $className = ''): array
     {
-        $classNAME  = get_class($this);
-        $DataMODEL  = str_replace('Mapper', '', $classNAME);
+        $className = $className === '' ? static::MODEL_CLASS : $className;
+        $DataMODEL  = str_replace('Mapper', '', $className);
         $DataObj    = new $DataMODEL();
         $column     = $DataObj->getSchema();
         if ($is_exclude_date) {
@@ -78,6 +83,8 @@ abstract class DataMapperBase
         unset($column[$key_sid]);
         return $column;
     }
+
+
 
     /**
      * INSERT
