@@ -78,11 +78,12 @@ class View
      * Set the title name of the page.
      *
      * @param string $p_title Page title name
-     * @return void
+     * @return object
      */
     final public function setTitle(string $p_title)
     {
         $this->smarty->assign('t_title', SITE_TITLE_PRE . $p_title . SITE_TITLE_SUFFIX);
+        return $this;
     }
 
     /**
@@ -91,7 +92,7 @@ class View
      * If the passed argument is a URL, register that URL. Otherwise, register the file in the CSS directory.
      *
      * @param string $p_css Style sheet file name.
-     * @return void
+     * @return object
      */
     final public function addCSS(string $p_css)
     {
@@ -102,13 +103,14 @@ class View
                 $this->cssArray[] = "css/{$p_css}.css";
             }
         }
+        return self::$instance;
     }
 
     /**
      * Set css
      * Set the style sheet to be used in the view.
      *
-     * @return void
+     * @return object
      */
     final public function setCSS()
     {
@@ -122,6 +124,7 @@ class View
             }
         }
         $this->setValues('t_css', $cssArray);
+        return self::$instance;
     }
 
     /**
@@ -129,7 +132,7 @@ class View
      * Add javascript to be used.
      *
      * @param string Javascript file name.
-     * @return void
+     * @return object
      */
     final public function addJS(string $p_js)
     {
@@ -140,13 +143,14 @@ class View
                 $this->jsArray[] = "js/{$p_js}.js";
             }
         }
+        return self::$instance;
     }
 
     /**
      * Set javascript
      * Set the javascript to be used in the view.
      *
-     * @return void
+     * @return object
      */
     final public function setJS()
     {
@@ -160,6 +164,7 @@ class View
             }
         }
         $this->setValues('t_js', $jsArray);
+        return self::$instance;
     }
 
     /**
@@ -168,11 +173,13 @@ class View
      *
      * @param string $p_target  Target variable name in template file.
      * @param string $p_value   The value to set.
-     * @return void
+     *
+     * @return object
      */
     final public function setValue(string $p_target, string $p_value)
     {
         $this->smarty->assign($p_target, $p_value);
+        return self::$instance;
     }
 
     /**
@@ -181,11 +188,12 @@ class View
      *
      * @param string $p_target  Target variable name in template file.
      * @param array $p_value    The array to set.
-     * @return void
+     * @return object
      */
     final public function setValues(string $p_target, array $p_value)
     {
         $this->smarty->assign($p_target, $p_value);
+        return self::$instance;
     }
 
     /**
