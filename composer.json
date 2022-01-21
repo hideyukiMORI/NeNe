@@ -15,6 +15,6 @@
         "smarty/smarty" : "^3.1.38"
    },
     "require-dev": {
-        "phan/phan": "^2.5"
+        "phan/phan": "5.x"
     }
 }
