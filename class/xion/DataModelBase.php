@@ -242,21 +242,6 @@ abstract class DataModelBase
     }
 
     /**
-     * Set filtered POST.
-     *
-     * Set the POST data obtained from filter_input to the specified parameter.
-     *
-     * @param string $prop  Object parameter name.
-     * @param string $postProp  POST parameter name.
-     * @return void
-     */
-    public function setFilteredPost($prop, $postProp = '')
-    {
-        $postProp = $postProp == '' ? $prop : $postProp;
-        $this->set($prop, (string)filter_input(INPUT_POST, $postProp));
-    }
-
-    /**
      * Set now.
      *
      * Use this method when the creation date and update date of the database row are string type for some reason.
