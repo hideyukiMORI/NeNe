@@ -39,13 +39,13 @@ class UrlParameter extends RequestVariables
         if ('' != $param) {
             $params = explode('/', $param);
         }
-        if (3 < count($params)) {
+        if (LAYERS_NUM + 3 < count($params)) {
             foreach ($params as $param) {
                 $split = explode('_', $param);
                 if (2 == count($split)) {
                     $key = $split[0];
                     $val = $split[1];
-                    $this->_values[$key] = $val;
+                    $this->values[$key] = $val;
                 }
             }
         }
