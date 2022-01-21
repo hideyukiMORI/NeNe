@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Xion;
 
 /**
@@ -20,8 +22,19 @@ namespace Nene\Xion;
  */
 class ErrorCode
 {
-    private static $instance;   // INSTANCE VARIABLE
-    public $ERROR_CODE;         // ERROR CODE ARRAY
+    /**
+     * Instance to pass as a singleton.
+     *
+     * @var ErrorCode
+     */
+    private static $instance;
+
+    /**
+     * Error code array.
+     *
+     * @var array
+     */
+    public $ERROR_CODE;
 
     /**
      * CONSTRUCTOR
@@ -38,8 +51,10 @@ class ErrorCode
 
     /**
      * GET INSTANCE
+     *
+     * @return ErrorCode
      */
-    final public static function getInstance()
+    final public static function getInstance(): ErrorCode
     {
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -49,9 +64,9 @@ class ErrorCode
 
     /**
      * Get error text.
-     * @param  string   $errorCode  ERROR CODE
+     * @param string $errorCode Error code.
      *
-     * @return string   ERROR TEXT
+     * @return string ERROR TEXT
      */
     final public function getErrorText(string $errorCode): string
     {
@@ -64,8 +79,10 @@ class ErrorCode
 
     /**
      * Copy inhibit.
+     *
+     * @return void
      */
-    final public function __clone()
+    final public function __clone(): void
     {
         throw new \RuntimeException('Clone is not allowed against ' . get_class($this));
     }
