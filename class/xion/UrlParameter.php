@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Xion;
 
 /**
@@ -31,8 +33,10 @@ class UrlParameter extends RequestVariables
      * Parse URL parameters and set it to an internal variable.
      * Separate the URL after the controller
      * and the action with / and interpret each part as "key_value".
+     *
+     * @return void
      */
-    final protected function setValues()
+    final protected function setValues(): void
     {
         $param = rtrim($_SERVER['REQUEST_URI'], '/');
         $params = [];
