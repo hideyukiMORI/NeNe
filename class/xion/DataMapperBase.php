@@ -292,7 +292,7 @@ abstract class DataMapperBase
      *
      * @return int  number of rows.
      */
-    public function countALL()
+    public function countAll()
     {
         $stmt = $this->executeQuery('
             SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
@@ -300,6 +300,8 @@ abstract class DataMapperBase
         ');
         return $stmt->fetchColumn();
     }
+
+
 
     /**
      * EXECUTE
@@ -319,6 +321,8 @@ abstract class DataMapperBase
         return $stmt;
     }
 
+
+
     /**
      * EXECUTE QUERY
      * Try to query execute stmt.
@@ -336,6 +340,8 @@ abstract class DataMapperBase
         }
         return $stmt;
     }
+
+
 
     /**
      * Get search array
@@ -355,6 +361,8 @@ abstract class DataMapperBase
         return $searchArray;
     }
 
+
+
     /**
      * DECORATE
      * Set fetch mode to convert to the specified class.
@@ -368,6 +376,8 @@ abstract class DataMapperBase
         return $stmt;
     }
 
+
+
     /**
      * ASSOCIATIVE ARRAY
      * Set fetch mode to convert to associative array.
@@ -380,6 +390,8 @@ abstract class DataMapperBase
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         return $stmt;
     }
+
+
 
     /**
      * JSON ERROR CODE
