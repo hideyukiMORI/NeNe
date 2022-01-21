@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Xion;
 
 /**
@@ -20,7 +22,6 @@ namespace Nene\Xion;
  */
 class Dispatcher
 {
-
     /**
      * CONSTRUCTOR.
      */
@@ -33,8 +34,10 @@ class Dispatcher
      * Then generate the controller class and execute the action.
      * If there is no corresponding class, the error message string is returned.
      * If there is no corresponding class, 404 Not Found is returned.
+     *
+     * @return void
      */
-    final public function dispatch()
+    final public function dispatch(): void
     {
         $param = ltrim($_SERVER['REQUEST_URI'], '/');
         $param = rtrim($param, '/');
@@ -48,19 +51,13 @@ class Dispatcher
         /* ========== SET CONTROLLER ========== */
         define('APP_CONTROLLER', $controller);
         $controllerInstance = $this->getControllerInstance($controller);
-        if ($controllerInstance === null) {
-            return ('Controller [' . $controller . '] is not defined.');
-        }
 
         /* ========== SET ACTION ========== */
         define('APP_ACTION', $action);
-        if (method_exists(
-            $controllerInstance,
-            $action . 'Action'
-        ) && method_exists(
-            $controllerInstance,
-            $action . 'Rest'
-        )) {
+        if (
+            method_exists($controllerInstance, $action . 'Action')
+            && method_exists($controllerInstance, $action . 'Rest')
+        ) {
             echo $action . 'Action' . ' and ' . $action . 'Rest Duplicate';
             exit();
         } elseif (method_exists($controllerInstance, $action . 'Action')) {
@@ -79,10 +76,11 @@ class Dispatcher
      * Determine the class file name from the controller name passed as an argument,
      * generate an instance, and return.
      *
-     * @param   string  $controller Controller name.
-     * @return  ControllerBase  $ControllerBase     Controller alias specified by argument.
+     * @param string $controller Controller name.
+     *
+     * @return ControllerBase $ControllerBase Controller alias specified by argument.
      */
-    private function getControllerInstance($controller)
+    private function getControllerInstance(string $controller)
     {
         $className = ucfirst(strtolower($controller)) . 'Controller';
         $className = '\\Nene\\Controller\\' . $className;
