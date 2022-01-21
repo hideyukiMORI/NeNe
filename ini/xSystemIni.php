@@ -46,6 +46,7 @@ const DB_HOST = 'localhost';
 const DB_NAME = 'nene-php';
 
 // DATABASE
+const DB_COLUMN_TIMESTAMP = true;
 const DB_COLUMN_NAME_CREATED = 'created_at';            // COLUMN NAME OF ROW CREATION DATE
 const DB_COLUMN_NAME_UPDATED = 'updated_at';            // COLUMN NAME OF ROW UPDATE DATE
 const DB_AUTO_CREATED_STAMP = true;                     // WHETHER TO SET THE CREATION DATE AUTOMATICALLY
