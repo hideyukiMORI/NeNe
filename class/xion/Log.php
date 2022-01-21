@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Xion;
 
 use Monolog\Logger;
@@ -27,9 +29,32 @@ use Monolog\Handler\RotatingFileHandler;
  */
 class Log
 {
+    /**
+     * Instance to pass as a singleton.
+     *
+     * @var [type]
+     */
     private static $instance;
+
+    /**
+     * Logger class for access log
+     *
+     * @var [type]
+     */
     public $accessLog;
+
+    /**
+     * Logger class for information log
+     *
+     * @var [type]
+     */
     public $informationLog;
+
+    /**
+     * Logger class for error log
+     *
+     * @var [type]
+     */
     public $errorLog;
 
     /**
@@ -53,8 +78,12 @@ class Log
 
     /**
      * GET INSTANCE
+     *
+     * @param string $mode Log type.
+     *
+     * @return object
      */
-    final public static function getInstance($mode = 'information')
+    final public static function getInstance(string $mode = 'information')
     {
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -74,8 +103,10 @@ class Log
 
     /**
      * Copy inhibit
+     *
+     * @return void
      */
-    final public function __clone()
+    final public function __clone(): void
     {
         throw new \RuntimeException('Clone is not allowed against ' . get_class($this));
     }
