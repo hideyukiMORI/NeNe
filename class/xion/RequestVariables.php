@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Xion;
 
 /**
@@ -23,6 +25,11 @@ namespace Nene\Xion;
  */
 abstract class RequestVariables
 {
+    /**
+     * Request variables
+     *
+     * @var [type]
+     */
     protected $values;
 
     /**
@@ -37,13 +44,16 @@ abstract class RequestVariables
      * Set values
      *
      * Initialize the value
+     *
+     * @return void
      */
     abstract protected function setValues();
 
     /**
      * Get value.
      *
-     * @param string $key   Parameter name.
+     * @param string $key Parameter name.
+     *
      * @return mixed value [string or array]
      */
     public function get(string $key = null)
@@ -60,8 +70,9 @@ abstract class RequestVariables
     /**
      * Check for the existence of a value.
      *
-     * @param string $key   Parameter name.
-     * @return bool
+     * @param string $key Parameter name.
+     *
+     * @return boolean
      */
     public function has(string $key): bool
     {
