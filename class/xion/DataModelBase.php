@@ -85,6 +85,47 @@ abstract class DataModelBase
         return true;
     }
 
+    public function setParam($prop, $val)
+    {
+        if (!$this->validate($prop, $val)) {
+            throw new \Exception('Parameter ' . $prop . ' is a validation error. (value : ' . $val . ')');
+        }
+        $this->__set($prop, $val);
+        return $this;
+    }
+
+    /**
+     * Set filtered POST.
+     *
+     * Set the POST data obtained from filter_input to the specified parameter.
+     *
+     * @param string $prop  Object parameter name.
+     * @param string $postProp  POST parameter name.
+     *
+     * @return DataModelBase
+     */
+    public function setParamPostString($prop, $postProp = '')
+    {
+        $postProp = $postProp == '' ? $prop : $postProp;
+        return $this->setParam($prop, (string)filter_input(INPUT_POST, $postProp));
+    }
+
+    /**
+     * Set filtered POST.
+     *
+     * Set the POST data obtained from filter_input to the specified parameter.
+     *
+     * @param string $prop  Object parameter name.
+     * @param string $postProp  POST parameter name.
+     *
+     * @return DataModelBase
+     */
+    public function setParamPostInt($prop, $postProp = '')
+    {
+        $postProp = $postProp == '' ? $prop : $postProp;
+        return $this->setParam($prop, (int)filter_input(INPUT_POST, $postProp));
+    }
+
     public function __set($prop, $val)
     {
         if (!isset(static::$schema[$prop])) {
