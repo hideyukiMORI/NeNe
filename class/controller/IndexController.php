@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Controller;
 
 use Nene\Model as Model;
@@ -24,6 +26,11 @@ use Nene\Database as Database;
  */
 class IndexController extends ControllerBase
 {
+    /**
+     * Processed before the controller method is executed
+     *
+     * @return void
+     */
     protected function preAction()
     {
         $this->SESSION_CHECK = false;
@@ -32,7 +39,6 @@ class IndexController extends ControllerBase
     /**
      * INDEX
      * Action for document root.
-     *
      *
      * @return void
      */
