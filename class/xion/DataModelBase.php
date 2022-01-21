@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
@@ -31,13 +33,13 @@ use Nene\Xion as Xion;
  */
 abstract class DataModelBase
 {
-    const BOOLEAN       = 'boolean';
-    const INTEGER       = 'integer';
-    const DOUBLE        = 'double';
-    const FLOAT         = 'double';
-    const STRING        = 'string';
-    const DATETIME      = 'dateTime';
-    const DATE          = 'date';
+    protected const BOOLEAN       = 'boolean';
+    protected const INTEGER       = 'integer';
+    protected const DOUBLE        = 'double';
+    protected const FLOAT         = 'double';
+    protected const STRING        = 'string';
+    protected const DATETIME      = 'dateTime';
+    protected const DATE          = 'date';
     protected $data    = [];
     protected static $schema  = [];
     protected $LOGGER;
@@ -174,9 +176,11 @@ abstract class DataModelBase
      * If the property is specified, validate the value passed in the argument and return the result.
      *
      * @param string $prop  Validation target. If not specified, all schemas.
-     * @param string $value  The value you want to validate.
+     * @param string $value The value you want to validate.
+     *
+     * @return mixed
      */
-    abstract public function validate($prop = '', $value = '');
+    abstract public function validate(string $prop = '', string $value = '');
 
     /**
      * Do valid

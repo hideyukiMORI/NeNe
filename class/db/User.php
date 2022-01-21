@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Database;
 
 use Nene\Xion\DataModelBase as DataModelBase;
@@ -22,6 +24,11 @@ use Nene\Xion\DataModelBase as DataModelBase;
  */
 class User extends DataModelBase
 {
+    /**
+     * Table schema
+     *
+     * @var array
+     */
     protected static $schema = [
         'id'            => parent::INTEGER,
         'created_at'    => parent::DATETIME,
@@ -39,9 +46,11 @@ class User extends DataModelBase
      * If the property is specified, validate the value passed in the argument and return the result.
      *
      * @param string $prop  Validation target. If not specified, all schemas.
-     * @param string $value  The value you want to validate.
+     * @param string $value The value you want to validate.
+     *
+     * @return mixed
      */
-    public function validate($prop = '', $value = '')
+    public function validate(string $prop = '', string $value = '')
     {
         $validateArray = [
             'user_id'           => ['required' => true],
@@ -71,7 +80,7 @@ class User extends DataModelBase
      * Is valid.
      * Returns the result of object validation as a boolean.
      *
-     * @return bool
+     * @return boolean
      */
     public function isValid()
     {
