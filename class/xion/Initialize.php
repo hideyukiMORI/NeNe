@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Xion;
 
 /**
@@ -28,9 +30,14 @@ class Initialize
     {
     }
 
+    /**
+     * Read the configuration file and initialize it.
+     *
+     * @return void
+     */
     final public static function init()
     {
-        require_once dirname(__FILE__).'/../../ini/xSystemIni.php';       // SYSTEM INITIALIZE
-        require_once dirname(__FILE__).'/../../ini/xSiteIni.php';         // SITE INITIALIZE
+        require_once dirname(__FILE__) . '/../../ini/xSystemIni.php';       // SYSTEM INITIALIZE
+        require_once dirname(__FILE__) . '/../../ini/xSiteIni.php';         // SITE INITIALIZE
     }
 }
