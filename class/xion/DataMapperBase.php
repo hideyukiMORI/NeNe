@@ -199,10 +199,10 @@ abstract class DataMapperBase
     {
         if (DB_IS_PHYSICAL_DELETE) {
             $modelClass = static::MODEL_CLASS;
-            $stmt = $this->DB->prepare('
+            $stmt = $this->DB->prepare(<<<__SQL__
                 DELETE FROM ' . static::TARGET_TABLE . '
                 WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID . '
-            ');
+            __SQL__);
             if (!is_array($data)) {
                 $data = [$data];
             }
@@ -256,11 +256,11 @@ abstract class DataMapperBase
     public function findALL($limit = 0)
     {
         $limitSQL = $limit === 0 ? '' : " LIMIT " . (int)$limit;
-        $stmt = $this->executeQuery('
+        $stmt = $this->executeQuery(<<<__SQL__
             SELECT * FROM ' . static::TARGET_TABLE . '
             WHERE 1
             ORDER BY ' . static::KEY_SID . $limitSQL . '
-        ');
+        __SQL__);
         return $this->decorate($stmt);
     }
 
@@ -275,10 +275,10 @@ abstract class DataMapperBase
      */
     public function countById($sid)
     {
-        $stmt = $this->DB->prepare('
+        $stmt = $this->DB->prepare(<<<__SQL__
             SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
             WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID . '
-        ');
+        __SQL__);
         $stmt->bindParam(':' . static::KEY_SID, $sid, PDO::PARAM_INT);
         $stmt = $this->execute($stmt);
         return $stmt->fetchColumn();
@@ -294,10 +294,10 @@ abstract class DataMapperBase
      */
     public function countAll()
     {
-        $stmt = $this->executeQuery('
+        $stmt = $this->executeQuery(<<<__SQL__
             SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
             WHERE 1
-        ');
+        __SQL__);
         return $stmt->fetchColumn();
     }
 
