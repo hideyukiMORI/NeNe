@@ -226,37 +226,45 @@ abstract class DataMapperBase
      * FIND
      * Search primary key by specified value and return one row.
      *
-     * @param  int $sid  Primary key value to search.
+     * @param int $sid Primary key value to search.
+     *
      * @return mixed  Search results.
      */
     public function find($sid)
     {
-        $stmt = $this->DB->prepare('
+        $stmt = $this->DB->prepare(<<<__SQL__
             SELECT * FROM ' . static::TARGET_TABLE . '
             WHERE   ' . static::KEY_SID . ' =:' . static::KEY_SID . '
             LIMIT 1
-        ');
+        __SQL__);
         $stmt->bindParam(':' . static::KEY_SID, $sid, PDO::PARAM_INT);
         $stmt = $this->execute($stmt);
         $stmt = $this->decorate($stmt);
         return $stmt->fetch();
     }
 
+
+
     /**
      * Find all
      * Returns all rows from a database table.
      *
-     * @return mixed  Search results.
+     * @param int $limit Number of acquisitions
+     *
+     * @return PDOStatement  Search results.
      */
-    public function findALL()
+    public function findALL($limit = 0)
     {
+        $limitSQL = $limit === 0 ? '' : " LIMIT " . (int)$limit;
         $stmt = $this->executeQuery('
             SELECT * FROM ' . static::TARGET_TABLE . '
             WHERE 1
-            ORDER BY ' . static::KEY_SID . '
+            ORDER BY ' . static::KEY_SID . $limitSQL . '
         ');
         return $this->decorate($stmt);
     }
+
+
 
     /**
      * COUNT
