@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Database;
 
 use Nene\Xion\DataMapperBase as DataMapperBase;
@@ -24,11 +26,16 @@ use PDO;
  */
 class UserMapper extends DataMapperBase
 {
-    const MODEL_CLASS = 'Nene\Database\User';
-    const TARGET_TABLE = 'users';
-    const KEY_SID = 'id';
+    private const MODEL_CLASS = 'Nene\Database\User';
+    private const TARGET_TABLE = 'users';
+    private const KEY_SID = 'id';
 
-    final public function findByUserID()
+    /**
+     * Preparing a method to get information by user ID.
+     *
+     * @return array
+     */
+    final public function findByUserID(): array
     {
         return ([]);
     }
@@ -37,10 +44,10 @@ class UserMapper extends DataMapperBase
      * CheckLogin
      * Check accounts by user ID and user pass.
      *
-     * @param string $user_id       UserID
-     * @param string $user_pass     UserPASS
+     * @param string $user_id   User ID.
+     * @param string $user_pass User PASS.
      *
-     * @return int                  User verification result.
+     * @return integer User verification result.
      */
     final public function checkLogin(string $user_id, string $user_pass): int
     {
