@@ -267,13 +267,13 @@ abstract class DataMapperBase
 
 
     /**
-     * COUNT
+     * COUNT BY ID
      * Returns whether there is a primary key row with the specified value.
      *
      * @param  int $sid  Primary key value to search.
      * @return int  Search results.
      */
-    public function countSID($sid)
+    public function countById($sid)
     {
         $stmt = $this->DB->prepare('
             SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
@@ -283,6 +283,8 @@ abstract class DataMapperBase
         $stmt = $this->execute($stmt);
         return $stmt->fetchColumn();
     }
+
+
 
     /**
      * Count all
