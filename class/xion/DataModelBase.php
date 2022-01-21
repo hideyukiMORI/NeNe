@@ -193,7 +193,7 @@ abstract class DataModelBase
         foreach ($validateArray as $key => $value) {
             switch ($key) {
                 case 'required':
-                    if (empty($param)) {
+                    if (!isset($param)) {
                         $flag = false;
                         break 2;
                     }
