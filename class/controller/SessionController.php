@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Controller;
 
 use Nene\Model as Model;
@@ -24,6 +26,11 @@ use Nene\Database as Database;
  */
 class SessionController extends ControllerBase
 {
+    /**
+     * Processed before the controller method is executed
+     *
+     * @return void
+     */
     protected function preAction()
     {
         $this->SESSION_CHECK = false;
