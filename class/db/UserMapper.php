@@ -26,9 +26,9 @@ use PDO;
  */
 class UserMapper extends DataMapperBase
 {
-    private const MODEL_CLASS = 'Nene\Database\User';
-    private const TARGET_TABLE = 'users';
-    private const KEY_SID = 'id';
+    protected const MODEL_CLASS = 'Nene\Database\User';
+    protected const TARGET_TABLE = 'users';
+    protected const KEY_SID = 'id';
 
     /**
      * Preparing a method to get information by user ID.
@@ -60,6 +60,6 @@ class UserMapper extends DataMapperBase
         $stmt->bindParam(':user_id', $user_id, PDO::PARAM_STR);
         $stmt->bindParam(':user_pass', $user_pass, PDO::PARAM_STR);
         $stmt = $this->execute($stmt);
-        return $stmt->fetchColumn();
+        return (int)$stmt->fetchColumn();
     }
 }

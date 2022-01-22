@@ -48,7 +48,7 @@ class SessionController extends ControllerBase
         $user_pass   = filter_input(INPUT_POST, 'user_pass');
         $userMapper = new Database\UserMapper();
         $count = $userMapper->checkLogin($user_id, $user_pass);
-        if ($count == 0) {
+        if ($count === 0) {
             $errorCode = 'LOGIN-FAILED';
             return ([
                 'status'        => 'failure',

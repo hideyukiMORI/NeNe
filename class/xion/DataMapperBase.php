@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
@@ -19,8 +21,8 @@ use Nene\Database   as Database;
 use Nene\Xion       as Xion;
 use Nene\Xion\Log   as Log;
 use Nene\Func       as Func;
-use \PDOStatement;
-use \PDO;
+use PDOStatement;
+use PDO;
 
 /**
  * Abstract class for data mapper
@@ -36,9 +38,9 @@ abstract class DataMapperBase
     protected $CLASS;
     protected $ERROR_CODE;
 
-    const MODEL_CLASS = '';
-    const TARGET_TABLE = '';
-    const KEY_SID = '';
+    protected const MODEL_CLASS = '';
+    protected const TARGET_TABLE = '';
+    protected const KEY_SID = '';
 
 
     /**
