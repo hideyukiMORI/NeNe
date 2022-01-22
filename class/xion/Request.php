@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Xion;
 
 /**
@@ -29,8 +31,25 @@ namespace Nene\Xion;
  */
 class Request
 {
-    private $post;     // POST
-    private $query;    // GET
+    /**
+     * POST
+     *
+     * @var Post
+     */
+    private $post;
+
+    /**
+     * GET
+     *
+     * @var QueryString
+     */
+    private $query;
+
+    /**
+     * URI
+     *
+     * @var UrlParameter
+     */
     private $param;    // URI
 
     /**
@@ -47,7 +66,9 @@ class Request
      * Get POST
      * Get the value of $_POST
      *
-     * @param string|null $key  Parameter name.
+     * @param string|null $key Parameter name.
+     *
+     * @return mixed
      */
     final public function getPost(string $key = null)
     {
@@ -64,7 +85,9 @@ class Request
      * Get Query
      * Get the value of $_GET
      *
-     * @param string|null $key  Parameter name.
+     * @param string|null $key Parameter name.
+     *
+     * @return mixed
      */
     public function getQuery(string $key = null)
     {
@@ -81,7 +104,9 @@ class Request
      * Get param
      * Gets the value obtained by parsing the URI parameter.
      *
-     * @param string|null $key  Parameter name.
+     * @param string|null $key Parameter name.
+     *
+     * @return mixed
      */
     public function getParam(string $key = null)
     {
