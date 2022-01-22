@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Xion;
 
 /**
@@ -31,8 +33,10 @@ class Post extends RequestVariables
     /**
      * Set value
      * Get $_POST and set it to an internal variable.
+     *
+     * @return void
      */
-    final protected function setValues()
+    final protected function setValues(): void
     {
         foreach ($_POST as $key => $value) {
             $this->_values[$key] = $value;
