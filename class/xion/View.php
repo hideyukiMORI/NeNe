@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
@@ -24,11 +26,40 @@ use PDOStatement;
  */
 class View
 {
-    private static $instance;   // INSTANCE VARIABLE
-    public $smarty;             // SMARTY OBJECT
-    private $template;          // TEMPLATE FILE NAME
-    private $cssArray = [];     // CSS FILE NAME ARRAY
-    private $jsArray  = [];     // JAVASCRIPT FILE NAME ARRAY
+    /**
+     * Instance to pass as a singleton.
+     *
+     * @var View
+     */
+    private static $instance;
+
+    /**
+     * Smarty object
+     *
+     * @var Smarty
+     */
+    public $smarty;
+
+    /**
+     * Template file name.
+     *
+     * @var string
+     */
+    private $template;
+
+    /**
+     * CSS file name array
+     *
+     * @var array
+     */
+    private $cssArray = [];
+
+    /**
+     * Javascript file name array
+     *
+     * @var array
+     */
+    private $jsArray  = [];
 
     /**
      * CONSTRUCTOR.
