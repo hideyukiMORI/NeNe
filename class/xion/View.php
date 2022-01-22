@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
@@ -14,6 +12,8 @@ declare(strict_types=1);
  * @license   https://choosealicense.com/no-permission/ NO LICENSE
  * @link      https://ayane.co.jp/
  */
+
+declare(strict_types=1);
 
 namespace Nene\Xion;
 
@@ -96,10 +96,11 @@ class View
      * Set template
      * Set the template file.
      *
-     * @param string $p_template  Template file name.
+     * @param string $p_template Template file name.
+     *
      * @return void
      */
-    final public function setTemplate(string $p_template)
+    final public function setTemplate(string $p_template): void
     {
         $this->template = $p_template;
     }
@@ -108,10 +109,11 @@ class View
      * Set title
      * Set the title name of the page.
      *
-     * @param string $p_title Page title name
-     * @return object
+     * @param string $p_title Page title name.
+     *
+     * @return View
      */
-    final public function setTitle(string $p_title)
+    final public function setTitle(string $p_title): View
     {
         $this->smarty->assign('t_title', SITE_TITLE_PRE . $p_title . SITE_TITLE_SUFFIX);
         return $this;
@@ -162,16 +164,17 @@ class View
      * Add javascript
      * Add javascript to be used.
      *
-     * @param string Javascript file name.
+     * @param string $fileName Javascript file name.
+     *
      * @return object
      */
-    final public function addJS(string $p_js)
+    final public function addJS(string $fileName)
     {
-        if (strlen($p_js) > 0) {
-            if (filter_var($p_js, FILTER_VALIDATE_URL)) {
-                $this->jsArray[] = $p_js;
+        if (strlen($fileName) > 0) {
+            if (filter_var($fileName, FILTER_VALIDATE_URL)) {
+                $this->jsArray[] = $fileName;
             } else {
-                $this->jsArray[] = "js/{$p_js}.js";
+                $this->jsArray[] = "js/{$fileName}.js";
             }
         }
         return self::$instance;
@@ -202,8 +205,8 @@ class View
      * Set value.
      * Set the value in the template.
      *
-     * @param string $p_target  Target variable name in template file.
-     * @param string $p_value   The value to set.
+     * @param string $p_target Target variable name in template file.
+     * @param string $p_value  The value to set.
      *
      * @return object
      */
@@ -217,8 +220,9 @@ class View
      * Set values.
      * Set the array in the template.
      *
-     * @param string $p_target  Target variable name in template file.
-     * @param array $p_value    The array to set.
+     * @param string $p_target Target variable name in template file.
+     * @param array  $p_value  The array to set.
+     *
      * @return object
      */
     final public function setValues(string $p_target, array $p_value)
@@ -230,11 +234,12 @@ class View
     /**
      * Set PDOStatement.
      *
-     * @param string $p_target  Target variable name in template file.
-     * @param object $p_value   The PDOStatement to set.
-     * @return object
+     * @param string       $p_target Target variable name in template file.
+     * @param PDOStatement $p_value  The PDOStatement to set.
+     *
+     * @return View
      */
-    final public function setPDOStatement(string $p_target, PDOStatement $p_value)
+    final public function setPDOStatement(string $p_target, PDOStatement $p_value): View
     {
         $this->smarty->assign($p_target, $p_value);
         return self::$instance;
@@ -243,11 +248,12 @@ class View
     /**
      * Set data model object.
      *
-     * @param string        $p_target  Target variable name in template file.
-     * @param DataModelBase $p_value   The data model to set.
-     * @return object
+     * @param string        $p_target Target variable name in template file.
+     * @param DataModelBase $p_value  The data model to set.
+     *
+     * @return View
      */
-    final public function setObject(string $p_target, DataModelBase $p_value)
+    final public function setObject(string $p_target, DataModelBase $p_value): View
     {
         $this->smarty->assign($p_target, $p_value);
         return self::$instance;
@@ -256,10 +262,11 @@ class View
     /**
      * Set data object.
      *
-     * @param array $dataArray  Pass the data to vue.js.
-     * @return object
+     * @param array $dataArray Pass the data to vue.js.
+     *
+     * @return View
      */
-    final public function setDataObject(array $dataArray)
+    final public function setDataObject(array $dataArray): View
     {
         $this->smarty->assign(
             't_dataObject',
@@ -285,10 +292,11 @@ class View
      * Display error
      * Output error page.
      *
-     * @param  string $p_message  Error message text.
+     * @param string $p_message Error message text.
+     *
      * @return void
      */
-    final public function error(string $p_message)
+    final public function error(string $p_message): void
     {
         $this->setTitle('ERROR');
         $this->setValue('t_message', $p_message);
@@ -303,9 +311,11 @@ class View
     /**
      * Copy inhibit.
      *
-     * @throws RuntimeException
+     * @throws RuntimeException If you try to duplicate it, it will throw an exception because it is a singleton.
+     *
+     * @return  void
      */
-    final public function __clone()
+    final public function __clone(): void
     {
         throw new \RuntimeException('Clone is not allowed against ' . get_class($this));
     }
