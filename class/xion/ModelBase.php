@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Xion;
 
 use Nene\Model;
@@ -27,8 +29,25 @@ use Logger;
  */
 abstract class ModelBase
 {
+    /**
+     * LOGGER
+     *
+     * @var Log
+     */
     protected $LOGGER;
+
+    /**
+     * Class name.
+     *
+     * @var string
+     */
     protected $CLASS;
+
+    /**
+     * Error code
+     *
+     * @var ErrorCode
+     */
     protected $ERROR_CODE;
 
     /**
@@ -47,6 +66,8 @@ abstract class ModelBase
 
     /**
      * check login
+     *
+     * @return boolean
      */
     final protected function checkLogin()
     {
@@ -72,6 +93,10 @@ abstract class ModelBase
 
     /**
      * ACCESS LOG.
+     *
+     * @param string $API API name.
+     *
+     * @return void
      */
     final protected function accessLog(string $API = '')
     {
