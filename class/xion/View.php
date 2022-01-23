@@ -71,7 +71,7 @@ class View
         $this->smarty->compile_dir   = DIR_SMARTY_COMPILE;      // TEMPLATE COMPILE DIR
         $this->smarty->config_dir    = DIR_SMARTY_CONFIG;       // CONFIG DIR
         $this->smarty->addPluginsDir(DIR_SMARTY_PLUGINS);       // PLUGINS DIR
-        $this->smarty->escape_html  = true;
+        $this->smarty->escape_html   = true;
     }
 
     /**

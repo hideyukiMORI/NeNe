@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Func;
 
 /**
@@ -32,10 +34,10 @@ class Text
      * getLink
      * generate and return A tag.
      *
-     * @param string    $text   Link string.
-     * @param string    $link   Link destination URL.
-     * @param bool      $blank  Whether to open in a separate window.
-     * @param string    $class  Class name.
+     * @param string  $text  Link string.
+     * @param string  $link  Link destination URL.
+     * @param boolean $blank Whether to open in a separate window.
+     * @param string  $class Class name.
      *
      * @return string  HTML tags generated.
      */
