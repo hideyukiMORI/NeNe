@@ -13,6 +13,8 @@
  * @link      https://ayane.co.jp/
  */
 
+declare(strict_types=1);
+
 namespace Nene\Xion;
 
 use Nene\Model          as Model;
@@ -30,22 +32,117 @@ use Nene\Func           as Func;
  */
 abstract class ControllerBase
 {
-    protected $request;                             // Request
-    protected $method;                              // Request method.
-    protected $controller = 'index';                // Controller name.
-    protected $action = 'index';                    // Action name.
-    protected $TITLE = SITE_TITLE;                  // Site title.
-    protected $HEADER_TITLE = SITE_HEADER_TITLE;    // Site header title.
-    protected $VIEW;                                // View management class.
-    protected $SESSION_CHECK = true;                // Session check flag.
-    protected $LOGGER;                              // Monolog information log.
-    protected $ACCESS_LOGGER;                       // Monolog access log.
-    protected $ERROR_LOGGER;                        // Monolog error log.
-    protected $ERROR_CODE;                          // Error code.
-    protected $REQUEST_JSON;                        // Rest post.
-    protected $OUTPUT_JSON_STYLE = 'json';          // Json format at rest
-    protected $refController;                       // Referrer controller name
-    protected $refAction;                           // Referrer action name
+    /**
+     * Request.
+     *
+     * @var Request
+     */
+    protected $request;
+
+    /**
+     * Request method.
+     *
+     * @var string
+     */
+    protected $method;
+
+    /**
+     * Controller name.
+     *
+     * @var string
+     */
+    protected $controller = 'index';
+
+    /**
+     * Action name.
+     *
+     * @var string
+     */
+    protected $action = 'index';
+
+    /**
+     * Site title.
+     *
+     * @var string
+     */
+    protected $TITLE = SITE_TITLE;
+
+    /**
+     * Site header title.
+     *
+     * @var string
+     */
+    protected $HEADER_TITLE = SITE_HEADER_TITLE;
+
+    /**
+     * View management class.
+     *
+     * @var View
+     */
+    protected $VIEW;
+
+    /**
+     * Session check flag.
+     *
+     * @var boolean
+     */
+    protected $SESSION_CHECK = true;
+
+    /**
+     * Monolog information log.
+     *
+     * @var Logger
+     */
+    protected $LOGGER;
+
+    /**
+     * Undocumented variable
+     *
+     * @var Logger
+     */
+    protected $ACCESS_LOGGER;
+
+    /**
+     * Monolog error log.
+     *
+     * @var Logger
+     */
+    protected $ERROR_LOGGER;
+
+    /**
+     * Error code.
+     *
+     * @var ErrorCode
+     */
+    protected $ERROR_CODE;
+
+    /**
+     * Rest post
+     *
+     * @var array
+     */
+    protected $REQUEST_JSON;
+
+    /**
+     * Json format at rest.
+     *
+     * @var string
+     */
+    protected $OUTPUT_JSON_STYLE = 'json';
+
+    /**
+     * Referrer controller name.
+     *
+     * @var string
+     */
+    protected $refController;
+
+    /**
+     * Referrer action name.
+     *
+     * @var string
+     */
+    protected $refAction;
 
     /**
      * CONSTRUCTOR.

@@ -81,7 +81,7 @@ class Log
      *
      * @param string $mode Log type.
      *
-     * @return object
+     * @return Logger
      */
     final public static function getInstance(string $mode = 'information')
     {
