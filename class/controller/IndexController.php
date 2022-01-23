@@ -49,6 +49,6 @@ class IndexController extends ControllerBase
         // $userMapper = new Database\UserMapper();
         // $user = $userMapper->find(1);
 
-        $this->VIEW->setValue('t_contents', 'This framework is produced by AYANE International.');
+        $this->VIEW->setString('t_contents', 'This framework is produced by AYANE International.');
     }
 }

@@ -72,10 +72,6 @@ class View
         $this->smarty->config_dir    = DIR_SMARTY_CONFIG;       // CONFIG DIR
         $this->smarty->addPluginsDir(DIR_SMARTY_PLUGINS);       // PLUGINS DIR
         $this->smarty->escape_html  = true;
-        $this->addCSS('common');
-        $this->addCSS('components/common');
-        $this->addJS('common');
-        $this->setValue('t_contents', '');
     }
 
     /**
@@ -88,6 +84,11 @@ class View
     {
         if (!isset(self::$instance)) {
             self::$instance = new self();
+            self::$instance
+                ->addCSS('common')
+                ->addCSS('components/common')
+                ->addJS('common')
+                ->setString('t_contents', '');
         }
         return self::$instance;
     }
@@ -98,11 +99,12 @@ class View
      *
      * @param string $p_template Template file name.
      *
-     * @return void
+     * @return View
      */
-    final public function setTemplate(string $p_template): void
+    final public function setTemplate(string $p_template): View
     {
-        $this->template = $p_template;
+        self::$instance->template = $p_template;
+        return self::$instance;
     }
 
     /**
@@ -115,8 +117,8 @@ class View
      */
     final public function setTitle(string $p_title): View
     {
-        $this->smarty->assign('t_title', SITE_TITLE_PRE . $p_title . SITE_TITLE_SUFFIX);
-        return $this;
+        self::$instance->smarty->assign('t_title', SITE_TITLE_PRE . $p_title . SITE_TITLE_SUFFIX);
+        return self::$instance;
     }
 
     /**
@@ -125,15 +127,15 @@ class View
      * If the passed argument is a URL, register that URL. Otherwise, register the file in the CSS directory.
      *
      * @param string $p_css Style sheet file name.
-     * @return object
+     * @return View
      */
-    final public function addCSS(string $p_css)
+    final public function addCSS(string $p_css): View
     {
         if (strlen($p_css) > 0) {
             if (filter_var($p_css, FILTER_VALIDATE_URL)) {
-                $this->cssArray[] = $p_css;
+                self::$instance->cssArray[] = $p_css;
             } else {
-                $this->cssArray[] = "css/{$p_css}.css";
+                self::$instance->cssArray[] = URI_CSS . $p_css . '.css';
             }
         }
         return self::$instance;
@@ -143,20 +145,20 @@ class View
      * Set css
      * Set the style sheet to be used in the view.
      *
-     * @return object
+     * @return View
      */
-    final public function setCSS()
+    final public function setCSS(): View
     {
         $cssArray = [];
-        foreach ($this->cssArray as $filename) {
+        foreach (self::$instance->cssArray as $filename) {
             if (filter_var($filename, FILTER_VALIDATE_URL)) {
                 $cssArray[] = $filename;
             } elseif (file_exists(DOCUMENT_ROOT . $filename)) {
                 $fileTime = filemtime(DOCUMENT_ROOT . $filename);
-                $cssArray[] = URI_ROOT . $filename . '?' . $fileTime;
+                $cssArray[] = $filename . '?' . $fileTime;
             }
         }
-        $this->setValues('t_css', $cssArray);
+        self::$instance->setValues('t_css', $cssArray);
         return self::$instance;
     }
 
@@ -166,15 +168,15 @@ class View
      *
      * @param string $fileName Javascript file name.
      *
-     * @return object
+     * @return View
      */
-    final public function addJS(string $fileName)
+    final public function addJS(string $fileName): View
     {
         if (strlen($fileName) > 0) {
             if (filter_var($fileName, FILTER_VALIDATE_URL)) {
-                $this->jsArray[] = $fileName;
+                self::$instance->jsArray[] = $fileName;
             } else {
-                $this->jsArray[] = "js/{$fileName}.js";
+                self::$instance->jsArray[] = URI_JS . $fileName . '.js';
             }
         }
         return self::$instance;
@@ -184,20 +186,50 @@ class View
      * Set javascript
      * Set the javascript to be used in the view.
      *
-     * @return object
+     * @return View
      */
-    final public function setJS()
+    final public function setJS(): View
     {
         $jsArray = [];
-        foreach ($this->jsArray as $filename) {
+        foreach (self::$instance->jsArray as $filename) {
             if (filter_var($filename, FILTER_VALIDATE_URL)) {
                 $jsArray[] = $filename;
             } elseif (file_exists(DOCUMENT_ROOT . $filename)) {
                 $fileTime = filemtime(DOCUMENT_ROOT . $filename);
-                $jsArray[] = URI_ROOT . $filename . '?' . $fileTime;
+                $jsArray[] = $filename . '?' . $fileTime;
             }
         }
-        $this->setValues('t_js', $jsArray);
+        self::$instance->setValues('t_js', $jsArray);
+        return self::$instance;
+    }
+
+    /**
+     * Set string.
+     * Set the string in the template.
+     *
+     * @param string $p_target Target variable name in template file.
+     * @param string $p_value  The string to set.
+     *
+     * @return View
+     */
+    final public function setString(string $p_target, string $p_value): View
+    {
+        self::$instance->smarty->assign($p_target, $p_value);
+        return self::$instance;
+    }
+
+    /**
+     * Set integer.
+     * Set the integer in the template.
+     *
+     * @param string  $p_target Target variable name in template file.
+     * @param integer $p_value  The integer to set.
+     *
+     * @return View
+     */
+    final public function setInteger(string $p_target, int $p_value): View
+    {
+        self::$instance->smarty->assign($p_target, $p_value);
         return self::$instance;
     }
 
@@ -206,15 +238,15 @@ class View
      * Set the value in the template.
      *
      * @param string $p_target Target variable name in template file.
-     * @param string $p_value  The value to set.
+     * @param mixed  $p_value  The value to set.
      *
-     * @return object
+     * @return View
      */
-    final public function setValue(string $p_target, string $p_value)
-    {
-        $this->smarty->assign($p_target, $p_value);
-        return self::$instance;
-    }
+    // final public function setValue(string $p_target, mixed $p_value): View
+    // {
+    //     self::$instance->smarty->assign($p_target, $p_value);
+    //     return self::$instance;
+    // }
 
     /**
      * Set values.
@@ -223,11 +255,11 @@ class View
      * @param string $p_target Target variable name in template file.
      * @param array  $p_value  The array to set.
      *
-     * @return object
+     * @return View
      */
-    final public function setValues(string $p_target, array $p_value)
+    final public function setValues(string $p_target, array $p_value): View
     {
-        $this->smarty->assign($p_target, $p_value);
+        self::$instance->smarty->assign($p_target, $p_value);
         return self::$instance;
     }
 
@@ -241,7 +273,7 @@ class View
      */
     final public function setPDOStatement(string $p_target, PDOStatement $p_value): View
     {
-        $this->smarty->assign($p_target, $p_value);
+        self::$instance->smarty->assign($p_target, $p_value);
         return self::$instance;
     }
 
@@ -255,7 +287,7 @@ class View
      */
     final public function setObject(string $p_target, DataModelBase $p_value): View
     {
-        $this->smarty->assign($p_target, $p_value);
+        self::$instance->smarty->assign($p_target, $p_value);
         return self::$instance;
     }
 
@@ -268,7 +300,7 @@ class View
      */
     final public function setDataObject(array $dataArray): View
     {
-        $this->smarty->assign(
+        self::$instance->smarty->assign(
             't_dataObject',
             '<script type="text/javascript">const dataObject = ' . json_encode($dataArray) . '</script>'
         );
@@ -283,9 +315,10 @@ class View
      */
     final public function execute()
     {
-        $this->setCSS();
-        $this->setJS();
-        $this->smarty->display($this->smarty->template_dir[0] . '' . $this->template);
+        self::$instance
+            ->setCSS()
+            ->setJS()
+            ->smarty->display(self::$instance->smarty->template_dir[0] . self::$instance->template);
     }
 
     /**
@@ -298,13 +331,14 @@ class View
      */
     final public function error(string $p_message): void
     {
-        $this->setTitle('ERROR');
-        $this->setValue('t_message', $p_message);
-        $this->setTemplate('error.tpl');
-        $this->setValue('t_root', URI_ROOT);
-        $this->setValue('t_controller', APP_CONTROLLER);
-        $this->setValue('t_controller_action', APP_CONTROLLER . '_' . APP_ACTION);
-        $this->execute();
+        self::$instance
+            ->setString('t_root', URI_ROOT)
+            ->setString('t_controller', APP_CONTROLLER)
+            ->setString('t_controller_action', APP_CONTROLLER . '_' . APP_ACTION)
+            ->setTitle('ERROR')
+            ->setString('t_message', $p_message)
+            ->setTemplate('error.tpl')
+            ->execute();
         exit;
     }
 

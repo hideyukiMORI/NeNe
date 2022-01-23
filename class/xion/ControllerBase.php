@@ -206,16 +206,16 @@ abstract class ControllerBase
             $this->setCSS();
             $this->setJS();
             $this->VIEW->setTitle($this->TITLE)
-                ->setValue('t_header_title', $this->HEADER_TITLE)
-                ->setValue('t_copyright', COPYRIGHT)
-                ->setValue('t_copyright_url', COPYRIGHT_URL)
-                ->setValue('t_root', URI_ROOT)
-                ->setValue('t_appVersion', VERSION)
-                ->setValue('t_controller', APP_CONTROLLER)
-                ->setValue('t_action', APP_ACTION)
-                ->setValue('t_controller_action', APP_CONTROLLER . '_' . APP_ACTION)
-                ->setValue('t_debugMode', DEBUG_MODE)
-                ->setValue('t_login_mode', $this->SESSION_CHECK)
+                ->setString('t_header_title', $this->HEADER_TITLE)
+                ->setString('t_copyright', COPYRIGHT)
+                ->setString('t_copyright_url', COPYRIGHT_URL)
+                ->setString('t_root', URI_ROOT)
+                ->setString('t_appVersion', VERSION)
+                ->setString('t_controller', APP_CONTROLLER)
+                ->setString('t_action', APP_ACTION)
+                ->setString('t_controller_action', APP_CONTROLLER . '_' . APP_ACTION)
+                ->setInteger('t_debugMode', DEBUG_MODE)
+                ->setString('t_login_mode', $this->SESSION_CHECK ? '1' : '0')
                 ->execute();
         }
     }
