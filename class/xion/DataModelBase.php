@@ -271,7 +271,21 @@ abstract class DataModelBase
      *
      * @return mixed
      */
-    abstract public function validate(string $prop = '', string $value = '');
+    public function validate(string $prop = '', string $value = ''): mixed
+    {
+        if ($prop == '') {
+            foreach ($this->validation as $key => $val) {
+                if (!$this->doValid($this->$key, $val)) {
+                    return ($key);
+                }
+            }
+        } elseif (in_array($prop, $this->validation, true)) {
+            if (!$this->doValid($value, $this->validation[$prop])) {
+                return (false);
+            }
+        }
+        return true;
+    }
 
     /**
      * Do valid
