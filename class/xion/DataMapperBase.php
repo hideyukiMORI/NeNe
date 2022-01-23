@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.
@@ -14,6 +12,8 @@ declare(strict_types=1);
  * @license   https://choosealicense.com/no-permission/ NO LICENSE
  * @link      https://ayane.co.jp/
  */
+
+declare(strict_types=1);
 
 namespace Nene\Xion;
 
@@ -33,14 +33,37 @@ use PDO;
  */
 abstract class DataMapperBase
 {
+    /**
+     * Database connection object
+     *
+     * @var PDO
+     */
     protected $DB;
+
+    /**
+     * Logger
+     *
+     * @var Log
+     */
     protected $LOGGER;
+
+    /**
+     * Class name.
+     *
+     * @var string
+     */
     protected $CLASS;
+
+    /**
+     * Error code
+     *
+     * @var ErrorCode
+     */
     protected $ERROR_CODE;
 
-    protected const MODEL_CLASS = '';
+    protected const MODEL_CLASS = 'Nene\Xion\DataModelBase';
     protected const TARGET_TABLE = '';
-    protected const KEY_SID = '';
+    protected const KEY_SID = 'id';
 
 
     /**
@@ -52,7 +75,6 @@ abstract class DataMapperBase
         $this->LOGGER = Log::getInstance();
         $classPathArray = explode('\\', get_class($this));
         $this->CLASS = 'Database\\' . end($classPathArray);
-
         if (APP_CONTROLLER != 'debug' && APP_CONTROLLER != 'stub') {
             $this->LOGGER->addDebug('NEW : ' . $this->CLASS);
         }
@@ -66,13 +88,13 @@ abstract class DataMapperBase
      *
      * Returns non-primary key column names.
      *
-     * @param string $key_sid         Column name for sequence ID of auto increment.
-     * @param bool   $is_exclude_date Whether to exclude the creation date and update date of the database row.
-     * @param string $className       The target class name.
+     * @param string  $key_sid         Column name for sequence ID of auto increment.
+     * @param boolean $is_exclude_date Whether to exclude the creation date and update date of the database row.
+     * @param string  $className       The target class name.
      *
      * @return array Column name array.
      */
-    public function getTableColumn($key_sid, $is_exclude_date = false, $className = ''): array
+    public function getTableColumn(string $key_sid, bool $is_exclude_date = false, string $className = ''): array
     {
         $className = $className === '' ? static::MODEL_CLASS : $className;
         $DataMODEL  = str_replace('Mapper', '', $className);
@@ -91,17 +113,16 @@ abstract class DataMapperBase
     /**
      * INSERT
      *
-     * @param  object $data      The data object you want to insert into the database.
-     * @param  string $className The target class name.
+     * @param mixed  $data      A data object or array of objects to insert into the database.
+     * @param string $className The target class name.
      *
-     * @return int  Primary key sequence ID assigned by auto increment.
+     * @return integer  Primary key sequence ID assigned by auto increment.
      */
-    public function insert($data, $className = '')
+    public function insert(mixed $data, string $className = ''): int
     {
-        $modelClass = static::MODEL_CLASS;
         $targetClassName = $className === '' ? get_class($this) : $className;
-        $fields = array();
-        $values = array();
+        $fields = [];
+        $values = [];
         $column = $this->getTableColumn(static::KEY_SID, DB_COLUMN_TIMESTAMP, $targetClassName);
         foreach ($column as $key => $var) {
             $key = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
@@ -124,13 +145,13 @@ abstract class DataMapperBase
             $data = [$data];
         }
         foreach ($data as $row) {
-            if (!$row instanceof $modelClass) {
+            if (!$row instanceof DataModelBase) {
                 throw new \InvalidArgumentException(
-                    'DATA MAPPER ERROR. Not an instance of the specified "' . $modelClass . '" class.'
+                    'DATA MAPPER ERROR. Not an instance of the specified "' . static::MODEL_CLASS . '" class.'
                 );
             } elseif (!$row->isValid()) {
                 throw new \InvalidArgumentException(
-                    'DATA MAPPER ERROR. The specified "' . $modelClass . '.' .
+                    'DATA MAPPER ERROR. The specified "' . static::MODEL_CLASS . '.' .
                         $row->validate() . '" is in violation of validation'
                 );
             }
@@ -138,7 +159,7 @@ abstract class DataMapperBase
                 $col = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
                 $stmt->bindValue(':' . $col, $row->$key);
             }
-            $stmt = $this->execute($stmt);
+            $this->execute($stmt);
             $row->{static::KEY_SID} = $this->DB->lastInsertId();
         }
         return $row->{static::KEY_SID};
@@ -149,12 +170,12 @@ abstract class DataMapperBase
     /**
      * UPDATE
      *
-     * @param  object $data  Data object to update the database.
+     * @param mixed $data Data object to update the database.
+     *
      * @return void
      */
-    public function update($data)
+    public function update(mixed $data): void
     {
-        $modelClass = static::MODEL_CLASS;
         $column = $this->getTableColumn(static::KEY_SID, DB_COLUMN_TIMESTAMP);
         foreach ($column as $key => $val) {
             $key = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
@@ -169,14 +190,14 @@ abstract class DataMapperBase
             $data = [$data];
         }
         foreach ($data as $row) {
-            if (!$row instanceof $modelClass) {
+            if (!$row instanceof DataModelBase) {
                 throw new \InvalidArgumentException(
-                    'DATA MAPPER ERROR. Not an instance of the specified "' . $modelClass . '" class.'
+                    'DATA MAPPER ERROR. Not an instance of the specified "' . static::MODEL_CLASS . '" class.'
                 );
             } elseif (!$row->isValid()) {
                 throw new \InvalidArgumentException(
                     'DATA MAPPER ERROR. The specified "' .
-                        $modelClass . '.' . $row->isValid() . '" is in violation of validation'
+                        static::MODEL_CLASS . '.' . $row->isValid() . '" is in violation of validation'
                 );
             }
             foreach ($column as $key => $var) {
@@ -184,7 +205,7 @@ abstract class DataMapperBase
                 $stmt->bindValue(':' . $col, $row->$key);
             }
             $stmt->bindValue(':' . static::KEY_SID, $row->{static::KEY_SID});
-            $stmt = $this->execute($stmt);
+            $this->execute($stmt);
         }
     }
 
@@ -194,30 +215,30 @@ abstract class DataMapperBase
      * DELETE
      * To do a logical delete, use the update method or add logic to this method.
      *
-     * @param  object $data  Data object to update the database.
+     * @param mixed $data Data object to update the database.
+     *
      * @return void
      */
-    public function delete($data)
+    public function delete(mixed $data)
     {
         if (DB_IS_PHYSICAL_DELETE) {
-            $modelClass = static::MODEL_CLASS;
-            $stmt = $this->DB->prepare(<<<__SQL__
+            $stmt = $this->DB->prepare('
                 DELETE FROM ' . static::TARGET_TABLE . '
                 WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID . '
-            __SQL__);
+            ');
             if (!is_array($data)) {
                 $data = [$data];
             }
             foreach ($data as $row) {
-                if (!$row instanceof $modelClass) {
+                if (!$row instanceof DataModelBase) {
                     throw new \InvalidArgumentException(
                         'DATA MAPPER ERROR. Not an instance of the specified "' .
-                            $modelClass . '" class.'
+                            static::MODEL_CLASS . '" class.'
                     );
                 }
                 $key_sid = $row->{static::KEY_SID};
                 $stmt->bindParam(':' . static::KEY_SID, $key_sid, PDO::PARAM_INT);
-                $stmt = $this->execute($stmt);
+                $this->execute($stmt);
             }
         }
     }
@@ -228,17 +249,17 @@ abstract class DataMapperBase
      * FIND
      * Search primary key by specified value and return one row.
      *
-     * @param int $sid Primary key value to search.
+     * @param integer $sid Primary key value to search.
      *
      * @return mixed  Search results.
      */
-    public function find($sid)
+    public function find(int $sid)
     {
-        $stmt = $this->DB->prepare(<<<__SQL__
+        $stmt = $this->DB->prepare('
             SELECT * FROM ' . static::TARGET_TABLE . '
             WHERE   ' . static::KEY_SID . ' =:' . static::KEY_SID . '
             LIMIT 1
-        __SQL__);
+        ');
         $stmt->bindParam(':' . static::KEY_SID, $sid, PDO::PARAM_INT);
         $stmt = $this->execute($stmt);
         $stmt = $this->decorate($stmt);
@@ -251,18 +272,18 @@ abstract class DataMapperBase
      * Find all
      * Returns all rows from a database table.
      *
-     * @param int $limit Number of acquisitions
+     * @param integer $limit Number of acquisitions.
      *
      * @return PDOStatement  Search results.
      */
-    public function findALL($limit = 0)
+    public function findALL(int $limit = 0): PDOStatement
     {
         $limitSQL = $limit === 0 ? '' : " LIMIT " . (int)$limit;
-        $stmt = $this->executeQuery(<<<__SQL__
+        $stmt = $this->executeQuery('
             SELECT * FROM ' . static::TARGET_TABLE . '
             WHERE 1
             ORDER BY ' . static::KEY_SID . $limitSQL . '
-        __SQL__);
+        ');
         return $this->decorate($stmt);
     }
 
@@ -272,18 +293,18 @@ abstract class DataMapperBase
      * COUNT BY ID
      * Returns whether there is a primary key row with the specified value.
      *
-     * @param  int $sid  Primary key value to search.
-     * @return int  Search results.
+     * @param integer $sid Primary key value to search.
+     *
+     * @return integer  Search results.
      */
-    public function countById($sid)
+    public function countById(int $sid): int
     {
-        $stmt = $this->DB->prepare(<<<__SQL__
+        $stmt = $this->DB->prepare('
             SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
             WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID . '
-        __SQL__);
+        ');
         $stmt->bindParam(':' . static::KEY_SID, $sid, PDO::PARAM_INT);
-        $stmt = $this->execute($stmt);
-        return $stmt->fetchColumn();
+        return $this->execute($stmt)->fetchColumn();
     }
 
 
@@ -292,14 +313,14 @@ abstract class DataMapperBase
      * Count all
      * Returns the number of rows in a database table.
      *
-     * @return int  number of rows.
+     * @return integer number of rows.
      */
     public function countAll()
     {
-        $stmt = $this->executeQuery(<<<__SQL__
+        $stmt = $this->executeQuery('
             SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
             WHERE 1
-        __SQL__);
+        ');
         return $stmt->fetchColumn();
     }
 
@@ -309,8 +330,9 @@ abstract class DataMapperBase
      * EXECUTE
      * Try to execute stmt.
      *
-     * @param   PDOStatement $stmt  PDOStatement you want to try.
-     * @return  PDOStatement        PDOStatement after try.
+     * @param PDOStatement $stmt PDOStatement you want to try.
+     *
+     * @return PDOStatement PDOStatement after try.
      */
     final public function execute(PDOStatement $stmt)
     {
@@ -329,10 +351,11 @@ abstract class DataMapperBase
      * EXECUTE QUERY
      * Try to query execute stmt.
      *
-     * @param   string @query       Query statement.
-     * @return  PDOStatement        PDOStatement after try.
+     * @param string $query Query statement.
+     *
+     * @return PDOStatement PDOStatement after try.
      */
-    final public function executeQuery(string $query)
+    final public function executeQuery(string $query): PDOStatement
     {
         try {
             $stmt = $this->DB->query($query);
@@ -349,10 +372,11 @@ abstract class DataMapperBase
      * Get search array
      * Parse search keyword delimiter and return as array.
      *
-     * @param  string $searchKey  Search keyword.
+     * @param string $searchKey Search keyword.
+     *
      * @return array  Search keyword array.
      */
-    public function getSearchARRAY(string $searchKey)
+    public function getSearchARRAY(string $searchKey): array
     {
         $searchKey = str_replace(',', ' ', $searchKey);
         $searchKey = str_replace('、', ' ', $searchKey);
@@ -369,10 +393,11 @@ abstract class DataMapperBase
      * DECORATE
      * Set fetch mode to convert to the specified class.
      *
-     * @param  \PDOStatement $stmt PDOStatement instance.
-     * @return \PDOStatement  Instance of PDOStatement after setting.
+     * @param  PDOStatement $stmt PDOStatement instance.
+     *
+     * @return PDOStatement Instance of PDOStatement after setting.
      */
-    protected function decorate(\PDOStatement $stmt)
+    protected function decorate(PDOStatement $stmt): PDOStatement
     {
         $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, static::MODEL_CLASS);
         return $stmt;
@@ -384,10 +409,11 @@ abstract class DataMapperBase
      * ASSOCIATIVE ARRAY
      * Set fetch mode to convert to associative array.
      *
-     * @param  \PDOStatement $stmt PDOStatement instance.
-     * @return \PDOStatement  Instance of PDOStatement after setting.
+     * @param PDOStatement $stmt PDOStatement instance.
+     *
+     * @return PDOStatement Instance of PDOStatement after setting.
      */
-    protected function assoc(\PDOStatement $stmt)
+    protected function assoc(PDOStatement $stmt): PDOStatement
     {
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         return $stmt;
@@ -398,8 +424,13 @@ abstract class DataMapperBase
     /**
      * JSON ERROR CODE
      * Output Error Json.
+     *
+     * @param string $errorCode    Error code.
+     * @param string $errorMessage Error message.
+     *
+     * @return void
      */
-    final protected function error(string $errorCode, string $errorMessage)
+    final protected function error(string $errorCode, string $errorMessage): void
     {
         Func\Json::outputErrorInJson($errorCode, $errorMessage);
     }

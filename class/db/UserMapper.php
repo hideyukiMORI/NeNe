@@ -59,7 +59,6 @@ class UserMapper extends DataMapperBase
         ');
         $stmt->bindParam(':user_id', $user_id, PDO::PARAM_STR);
         $stmt->bindParam(':user_pass', $user_pass, PDO::PARAM_STR);
-        $stmt = $this->execute($stmt);
-        return (int)$stmt->fetchColumn();
+        return (int)$this->execute($stmt)->fetchColumn();
     }
 }
