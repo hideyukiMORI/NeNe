@@ -251,11 +251,15 @@ abstract class DataModelBase
     }
 
     /**
-     * Check if the value is valid
+     * Is valid.
+     * Returns the result of object validation as a boolean.
      *
      * @return boolean
      */
-    abstract public function isValid();
+    public function isValid(): bool
+    {
+        return ($this->validate() === true ?: false);
+    }
 
     /**
      * Validate

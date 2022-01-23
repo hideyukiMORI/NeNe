@@ -75,15 +75,4 @@ class User extends DataModelBase
         }
         return true;
     }
-
-    /**
-     * Is valid.
-     * Returns the result of object validation as a boolean.
-     *
-     * @return boolean
-     */
-    public function isValid()
-    {
-        return ($this->validate() === true ?: false);
-    }
 }
