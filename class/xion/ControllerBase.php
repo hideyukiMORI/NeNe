@@ -270,6 +270,9 @@ abstract class ControllerBase
         if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER))) {
             $template = APP_CONTROLLER;
         }
+        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER . '/' . $template))) {
+            $template = APP_CONTROLLER . '/' . $template;
+        }
         if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER . '/' . APP_ACTION))) {
             $template = APP_CONTROLLER . '/' . APP_ACTION;
         }
