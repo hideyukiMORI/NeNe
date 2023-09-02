@@ -150,12 +150,12 @@ class View
     final public function setCSS(): View
     {
         $cssArray = [];
-        foreach (self::$instance->cssArray as $filename) {
-            if (filter_var($filename, FILTER_VALIDATE_URL)) {
-                $cssArray[] = $filename;
-            } elseif (file_exists(DOCUMENT_ROOT . $filename)) {
-                $fileTime = filemtime(DOCUMENT_ROOT . $filename);
-                $cssArray[] = $filename . '?' . $fileTime;
+        foreach (self::$instance->cssArray as $fileName) {
+            if (filter_var($fileName, FILTER_VALIDATE_URL)) {
+                $cssArray[] = $fileName;
+            } elseif (file_exists(DOCUMENT_ROOT . $fileName)) {
+                $fileTime = filemtime(DOCUMENT_ROOT . $fileName);
+                $cssArray[] = $fileName . '?' . $fileTime;
             }
         }
         self::$instance->setValues('t_css', $cssArray);
