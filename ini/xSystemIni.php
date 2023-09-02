@@ -39,13 +39,13 @@ const URI_IMG = 'https://' . OWN_DOMAIN;                // IMAGE DIR URI
 
 
 // DATABASE CONNECTION SETUP
-const DB_TYPE = 'SQLite3';                           // TYPE [MySQL|SQLite3]
-const DB_DIR = DIR_ROOT . 'data/';                     // DATABASE DIRECTORY WHEN USING SQLITE3
-const DB_FILE = 'nene.db';                           // DATABASE FILE NAME WHEN USING SQLITE3
-const DB_USER = 'root';
-const DB_PASS = '';
-const DB_HOST = 'localhost';
-const DB_NAME = 'nene-php';
+const DB_TYPE = 'SQLite3';                              // TYPE [MySQL|SQLite3]
+const DB_DIR = DIR_ROOT . 'data/';                      // DIRECTORY FOR SQLite3 DATABASE
+const DB_FILE = 'nene.db';                              // FILE NAME FOR SQLite3 DATABASE
+const DB_USER = 'root';                                 // USERNAME
+const DB_PASS = '';                                     // PASSWORD
+const DB_HOST = 'localhost';                            // HOSTNAME
+const DB_NAME = 'nene-php';                             // DATABASE NAME
 
 // DATABASE
 const DB_COLUMN_TIMESTAMP = true;
