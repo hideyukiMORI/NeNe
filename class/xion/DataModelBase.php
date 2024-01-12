@@ -309,13 +309,13 @@ abstract class DataModelBase
                     }
                     break;
                 case 'maxlength':
-                    if (mb_strlen($param) > $value) {
+                    if (mb_strlen($param) >= $value) {
                         $flag = false;
                         break 2;
                     }
                     break;
                 case 'minlength':
-                    if (mb_strlen($param) < $value) {
+                    if (mb_strlen($param) <= $value) {
                         $flag = false;
                         break 2;
                     }
