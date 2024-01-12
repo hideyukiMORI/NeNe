@@ -82,7 +82,7 @@ class ErrorCode
      *
      * @return void
      */
-    final public function __clone(): void
+    final public function __clone()
     {
         throw new \RuntimeException('Clone is not allowed against ' . get_class($this));
     }
