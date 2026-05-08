@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #50: Add starter OpenAPI contract and Swagger UI.
 - #16: Add PHPUnit test foundation and first pure function tests.
 - #8: Rename default branch from `master` to `main`.
 - #6: Add project documentation, AI guide, coding standards, workflow, roadmap, TODO, milestones, and ADR foundation.
@@ -16,7 +17,6 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 - Create a Phan baseline or configuration so static analysis can become repeatable.
 - Review PHP CS Fixer setup and document the exact formatting command.
-- Add an OpenAPI starter document for REST endpoints.
 - Document routing examples with real controllers.
 - Prepare documentation/sample pages for the home side menu: `Authentication`, `Routing Guide`, and `OpenAPI`.
 - Review security-sensitive request, session, template, and error handling.

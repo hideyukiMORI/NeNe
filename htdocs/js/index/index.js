@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { href: '#sample-app', label: 'Authentication' },
         { href: '#sample-app', label: 'Sample TODO' },
         { href: '#getting-started', label: 'Routing Guide' },
-        { href: '#getting-started', label: 'OpenAPI' }
+        { href: '/api-docs/', label: 'OpenAPI' }
     ];
 
     function App() {

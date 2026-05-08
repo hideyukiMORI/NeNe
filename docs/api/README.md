@@ -11,16 +11,19 @@ NeNe should use OpenAPI for public HTTP API contracts.
 
 ## Current State
 
-No OpenAPI contract is defined yet.
-
-## Starter Structure
-
-When API documentation begins, prefer:
+The starter OpenAPI contract is defined at:
 
 ```text
 docs/api/openapi.yaml
-docs/api/schemas/
 ```
+
+Local Swagger UI is available at:
+
+```text
+http://localhost:8080/api-docs/
+```
+
+`docs/api/openapi.yaml` is the source of truth. The Swagger UI page serves that file through `htdocs/api-docs/openapi.php` so the contract is not duplicated under the document root.
 
 ## REST Convention
 
@@ -29,7 +32,7 @@ NeNe currently treats controller methods ending in `Rest` as REST/API handlers.
 Example:
 
 ```text
-/session/login -> SessionController::loginRest()
+/session/login -> SessionController::loginPostRest()
 ```
 
 OpenAPI paths should describe the URL and the request/response contract, not the internal method name.

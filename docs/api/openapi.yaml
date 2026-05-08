@@ -1,0 +1,495 @@
+openapi: 3.1.0
+info:
+  title: NeNe Sample REST API
+  version: 0.1.0
+  description: |
+    OpenAPI contract for the current NeNe sample REST endpoints.
+    The YAML file under `docs/api/` is the source of truth for API documentation.
+servers:
+  - url: http://localhost:8080
+    description: Local Docker development server
+tags:
+  - name: Session
+    description: Session authentication endpoints.
+  - name: TODO
+    description: Authenticated TODO sample endpoints.
+paths:
+  /session/login:
+    post:
+      tags:
+        - Session
+      summary: Sign in to the sample application
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            examples:
+              default:
+                value:
+                  user_id: admin
+                  user_pass: admin
+      responses:
+        "200":
+          description: Login succeeded or credentials were rejected.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/LoginSuccessEnvelope"
+                  - $ref: "#/components/schemas/LoginFailureEnvelope"
+              examples:
+                success:
+                  value:
+                    Result: true
+                    Data:
+                      status: success
+                      errorCode: ""
+                      user:
+                        id: 1
+                        user_id: admin
+                failure:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: LOGIN-FAILED
+                      errorMessage: Wrong user ID or user PASS
+  /session/logout:
+    post:
+      tags:
+        - Session
+      summary: Sign out from the sample application
+      operationId: logout
+      responses:
+        "200":
+          description: Logout completed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicSuccessEnvelope"
+  /todo/index:
+    get:
+      tags:
+        - TODO
+      summary: List TODO items for the signed-in user
+      operationId: listTodos
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: TODO list or session failure.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/TodoListSuccessEnvelope"
+                  - $ref: "#/components/schemas/SessionClosedEnvelope"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+    post:
+      tags:
+        - TODO
+      summary: Create a TODO item for the signed-in user
+      operationId: createTodo
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TodoCreateRequest"
+            examples:
+              default:
+                value:
+                  title: Write OpenAPI docs
+      responses:
+        "200":
+          description: TODO created or session failure.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/TodoSuccessEnvelope"
+                  - $ref: "#/components/schemas/SessionClosedEnvelope"
+        "400":
+          description: TODO title was missing.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoTitleRequiredEnvelope"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+  /todo/item/id_{id}:
+    put:
+      tags:
+        - TODO
+      summary: Update a TODO item for the signed-in user
+      operationId: updateTodo
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: "#/components/parameters/TodoId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TodoUpdateRequest"
+            examples:
+              completion:
+                value:
+                  is_completed: true
+              rename:
+                value:
+                  title: Review OpenAPI docs
+      responses:
+        "200":
+          description: TODO updated or session failure.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/TodoSuccessEnvelope"
+                  - $ref: "#/components/schemas/SessionClosedEnvelope"
+        "400":
+          description: TODO id or title was invalid.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/TodoIdRequiredEnvelope"
+                  - $ref: "#/components/schemas/TodoTitleRequiredEnvelope"
+        "404":
+          $ref: "#/components/responses/TodoNotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+    delete:
+      tags:
+        - TODO
+      summary: Delete a TODO item for the signed-in user
+      operationId: deleteTodo
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: "#/components/parameters/TodoId"
+      responses:
+        "200":
+          description: TODO deleted or session failure.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/TodoDeleteSuccessEnvelope"
+                  - $ref: "#/components/schemas/SessionClosedEnvelope"
+        "400":
+          description: TODO id was missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoIdRequiredEnvelope"
+        "404":
+          $ref: "#/components/responses/TodoNotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: PHPSESSID
+      description: PHP session cookie created by `/session/login`.
+  parameters:
+    TodoId:
+      name: id
+      in: path
+      required: true
+      description: TODO id encoded in NeNe URL parameter format.
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    TodoNotFound:
+      description: TODO item was not found for the signed-in user.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TodoNotFoundEnvelope"
+    MethodNotAllowed:
+      description: HTTP method is not allowed for this endpoint.
+      headers:
+        Allow:
+          description: Comma-separated allowed HTTP methods.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DispatcherErrorEnvelope"
+  schemas:
+    JsonEnvelope:
+      type: object
+      required:
+        - Result
+        - Data
+      properties:
+        Result:
+          type: boolean
+          const: true
+        Data:
+          type: object
+    ApiSuccessData:
+      type: object
+      required:
+        - status
+        - errorCode
+      properties:
+        status:
+          type: string
+          const: success
+        errorCode:
+          type: string
+          const: ""
+    ApiFailureData:
+      type: object
+      required:
+        - status
+        - errorCode
+        - errorMessage
+      properties:
+        status:
+          type: string
+          const: failure
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+    BasicSuccessEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/JsonEnvelope"
+        - type: object
+          properties:
+            Data:
+              $ref: "#/components/schemas/ApiSuccessData"
+    LoginRequest:
+      type: object
+      required:
+        - user_id
+        - user_pass
+      properties:
+        user_id:
+          type: string
+        user_pass:
+          type: string
+          format: password
+    LoginUser:
+      type: object
+      required:
+        - id
+        - user_id
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+    LoginSuccessEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/JsonEnvelope"
+        - type: object
+          properties:
+            Data:
+              allOf:
+                - $ref: "#/components/schemas/ApiSuccessData"
+                - type: object
+                  required:
+                    - user
+                  properties:
+                    user:
+                      $ref: "#/components/schemas/LoginUser"
+    LoginFailureEnvelope:
+      $ref: "#/components/schemas/LoginFailedEnvelope"
+    Todo:
+      type: object
+      required:
+        - id
+        - user_id
+        - title
+        - is_completed
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        title:
+          type: string
+        is_completed:
+          type: boolean
+        created_at:
+          type: string
+          description: Database timestamp string.
+        updated_at:
+          type: string
+          description: Database timestamp string.
+    TodoCreateRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+    TodoUpdateRequest:
+      type: object
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+        is_completed:
+          type: boolean
+    TodoListSuccessEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/JsonEnvelope"
+        - type: object
+          properties:
+            Data:
+              allOf:
+                - $ref: "#/components/schemas/ApiSuccessData"
+                - type: object
+                  required:
+                    - todos
+                  properties:
+                    todos:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/Todo"
+    TodoSuccessEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/JsonEnvelope"
+        - type: object
+          properties:
+            Data:
+              allOf:
+                - $ref: "#/components/schemas/ApiSuccessData"
+                - type: object
+                  required:
+                    - todo
+                  properties:
+                    todo:
+                      $ref: "#/components/schemas/Todo"
+    TodoDeleteSuccessEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/JsonEnvelope"
+        - type: object
+          properties:
+            Data:
+              allOf:
+                - $ref: "#/components/schemas/ApiSuccessData"
+                - type: object
+                  required:
+                    - id
+                  properties:
+                    id:
+                      type: integer
+    ErrorEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/JsonEnvelope"
+        - type: object
+          properties:
+            Data:
+              $ref: "#/components/schemas/ApiFailureData"
+    SessionClosedEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ErrorEnvelope"
+        - type: object
+          properties:
+            Data:
+              allOf:
+                - $ref: "#/components/schemas/ApiFailureData"
+                - type: object
+                  properties:
+                    errorCode:
+                      const: SESSION-CLOSED
+                    errorMessage:
+                      const: Session timeout. Please log in again.
+    LoginFailedEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ErrorEnvelope"
+        - type: object
+          properties:
+            Data:
+              allOf:
+                - $ref: "#/components/schemas/ApiFailureData"
+                - type: object
+                  properties:
+                    errorCode:
+                      const: LOGIN-FAILED
+                    errorMessage:
+                      const: Wrong user ID or user PASS
+    TodoIdRequiredEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ErrorEnvelope"
+        - type: object
+          properties:
+            Data:
+              allOf:
+                - $ref: "#/components/schemas/ApiFailureData"
+                - type: object
+                  properties:
+                    errorCode:
+                      const: TODO-ID-REQUIRED
+                    errorMessage:
+                      const: TODO id is required.
+    TodoNotFoundEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ErrorEnvelope"
+        - type: object
+          properties:
+            Data:
+              allOf:
+                - $ref: "#/components/schemas/ApiFailureData"
+                - type: object
+                  properties:
+                    errorCode:
+                      const: TODO-NOT-FOUND
+                    errorMessage:
+                      const: TODO item was not found.
+    TodoTitleRequiredEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ErrorEnvelope"
+        - type: object
+          properties:
+            Data:
+              allOf:
+                - $ref: "#/components/schemas/ApiFailureData"
+                - type: object
+                  properties:
+                    errorCode:
+                      const: TODO-TITLE-REQUIRED
+                    errorMessage:
+                      const: TODO title is required.
+    DispatcherErrorEnvelope:
+      type: object
+      required:
+        - Result
+        - Error
+      properties:
+        Result:
+          type: boolean
+          const: false
+        Error:
+          type: object
+          required:
+            - ErrorCode
+            - ErrorMessage
+          properties:
+            ErrorCode:
+              type: string
+              const: METHOD-NOT-ALLOWED
+            ErrorMessage:
+              type: string
