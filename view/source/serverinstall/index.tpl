@@ -66,9 +66,10 @@ php cli/setupDatabase.php --env=.env --yes</code></pre>
                             <h2>Prepare the database</h2>
                             <p>
                                 Docker initializes MySQL automatically. On a server, run the setup command after editing
-                                the environment values so the sample <code>users</code> and <code>todos</code> tables exist.
+                                the environment values. If you intentionally use SQLite3, run the SQLite initializer.
                             </p>
-                            <code>php cli/setupDatabase.php --env=.env --yes</code>
+                            <code>MySQL: php cli/setupDatabase.php --env=.env --yes</code>
+                            <code>SQLite3: php cli/initSQLite.php</code>
                         </article>
                     </section>
 
@@ -124,9 +125,9 @@ php cli/setupDatabase.php --env=.env --yes</code></pre>
                                 <h3>The TODO sample cannot login</h3>
                                 <p>
                                     Confirm the database settings and make sure the <code>users</code> and
-                                    <code>todos</code> tables exist for the configured database. Run
-                                    <code>php cli/setupDatabase.php --env=.env --yes</code>, then check
-                                    <code>/health/index</code>.
+                                    <code>todos</code> tables exist for the configured database. For MySQL, run
+                                    <code>php cli/setupDatabase.php --env=.env --yes</code>. For SQLite3, run
+                                    <code>php cli/initSQLite.php</code>. Then check <code>/health/index</code>.
                                 </p>
                             </div>
                         </div>
