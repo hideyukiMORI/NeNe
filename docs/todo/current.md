@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #106: Update roadmap and milestones to reflect current status and architecture policy.
 - #104: Clarify NeNe's renovation philosophy and target audience.
 - #102: Add a service implementation tutorial for pages, REST endpoints, database-backed features, OpenAPI, and tests.
 - #99: Prepare documentation/sample sections for the home side menu: `Authentication`, `Routing Guide`, and `OpenAPI`.

@@ -37,6 +37,27 @@ Avoid:
 - Introducing an ORM or plugin system before a real project need exists.
 - Refactoring legacy conventions only for aesthetic reasons.
 
+## Architecture Policy
+
+Large architecture changes are not the current goal.
+
+NeNe should feel familiar to developers who have used older PHP MVC frameworks. The important design surface is the visible, predictable path from URL to controller method:
+
+```text
+/{controller}/{action}
+```
+
+That route convention is part of the product philosophy. Improvements should make it safer, clearer, and easier to test without hiding it behind a new router abstraction.
+
+When considering changes, prefer this order:
+
+1. Document the existing convention.
+2. Add focused tests around the boundary.
+3. Improve safety or typing locally.
+4. Create an ADR only if the change affects routing, controller conventions, dependency policy, security posture, or API boundaries.
+
+Do not treat legacy style as a defect by itself. In NeNe, some legacy shape is intentionally preserved so the framework stays small, readable, and approachable for its target users.
+
 ## Current Shape
 
 - PHP application framework with a front controller entry point at `htdocs/index.php`.
