@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nene\Tests\Unit\Xion;
 
+use Nene\Xion\HttpTermination;
 use Nene\Xion\JsonResponder;
 use PHPUnit\Framework\TestCase;
 
@@ -51,5 +52,33 @@ final class JsonResponderTest extends TestCase
         self::assertSame(405, $response->statusCode());
         self::assertSame(['Content-Type' => 'application/json; charset=utf-8'], $response->headers());
         self::assertStringContainsString('"METHOD-NOT-ALLOWED"', $response->body());
+    }
+
+    public function testOutputArrayThrowsHttpTerminationWithJsonResponse(): void
+    {
+        try {
+            JsonResponder::outputArray(['status' => 'success']);
+            self::fail('JsonResponder::outputArray() should throw HttpTermination.');
+        } catch (HttpTermination $termination) {
+            $response = $termination->response();
+            self::assertSame(200, $response->statusCode());
+            self::assertSame(['Content-Type' => 'application/json; charset=utf-8'], $response->headers());
+            self::assertStringContainsString('"Result":true', $response->body());
+            self::assertStringContainsString('"status":"success"', $response->body());
+        }
+    }
+
+    public function testOutputErrorThrowsHttpTerminationWithErrorEnvelope(): void
+    {
+        try {
+            JsonResponder::outputError('SAMPLE-ERROR', 'Sample error.');
+            self::fail('JsonResponder::outputError() should throw HttpTermination.');
+        } catch (HttpTermination $termination) {
+            $response = $termination->response();
+            self::assertSame(200, $response->statusCode());
+            self::assertSame(['Content-Type' => 'application/json; charset=utf-8'], $response->headers());
+            self::assertStringContainsString('"Result":false', $response->body());
+            self::assertStringContainsString('"ErrorCode":"SAMPLE-ERROR"', $response->body());
+        }
     }
 }

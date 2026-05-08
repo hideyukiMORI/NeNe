@@ -180,7 +180,7 @@ abstract class ControllerBase
      *
      * Controller execution.
      *
-     * @return mixed
+     * @return void
      */
     final public function run()
     {
@@ -216,7 +216,6 @@ abstract class ControllerBase
 
         if ($this->ROUTE_CONTEXT->isRest()) {
             Xion\JsonResponder::outputArray($return);
-            return $return;
         } else {
             $this->setCSS();
             $this->setJS();

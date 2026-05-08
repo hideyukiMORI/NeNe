@@ -413,9 +413,9 @@ abstract class DataMapperBase
      * @param string $errorCode    Error code.
      * @param string $errorMessage Error message.
      *
-     * @return void
+     * @return never
      */
-    final protected function error(string $errorCode, string $errorMessage): void
+    final protected function error(string $errorCode, string $errorMessage): never
     {
         JsonResponder::outputError($errorCode, $errorMessage);
     }
