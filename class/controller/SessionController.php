@@ -42,8 +42,8 @@ class SessionController extends ControllerBase
      */
     public function loginPostRest(): array
     {
-        $user_id = (string)($this->REQUEST_JSON['user_id'] ?? filter_input(INPUT_POST, 'user_id') ?? '');
-        $user_pass = (string)($this->REQUEST_JSON['user_pass'] ?? filter_input(INPUT_POST, 'user_pass') ?? '');
+        $user_id = (string)($this->REQUEST_JSON['user_id'] ?? '');
+        $user_pass = (string)($this->REQUEST_JSON['user_pass'] ?? '');
         $userMapper = new Database\UserMapper();
         $user = $userMapper->findByCredentials($user_id, $user_pass);
         if ($user === null) {

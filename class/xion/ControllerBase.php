@@ -127,7 +127,7 @@ abstract class ControllerBase
      *
      * @var array
      */
-    protected $REQUEST_JSON;
+    protected $REQUEST_JSON = [];
 
     /**
      * Json format at rest.
