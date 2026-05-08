@@ -8,6 +8,8 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #121: Add server install database setup CLI and runtime health check.
+- #120: Add a traditional Apache/PHP server install guide and public documentation page.
 - #116: Expand HTTP runtime coverage for explicit routing, REST method boundaries, and JSON-only responses.
 - #108: Remove legacy JSONP output and move JSON handling to the response boundary.
 - #106: Update roadmap and milestones to reflect current status and architecture policy.
@@ -44,7 +46,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
-- No active short-term TODO after #116. Use new GitHub Issues for follow-up work.
+- No active short-term TODO after #121. Use new GitHub Issues for follow-up work.
 
 ## Backlog Candidates
 

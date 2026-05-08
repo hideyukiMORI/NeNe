@@ -23,12 +23,13 @@ final class OpenApiRuntimeContractTest extends HttpRuntimeTestCase
         $operations = $this->documentedOperations($openApi);
 
         $examples = [
+            ['GET', '/health/index', '/health/index', null],
             ['POST', '/session/login', '/session/login', ['user_id' => 'admin', 'user_pass' => 'admin']],
             ['POST', '/session/logout', '/session/logout', []],
             ['GET', '/todo/index', '/todo/index', null],
             ['POST', '/todo/index', '/todo/index', ['title' => self::TEST_TODO_PREFIX . 'contract']],
             ['PUT', '/todo/item/id_{id}', '/todo/item/id_1', ['is_completed' => true]],
-            ['DELETE', '/todo/item/id_{id}', '/todo/item/id_1', null]
+            ['DELETE', '/todo/item/id_{id}', '/todo/item/id_1', null],
         ];
 
         foreach ($examples as [$method, $documentedPath, $runtimePath, $body]) {

@@ -24,6 +24,7 @@ The goal is not to replace Laravel, Symfony, CodeIgniter, or Laminas. The goal i
 - Workflow: `docs/workflow.md`
 - Coding standards: `docs/development/coding-standards.md`
 - Docker development: `docs/development/docker.md`
+- Server install: `docs/deployment/server-install.md`
 - Testing: `docs/development/testing.md`
 - AI agent guide: `AGENTS.md`
 
@@ -57,6 +58,13 @@ docker compose up --build
 Open `http://localhost:8080/`.
 
 Docker Compose starts MySQL 8.4 and initializes the development `users` and `todos` tables automatically. The default development login is `admin` / `admin`.
+
+For a traditional Apache/PHP server install, run Composer and then initialize the sample database:
+
+```sh
+composer install --no-dev --optimize-autoloader
+php cli/setupDatabase.php --env=.env --yes
+```
 
 ## Testing
 

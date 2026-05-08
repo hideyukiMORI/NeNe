@@ -9,11 +9,49 @@ servers:
   - url: http://localhost:8080
     description: Local Docker development server
 tags:
+  - name: Health
+    description: Installation and runtime health checks.
   - name: Session
     description: Session authentication endpoints.
   - name: TODO
     description: Authenticated TODO sample endpoints.
 paths:
+  /health/index:
+    get:
+      tags:
+        - Health
+      summary: Check API, database, and sample schema health
+      operationId: healthCheck
+      responses:
+        "200":
+          description: Health result. A degraded result still uses 200 so installers can inspect setup state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthSuccessEnvelope"
+              examples:
+                ok:
+                  value:
+                    Result: true
+                    Data:
+                      status: success
+                      errorCode: ""
+                      healthStatus: ok
+                      api: true
+                      database: true
+                      schema: true
+                      databaseType: MySQL
+                degraded:
+                  value:
+                    Result: true
+                    Data:
+                      status: success
+                      errorCode: ""
+                      healthStatus: degraded
+                      api: true
+                      database: false
+                      schema: false
+                      databaseType: MySQL
   /session/login:
     post:
       tags:
@@ -331,6 +369,43 @@ components:
           properties:
             Data:
               $ref: "#/components/schemas/ApiSuccessData"
+    HealthStatus:
+      allOf:
+        - $ref: "#/components/schemas/ApiSuccessData"
+        - type: object
+          required:
+            - api
+            - database
+            - schema
+            - databaseType
+            - healthStatus
+          properties:
+            healthStatus:
+              type: string
+              enum:
+                - ok
+                - degraded
+            api:
+              type: boolean
+            database:
+              type: boolean
+            schema:
+              type: boolean
+            databaseType:
+              type: string
+              enum:
+                - MySQL
+                - SQLite3
+            detail:
+              type: string
+              description: Debug-only diagnostic detail when APP_DEBUG is enabled.
+    HealthSuccessEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/JsonEnvelope"
+        - type: object
+          properties:
+            Data:
+              $ref: "#/components/schemas/HealthStatus"
     LoginRequest:
       type: object
       required:

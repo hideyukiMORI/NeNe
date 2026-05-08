@@ -196,6 +196,7 @@
 
 .developers__card,
 .guide-panel,
+.health-card,
 .openapi-card,
 .quick-start-card,
 .sample-card,
@@ -254,6 +255,74 @@
     padding: 14px;
 }
 
+.health-card {
+    align-items: center;
+    display: grid;
+    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 18px;
+}
+
+.health-card--ok {
+    border-color: rgba(120, 218, 154, 0.28);
+}
+
+.health-card--degraded {
+    border-color: rgba(255, 193, 120, 0.28);
+}
+
+.health-card__summary span {
+    color: #f2f2ee;
+    display: block;
+    font-size: 0.98rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.health-card__summary p {
+    color: #aaa9a1;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.health-card__checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.health-badge {
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 6px 10px;
+}
+
+.health-badge.is-ok {
+    background: rgba(120, 218, 154, 0.14);
+    color: #9be7b3;
+}
+
+.health-badge.is-ng {
+    background: rgba(255, 143, 143, 0.13);
+    color: #ffabab;
+}
+
+.health-card code {
+    background: #050505;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: #f2f2ee;
+    font-family: "IBM Plex Sans", "IBM Plex Sans JP", sans-serif;
+    font-size: 0.84rem;
+    grid-column: 1 / -1;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    padding: 10px 12px;
+}
+
 .guide-panel,
 .openapi-card {
     padding: 18px;
@@ -278,7 +347,6 @@
 
 .tutorial__doc-link {
     color: #8f82ff;
-    flex: 0 0 auto;
     font-size: 0.86rem;
     font-weight: 600;
     text-decoration: none;
@@ -286,6 +354,14 @@
 
 .tutorial__doc-link:hover {
     color: #f2f2ee;
+}
+
+.tutorial__links {
+    align-items: flex-end;
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .tutorial__steps {
@@ -535,8 +611,13 @@
     }
 
     .developers__layout,
-    .developers__cards {
+    .developers__cards,
+    .health-card {
         grid-template-columns: 1fr;
+    }
+
+    .health-card__checks {
+        justify-content: flex-start;
     }
 
     .developers__sidebar {
@@ -548,6 +629,10 @@
 
     .tutorial__intro {
         flex-direction: column;
+    }
+
+    .tutorial__links {
+        align-items: flex-start;
     }
 
     .todo-panel__form {
