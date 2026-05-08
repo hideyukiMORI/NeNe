@@ -39,7 +39,7 @@ class QueryString extends RequestVariables
     final protected function setValues(): void
     {
         foreach ($_GET as $key => $value) {
-            $this->_values[$key] = $value;
+            $this->values[$key] = $value;
         }
     }
 }
