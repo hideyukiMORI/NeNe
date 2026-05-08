@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #8: Rename default branch from `master` to `main`.
 - #6: Add project documentation, AI guide, coding standards, workflow, roadmap, TODO, milestones, and ADR foundation.
 
 ## Next
@@ -23,4 +24,3 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 - Improve PHPDoc accuracy across `class/xion/`.
 - Add focused tests around dispatcher routing.
 - Decide PHP minimum and target versions in an ADR.
-- Decide whether `master` should be renamed to `main`.

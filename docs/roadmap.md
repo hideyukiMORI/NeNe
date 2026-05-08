@@ -2,6 +2,17 @@
 
 This roadmap describes NeNe's current direction. Each item should become GitHub Issues before implementation.
 
+## 0. Legacy Framework Stabilization
+
+- Keep the legacy directory structure and URL-based routing rules.
+- Resolve known security issues.
+- Make clone-based setup simple, fast, and stable.
+- Add Docker-based local development.
+- Finish dispatcher behavior for correct REST handling.
+- Complete OpenAPI introduction.
+- Keep NeNe as an old-school, simple, lightweight framework.
+- Improve onboarding docs, ADRs, and implementation support.
+
 ## 1. Documentation Foundation
 
 - Add AI and contributor guidance.

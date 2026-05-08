@@ -4,6 +4,21 @@ Use this directory to mirror important GitHub milestones when local context is u
 
 ## Suggested Milestones
 
+### legacy-framework-stabilization
+
+Goal: finish the foundation needed to keep NeNe useful as a legacy, simple, lightweight PHP framework.
+
+Completion criteria:
+
+- Keep the legacy structure intact.
+- Keep the URL-based routing convention intact.
+- Resolve known security issues.
+- Make clone-based installation simple, fast, and stable.
+- Finish dispatcher behavior needed to reproduce correct REST handling.
+- Complete OpenAPI introduction for public REST/API contracts.
+- Keep NeNe easy, simple, and lightweight.
+- Maintain onboarding and implementation support docs under `docs/`, including ADR guidance.
+
 ### docs-foundation
 
 Purpose: establish project documentation, AI guidance, workflow, roadmap, TODO, and ADR practice.
