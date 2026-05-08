@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace Nene\Tests\Http;
 
+use Symfony\Component\Yaml\Yaml;
+
 require_once __DIR__ . '/HttpRuntimeTestCase.php';
 
 final class OpenApiRuntimeContractTest extends HttpRuntimeTestCase
 {
     /*
-     * This test intentionally uses a lightweight line-based OpenAPI reader.
-     * Its current purpose is a runtime smoke check: documented REST operations
-     * should exist, and observed HTTP statuses should be listed in the contract.
-     *
-     * It is not a general YAML parser. When the OpenAPI contract grows beyond
-     * this simple path/method/status check, replace this extraction logic with
-     * a dev dependency such as symfony/yaml before adding richer assertions.
+     * This is still a runtime smoke check rather than a full OpenAPI validator:
+     * documented REST operations should exist, and observed HTTP statuses
+     * should be listed in the contract. symfony/yaml is used so this test reads
+     * the contract as structured data instead of depending on indentation.
      */
     public function testDocumentedRestOperationsRespondWithDocumentedStatuses(): void
     {
         $openApiResponse = $this->client->request('GET', '/api-docs/openapi.php');
-        $openApi = $openApiResponse->body();
+        $openApi = $this->parseOpenApi($openApiResponse->body());
         $operations = $this->documentedOperations($openApi);
 
         $examples = [
@@ -53,63 +52,50 @@ final class OpenApiRuntimeContractTest extends HttpRuntimeTestCase
     }
 
     /**
+     * @return array<string,mixed>
+     */
+    private function parseOpenApi(string $yaml): array
+    {
+        $parsed = Yaml::parse($yaml);
+
+        self::assertIsArray($parsed);
+        return $parsed;
+    }
+
+    /**
+     * @param array<string,mixed> $openApi Parsed OpenAPI document.
+     *
      * @return array<int,array{0:string,1:string}>
      */
-    private function documentedOperations(string $openApi): array
+    private function documentedOperations(array $openApi): array
     {
         $operations = [];
-        $currentPath = null;
-        foreach (explode("\n", $openApi) as $line) {
-            if (preg_match('/^  (\/[^:]+):$/', $line, $matches)) {
-                $currentPath = $matches[1];
+        $paths = $openApi['paths'] ?? [];
+        self::assertIsArray($paths);
+
+        foreach ($paths as $path => $pathItem) {
+            if (!is_string($path) || !is_array($pathItem)) {
                 continue;
             }
-            if ($currentPath !== null && preg_match('/^    (get|post|put|patch|delete):$/', $line, $matches)) {
-                $operations[] = [strtoupper($matches[1]), $currentPath];
+            foreach (['get', 'post', 'put', 'patch', 'delete'] as $method) {
+                if (array_key_exists($method, $pathItem)) {
+                    $operations[] = [strtoupper($method), $path];
+                }
             }
         }
         return $operations;
     }
 
     /**
+     * @param array<string,mixed> $openApi Parsed OpenAPI document.
+     *
      * @return array<int,string>
      */
-    private function documentedStatuses(string $openApi, string $path, string $method): array
+    private function documentedStatuses(array $openApi, string $path, string $method): array
     {
-        $lines = explode("\n", $openApi);
-        $insidePath = false;
-        $insideMethod = false;
-        $insideResponses = false;
-        $statuses = [];
+        $responses = $openApi['paths'][$path][strtolower($method)]['responses'] ?? [];
+        self::assertIsArray($responses);
 
-        foreach ($lines as $line) {
-            if (preg_match('/^  (\/[^:]+):$/', $line, $matches)) {
-                $insidePath = $matches[1] === $path;
-                $insideMethod = false;
-                $insideResponses = false;
-                continue;
-            }
-            if (!$insidePath) {
-                continue;
-            }
-            if (preg_match('/^    (get|post|put|patch|delete):$/', $line, $matches)) {
-                $insideMethod = strtoupper($matches[1]) === strtoupper($method);
-                $insideResponses = false;
-                continue;
-            }
-            if ($insideMethod && preg_match('/^      responses:$/', $line)) {
-                $insideResponses = true;
-                continue;
-            }
-            if ($insideResponses && preg_match('/^        "(\d{3})":$/', $line, $matches)) {
-                $statuses[] = $matches[1];
-                continue;
-            }
-            if ($insideResponses && preg_match('/^      [a-zA-Z_][^:]*:/', $line)) {
-                break;
-            }
-        }
-
-        return $statuses;
+        return array_map('strval', array_keys($responses));
     }
 }

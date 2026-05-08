@@ -27,9 +27,9 @@ http://localhost:8080/api-docs/
 
 ## Contract Test Parser Policy
 
-The current runtime contract test uses a small line-based reader for `openapi.yaml`. That is acceptable while the contract is small and the test only checks path, method, and documented HTTP status coverage.
+The runtime contract test parses `openapi.yaml` with `symfony/yaml`. This keeps the test resilient to normal YAML formatting changes while still keeping the assertion scope small.
 
-Before expanding the test into richer OpenAPI assertions, parse the YAML with a real parser such as `symfony/yaml` in `require-dev`. If the project starts validating response bodies against schemas, choose an OpenAPI/JSON Schema validation library deliberately instead of extending the current regular expressions.
+Before expanding the test into response body validation, choose an OpenAPI/JSON Schema validation library deliberately. Do not turn the runtime smoke test into a custom full OpenAPI validator.
 
 ## REST Convention
 
