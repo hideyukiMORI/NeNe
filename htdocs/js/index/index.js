@@ -267,6 +267,21 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        function signOut() {
+            setStatus('Signing out...');
+            requestJson('/session/logout', {
+                method: 'POST'
+            }).then(function() {
+                setTodos([]);
+                setTask('');
+                setStatus('');
+                setUser(null);
+                setIsSignedIn(false);
+            }).catch(function(error) {
+                setStatus(error.message);
+            });
+        }
+
         return e('section', { className: 'developers__section developers__sample', id: 'sample-app' },
             e('div', { className: 'developers__section-heading' },
                 e('div', null,
@@ -281,6 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         addTodo: addTodo,
                         removeTodo: removeTodo,
                         setTask: setTask,
+                        signOut: signOut,
                         task: task,
                         todos: todos,
                         status: status,
@@ -330,7 +346,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function TodoPanel(props) {
         return e('div', { className: 'todo-panel' },
-            props.user ? e('p', { className: 'todo-panel__user' }, 'Signed in as ' + props.user.user_id) : null,
+            e('div', { className: 'todo-panel__session' },
+                props.user ? e('p', { className: 'todo-panel__user' }, 'Signed in as ' + props.user.user_id) : null,
+                e('button', {
+                    className: 'todo-panel__logout',
+                    type: 'button',
+                    onClick: props.signOut
+                }, 'Sign out')
+            ),
             props.status ? e('p', { className: 'todo-panel__status' }, props.status) : null,
             e('form', { className: 'todo-panel__form', onSubmit: props.addTodo },
                 e('input', {
