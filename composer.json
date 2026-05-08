@@ -1,7 +1,7 @@
 {
     "name": "hideyukimori/nene",
     "description": "Simple web application framework",
-    "license": "proprietary",
+    "license": "MIT",
     "autoload": {
 		"psr-4": {
 			"Nene\\Init\\"      : "class/init/",

@@ -9,7 +9,7 @@
  * @package   AYANE
  * @author    hideyukiMORI <info@ayane.co.jp>
  * @copyright 2021 AYANE
- * @license   https://choosealicense.com/no-permission/ NO LICENSE
+ * @license   https://opensource.org/licenses/MIT MIT License
  * @link      https://ayane.co.jp/
  */
 
