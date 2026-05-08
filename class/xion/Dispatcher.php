@@ -229,6 +229,7 @@ class Dispatcher
      */
     private function notFoundResponse(): HttpResponse
     {
-        return HttpResponse::html((string)file_get_contents(DIR_ROOT . '/404.html'), 404);
+        $body = file_get_contents(DIR_ROOT . '/404.html');
+        return HttpResponse::html(is_string($body) ? $body : '404 Not Found', 404);
     }
 }
