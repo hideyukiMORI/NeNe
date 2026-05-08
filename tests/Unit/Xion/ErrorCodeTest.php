@@ -24,11 +24,22 @@ final class ErrorCodeTest extends TestCase
         );
     }
 
+    public function testGetHttpStatusReturnsCatalogStatus(): void
+    {
+        self::assertSame(400, ErrorCode::getInstance()->getHttpStatus('TODO-TITLE-REQUIRED'));
+        self::assertSame(404, ErrorCode::getInstance()->getHttpStatus('TODO-NOT-FOUND'));
+    }
+
     public function testGetErrorTextReturnsDeterministicFallbackForMissingCode(): void
     {
         self::assertSame(
             'Error code [UNKNOWN-CODE] is not defined.',
             ErrorCode::getInstance()->getErrorText('UNKNOWN-CODE')
         );
+    }
+
+    public function testGetHttpStatusReturnsServerErrorForMissingCode(): void
+    {
+        self::assertSame(500, ErrorCode::getInstance()->getHttpStatus('UNKNOWN-CODE'));
     }
 }

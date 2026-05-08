@@ -61,6 +61,7 @@ class ApiResponse
      */
     public function failure(string $errorCode): array
     {
+        http_response_code($this->errorCode->getHttpStatus($errorCode));
         return [
             'status' => 'failure',
             'errorCode' => $errorCode,
