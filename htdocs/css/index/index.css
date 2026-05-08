@@ -195,6 +195,8 @@
 }
 
 .developers__card,
+.guide-panel,
+.openapi-card,
 .quick-start-card,
 .sample-card {
     background: rgba(18, 18, 18, 0.78);
@@ -248,6 +250,50 @@
 
 .quick-start-card {
     padding: 14px;
+}
+
+.guide-panel,
+.openapi-card {
+    padding: 18px;
+}
+
+.guide-panel {
+    display: grid;
+    gap: 10px;
+}
+
+.guide-panel__row {
+    align-items: center;
+    background: #0a0a0a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 120px minmax(0, 1fr);
+    padding: 12px;
+}
+
+.guide-panel__row span {
+    color: #aaa9a1;
+    font-size: 0.82rem;
+}
+
+.guide-panel__row code {
+    color: #f2f2ee;
+    font-family: "IBM Plex Sans", "IBM Plex Sans JP", sans-serif;
+    font-size: 0.86rem;
+    overflow-wrap: anywhere;
+}
+
+.openapi-card p {
+    color: #aaa9a1;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    margin: 0;
+}
+
+.openapi-card .developers__actions {
+    margin-top: 18px;
 }
 
 .quick-start-card pre {
@@ -413,6 +459,10 @@
     }
 
     .todo-panel__form {
+        grid-template-columns: 1fr;
+    }
+
+    .guide-panel__row {
         grid-template-columns: 1fr;
     }
 }
