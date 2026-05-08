@@ -1,14 +1,37 @@
 # NeNe
- Simple WEB application framework
 
-## Desctiption
+Simple web application framework.
 
-## Usage
+NeNe is a legacy, simple, lightweight PHP framework. It uses a front controller and URL path segments to resolve controller classes and action methods.
 
-## Install
+## Documentation
 
-## Requirement
+- Project overview: `docs/project.md`
+- Documentation index: `docs/README.md`
+- Contributor guide: `docs/CONTRIBUTING.md`
+- Workflow: `docs/workflow.md`
+- Coding standards: `docs/development/coding-standards.md`
+- AI agent guide: `AGENTS.md`
 
-## Licence
+## Routing
 
-## Author
+NeNe routes URLs by convention:
+
+```text
+/{controller}/{action}
+```
+
+The dispatcher resolves the URL to:
+
+- `Nene\Controller\{Controller}Controller`
+- `{action}Action` for server-rendered pages
+- `{action}Rest` for JSON/API responses
+
+## Requirements
+
+- PHP 8.1 or later is currently used for maintenance.
+- Composer is required for dependency installation and autoloading.
+
+## License
+
+Proprietary.
