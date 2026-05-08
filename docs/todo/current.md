@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #123: Load the repository-root `.env` before web runtime initialization.
 - #121: Add server install database setup CLI and runtime health check.
 - #120: Add a traditional Apache/PHP server install guide and public documentation page.
 - #116: Expand HTTP runtime coverage for explicit routing, REST method boundaries, and JSON-only responses.
@@ -46,7 +47,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
-- No active short-term TODO after #121. Use new GitHub Issues for follow-up work.
+- No active short-term TODO after #123. Use new GitHub Issues for follow-up work.
 
 ## Backlog Candidates
 

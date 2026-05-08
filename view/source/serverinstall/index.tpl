@@ -55,10 +55,10 @@ php cli/setupDatabase.php --env=.env --yes</code></pre>
                             <span>03</span>
                             <h2>Set runtime environment</h2>
                             <p>
-                                Plain Apache/PHP does not automatically load <code>.env</code>. Configure values with
-                                hosting environment settings or Apache <code>SetEnv</code>.
+                                Copy <code>.env.example</code> to <code>.env</code> and edit it in the repository root.
+                                Web requests load that file before NeNe initializes configuration.
                             </p>
-                            <code>NENE_APP_ENV=production</code>
+                            <code>NENE_DB_TYPE=MySQL</code>
                         </article>
 
                         <article class="server-install__card">
