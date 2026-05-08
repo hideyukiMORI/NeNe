@@ -19,9 +19,13 @@ Completion criteria:
 - Keep NeNe easy, simple, and lightweight.
 - Maintain onboarding and implementation support docs under `docs/`, including ADR guidance.
 
+Current status: known stabilization Issues are complete, including local Docker setup, test foundation, REST dispatch behavior, OpenAPI/Swagger UI, SQLite fallback, and focused security hardening. No open Issues remain for this milestone.
+
 ### docs-foundation
 
 Purpose: establish project documentation, AI guidance, workflow, roadmap, TODO, and ADR practice.
+
+Current status: core project docs, workflow docs, API docs, TODO tracking, and the service implementation tutorial are in place. No open Issues remain for this milestone.
 
 ### php-modernization
 

@@ -11,6 +11,7 @@ This directory contains project documentation for humans and AI agents.
 - `development/commit-conventions.md`: Commit message rules.
 - `development/docker.md`: Docker local development.
 - `development/testing.md`: Testing strategy and commands.
+- `tutorials/building-a-service.md`: Practical guide for adding pages, REST endpoints, database-backed features, OpenAPI, and tests.
 - `roadmap.md`: Project direction.
 - `todo/current.md`: Current TODO summary.
 - `milestones/README.md`: Milestone management.

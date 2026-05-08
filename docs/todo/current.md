@@ -4,10 +4,13 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Active
 
-- #98: Refresh this TODO from the current roadmap, milestones, and Issue state.
+- None.
 
 ## Recently Completed
 
+- #102: Add a service implementation tutorial for pages, REST endpoints, database-backed features, OpenAPI, and tests.
+- #99: Prepare documentation/sample sections for the home side menu: `Authentication`, `Routing Guide`, and `OpenAPI`.
+- #98: Refresh TODO from roadmap, milestones, and Issue state.
 - #88: Fix request variable storage and add boundary tests.
 - #87: Decide and apply non-200 HTTP status policy for authentication failures.
 - #86: Route Dispatcher errors through the shared JSON error responder.
@@ -20,7 +23,6 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 - #78: Parse OpenAPI runtime contract tests with `symfony/yaml`.
 - #76: Add PHP CS Fixer configuration and formatting scripts.
 - #74: Add Phan baseline and repeatable static analysis configuration.
-- #72: Refresh TODO from roadmap, milestones, and Issue state.
 - #70: Document the OpenAPI runtime contract test parser policy.
 - #68: Update the SQLite initializer so the TODO sample also works with SQLite fallback.
 - #66: Expand first-reader comments in `ini/xSystemIni.php`.
@@ -38,7 +40,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
-- #99: Prepare documentation/sample sections for the home side menu: `Authentication`, `Routing Guide`, and `OpenAPI`.
+- No active short-term TODO after #102. Use new GitHub Issues for follow-up work.
 
 ## Backlog Candidates
 

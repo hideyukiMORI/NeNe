@@ -27,14 +27,15 @@ the dispatcher resolves:
 
 - Controller class: `Nene\Controller\{Controller}Controller`
 - HTML action method: `{action}Action`
-- JSON/API method: `{action}Rest`
+- JSON/API method: `{action}{HttpMethod}Rest`, such as `indexGetRest` or `loginPostRest`
 
-If both `{action}Action` and `{action}Rest` exist, the route is treated as invalid. If neither exists, NeNe returns 404.
+The legacy `{action}Rest` fallback still exists for compatibility, but new REST endpoints should use method-specific handlers. If both `{action}Action` and the legacy `{action}Rest` exist, the route is treated as invalid. If neither an HTML action nor a matching REST handler exists, NeNe returns 404 or 405 depending on available methods.
 
 Examples:
 
-- `/` resolves to `IndexController::indexAction()` or `IndexController::indexRest()`.
-- `/session/login` resolves to `SessionController::loginAction()` or `SessionController::loginRest()`.
+- `/` resolves to `IndexController::indexAction()`.
+- `POST /session/login` resolves to `SessionController::loginPostRest()`.
+- `GET /todo/index` resolves to `TodoController::indexGetRest()`.
 
 ## Direction
 
