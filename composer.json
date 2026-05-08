@@ -17,6 +17,7 @@
         "smarty/smarty" : "^5.8"
    },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.95",
         "phan/phan": "^6.0",
         "phpunit/phpunit": "^10.5"
     },
@@ -25,6 +26,8 @@
         "test:http": "phpunit --testsuite http",
         "test:all": "phpunit",
         "analyze": "phan --allow-polyfill-parser --load-baseline .phan/baseline.php",
+        "format": "php-cs-fixer fix --config=.php-cs-fixer.dist.php",
+        "format:check": "php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff",
         "check": [
             "@test",
             "@test:http",
