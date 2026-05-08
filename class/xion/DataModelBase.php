@@ -85,7 +85,8 @@ abstract class DataModelBase
         $this->LOGGER = Log::getInstance();
         $classPathArray = explode('\\', get_class($this));
         $this->CLASS = 'Database\\' . end($classPathArray);
-        if (APP_CONTROLLER != 'debug' && APP_CONTROLLER != 'stub') {
+        $controller = RouteContext::getInstance()->controller();
+        if ($controller != 'debug' && $controller != 'stub') {
             $this->LOGGER->debug('NEW : ' . $this->CLASS);
         }
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();

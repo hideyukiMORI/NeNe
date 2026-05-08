@@ -65,7 +65,9 @@ abstract class ModelBase
         $this->LOGGER = Log::getInstance('information');
         $classPathArray = explode('\\', get_class($this));
         $this->CLASS = 'Model\\' . end($classPathArray);
-        if (APP_CONTROLLER != 'debug' && APP_CONTROLLER != 'stub') {
+        $routeContext = Xion\RouteContext::getInstance();
+        $controller = $routeContext->controller();
+        if ($controller != 'debug' && $controller != 'stub') {
             $this->LOGGER->debug('NEW : ' . $this->CLASS);
         }
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
@@ -106,8 +108,8 @@ abstract class ModelBase
     {
         $log = date('[Y-m-d H:i:s]') . ' ' .
             $this->AUTH_SESSION->userIdentifier() . ' ' .
-            APP_CONTROLLER . '   ' .
-            APP_ACTION . '   ' .
+            Xion\RouteContext::getInstance()->controller() . '   ' .
+            Xion\RouteContext::getInstance()->action() . '   ' .
             $API . PHP_EOL;
         file_put_contents(ACCESS_LOG_PATH, $log, FILE_APPEND);
     }

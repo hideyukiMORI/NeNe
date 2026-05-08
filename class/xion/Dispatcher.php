@@ -49,12 +49,8 @@ class Dispatcher
         $controller = (LAYERS_NUM < count($params)) ? $params[LAYERS_NUM] : 'index';
         $action = ((LAYERS_NUM + 1) < count($params)) ? $params[LAYERS_NUM + 1] : 'index';
 
-        /* ========== SET CONTROLLER ========== */
-        define('APP_CONTROLLER', $controller);
         $controllerInstance = $this->getControllerInstance($controller);
 
-        /* ========== SET ACTION ========== */
-        define('APP_ACTION', $action);
         $route = $this->resolveActionRoute(
             $controllerInstance,
             $action,
@@ -79,8 +75,7 @@ class Dispatcher
             echo $action . 'Action' . ' and ' . $action . 'Rest Duplicate';
             exit();
         }
-        define('APP_ACTION_MODE', $route['mode']);
-        define('APP_ACTION_METHOD', $route['method']);
+        RouteContext::getInstance()->set($controller, $action, $route['mode'], $route['method']);
         $controllerInstance->run();
     }
 
@@ -194,11 +189,11 @@ class Dispatcher
      *
      * @return ControllerBase $ControllerBase Controller alias specified by argument.
      */
-    private function getControllerInstance(string $controller)
+    private function getControllerInstance(string $controller): ControllerBase
     {
         $className = ucfirst(strtolower($controller)) . 'Controller';
         $className = '\\Nene\\Controller\\' . $className;
-        if (false == class_exists($className)) {
+        if (!class_exists($className)) {
             header('HTTP/1.0 404 Not Found');
             echo file_get_contents(DIR_ROOT . '/404.html');
             exit;
