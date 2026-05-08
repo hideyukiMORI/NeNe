@@ -1,5 +1,4 @@
-{include file='head_01.tpl'}{include file='head_02.tpl'}
-
+{extends file='layout/app.tpl'}
+{block name='content'}
                 <div id="app" class="nene-home" data-tagline="{$t_contents|escape:'html'}"></div>
-
-{include file='footer.tpl'}
+{/block}
