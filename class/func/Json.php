@@ -60,14 +60,12 @@ class Json
     ): void {
         $responseArray = [
             'Result' => true,
-            'Data'   => $jsonArray
+            'Data'   => $jsonArray,
         ];
         if ($format == 'jsonp') {
-            if ($callback == null || !$callback) {
-                $callback = 'jsonCallback';
-            }
+            $callback = self::sanitizeJsonpCallback($callback);
             $json = json_encode($responseArray, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
-            header("Content-type: application/x-javascript");
+            header('Content-Type: application/javascript; charset=utf-8');
             echo $callback . '(' . $json . ')';
         } else {
             $json = json_encode($responseArray);
@@ -75,6 +73,25 @@ class Json
             echo $json;
         }
         exit();
+    }
+
+    /**
+     * Allow only JavaScript identifier paths for legacy JSONP callbacks.
+     *
+     * @param string $callback Callback function name.
+     *
+     * @return string Safe callback function name.
+     */
+    final public static function sanitizeJsonpCallback(string $callback): string
+    {
+        $callback = trim($callback);
+        if ($callback === '') {
+            return 'jsonCallback';
+        }
+        if (preg_match('/^[A-Za-z_$][0-9A-Za-z_$]*(\.[A-Za-z_$][0-9A-Za-z_$]*)*$/', $callback) !== 1) {
+            return 'jsonCallback';
+        }
+        return $callback;
     }
 
     /**
@@ -91,8 +108,8 @@ class Json
             'Result' => false,
             'Error'  => [
                 'ErrorCode'    => $errorCode,
-                'ErrorMessage' => $errorMessage
-            ]
+                'ErrorMessage' => $errorMessage,
+            ],
         ];
         $json = json_encode($responseArray);
         header('Content-Type: application/json; charset=utf-8');
