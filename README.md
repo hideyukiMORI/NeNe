@@ -66,6 +66,12 @@ composer install --no-dev --optimize-autoloader
 php cli/setupDatabase.php --env=.env --yes
 ```
 
+If you intentionally use the SQLite3 fallback, initialize the SQLite sample file instead:
+
+```sh
+php cli/initSQLite.php
+```
+
 ## Testing
 
 ```sh

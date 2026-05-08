@@ -24,13 +24,19 @@ After Composer finishes, point the web server document root to:
 
 Open the configured domain and confirm that the NeNe top page appears.
 
-Then create the sample database tables:
+Then create the sample database tables. For MySQL, use the general setup command:
 
 ```sh
 php cli/setupDatabase.php --env=.env --yes
 ```
 
-The command is safe to run more than once. It creates the current sample `users` and `todos` tables when missing and inserts the default `admin` sample user only when that user does not already exist.
+For SQLite3 fallback, initialize the SQLite file explicitly:
+
+```sh
+php cli/initSQLite.php
+```
+
+Both commands are safe to run more than once. They create the current sample `users` and `todos` tables when missing and insert the default `admin` sample user only when that user does not already exist.
 
 ## Requirements
 
@@ -161,7 +167,7 @@ The sample TODO app expects:
 
 Use the Docker initialization SQL and SQLite initializer as references when preparing a server schema. Keep the sample `admin` account only for local testing; replace or remove it for production use.
 
-For the current sample runtime, use the setup command:
+For the current MySQL sample runtime, use the setup command:
 
 ```sh
 php cli/setupDatabase.php --env=.env --yes
@@ -207,10 +213,16 @@ The browser health endpoint returns the same idea through the NeNe JSON envelope
 
 When no database environment variables are provided, NeNe can fall back to SQLite-oriented defaults.
 
-Initialize the SQLite sample data from the repository root:
+When you intentionally use `NENE_DB_TYPE=SQLite3`, initialize the SQLite sample data from the repository root:
 
 ```sh
 php cli/initSQLite.php
+```
+
+This creates the SQLite database file under `data/`, creates the `users` and `todos` tables, and inserts the default `admin` sample user. You can also use the general setup command with an env file that sets `NENE_DB_TYPE=SQLite3`:
+
+```sh
+php cli/setupDatabase.php --env=.env --yes
 ```
 
 SQLite is useful for a very small sample deployment or quick hosting verification. MySQL is recommended once the application stores real service data.
@@ -247,6 +259,12 @@ After installation, verify:
 ```sh
 composer install --no-dev --optimize-autoloader
 php cli/setupDatabase.php --env=.env --yes
+```
+
+If you are using SQLite3 instead of MySQL, run:
+
+```sh
+php cli/initSQLite.php
 ```
 
 Then open these URLs in a browser:
