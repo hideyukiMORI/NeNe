@@ -51,7 +51,10 @@ class SessionController extends ControllerBase
             return $this->API_RESPONSE->failure('LOGIN-FAILED');
         }
         $loginUser = $this->AUTH_SESSION->login($user);
-        return $this->API_RESPONSE->success(['user' => $loginUser]);
+        return $this->API_RESPONSE->success([
+            'user' => $loginUser,
+            'csrfToken' => $this->AUTH_SESSION->csrfToken(),
+        ]);
     }
 
     /**

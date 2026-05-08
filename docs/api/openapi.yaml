@@ -47,6 +47,7 @@ paths:
                     Data:
                       status: success
                       errorCode: ""
+                      csrfToken: sample-csrf-token
                       user:
                         id: 1
                         user_id: admin
@@ -63,6 +64,9 @@ paths:
         - Session
       summary: Sign out from the sample application
       operationId: logout
+      security:
+        - sessionCookie: []
+          csrfToken: []
       responses:
         "200":
           description: Logout completed.
@@ -70,6 +74,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BasicSuccessEnvelope"
+        "403":
+          description: CSRF token was missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CsrfTokenInvalidEnvelope"
   /todo/index:
     get:
       tags:
@@ -96,6 +106,7 @@ paths:
       operationId: createTodo
       security:
         - sessionCookie: []
+          csrfToken: []
       requestBody:
         required: true
         content:
@@ -121,6 +132,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TodoTitleRequiredEnvelope"
+        "403":
+          description: CSRF token was missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CsrfTokenInvalidEnvelope"
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
   /todo/item/id_{id}:
@@ -131,6 +148,7 @@ paths:
       operationId: updateTodo
       security:
         - sessionCookie: []
+          csrfToken: []
       parameters:
         - $ref: "#/components/parameters/TodoId"
       requestBody:
@@ -165,6 +183,12 @@ paths:
                   - $ref: "#/components/schemas/TodoTitleRequiredEnvelope"
         "404":
           $ref: "#/components/responses/TodoNotFound"
+        "403":
+          description: CSRF token was missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CsrfTokenInvalidEnvelope"
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
     delete:
@@ -174,6 +198,7 @@ paths:
       operationId: deleteTodo
       security:
         - sessionCookie: []
+          csrfToken: []
       parameters:
         - $ref: "#/components/parameters/TodoId"
       responses:
@@ -193,6 +218,12 @@ paths:
                 $ref: "#/components/schemas/TodoIdRequiredEnvelope"
         "404":
           $ref: "#/components/responses/TodoNotFound"
+        "403":
+          description: CSRF token was missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CsrfTokenInvalidEnvelope"
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
 components:
@@ -202,6 +233,11 @@ components:
       in: cookie
       name: PHPSESSID
       description: PHP session cookie created by `/session/login`.
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+      description: CSRF token returned by `/session/login` as `Data.csrfToken`.
   parameters:
     TodoId:
       name: id
@@ -306,9 +342,12 @@ components:
                 - type: object
                   required:
                     - user
+                    - csrfToken
                   properties:
                     user:
                       $ref: "#/components/schemas/LoginUser"
+                    csrfToken:
+                      type: string
     LoginFailureEnvelope:
       $ref: "#/components/schemas/LoginFailedEnvelope"
     Todo:
@@ -431,6 +470,20 @@ components:
                       const: LOGIN-FAILED
                     errorMessage:
                       const: Wrong user ID or user PASS
+    CsrfTokenInvalidEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ErrorEnvelope"
+        - type: object
+          properties:
+            Data:
+              allOf:
+                - $ref: "#/components/schemas/ApiFailureData"
+                - type: object
+                  properties:
+                    errorCode:
+                      const: CSRF-TOKEN-INVALID
+                    errorMessage:
+                      const: Invalid CSRF token.
     TodoIdRequiredEnvelope:
       allOf:
         - $ref: "#/components/schemas/ErrorEnvelope"

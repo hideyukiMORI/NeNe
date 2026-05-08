@@ -70,6 +70,7 @@ class AuthSession
         ];
         $_SESSION['xion']['login_mode'] = 'login';
         $_SESSION['xion']['user'] = $loginUser;
+        $_SESSION['xion']['csrf_token'] = bin2hex(random_bytes(32));
         return $loginUser;
     }
 
@@ -162,6 +163,29 @@ class AuthSession
     {
         $user = $this->user();
         return $user === null ? '' : (string)($user['user_id'] ?? '');
+    }
+
+    /**
+     * Get the CSRF token for the current authenticated session.
+     *
+     * @return string CSRF token.
+     */
+    final public function csrfToken(): string
+    {
+        return (string)($_SESSION['xion']['csrf_token'] ?? '');
+    }
+
+    /**
+     * Verify a submitted CSRF token against the authenticated session token.
+     *
+     * @param string $token Submitted CSRF token.
+     *
+     * @return boolean Whether the token is valid.
+     */
+    final public function verifyCsrfToken(string $token): bool
+    {
+        $sessionToken = $this->csrfToken();
+        return $sessionToken !== '' && hash_equals($sessionToken, $token);
     }
 
     /**

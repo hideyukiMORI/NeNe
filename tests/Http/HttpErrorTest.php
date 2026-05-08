@@ -12,7 +12,7 @@ final class HttpErrorTest extends HttpRuntimeTestCase
     {
         $response = $this->client->json('POST', '/session/login', [
             'user_id' => 'admin',
-            'user_pass' => 'wrong'
+            'user_pass' => 'wrong',
         ]);
         $payload = $response->json();
 
@@ -33,12 +33,40 @@ final class HttpErrorTest extends HttpRuntimeTestCase
         self::assertSame('TODO-TITLE-REQUIRED', $payload['Data']['errorCode']);
     }
 
+    public function testStateChangingTodoRequestRequiresValidCsrfToken(): void
+    {
+        $this->loginAsAdmin();
+        $this->client->setCsrfToken('invalid-token');
+
+        $response = $this->client->json('POST', '/todo/index', [
+            'title' => self::TEST_TODO_PREFIX . 'csrf',
+        ]);
+        $payload = $response->json();
+
+        self::assertSame(403, $response->statusCode());
+        self::assertSame('failure', $payload['Data']['status']);
+        self::assertSame('CSRF-TOKEN-INVALID', $payload['Data']['errorCode']);
+    }
+
+    public function testLogoutRequiresValidCsrfToken(): void
+    {
+        $this->loginAsAdmin();
+        $this->client->setCsrfToken('invalid-token');
+
+        $response = $this->client->json('POST', '/session/logout');
+        $payload = $response->json();
+
+        self::assertSame(403, $response->statusCode());
+        self::assertSame('failure', $payload['Data']['status']);
+        self::assertSame('CSRF-TOKEN-INVALID', $payload['Data']['errorCode']);
+    }
+
     public function testUpdatingMissingTodoReturnsNotFound(): void
     {
         $this->loginAsAdmin();
 
         $response = $this->client->json('PUT', '/todo/item/id_999999999', [
-            'title' => self::TEST_TODO_PREFIX . 'missing'
+            'title' => self::TEST_TODO_PREFIX . 'missing',
         ]);
         $payload = $response->json();
 
@@ -64,7 +92,7 @@ final class HttpErrorTest extends HttpRuntimeTestCase
         $this->loginAsAdmin();
 
         $response = $this->client->json('PUT', '/todo/item/id_invalid', [
-            'title' => self::TEST_TODO_PREFIX . 'invalid'
+            'title' => self::TEST_TODO_PREFIX . 'invalid',
         ]);
         $payload = $response->json();
 

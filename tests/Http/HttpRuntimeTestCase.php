@@ -62,12 +62,13 @@ abstract class HttpRuntimeTestCase extends TestCase
         $client = $client ?? $this->client;
         $response = $client->json('POST', '/session/login', [
             'user_id' => 'admin',
-            'user_pass' => 'admin'
+            'user_pass' => 'admin',
         ]);
         $payload = $response->json();
 
         self::assertSame(200, $response->statusCode());
         self::assertSame('success', $payload['Data']['status']);
+        self::assertNotSame('', $payload['Data']['csrfToken'] ?? '');
         return $client;
     }
 

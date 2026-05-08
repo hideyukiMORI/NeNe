@@ -34,6 +34,9 @@ final class AuthSessionTest extends TestCase
         self::assertSame(1, $authSession->userId());
         self::assertSame('admin', $authSession->userIdentifier());
         self::assertSame($user, $authSession->user());
+        self::assertNotSame('', $authSession->csrfToken());
+        self::assertTrue($authSession->verifyCsrfToken($authSession->csrfToken()));
+        self::assertFalse($authSession->verifyCsrfToken('invalid-token'));
     }
 
     public function testLogoutClearsAuthenticationSession(): void

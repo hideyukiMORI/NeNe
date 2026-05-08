@@ -215,6 +215,14 @@ abstract class ControllerBase
         if ($this->SESSION_CHECK) {
             $this->sessionCheck();
         }
+        if ($this->requiresCsrfProtection() && !$this->AUTH_SESSION->verifyCsrfToken($this->csrfTokenFromRequest())) {
+            Func\Json::outputArrayToJson(
+                $this->API_RESPONSE->failure('CSRF-TOKEN-INVALID'),
+                $this->OUTPUT_JSON_STYLE,
+                filter_input(INPUT_GET, 'callback') ?: '',
+                $this->SESSION_CHECK
+            );
+        }
 
         $methodName = $this->ROUTE_CONTEXT->method();
         $return = $this->$methodName();
@@ -387,6 +395,32 @@ abstract class ControllerBase
     final protected function logout(bool $destroySession = false): void
     {
         $this->AUTH_SESSION->logout($destroySession);
+    }
+
+    /**
+     * Determine whether the current REST request must include a CSRF token.
+     *
+     * @return boolean Whether CSRF validation is required.
+     */
+    final protected function requiresCsrfProtection(): bool
+    {
+        if (!$this->ROUTE_CONTEXT->isRest() || !in_array($this->method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+            return false;
+        }
+        if ($this->ROUTE_CONTEXT->method() === 'loginPostRest') {
+            return false;
+        }
+        return $this->AUTH_SESSION->isLoggedIn();
+    }
+
+    /**
+     * Read the CSRF token from the request header.
+     *
+     * @return string Submitted token.
+     */
+    final protected function csrfTokenFromRequest(): string
+    {
+        return (string)($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
     }
 
     /**

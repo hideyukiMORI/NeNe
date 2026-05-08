@@ -141,6 +141,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const userState = useState(null);
         const user = userState[0];
         const setUser = userState[1];
+        const csrfTokenState = useState('');
+        const csrfToken = csrfTokenState[0];
+        const setCsrfToken = csrfTokenState[1];
 
         useEffect(function() {
             if (isSignedIn) {
@@ -153,6 +156,9 @@ document.addEventListener('DOMContentLoaded', function() {
             requestOptions.headers = Object.assign({
                 'Content-Type': 'application/json'
             }, requestOptions.headers || {});
+            if (csrfToken && requestOptions.method && requestOptions.method.toUpperCase() !== 'GET') {
+                requestOptions.headers['X-CSRF-Token'] = csrfToken;
+            }
             return fetch(url, requestOptions)
                 .then(function(response) {
                     return response.json().then(function(body) {
@@ -206,6 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
             }).then(function(data) {
                 setUser(data.user);
+                setCsrfToken(data.csrfToken || '');
                 setIsSignedIn(true);
             }).catch(function(error) {
                 setLoginError(error.message);
@@ -276,6 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTask('');
                 setStatus('');
                 setUser(null);
+                setCsrfToken('');
                 setIsSignedIn(false);
             }).catch(function(error) {
                 setStatus(error.message);
