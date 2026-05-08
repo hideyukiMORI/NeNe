@@ -310,6 +310,14 @@
     margin-bottom: 18px;
 }
 
+.todo-panel__session {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
 .todo-panel__user,
 .todo-panel__status {
     color: #8f82ff;
@@ -319,6 +327,17 @@
 
 .todo-panel__user {
     color: #aaa9a1;
+    margin-bottom: 0;
+}
+
+.todo-panel__logout {
+    background: transparent;
+    border: 0;
+    color: #8f82ff;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.82rem;
+    padding: 0;
 }
 
 .todo-list {

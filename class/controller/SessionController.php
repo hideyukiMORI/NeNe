@@ -69,4 +69,18 @@ class SessionController extends ControllerBase
             'errorCode' => ''
         ]);
     }
+
+    /**
+     * LOGOUT
+     *
+     * @return array<string,string> Logout response.
+     */
+    public function logoutPostRest(): array
+    {
+        $this->logout();
+        return [
+            'status' => 'success',
+            'errorCode' => ''
+        ];
+    }
 }
