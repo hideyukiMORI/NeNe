@@ -56,29 +56,35 @@ final class JsonResponderTest extends TestCase
 
     public function testOutputArrayThrowsHttpTerminationWithJsonResponse(): void
     {
+        $this->expectException(HttpTermination::class);
+
         try {
             JsonResponder::outputArray(['status' => 'success']);
-            self::fail('JsonResponder::outputArray() should throw HttpTermination.');
         } catch (HttpTermination $termination) {
             $response = $termination->response();
             self::assertSame(200, $response->statusCode());
             self::assertSame(['Content-Type' => 'application/json; charset=utf-8'], $response->headers());
             self::assertStringContainsString('"Result":true', $response->body());
             self::assertStringContainsString('"status":"success"', $response->body());
+
+            throw $termination;
         }
     }
 
     public function testOutputErrorThrowsHttpTerminationWithErrorEnvelope(): void
     {
+        $this->expectException(HttpTermination::class);
+
         try {
             JsonResponder::outputError('SAMPLE-ERROR', 'Sample error.');
-            self::fail('JsonResponder::outputError() should throw HttpTermination.');
         } catch (HttpTermination $termination) {
             $response = $termination->response();
             self::assertSame(200, $response->statusCode());
             self::assertSame(['Content-Type' => 'application/json; charset=utf-8'], $response->headers());
             self::assertStringContainsString('"Result":false', $response->body());
             self::assertStringContainsString('"ErrorCode":"SAMPLE-ERROR"', $response->body());
+
+            throw $termination;
         }
     }
 }
