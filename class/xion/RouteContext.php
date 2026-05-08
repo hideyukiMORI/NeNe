@@ -96,6 +96,19 @@ class RouteContext
     }
 
     /**
+     * Reset current route information to framework defaults.
+     *
+     * @return void
+     */
+    final public function reset(): void
+    {
+        $this->controller = 'index';
+        $this->action = 'index';
+        $this->mode = 'Action';
+        $this->method = 'indexAction';
+    }
+
+    /**
      * Get controller name.
      *
      * @return string Controller name.
