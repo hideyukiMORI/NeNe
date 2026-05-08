@@ -187,8 +187,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     e(HealthBadge, { label: 'DB', ok: health.database }),
                     e(HealthBadge, { label: 'Schema', ok: health.schema })
                 ),
-                health.environment && health.environment !== 'production' && health.databaseType
-                    ? e('p', { className: 'health-card__meta' }, 'DB Type: ' + health.databaseType)
+                health.environment === 'development'
+                    ? e('div', { className: 'health-card__meta' },
+                        e('span', null, 'Environment: ' + health.environment),
+                        health.databaseType ? e('span', null, 'DB Type: ' + health.databaseType) : null
+                    )
                     : null,
                 health.status === 'ok'
                     ? null

@@ -295,8 +295,11 @@
 
 .health-card__meta {
     color: #8f82ff;
+    display: flex;
+    flex-wrap: wrap;
     font-size: 0.82rem;
     font-weight: 700;
+    gap: 10px;
     grid-column: 1 / -1;
     letter-spacing: 0.02em;
     margin: 0;
