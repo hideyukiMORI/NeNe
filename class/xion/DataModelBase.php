@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace Nene\Xion;
 
+use Monolog\Logger;
 use Nene\Xion as Xion;
 
 /**
@@ -58,7 +59,7 @@ abstract class DataModelBase
     /**
      * Logger
      *
-     * @var Log
+     * @var Logger
      */
     protected $LOGGER;
 
@@ -85,7 +86,7 @@ abstract class DataModelBase
         $classPathArray = explode('\\', get_class($this));
         $this->CLASS = 'Database\\' . end($classPathArray);
         if (APP_CONTROLLER != 'debug' && APP_CONTROLLER != 'stub') {
-            $this->LOGGER->addDebug('NEW : ' . $this->CLASS);
+            $this->LOGGER->debug('NEW : ' . $this->CLASS);
         }
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
     }
@@ -146,7 +147,7 @@ abstract class DataModelBase
      * @param string $prop Parameter key.
      * @param mixed  $val  Parameter value.
      *
-     * @return DataModelBale
+     * @return DataModelBase
      */
     public function setParam(string $prop, mixed $val)
     {

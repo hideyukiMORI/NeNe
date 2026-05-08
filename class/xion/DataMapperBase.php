@@ -17,9 +17,9 @@ declare(strict_types=1);
 
 namespace Nene\Xion;
 
+use Monolog\Logger;
 use Nene\Database   as Database;
 use Nene\Xion       as Xion;
-use Nene\Xion\Log   as Log;
 use Nene\Func       as Func;
 use PDOStatement;
 use PDO;
@@ -43,7 +43,7 @@ abstract class DataMapperBase
     /**
      * Logger
      *
-     * @var Log
+     * @var Logger
      */
     protected $LOGGER;
 
@@ -76,7 +76,7 @@ abstract class DataMapperBase
         $classPathArray = explode('\\', get_class($this));
         $this->CLASS = 'Database\\' . end($classPathArray);
         if (APP_CONTROLLER != 'debug' && APP_CONTROLLER != 'stub') {
-            $this->LOGGER->addDebug('NEW : ' . $this->CLASS);
+            $this->LOGGER->debug('NEW : ' . $this->CLASS);
         }
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
     }

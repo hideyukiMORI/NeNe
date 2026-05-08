@@ -17,9 +17,9 @@ declare(strict_types=1);
 
 namespace Nene\Xion;
 
+use Monolog\Logger;
 use Nene\Model;
 use Nene\Xion as Xion;
-use Logger;
 
 /**
  * Model abstract class.
@@ -32,7 +32,7 @@ abstract class ModelBase
     /**
      * LOGGER
      *
-     * @var Log
+     * @var Logger
      */
     protected $LOGGER;
 
@@ -59,7 +59,7 @@ abstract class ModelBase
         $classPathArray = explode('\\', get_class($this));
         $this->CLASS = 'Model\\' . end($classPathArray);
         if (APP_CONTROLLER != 'debug' && APP_CONTROLLER != 'stub') {
-            $this->LOGGER->addDebug('NEW : ' . $this->CLASS);
+            $this->LOGGER->debug('NEW : ' . $this->CLASS);
         }
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
     }
