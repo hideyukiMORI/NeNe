@@ -18,6 +18,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 - Review PHP CS Fixer setup and document the exact formatting command.
 - Add an OpenAPI starter document for REST endpoints.
 - Document routing examples with real controllers.
+- Prepare documentation/sample pages for the home side menu: `Authentication`, `Routing Guide`, and `OpenAPI`.
 - Review security-sensitive request, session, template, and error handling.
 
 ## Backlog Candidates
