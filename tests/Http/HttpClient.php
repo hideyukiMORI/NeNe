@@ -23,6 +23,13 @@ final class HttpClient
      */
     private $cookies = [];
 
+    /**
+     * CSRF token returned by the login API.
+     *
+     * @var string
+     */
+    private $csrfToken = '';
+
     public function __construct(string $baseUrl)
     {
         $this->baseUrl = rtrim($baseUrl, '/');
@@ -55,6 +62,9 @@ final class HttpClient
      */
     public function request(string $method, string $path, ?string $body = null, array $headers = []): HttpResponse
     {
+        if ($this->csrfToken !== '' && strtoupper($method) !== 'GET' && !isset($headers['X-CSRF-Token'])) {
+            $headers['X-CSRF-Token'] = $this->csrfToken;
+        }
         $requestHeaders = $this->formatHeaders($headers);
         $cookieHeader = $this->buildCookieHeader();
         if ($cookieHeader !== '') {
@@ -67,8 +77,8 @@ final class HttpClient
                 'header' => implode("\r\n", $requestHeaders),
                 'content' => $body ?? '',
                 'ignore_errors' => true,
-                'timeout' => 5
-            ]
+                'timeout' => 5,
+            ],
         ]);
 
         $responseHeaders = [];
@@ -82,7 +92,13 @@ final class HttpClient
 
         $response = HttpResponse::fromRawHeaders($responseHeaders, $responseBody);
         $this->storeCookies($response->headers());
+        $this->storeCsrfToken($response);
         return $response;
+    }
+
+    public function setCsrfToken(string $csrfToken): void
+    {
+        $this->csrfToken = $csrfToken;
     }
 
     /**
@@ -121,6 +137,14 @@ final class HttpClient
             if (count($parts) === 2) {
                 $this->cookies[$parts[0]] = $parts[1];
             }
+        }
+    }
+
+    private function storeCsrfToken(HttpResponse $response): void
+    {
+        $decoded = json_decode($response->body(), true);
+        if (is_array($decoded) && isset($decoded['Data']['csrfToken']) && is_string($decoded['Data']['csrfToken'])) {
+            $this->csrfToken = $decoded['Data']['csrfToken'];
         }
     }
 }

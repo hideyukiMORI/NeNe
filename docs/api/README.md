@@ -42,3 +42,7 @@ Example:
 ```
 
 OpenAPI paths should describe the URL and the request/response contract, not the internal method name.
+
+## CSRF Protection
+
+Cookie-authenticated state-changing REST requests must send the `X-CSRF-Token` header. `/session/login` returns the token as `Data.csrfToken`; the React sample stores it in memory and sends it with TODO create/update/delete and logout requests.
