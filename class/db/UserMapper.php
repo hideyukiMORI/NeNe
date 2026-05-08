@@ -4,7 +4,7 @@
  * AYANE : ayane.co.jp
  * powered by NENE.
  *
- * PHP Version >= 7.4
+ * PHP Version >= 8.4
  *
  * @package   AYANE
  * @author    hideyukiMORI <info@ayane.co.jp>

@@ -4,6 +4,7 @@ NeNe is a legacy PHP framework, but new work should move the codebase toward cur
 
 ## PHP Compatibility
 
+- Treat PHP 8.4 in the Docker application container as the current development target.
 - Support the latest stable PHP version as far as practical.
 - Keep compatibility decisions explicit in Issues and ADRs.
 - Avoid new code that depends on deprecated PHP behavior.

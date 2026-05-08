@@ -31,7 +31,7 @@ The dispatcher resolves the URL to:
 
 ## Requirements
 
-- PHP 8.1 or later is currently used for maintenance.
+- The Docker development target is PHP 8.4.
 - Composer is required for dependency installation and autoloading.
 
 ## Docker Quick Start
