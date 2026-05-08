@@ -315,10 +315,12 @@ class View
      */
     final public function error(string $p_message): void
     {
+        $routeContext = RouteContext::getInstance();
+        $controller = $routeContext->controller();
         self::$instance
             ->setString('t_root', URI_ROOT)
-            ->setString('t_controller', APP_CONTROLLER)
-            ->setString('t_controller_action', APP_CONTROLLER . '_' . APP_ACTION)
+            ->setString('t_controller', $controller)
+            ->setString('t_controller_action', $controller . '_' . $routeContext->action())
             ->setTitle('ERROR')
             ->setString('t_message', $p_message)
             ->setTemplate('error.tpl')

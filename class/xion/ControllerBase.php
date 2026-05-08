@@ -130,6 +130,13 @@ abstract class ControllerBase
     protected $API_RESPONSE;
 
     /**
+     * Current route context.
+     *
+     * @var RouteContext
+     */
+    protected $ROUTE_CONTEXT;
+
+    /**
      * Rest post
      *
      * @var array
@@ -171,6 +178,7 @@ abstract class ControllerBase
         $this->ERROR_CODE       = Xion\ErrorCode::getInstance();
         $this->AUTH_SESSION     = Xion\AuthSession::getInstance();
         $this->API_RESPONSE     = new Xion\ApiResponse();
+        $this->ROUTE_CONTEXT    = Xion\RouteContext::getInstance();
         $this->refController    = $_SESSION['global']['referer']['controller'] ?? '';
         $this->refAction        = $_SESSION['global']['referer']['action'] ?? '';
     }
@@ -184,20 +192,22 @@ abstract class ControllerBase
      */
     final public function run()
     {
-        if (APP_CONTROLLER != 'debug') {
-            $_SESSION['global']['referer']['controller']    = APP_CONTROLLER;
-            $_SESSION['global']['referer']['action']        = APP_ACTION;
+        $controller = $this->ROUTE_CONTEXT->controller();
+        $action = $this->ROUTE_CONTEXT->action();
+        if ($controller != 'debug') {
+            $_SESSION['global']['referer']['controller']    = $controller;
+            $_SESSION['global']['referer']['action']        = $action;
             $this->ACCESS_LOGGER->info(
-                'ACCESS : ' . APP_CONTROLLER . '::' . APP_ACTION,
+                'ACCESS : ' . $controller . '::' . $action,
                 [
                     $_SERVER['HTTP_USER_AGENT'] ?? '',
                     $_SERVER['HTTP_REFERER'] ?? ''
                 ]
             );
         }
-        if (APP_ACTION_MODE == 'Rest' && in_array($this->method, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
+        if ($this->ROUTE_CONTEXT->isRest() && in_array($this->method, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
             $this->REQUEST_JSON = Func\Json::inputPostJsonToArray();
-        } elseif (APP_ACTION_MODE == 'Action') {
+        } elseif ($this->ROUTE_CONTEXT->isAction()) {
             $this->setTemplate();
         }
         $this->preAction();
@@ -206,10 +216,10 @@ abstract class ControllerBase
             $this->sessionCheck();
         }
 
-        $methodName = defined('APP_ACTION_METHOD') ? APP_ACTION_METHOD : sprintf('%s' . APP_ACTION_MODE, APP_ACTION);
+        $methodName = $this->ROUTE_CONTEXT->method();
         $return = $this->$methodName();
 
-        if (APP_ACTION_MODE == 'Rest') {
+        if ($this->ROUTE_CONTEXT->isRest()) {
             Func\Json::outputArrayToJson(
                 $return,
                 $this->OUTPUT_JSON_STYLE,
@@ -226,9 +236,9 @@ abstract class ControllerBase
                 ->setString('t_copyright_url', COPYRIGHT_URL)
                 ->setString('t_root', URI_ROOT)
                 ->setString('t_appVersion', VERSION)
-                ->setString('t_controller', APP_CONTROLLER)
-                ->setString('t_action', APP_ACTION)
-                ->setString('t_controller_action', APP_CONTROLLER . '_' . APP_ACTION)
+                ->setString('t_controller', $controller)
+                ->setString('t_action', $action)
+                ->setString('t_controller_action', $controller . '_' . $action)
                 ->setInteger('t_debugMode', DEBUG_MODE)
                 ->setString('t_login_mode', $this->SESSION_CHECK ? '1' : '0')
                 ->execute();
@@ -281,15 +291,17 @@ abstract class ControllerBase
      */
     final protected function setTemplate(): void
     {
+        $controller = $this->ROUTE_CONTEXT->controller();
+        $action = $this->ROUTE_CONTEXT->action();
         $template = 'common';
-        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER))) {
-            $template = APP_CONTROLLER;
+        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, $controller))) {
+            $template = $controller;
         }
-        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER . '/' . $template))) {
-            $template = APP_CONTROLLER . '/' . $template;
+        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, $controller . '/' . $template))) {
+            $template = $controller . '/' . $template;
         }
-        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, APP_CONTROLLER . '/' . APP_ACTION))) {
-            $template = APP_CONTROLLER . '/' . APP_ACTION;
+        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, $controller . '/' . $action))) {
+            $template = $controller . '/' . $action;
         }
         $this->VIEW->setTemplate($template . '.tpl');
     }
@@ -304,14 +316,16 @@ abstract class ControllerBase
      */
     final protected function setCSS(): void
     {
-        if (file_exists(sprintf('%scss/%s.css', DOCUMENT_ROOT, APP_CONTROLLER))) {
-            $this->VIEW->addCSS(APP_CONTROLLER);
+        $controller = $this->ROUTE_CONTEXT->controller();
+        $action = $this->ROUTE_CONTEXT->action();
+        if (file_exists(sprintf('%scss/%s.css', DOCUMENT_ROOT, $controller))) {
+            $this->VIEW->addCSS($controller);
         }
-        if (file_exists(sprintf('%scss/%s/common.css', DOCUMENT_ROOT, APP_CONTROLLER))) {
-            $this->VIEW->addCSS(APP_CONTROLLER . '/common');
+        if (file_exists(sprintf('%scss/%s/common.css', DOCUMENT_ROOT, $controller))) {
+            $this->VIEW->addCSS($controller . '/common');
         }
-        if (file_exists(sprintf('%scss/%s/%s.css', DOCUMENT_ROOT, APP_CONTROLLER, APP_ACTION))) {
-            $this->VIEW->addCSS(APP_CONTROLLER . '/' . APP_ACTION);
+        if (file_exists(sprintf('%scss/%s/%s.css', DOCUMENT_ROOT, $controller, $action))) {
+            $this->VIEW->addCSS($controller . '/' . $action);
         }
     }
 
@@ -325,14 +339,16 @@ abstract class ControllerBase
      */
     final protected function setJS(): void
     {
-        if (file_exists(sprintf('%sjs/%s.js', DOCUMENT_ROOT, APP_CONTROLLER))) {
-            $this->VIEW->addJS(APP_CONTROLLER);
+        $controller = $this->ROUTE_CONTEXT->controller();
+        $action = $this->ROUTE_CONTEXT->action();
+        if (file_exists(sprintf('%sjs/%s.js', DOCUMENT_ROOT, $controller))) {
+            $this->VIEW->addJS($controller);
         }
-        if (file_exists(sprintf('%sjs/%s/common.js', DOCUMENT_ROOT, APP_CONTROLLER))) {
-            $this->VIEW->addJS(APP_CONTROLLER . '/common');
+        if (file_exists(sprintf('%sjs/%s/common.js', DOCUMENT_ROOT, $controller))) {
+            $this->VIEW->addJS($controller . '/common');
         }
-        if (file_exists(sprintf('%sjs/%s/%s.js', DOCUMENT_ROOT, APP_CONTROLLER, APP_ACTION))) {
-            $this->VIEW->addJS(APP_CONTROLLER . '/' . APP_ACTION);
+        if (file_exists(sprintf('%sjs/%s/%s.js', DOCUMENT_ROOT, $controller, $action))) {
+            $this->VIEW->addJS($controller . '/' . $action);
         }
     }
 
@@ -348,7 +364,7 @@ abstract class ControllerBase
     {
         if (!$this->AUTH_SESSION->isLoggedIn()) {
             $this->logout();
-            if (APP_ACTION_MODE !== 'Rest') {
+            if (!$this->ROUTE_CONTEXT->isRest()) {
                 $this->location(LOGOUT_URI);
             } else {
                 Func\Json::outputArrayToJson(
