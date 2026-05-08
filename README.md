@@ -25,6 +25,7 @@ The goal is not to replace Laravel, Symfony, CodeIgniter, or Laminas. The goal i
 - Coding standards: `docs/development/coding-standards.md`
 - Docker development: `docs/development/docker.md`
 - Server install: `docs/deployment/server-install.md`
+- Releases: `docs/releases.md`
 - Testing: `docs/development/testing.md`
 - AI agent guide: `AGENTS.md`
 

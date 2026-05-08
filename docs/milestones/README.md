@@ -38,7 +38,13 @@ What was renovated:
 - Security-sensitive paths: sessions, cookies, password hashing, CSRF, JSON-only REST responses, inline script JSON, error exposure, and request wrappers.
 - Static analysis and formatting foundations with Phan and PHP CS Fixer.
 
-Current status: known stabilization Issues are complete. No open Issues remain for this milestone.
+Real server sample:
+
+- `https://nene-php.com/` is the current public sample deployment for NeNe.
+- The deployment validates the non-Docker path: `git clone`, Composer install, root `.env` loading, database initialization, public `htdocs/` document root, health check, and the React TODO sample.
+- The sample intentionally remains small. Its purpose is to prove that the renovated legacy framework can be installed on a traditional Apache/PHP server without turning the project into a large full-stack framework.
+
+Current status: known stabilization Issues are complete. No open Issues remain for this milestone. The current milestone state is suitable for the first framework tag, `v0.1.0`.
 
 ### docs-foundation
 
@@ -69,6 +75,12 @@ Current status: the starter OpenAPI contract and Swagger UI are in place for the
 Purpose: protect NeNe's renovated legacy architecture from unnecessary redesign.
 
 Current status: no broad architecture rewrite is planned. NeNe should keep the front controller, `/{controller}/{action}` routing, `{action}Action()` page handlers, method-specific REST handlers, Smarty templates, and lightweight mapper/model style. Architecture work should document boundaries, add tests, or clarify conventions. Any change that hides URL routing, replaces the MVC shape, adds a heavy ORM, or changes compatibility policy should require a focused Issue and ADR.
+
+### release-management
+
+Purpose: make framework progress visible through small versioned tags.
+
+Current status: `v0.1.0` is the first planned tag. It represents the point where NeNe has a working local Docker setup, traditional server install documentation, MySQL/SQLite sample database setup, a public `nene-php.com` sample deployment, OpenAPI/Swagger UI, tests, and a clear renovated-legacy framework policy.
 
 ## Maintenance Rule
 

@@ -14,6 +14,7 @@ This directory contains project documentation for humans and AI agents.
 - `development/testing.md`: Testing strategy and commands.
 - `tutorials/building-a-service.md`: Practical guide for adding pages, REST endpoints, database-backed features, OpenAPI, and tests.
 - `roadmap.md`: Project direction.
+- `releases.md`: Human-readable release notes and version checkpoints.
 - `todo/current.md`: Current TODO summary.
 - `milestones/README.md`: Milestone management.
 - `adr/README.md`: Architecture decision records.
