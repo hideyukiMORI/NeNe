@@ -50,13 +50,25 @@ Current status: core project docs, workflow docs, API docs, TODO tracking, renov
 
 Purpose: keep PHP and Composer dependencies current, improve PHPDoc and typing, and make formatting/static analysis repeatable.
 
+Current status: modernization foundation is in place. Composer packages were updated where practical, unused packages/assets were removed, Docker PHP 8.4 is the documented target, PHP CS Fixer is configured, and Phan has a repeatable baseline. Remaining work should be gradual PHPDoc/type/baseline cleanup in focused Issues, not a broad rewrite of stable legacy classes.
+
 ### security-hardening
 
 Purpose: reduce security risk through dependency updates, secure defaults, input/output review, and safer error handling.
 
+Current status: focused security hardening is complete for the reviewed request/session/template/error-handling paths. Sessions, cookie attributes, password hashing, CSRF, JSONP callback validation, inline script JSON encoding, Dispatcher JSON errors, authentication status codes, and request variable storage have been hardened. Future security work should be handled as new small Issues when findings appear.
+
 ### openapi-contracts
 
 Purpose: document public REST endpoints with OpenAPI and keep API behavior explicit.
+
+Current status: the starter OpenAPI contract and Swagger UI are in place for the current Session and TODO sample endpoints. Runtime contract tests verify that documented operations and observed statuses stay aligned. Future work should expand the contract when new REST endpoints are added, rather than inventing endpoints only to grow OpenAPI.
+
+### framework-architecture-policy
+
+Purpose: protect NeNe's renovated legacy architecture from unnecessary redesign.
+
+Current status: no broad architecture rewrite is planned. NeNe should keep the front controller, `/{controller}/{action}` routing, `{action}Action()` page handlers, method-specific REST handlers, Smarty templates, and lightweight mapper/model style. Architecture work should document boundaries, add tests, or clarify conventions. Any change that hides URL routing, replaces the MVC shape, adds a heavy ORM, or changes compatibility policy should require a focused Issue and ADR.
 
 ## Maintenance Rule
 
