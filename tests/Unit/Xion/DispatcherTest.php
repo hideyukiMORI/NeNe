@@ -31,7 +31,7 @@ final class DispatcherTest extends TestCase
         self::assertSame(['GET', 'POST'], $route['allowed']);
     }
 
-    public function testResolveActionRouteKeepsLegacyRestFallback(): void
+    public function testResolveActionRouteKeepsLegacyRestFallbackForCompatibility(): void
     {
         $controller = new class {
             public function loginRest(): array

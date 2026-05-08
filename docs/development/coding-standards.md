@@ -50,6 +50,15 @@ Security fixes should be small, focused, and prioritized.
 - Keep sessions, authentication, and authorization behavior explicit.
 - Never commit secrets or local environment files.
 
+## REST Controllers
+
+REST endpoints should make accepted HTTP methods explicit.
+
+- Prefer method-specific controller methods such as `indexGetRest`, `indexPostRest`, `itemPutRest`, and `itemDeleteRest`.
+- Avoid new `{action}Rest` handlers because they accept every HTTP method through the legacy dispatcher fallback.
+- Use `{action}Rest` only when there is a documented compatibility or framework-level reason to accept all methods.
+- Authentication and state-changing endpoints must use method-specific REST handlers.
+
 ## OpenAPI
 
 New public HTTP APIs should be documented with OpenAPI.

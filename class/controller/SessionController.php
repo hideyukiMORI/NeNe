@@ -41,7 +41,7 @@ class SessionController extends ControllerBase
      *
      * @return array
      */
-    public function loginRest(): array
+    public function loginPostRest(): array
     {
         $user_id = (string)($this->REQUEST_JSON['user_id'] ?? filter_input(INPUT_POST, 'user_id') ?? '');
         $user_pass = (string)($this->REQUEST_JSON['user_pass'] ?? filter_input(INPUT_POST, 'user_pass') ?? '');

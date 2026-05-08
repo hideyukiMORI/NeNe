@@ -87,8 +87,8 @@ class Dispatcher
     /**
      * Resolve the controller method for an action.
      *
-     * REST handlers may opt into HTTP-method dispatch with names like indexGetRest.
-     * The legacy indexRest convention remains supported as a fallback.
+     * REST handlers should opt into HTTP-method dispatch with names like indexGetRest.
+     * The legacy indexRest convention remains supported only as a compatibility fallback.
      *
      * @param object $controllerInstance Controller instance.
      * @param string $action             Action name.
