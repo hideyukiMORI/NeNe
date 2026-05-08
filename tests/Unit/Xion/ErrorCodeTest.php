@@ -26,6 +26,8 @@ final class ErrorCodeTest extends TestCase
 
     public function testGetHttpStatusReturnsCatalogStatus(): void
     {
+        self::assertSame(401, ErrorCode::getInstance()->getHttpStatus('SESSION-CLOSED'));
+        self::assertSame(401, ErrorCode::getInstance()->getHttpStatus('LOGIN-FAILED'));
         self::assertSame(400, ErrorCode::getInstance()->getHttpStatus('TODO-TITLE-REQUIRED'));
         self::assertSame(404, ErrorCode::getInstance()->getHttpStatus('TODO-NOT-FOUND'));
         self::assertSame(405, ErrorCode::getInstance()->getHttpStatus('METHOD-NOT-ALLOWED'));

@@ -36,7 +36,7 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         $response = $this->client->request('GET', '/todo/index');
         $payload = $response->json();
 
-        self::assertSame(200, $response->statusCode());
+        self::assertSame(401, $response->statusCode());
         self::assertSame(true, $payload['Result']);
         self::assertSame('failure', $payload['Data']['status']);
         self::assertSame('SESSION-CLOSED', $payload['Data']['errorCode']);
