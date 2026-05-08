@@ -12,26 +12,9 @@ body {
     padding: 0;
 }
 
-hr {
-    height: 1px;
-    border: none;
-    border-top: 1px solid #ccc;
-}
-
 .content {
     min-height: calc(100vh - 72px);
     padding: 0;
-}
-.hidden {
-    display: none;
-}
-.error {
-    color: red;
-}
-
-/* ========== HEADER ========== */
-header {
-    display: none;
 }
 
 /* ========== FOOTER ========== */
@@ -48,54 +31,3 @@ footer a {
     color: #aaa;
     text-decoration:  none;
 }
-
-/* ========== FORM ========== */
-form input,
-form label,
-form small {
-    display: block;
-}
-form > div {
-    margin-bottom: 12px;
-}
-form label {
-    font-size: 0.8rem;
-    margin-bottom: 4px;
-}
-form small {
-    font-size: 0.7rem;
-}
-form input {
-    border: 1px solid #666;
-    border-radius: 4px;
-    box-sizing: border-box;
-    height: 2.5rem;
-    line-height: 1.5;
-    margin-bottom: 4px;
-    padding: 10px;
-}
-form button {
-    border: 1px solid #666;
-    border-radius: 4px;
-    height: 2.5rem;
-    line-height: 1.5;
-    margin-bottom: 4px;
-    padding: 10px;
-}
-
-.input__w-255 {
-    width: 255px;
-}
-.input__w-128 {
-    width: 128px;
-}
-.input__w-100p {
-    width: 100%;
-}
-form button:hover {
-    background-color: black;
-    border-color: black;
-    color: white;
-    cursor: pointer;
-}
-
