@@ -70,7 +70,7 @@ class Request
      *
      * @return mixed
      */
-    final public function getPost(string $key = null)
+    final public function getPost(?string $key = null)
     {
         if ($key == null) {
             return $this->post->get();
@@ -89,7 +89,7 @@ class Request
      *
      * @return mixed
      */
-    public function getQuery(string $key = null)
+    public function getQuery(?string $key = null)
     {
         if ($key == null) {
             return $this->query->get();
@@ -108,7 +108,7 @@ class Request
      *
      * @return mixed
      */
-    public function getParam(string $key = null)
+    public function getParam(?string $key = null)
     {
         if ($key == null) {
             return $this->param->get();

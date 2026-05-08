@@ -52,11 +52,11 @@ abstract class RequestVariables
     /**
      * Get value.
      *
-     * @param string $key Parameter name.
+     * @param string|null $key Parameter name.
      *
      * @return mixed value [string or array]
      */
-    public function get(string $key = null)
+    public function get(?string $key = null)
     {
         $ret = null;
         if ($key == null) {
