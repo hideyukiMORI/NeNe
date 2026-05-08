@@ -1,6 +1,9 @@
 
 tags
 vendor
+.env
+.env.*
+!.env.example
 view/compile
 log
 data/*.db
