@@ -8,6 +8,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git unzip libsqlite3-dev \
     && docker-php-ext-install pdo_mysql pdo_sqlite \
     && a2enmod rewrite headers \
+    && echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf \
+    && a2enconf servername \
     && sed -ri 's!/var/www/html!/var/www/html/htdocs!g' /etc/apache2/sites-available/000-default.conf \
     && sed -ri 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.conf \
     && rm -rf /var/lib/apt/lists/*
