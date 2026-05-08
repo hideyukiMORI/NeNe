@@ -16,7 +16,7 @@ This file is the first document for AI agents and automation working on NeNe.
 ## Operating Rules
 
 - Work from GitHub Issues. If a code, documentation, or configuration change has no Issue, create one before editing.
-- Do not commit directly to `master`. Use a topic branch named like `type/issue-number-summary`.
+- Do not commit directly to `main`. Use a topic branch named like `type/issue-number-summary`.
 - Keep changes focused. Do not mix framework migration, feature work, dependency updates, and cosmetic cleanup in one PR.
 - Keep milestones, roadmap, TODO, and ADRs aligned with Issues and PRs.
 - Do not commit secrets, credentials, local `.env` files, generated logs, cache, or compiled templates.

@@ -5,7 +5,7 @@ NeNe development is Issue driven. Every meaningful code, documentation, dependen
 ## Basic Flow
 
 1. Create or select a GitHub Issue.
-2. Create a branch from `master`.
+2. Create a branch from `main`.
 3. Make a focused change.
 4. Run the relevant checks.
 5. Commit with the repository commit convention.

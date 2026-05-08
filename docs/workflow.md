@@ -6,7 +6,7 @@ NeNe uses an Issue driven workflow.
 
 1. Create or confirm a GitHub Issue.
 2. Assign a milestone when the work belongs to a planned release or theme.
-3. Create a topic branch from `master`.
+3. Create a topic branch from `main`.
 4. Implement only the Issue scope.
 5. Run checks and record the results in the PR.
 6. Commit using the commit convention.
@@ -31,6 +31,7 @@ Use milestones to group work by release, modernization stage, or maintenance the
 
 Examples:
 
+- `legacy-framework-stabilization`
 - `docs-foundation`
 - `php-modernization`
 - `security-hardening`
