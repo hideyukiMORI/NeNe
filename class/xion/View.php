@@ -284,9 +284,24 @@ class View
     {
         self::$instance->smarty->assign(
             't_dataObject',
-            '<script type="text/javascript">const dataObject = ' . json_encode($dataArray) . '</script>'
+            '<script type="text/javascript">const dataObject = ' . self::encodeScriptJson($dataArray) . ';</script>'
         );
         return self::$instance;
+    }
+
+    /**
+     * Encode data safely for embedding inside an inline script block.
+     *
+     * @param array<string,mixed> $dataArray Data to expose to the template script.
+     *
+     * @return string JSON string safe for `<script>` context.
+     */
+    final public static function encodeScriptJson(array $dataArray): string
+    {
+        return json_encode(
+            $dataArray,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
+        );
     }
 
     /**
