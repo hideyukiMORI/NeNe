@@ -66,6 +66,8 @@ class PdoConnection
                     break;
                 case 'SQLite3':
                     $this->connection = new PDO('sqlite:' . DB_DIR . DB_FILE);
+                    $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    $this->connection->exec('PRAGMA foreign_keys = ON');
                     break;
             }
         } catch (\PDOException $e) {
