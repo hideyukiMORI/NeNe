@@ -42,11 +42,7 @@ docker compose up --build
 
 Open `http://localhost:8080/`.
 
-To initialize the SQLite database:
-
-```sh
-docker compose run --rm app sh -lc "printf 'Y\n' | php cli/initSQLite.php"
-```
+Docker Compose starts MySQL 8.4 and initializes the development `users` and `todos` tables automatically. The default development login is `admin` / `admin`.
 
 ## Testing
 

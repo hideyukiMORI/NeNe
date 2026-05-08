@@ -2,6 +2,16 @@ services:
   app:
     build:
       context: .
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NENE_DB_TYPE: MySQL
+      NENE_DB_HOST: mysql
+      NENE_DB_PORT: 3306
+      NENE_DB_NAME: "${NENE_DB_NAME:-nene}"
+      NENE_DB_USER: "${NENE_DB_USER:-nene}"
+      NENE_DB_PASS: "${NENE_DB_PASS:-nene}"
     ports:
       - "${NENE_PORT:-8080}:80"
     volumes:
@@ -12,5 +22,24 @@ services:
       && ./init.sh
       && apache2-foreground"
 
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: "${NENE_DB_NAME:-nene}"
+      MYSQL_USER: "${NENE_DB_USER:-nene}"
+      MYSQL_PASSWORD: "${NENE_DB_PASS:-nene}"
+      MYSQL_ROOT_PASSWORD: "${NENE_DB_ROOT_PASS:-root}"
+    ports:
+      - "${NENE_MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
 volumes:
+  mysql-data:
   vendor:
