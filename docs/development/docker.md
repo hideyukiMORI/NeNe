@@ -21,6 +21,18 @@ Open:
 http://localhost:8080/
 ```
 
+## Environment Variables
+
+Docker Compose includes local development defaults, so `.env` is optional. To customize ports or database credentials, copy the committed example and edit your local file:
+
+```sh
+cp .env.example .env
+```
+
+The local `.env` file is ignored by Git. Keep real secrets out of the repository.
+
+The application reads database settings through `getenv()` in `ini/xSystemIni.php`. In Docker, Compose injects the connection type, host, and container port into the app service. The shared credentials and exposed host ports can be changed through `.env`.
+
 Use another port if needed:
 
 ```sh
