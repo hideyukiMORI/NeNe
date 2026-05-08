@@ -4,10 +4,23 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Active
 
-- #72: Refresh this TODO from the current roadmap, milestones, and Issue state.
+- #98: Refresh this TODO from the current roadmap, milestones, and Issue state.
 
 ## Recently Completed
 
+- #88: Fix request variable storage and add boundary tests.
+- #87: Decide and apply non-200 HTTP status policy for authentication failures.
+- #86: Route Dispatcher errors through the shared JSON error responder.
+- #85: Safely encode template data-object JSON for inline script output.
+- #84: Validate legacy JSONP callback output.
+- #83: Add CSRF protection to cookie-authenticated state-changing APIs.
+- #82: Hash stored passwords and clean up sample credentials.
+- #81: Harden authentication session lifecycle and cookie attributes.
+- #80: Control public error display by environment.
+- #78: Parse OpenAPI runtime contract tests with `symfony/yaml`.
+- #76: Add PHP CS Fixer configuration and formatting scripts.
+- #74: Add Phan baseline and repeatable static analysis configuration.
+- #72: Refresh TODO from roadmap, milestones, and Issue state.
 - #70: Document the OpenAPI runtime contract test parser policy.
 - #68: Update the SQLite initializer so the TODO sample also works with SQLite fallback.
 - #66: Expand first-reader comments in `ini/xSystemIni.php`.
@@ -25,12 +38,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
-- Create a Phan baseline/configuration so static analysis becomes repeatable for current PHP 8.4-targeted code.
-- Add PHP CS Fixer setup and document the exact formatting command used for PSR-12-oriented cleanup.
-- Review security-sensitive request/session/template/error-handling paths and record focused hardening Issues.
-- Document real routing examples for HTML actions and method-specific REST actions.
-- Prepare documentation/sample pages for the home side menu: `Authentication`, `Routing Guide`, and `OpenAPI`.
-- Add a follow-up Issue to migrate `OpenApiRuntimeContractTest` from line-based parsing to `symfony/yaml` before expanding OpenAPI assertions.
+- #99: Prepare documentation/sample sections for the home side menu: `Authentication`, `Routing Guide`, and `OpenAPI`.
 
 ## Backlog Candidates
 
