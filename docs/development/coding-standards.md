@@ -28,6 +28,22 @@ NeNe is a legacy PHP framework, but new work should move the codebase toward cur
 - Do not mix formatting-only changes into unrelated PRs.
 - Preserve the existing namespace layout unless an Issue and ADR approve a migration.
 
+PHP CS Fixer is configured in `.php-cs-fixer.dist.php`.
+
+Check formatting without changing files:
+
+```sh
+composer format:check
+```
+
+Apply formatting in a dedicated formatting PR:
+
+```sh
+composer format
+```
+
+`composer check` does not run PHP CS Fixer yet because the legacy tree still needs a focused formatting pass. Add it only after the baseline formatting PR lands.
+
 ## PHPDoc
 
 PHPDoc should be useful and accurate.

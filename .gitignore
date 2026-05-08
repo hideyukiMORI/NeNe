@@ -10,3 +10,4 @@ data/*.db
 data/*.sqlite
 data/*.sqlite3
 .phpunit.cache
+.php-cs-fixer.cache
