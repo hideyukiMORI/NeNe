@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #127: Remove the tracked generated SQLite database artifact.
 - #125: Clarify the SQLite3 initialization command in install documentation.
 - #123: Load the repository-root `.env` before web runtime initialization.
 - #121: Add server install database setup CLI and runtime health check.
@@ -48,7 +49,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
-- No active short-term TODO after #125. Use new GitHub Issues for follow-up work.
+- No active short-term TODO after #127. Use new GitHub Issues for follow-up work.
 
 ## Backlog Candidates
 

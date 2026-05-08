@@ -225,6 +225,13 @@ This creates the SQLite database file under `data/`, creates the `users` and `to
 php cli/setupDatabase.php --env=.env --yes
 ```
 
+The SQLite database file is a generated runtime artifact and is not committed to Git. If the sample login stops matching the expected `admin / admin` credentials, move the old file aside and initialize it again:
+
+```sh
+mv data/nene.db data/nene.db.bak
+php cli/initSQLite.php
+```
+
 SQLite is useful for a very small sample deployment or quick hosting verification. MySQL is recommended once the application stores real service data.
 
 ## Apache Rewrite

@@ -127,7 +127,8 @@ php cli/setupDatabase.php --env=.env --yes</code></pre>
                                     Confirm the database settings and make sure the <code>users</code> and
                                     <code>todos</code> tables exist for the configured database. For MySQL, run
                                     <code>php cli/setupDatabase.php --env=.env --yes</code>. For SQLite3, run
-                                    <code>php cli/initSQLite.php</code>. Then check <code>/health/index</code>.
+                                    <code>php cli/initSQLite.php</code>. SQLite DB files under <code>data/</code> are
+                                    generated locally and are not committed. Then check <code>/health/index</code>.
                                 </p>
                             </div>
                         </div>

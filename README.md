@@ -72,6 +72,8 @@ If you intentionally use the SQLite3 fallback, initialize the SQLite sample file
 php cli/initSQLite.php
 ```
 
+SQLite database files under `data/` are generated locally and are not committed.
+
 ## Testing
 
 ```sh
