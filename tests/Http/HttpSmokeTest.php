@@ -29,6 +29,16 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         self::assertStringContainsString('/js/index/index.js', $response->body());
     }
 
+    public function testTopPageJavaScriptIncludesServiceTutorialGuide(): void
+    {
+        $response = $this->client->request('GET', '/js/index/index.js');
+
+        self::assertSame(200, $response->statusCode());
+        self::assertStringContainsString('Tutorial', $response->body());
+        self::assertStringContainsString('Build a small service', $response->body());
+        self::assertStringContainsString('docs/tutorials/building-a-service.md', $response->body());
+    }
+
     public function testSwaggerUiAndOpenApiDocumentAreServed(): void
     {
         $swaggerResponse = $this->client->request('GET', '/api-docs/');
