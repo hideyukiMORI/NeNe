@@ -9,6 +9,30 @@ use PHPUnit\Framework\TestCase;
 
 final class DispatcherTest extends TestCase
 {
+    public function testResolveRequestRouteDefaultsToIndex(): void
+    {
+        $route = (new Dispatcher())->resolveRequestRoute('/');
+
+        self::assertSame('index', $route['controller']);
+        self::assertSame('index', $route['action']);
+    }
+
+    public function testResolveRequestRouteIgnoresQueryString(): void
+    {
+        $route = (new Dispatcher())->resolveRequestRoute('/todo/item/id_1?debug=1');
+
+        self::assertSame('todo', $route['controller']);
+        self::assertSame('item', $route['action']);
+    }
+
+    public function testResolveRequestRouteDefaultsMissingAction(): void
+    {
+        $route = (new Dispatcher())->resolveRequestRoute('/session');
+
+        self::assertSame('session', $route['controller']);
+        self::assertSame('index', $route['action']);
+    }
+
     public function testResolveActionRoutePrefersHttpMethodRestHandler(): void
     {
         $controller = new class {

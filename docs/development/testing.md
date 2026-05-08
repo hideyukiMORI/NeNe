@@ -32,6 +32,12 @@ vendor/bin/phpunit
 
 `composer test` runs the lightweight unit test suite only.
 
+For CI-style verification that also confirms HTTP tests are either runnable or safely skipped:
+
+```sh
+composer check
+```
+
 ## Docker
 
 Tests can also run in the Docker container:
@@ -57,6 +63,15 @@ NENE_HTTP_BASE_URL=http://localhost:8080 composer test:http
 ```
 
 If `NENE_HTTP_BASE_URL` is not configured, or the target server is unreachable, the HTTP test suite is skipped. This keeps normal unit testing fast and independent from Docker.
+
+For a full local runtime check:
+
+```sh
+docker compose up --build -d
+NENE_HTTP_BASE_URL=http://localhost:8080 composer check
+```
+
+HTTP tests use a test title prefix and clean up matching TODO rows before each runtime test. Tests that create TODOs also register them for cleanup during teardown, so failed tests should not leave long-lived sample data behind.
 
 ## Strategy for Coupled Code
 
