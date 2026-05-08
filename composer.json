@@ -24,9 +24,11 @@
         "test": "phpunit --testsuite unit",
         "test:http": "phpunit --testsuite http",
         "test:all": "phpunit",
+        "analyze": "phan --allow-polyfill-parser --load-baseline .phan/baseline.php",
         "check": [
             "@test",
-            "@test:http"
+            "@test:http",
+            "@analyze"
         ]
     }
 }

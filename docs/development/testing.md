@@ -38,6 +38,16 @@ For CI-style verification that also confirms HTTP tests are either runnable or s
 composer check
 ```
 
+## Static Analysis
+
+Phan is configured under `.phan/config.php` and can be run through Composer:
+
+```sh
+composer analyze
+```
+
+The initial `.phan/baseline.php` records issues that already exist in the legacy codebase. New work should avoid adding fresh Phan issues; reduce the baseline gradually in focused PRs rather than mixing broad static-analysis cleanup into unrelated changes.
+
 ## Docker
 
 Tests can also run in the Docker container:
