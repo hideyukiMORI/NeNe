@@ -264,7 +264,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/DispatcherErrorEnvelope"
+            $ref: "#/components/schemas/MethodNotAllowedEnvelope"
   schemas:
     JsonEnvelope:
       type: object
@@ -526,23 +526,17 @@ components:
                       const: TODO-TITLE-REQUIRED
                     errorMessage:
                       const: TODO title is required.
-    DispatcherErrorEnvelope:
-      type: object
-      required:
-        - Result
-        - Error
-      properties:
-        Result:
-          type: boolean
-          const: false
-        Error:
-          type: object
-          required:
-            - ErrorCode
-            - ErrorMessage
+    MethodNotAllowedEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ErrorEnvelope"
+        - type: object
           properties:
-            ErrorCode:
-              type: string
-              const: METHOD-NOT-ALLOWED
-            ErrorMessage:
-              type: string
+            Data:
+              allOf:
+                - $ref: "#/components/schemas/ApiFailureData"
+                - type: object
+                  properties:
+                    errorCode:
+                      const: METHOD-NOT-ALLOWED
+                    errorMessage:
+                      const: The HTTP method is not allowed for this endpoint.

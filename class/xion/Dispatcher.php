@@ -17,6 +17,8 @@ declare(strict_types=1);
 
 namespace Nene\Xion;
 
+use Nene\Func as Func;
+
 /**
  * Dispatches controllers and models.
  */
@@ -55,19 +57,14 @@ class Dispatcher
             echo file_get_contents(DIR_ROOT . '/404.html');
             exit;
         } elseif ($route['status'] === 405) {
-            header('HTTP/1.0 405 Method Not Allowed');
             header('Allow: ' . implode(', ', $route['allowed']));
-            echo json_encode([
-                'Result' => false,
-                'Error' => [
-                    'ErrorCode' => 'METHOD-NOT-ALLOWED',
-                    'ErrorMessage' => 'The HTTP method is not allowed for this endpoint.'
-                ]
-            ]);
-            exit;
+            $this->outputJsonFailure('METHOD-NOT-ALLOWED');
         } elseif ($route['status'] === 500) {
-            echo $action . 'Action' . ' and ' . $action . 'Rest Duplicate';
-            exit();
+            Log::getInstance('error')->error('Route conflict detected.', [
+                'controller' => $controller,
+                'action' => $action,
+            ]);
+            $this->outputJsonFailure('ROUTE-CONFLICT');
         }
         RouteContext::getInstance()->set($controller, $action, $route['mode'], $route['method']);
         $controllerInstance->run();
@@ -91,7 +88,7 @@ class Dispatcher
         $layersNum = defined('LAYERS_NUM') ? LAYERS_NUM : 0;
         return [
             'controller' => ($layersNum < count($params)) ? $params[$layersNum] : 'index',
-            'action' => (($layersNum + 1) < count($params)) ? $params[$layersNum + 1] : 'index'
+            'action' => (($layersNum + 1) < count($params)) ? $params[$layersNum + 1] : 'index',
         ];
     }
 
@@ -119,7 +116,7 @@ class Dispatcher
                 'status' => 200,
                 'mode' => 'Rest',
                 'method' => $methodRestMethod,
-                'allowed' => $allowedMethods
+                'allowed' => $allowedMethods,
             ];
         }
         if (
@@ -130,7 +127,7 @@ class Dispatcher
                 'status' => 500,
                 'mode' => '',
                 'method' => '',
-                'allowed' => $allowedMethods
+                'allowed' => $allowedMethods,
             ];
         }
         if (method_exists($controllerInstance, $actionMethod)) {
@@ -138,7 +135,7 @@ class Dispatcher
                 'status' => 200,
                 'mode' => 'Action',
                 'method' => $actionMethod,
-                'allowed' => $allowedMethods
+                'allowed' => $allowedMethods,
             ];
         }
         if (method_exists($controllerInstance, $legacyRestMethod)) {
@@ -146,7 +143,7 @@ class Dispatcher
                 'status' => 200,
                 'mode' => 'Rest',
                 'method' => $legacyRestMethod,
-                'allowed' => $allowedMethods
+                'allowed' => $allowedMethods,
             ];
         }
         if ($allowedMethods !== []) {
@@ -154,14 +151,14 @@ class Dispatcher
                 'status' => 405,
                 'mode' => '',
                 'method' => '',
-                'allowed' => $allowedMethods
+                'allowed' => $allowedMethods,
             ];
         }
         return [
             'status' => 404,
             'mode' => '',
             'method' => '',
-            'allowed' => []
+            'allowed' => [],
         ];
     }
 
@@ -216,5 +213,17 @@ class Dispatcher
         }
         $controllerInstance = new $className();
         return $controllerInstance;
+    }
+
+    /**
+     * Output a catalog-backed JSON failure response and terminate dispatch.
+     *
+     * @param string $errorCode Catalog error code.
+     *
+     * @return void
+     */
+    private function outputJsonFailure(string $errorCode): void
+    {
+        Func\Json::outputArrayToJson((new ApiResponse())->failure($errorCode), 'json', '');
     }
 }

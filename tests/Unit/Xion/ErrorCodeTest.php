@@ -28,6 +28,8 @@ final class ErrorCodeTest extends TestCase
     {
         self::assertSame(400, ErrorCode::getInstance()->getHttpStatus('TODO-TITLE-REQUIRED'));
         self::assertSame(404, ErrorCode::getInstance()->getHttpStatus('TODO-NOT-FOUND'));
+        self::assertSame(405, ErrorCode::getInstance()->getHttpStatus('METHOD-NOT-ALLOWED'));
+        self::assertSame(500, ErrorCode::getInstance()->getHttpStatus('ROUTE-CONFLICT'));
     }
 
     public function testGetErrorTextReturnsDeterministicFallbackForMissingCode(): void

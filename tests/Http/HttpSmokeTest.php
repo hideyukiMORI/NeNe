@@ -111,7 +111,8 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         self::assertSame(405, $response->statusCode());
         self::assertStringContainsString('DELETE', $response->headerLine('Allow'));
         self::assertStringContainsString('PUT', $response->headerLine('Allow'));
-        self::assertSame(false, $payload['Result']);
-        self::assertSame('METHOD-NOT-ALLOWED', $payload['Error']['ErrorCode']);
+        self::assertSame(true, $payload['Result']);
+        self::assertSame('failure', $payload['Data']['status']);
+        self::assertSame('METHOD-NOT-ALLOWED', $payload['Data']['errorCode']);
     }
 }
