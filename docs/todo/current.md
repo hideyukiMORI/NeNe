@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #133: Document the `v0.1.0` release milestone and prepare the first framework tag.
 - #131: Show the runtime environment label in the development health check card.
 - #129: Show the database type in the development health check card.
 - #127: Remove the tracked generated SQLite database artifact.
@@ -51,7 +52,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
-- No active short-term TODO after #131. Use new GitHub Issues for follow-up work.
+- No active short-term TODO after #133. Use new GitHub Issues for follow-up work.
 
 ## Backlog Candidates
 
