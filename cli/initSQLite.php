@@ -65,7 +65,7 @@ function initializeSQLite(string $databaseDir, string $databaseFile): void
     syncDatabaseFilePermissions($databaseDir, $databasePath);
 
     echo 'SQLite database is ready: ' . $databasePath . PHP_EOL;
-    echo 'Default account: admin / admin' . PHP_EOL;
+    echo 'Default development account: admin / admin' . PHP_EOL;
 }
 
 /**
@@ -134,13 +134,17 @@ SQL);
  */
 function seedSampleData(PDO $db): void
 {
-    $db->exec(<<<'SQL'
+    $adminPasswordHash = password_hash((string)(getenv('NENE_SAMPLE_ADMIN_PASSWORD') ?: 'admin'), PASSWORD_DEFAULT);
+
+    $stmt = $db->prepare(<<<'SQL'
 INSERT INTO users (user_id, user_pass, user_name, e_mail, is_deleted)
-SELECT 'admin', 'admin', 'admin', 'admin@example.com', 0
+SELECT 'admin', :user_pass, 'admin', 'admin@example.com', 0
 WHERE NOT EXISTS (
     SELECT 1 FROM users WHERE user_id = 'admin'
 )
 SQL);
+    $stmt->bindValue(':user_pass', $adminPasswordHash, PDO::PARAM_STR);
+    $stmt->execute();
 
     seedTodo($db, 'Read the routing guide', true);
     seedTodo($db, 'Create a controller action', false);

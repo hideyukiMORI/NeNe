@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     user_id VARCHAR(64) NOT NULL,
-    user_pass VARCHAR(64) NOT NULL,
+    user_pass VARCHAR(255) NOT NULL,
     user_name VARCHAR(255) NOT NULL,
     e_mail VARCHAR(255) NOT NULL,
     is_deleted TINYINT(1) NOT NULL DEFAULT 0,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS todos (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO users (user_id, user_pass, user_name, e_mail, is_deleted)
-SELECT 'admin', 'admin', 'admin', 'admin@example.com', 0
+SELECT 'admin', '$2y$10$vzh5MQipioE5H4GkmRttzekB3s/z5dr.tEnBBOENSW3s.pdyoy906', 'admin', 'admin@example.com', 0
 WHERE NOT EXISTS (
     SELECT 1 FROM users WHERE user_id = 'admin'
 );

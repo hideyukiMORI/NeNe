@@ -19,6 +19,7 @@ services:
       NENE_DB_NAME: "${NENE_DB_NAME:-nene}"
       NENE_DB_USER: "${NENE_DB_USER:-nene}"
       NENE_DB_PASS: "${NENE_DB_PASS:-nene}"
+      NENE_SAMPLE_ADMIN_PASSWORD: "${NENE_SAMPLE_ADMIN_PASSWORD:-admin}"
     ports:
       - "${NENE_PORT:-8080}:80"
     volumes:
