@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #116: Expand HTTP runtime coverage for explicit routing, REST method boundaries, and JSON-only responses.
 - #108: Remove legacy JSONP output and move JSON handling to the response boundary.
 - #106: Update roadmap and milestones to reflect current status and architecture policy.
 - #104: Clarify NeNe's renovation philosophy and target audience.
@@ -43,7 +44,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
-- No active short-term TODO after #108. Use new GitHub Issues for follow-up work.
+- No active short-term TODO after #116. Use new GitHub Issues for follow-up work.
 
 ## Backlog Candidates
 
