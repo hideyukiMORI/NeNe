@@ -233,21 +233,6 @@ class View
     }
 
     /**
-     * Set value.
-     * Set the value in the template.
-     *
-     * @param string $p_target Target variable name in template file.
-     * @param mixed  $p_value  The value to set.
-     *
-     * @return View
-     */
-    // final public function setValue(string $p_target, mixed $p_value): View
-    // {
-    //     self::$instance->smarty->assign($p_target, $p_value);
-    //     return self::$instance;
-    // }
-
-    /**
      * Set values.
      * Set the array in the template.
      *

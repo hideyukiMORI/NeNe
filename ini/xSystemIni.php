@@ -36,8 +36,6 @@ const URI_CSS = URI_ROOT . 'css/';                      // CSS URI
 const URI_JS = URI_ROOT . 'js/';                        // JS URI
 const URI_IMG = 'https://' . OWN_DOMAIN;                // IMAGE DIR URI
 
-
-
 // DATABASE CONNECTION SETUP
 define('DB_TYPE', getenv('NENE_DB_TYPE') ?: 'SQLite3'); // TYPE [MySQL|SQLite3]
 define('DB_DIR', DIR_ROOT . 'data/');                   // DIRECTORY FOR SQLite3 DATABASE
@@ -57,8 +55,6 @@ const DB_AUTO_UPDATED_STAMP = true;                     // WHETHER TO SET THE UP
 // WORKAROUND WHEN THE COLUMN NAME STARTS WITH A NUMBER FOR SOME REASON.
 const DB_NUM_PREFIX = 'numPrefix_';
 const DB_IS_PHYSICAL_DELETE = true;                     // WHETHER TO DELETE PHYSICALLY
-
-
 
 // OUTPUT
 const JSON_OUTPUT = true;                               // JSON OUTPUT

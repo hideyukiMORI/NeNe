@@ -17,9 +17,7 @@ declare(strict_types=1);
 
 namespace Nene\Controller;
 
-use Nene\Model as Model;
 use Nene\Xion\ControllerBase;
-use Nene\Database as Database;
 
 /**
  * IndexController
@@ -48,7 +46,5 @@ class IndexController extends ControllerBase
         $this->VIEW->addJS('https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js')
             ->addJS('https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js')
             ->setString('t_contents', 'A small legacy PHP framework for URL-based applications.');
-        // $userMapper = new Database\UserMapper();
-        // $user = $userMapper->find(1);
     }
 }
