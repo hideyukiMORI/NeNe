@@ -4,36 +4,10 @@ declare(strict_types=1);
 
 namespace Nene\Tests\Http;
 
-use PHPUnit\Framework\TestCase;
+require_once __DIR__ . '/HttpRuntimeTestCase.php';
 
-require_once __DIR__ . '/HttpClient.php';
-
-final class HttpSmokeTest extends TestCase
+final class HttpSmokeTest extends HttpRuntimeTestCase
 {
-    private const BASE_URL_ENV = 'NENE_HTTP_BASE_URL';
-
-    /**
-     * Runtime test client.
-     *
-     * @var HttpClient
-     */
-    private $client;
-
-    protected function setUp(): void
-    {
-        $baseUrl = (string)getenv(self::BASE_URL_ENV);
-        if ($baseUrl === '') {
-            self::markTestSkipped(self::BASE_URL_ENV . ' is not configured.');
-        }
-
-        $this->client = new HttpClient($baseUrl);
-        try {
-            $this->client->request('GET', '/api-docs/openapi.php');
-        } catch (\RuntimeException $exception) {
-            self::markTestSkipped('HTTP runtime is not reachable: ' . $exception->getMessage());
-        }
-    }
-
     public function testTopPageRespondsWithDevelopersHtml(): void
     {
         $response = $this->client->request('GET', '/');
@@ -70,24 +44,10 @@ final class HttpSmokeTest extends TestCase
 
     public function testSessionAndTodoCrudFlowRunsThroughHttpRuntime(): void
     {
-        $loginResponse = $this->client->json('POST', '/session/login', [
-            'user_id' => 'admin',
-            'user_pass' => 'admin'
-        ]);
-        $loginPayload = $loginResponse->json();
+        $this->loginAsAdmin();
 
-        self::assertSame(200, $loginResponse->statusCode());
-        self::assertSame(true, $loginPayload['Result']);
-        self::assertSame('success', $loginPayload['Data']['status']);
-        self::assertSame('admin', $loginPayload['Data']['user']['user_id']);
-
-        $title = 'HTTP runtime test ' . bin2hex(random_bytes(4));
-        $createResponse = $this->client->json('POST', '/todo/index', ['title' => $title]);
-        $createPayload = $createResponse->json();
-        $createdTodo = $createPayload['Data']['todo'];
-
-        self::assertSame(200, $createResponse->statusCode());
-        self::assertSame('success', $createPayload['Data']['status']);
+        $title = self::TEST_TODO_PREFIX . bin2hex(random_bytes(4));
+        $createdTodo = $this->createTodo($title);
         self::assertSame($title, $createdTodo['title']);
 
         $listResponse = $this->client->request('GET', '/todo/index');

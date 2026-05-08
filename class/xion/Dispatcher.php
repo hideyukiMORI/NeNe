@@ -39,15 +39,9 @@ class Dispatcher
      */
     final public function dispatch(): void
     {
-        $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '';
-        $param = ltrim($requestPath, '/');
-        $param = rtrim($param, '/');
-        $params = [];
-        if ($param != '') {
-            $params = explode('/', $param);
-        }
-        $controller = (LAYERS_NUM < count($params)) ? $params[LAYERS_NUM] : 'index';
-        $action = ((LAYERS_NUM + 1) < count($params)) ? $params[LAYERS_NUM + 1] : 'index';
+        $requestRoute = $this->resolveRequestRoute($_SERVER['REQUEST_URI'] ?? '');
+        $controller = $requestRoute['controller'];
+        $action = $requestRoute['action'];
 
         $controllerInstance = $this->getControllerInstance($controller);
 
@@ -77,6 +71,28 @@ class Dispatcher
         }
         RouteContext::getInstance()->set($controller, $action, $route['mode'], $route['method']);
         $controllerInstance->run();
+    }
+
+    /**
+     * Resolve controller and action names from a request URI.
+     *
+     * @param string $requestUri Request URI.
+     *
+     * @return array{controller:string, action:string}
+     */
+    final public function resolveRequestRoute(string $requestUri): array
+    {
+        $requestPath = parse_url($requestUri, PHP_URL_PATH) ?: '';
+        $param = trim($requestPath, '/');
+        $params = [];
+        if ($param != '') {
+            $params = explode('/', $param);
+        }
+        $layersNum = defined('LAYERS_NUM') ? LAYERS_NUM : 0;
+        return [
+            'controller' => ($layersNum < count($params)) ? $params[$layersNum] : 'index',
+            'action' => (($layersNum + 1) < count($params)) ? $params[$layersNum + 1] : 'index'
+        ];
     }
 
     /**
