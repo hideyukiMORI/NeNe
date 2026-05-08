@@ -2,8 +2,6 @@
 
 /* ========== BASIC ========== */
 
-
-
 body {
     background: #050505;
     color: #f2f2ee;
@@ -31,16 +29,12 @@ hr {
     color: red;
 }
 
-
-
 /* ========== HEADER ========== */
 header {
     display: none;
 }
 
-
-
-/* ========== HEADER ========== */
+/* ========== FOOTER ========== */
 footer {
     background: #050505;
     color: #777;
@@ -54,9 +48,6 @@ footer a {
     color: #aaa;
     text-decoration:  none;
 }
-
-
-
 
 /* ========== FORM ========== */
 form input,
@@ -107,13 +98,4 @@ form button:hover {
     color: white;
     cursor: pointer;
 }
-
-
-
-
-
-
-
-
-
 

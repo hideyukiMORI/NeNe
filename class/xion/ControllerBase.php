@@ -18,8 +18,6 @@ declare(strict_types=1);
 namespace Nene\Xion;
 
 use Monolog\Logger;
-use Nene\Model          as Model;
-use Nene\Database       as Database;
 use Nene\Xion           as Xion;
 use Nene\Func           as Func;
 
@@ -351,26 +349,8 @@ abstract class ControllerBase
                     $this->SESSION_CHECK
                 );
             }
-        } else {
-            // $this->setUserInfo($_SESSION['xion']['user_id']);
         }
     }
-
-    /**
-     * setUserInfo
-     *
-     * Set login user account information.
-     *
-     * @param string $userId User ID.
-     *
-     * @return void
-     */
-    // final protected function setUserInfo(string $userId): void
-    // {
-    //     $userMapper = new Database\UserMapper();
-    //     $_SESSION['xion']['user_info'] = $userMapper->findByUserID($userId);
-    //     $_SESSION['xion']['login_mode'] = 'login';
-    // }
 
     /**
      * logout

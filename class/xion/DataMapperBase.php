@@ -65,7 +65,6 @@ abstract class DataMapperBase
     protected const TARGET_TABLE = '';
     protected const KEY_SID = 'id';
 
-
     /**
      * CONSTRUCTOR
      */
@@ -80,8 +79,6 @@ abstract class DataMapperBase
         }
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
     }
-
-
 
     /**
      * Get table columns.
@@ -107,8 +104,6 @@ abstract class DataMapperBase
         unset($column[$key_sid]);
         return $column;
     }
-
-
 
     /**
      * INSERT
@@ -165,8 +160,6 @@ abstract class DataMapperBase
         return $row->{static::KEY_SID};
     }
 
-
-
     /**
      * UPDATE
      *
@@ -209,8 +202,6 @@ abstract class DataMapperBase
         }
     }
 
-
-
     /**
      * DELETE
      * To do a logical delete, use the update method or add logic to this method.
@@ -243,8 +234,6 @@ abstract class DataMapperBase
         }
     }
 
-
-
     /**
      * FIND
      * Search primary key by specified value and return one row.
@@ -266,8 +255,6 @@ abstract class DataMapperBase
         return $stmt->fetch();
     }
 
-
-
     /**
      * Find all
      * Returns all rows from a database table.
@@ -287,8 +274,6 @@ abstract class DataMapperBase
         return $this->decorate($stmt);
     }
 
-
-
     /**
      * COUNT BY ID
      * Returns whether there is a primary key row with the specified value.
@@ -307,8 +292,6 @@ abstract class DataMapperBase
         return $this->execute($stmt)->fetchColumn();
     }
 
-
-
     /**
      * Count all
      * Returns the number of rows in a database table.
@@ -323,8 +306,6 @@ abstract class DataMapperBase
         ');
         return $stmt->fetchColumn();
     }
-
-
 
     /**
      * EXECUTE
@@ -345,8 +326,6 @@ abstract class DataMapperBase
         return $stmt;
     }
 
-
-
     /**
      * EXECUTE QUERY
      * Try to query execute stmt.
@@ -365,8 +344,6 @@ abstract class DataMapperBase
         }
         return $stmt;
     }
-
-
 
     /**
      * Get search array
@@ -387,8 +364,6 @@ abstract class DataMapperBase
         return $searchArray;
     }
 
-
-
     /**
      * DECORATE
      * Set fetch mode to convert to the specified class.
@@ -403,8 +378,6 @@ abstract class DataMapperBase
         return $stmt;
     }
 
-
-
     /**
      * ASSOCIATIVE ARRAY
      * Set fetch mode to convert to associative array.
@@ -418,8 +391,6 @@ abstract class DataMapperBase
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         return $stmt;
     }
-
-
 
     /**
      * JSON ERROR CODE

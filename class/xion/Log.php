@@ -69,10 +69,8 @@ class Log
         $this->errorLog = new Logger('Nene');
         $this->errorLog->pushHandler(new RotatingFileHandler(ERROR_LOG_PATH, 60, Level::Error));
         if (LOG_LEVEL == 'EMERGENCY') {
-            // $this->logger->pushHandler(new StreamHandler(APP_LOG_PATH, Logger::EMERGENCY));
             $this->informationLog->pushHandler(new RotatingFileHandler(APP_LOG_PATH, 100, Level::Emergency));
         } else {
-            // $this->logger->pushHandler(new StreamHandler(APP_LOG_PATH, Logger::INFO));
             $this->informationLog->pushHandler(new RotatingFileHandler(APP_LOG_PATH, 100, Level::Info));
         }
     }
