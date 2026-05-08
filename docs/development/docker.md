@@ -7,6 +7,8 @@ NeNe can run locally with Docker Compose.
 - Docker
 - Docker Compose v2
 
+The application container uses PHP 8.4 as the Docker development target.
+
 ## Start
 
 ```sh
