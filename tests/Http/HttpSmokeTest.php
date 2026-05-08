@@ -42,6 +42,28 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         self::assertSame('SESSION-CLOSED', $payload['Data']['errorCode']);
     }
 
+    public function testSessionCookieHasExplicitSecurityAttributes(): void
+    {
+        $client = $this->newClient();
+        $loginResponse = $client->json('POST', '/session/login', [
+            'user_id' => 'admin',
+            'user_pass' => 'admin',
+        ]);
+        $loginCookie = $loginResponse->headerLine('Set-Cookie');
+
+        self::assertSame(200, $loginResponse->statusCode());
+        self::assertStringContainsString('PHPSESSID=', $loginCookie);
+        self::assertStringContainsString('HttpOnly', $loginCookie);
+        self::assertStringContainsString('SameSite=Lax', $loginCookie);
+
+        $logoutResponse = $client->json('POST', '/session/logout');
+        $logoutCookie = $logoutResponse->headerLine('Set-Cookie');
+
+        self::assertSame(200, $logoutResponse->statusCode());
+        self::assertStringContainsString('PHPSESSID=', $logoutCookie);
+        self::assertStringContainsString('expires=', strtolower($logoutCookie));
+    }
+
     public function testSessionAndTodoCrudFlowRunsThroughHttpRuntime(): void
     {
         $this->loginAsAdmin();
@@ -60,7 +82,7 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         $updatedTitle = $title . ' updated';
         $updateResponse = $this->client->json('PUT', '/todo/item/id_' . $createdTodo['id'], [
             'title' => $updatedTitle,
-            'is_completed' => true
+            'is_completed' => true,
         ]);
         $updatePayload = $updateResponse->json();
 

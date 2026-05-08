@@ -27,7 +27,7 @@ final class AuthSessionTest extends TestCase
             'id' => '1',
             'user_id' => 'admin',
             'user_name' => 'Administrator',
-            'e_mail' => 'admin@example.com'
+            'e_mail' => 'admin@example.com',
         ]);
 
         self::assertTrue($authSession->isLoggedIn());
@@ -43,7 +43,7 @@ final class AuthSessionTest extends TestCase
             'id' => 1,
             'user_id' => 'admin',
             'user_name' => 'Administrator',
-            'e_mail' => 'admin@example.com'
+            'e_mail' => 'admin@example.com',
         ]);
 
         $authSession->logout();
@@ -52,6 +52,23 @@ final class AuthSessionTest extends TestCase
         self::assertNull($authSession->user());
         self::assertNull($authSession->userId());
         self::assertSame('', $authSession->userIdentifier());
+    }
+
+    public function testLogoutCanDestroyWholeSessionState(): void
+    {
+        $_SESSION['global']['referer']['controller'] = 'index';
+
+        $authSession = AuthSession::getInstance();
+        $authSession->login([
+            'id' => 1,
+            'user_id' => 'admin',
+            'user_name' => 'Administrator',
+            'e_mail' => 'admin@example.com',
+        ]);
+
+        $authSession->logout(true);
+
+        self::assertSame([], $_SESSION);
     }
 
     public function testLoginModeWithoutUserIsNotLoggedIn(): void

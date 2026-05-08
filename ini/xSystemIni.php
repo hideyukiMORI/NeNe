@@ -32,6 +32,9 @@ declare(strict_types=1);
  * - NENE_APP_ENV names the runtime environment.
  * - NENE_APP_DEBUG controls whether detailed PHP errors may be shown in HTTP
  *   responses. Keep it disabled outside trusted local development.
+ * - NENE_SESSION_* values make PHP session Cookie behavior explicit. Local
+ *   HTTP development keeps Secure disabled; production should enable it behind
+ *   HTTPS.
  *
  * Local development:
  * - Docker Compose passes NENE_DB_* values into the application container.
@@ -86,8 +89,28 @@ define('APP_DEBUG', in_array(strtolower($getEnv('NENE_APP_DEBUG', APP_ENV === 'p
 define('DEBUG_MODE', APP_DEBUG ? 1 : 0); // 1 = on, 0 = off.
 const LOG_LEVEL = 'INFO'; // EMERGENCY or INFO.
 
-// Session namespace used by the original framework session connection.
+/*
+ * Session.
+ *
+ * CONNECT is the namespace used by the original framework session connection.
+ * The Cookie attributes below are applied before session_start() in the public
+ * front controller.
+ */
 const CONNECT = 'sessionConnect';
+define('SESSION_COOKIE_SECURE', in_array(strtolower($getEnv('NENE_SESSION_SECURE', APP_ENV === 'production' ? '1' : '0')), [
+    '1',
+    'true',
+    'on',
+    'yes',
+], true));
+define('SESSION_COOKIE_HTTPONLY', in_array(strtolower($getEnv('NENE_SESSION_HTTPONLY', '1')), [
+    '1',
+    'true',
+    'on',
+    'yes',
+], true));
+define('SESSION_COOKIE_SAMESITE', $getEnv('NENE_SESSION_SAMESITE', 'Lax'));
+define('SESSION_COOKIE_LIFETIME', (int)$getEnv('NENE_SESSION_LIFETIME', '0'));
 
 /*
  * Routing.

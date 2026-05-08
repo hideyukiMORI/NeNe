@@ -18,8 +18,8 @@ declare(strict_types=1);
 namespace Nene\Xion;
 
 use Monolog\Logger;
-use Nene\Xion           as Xion;
-use Nene\Func           as Func;
+use Nene\Func as Func;
+use Nene\Xion as Xion;
 
 /**
  * Controller abstract class.
@@ -170,7 +170,7 @@ abstract class ControllerBase
     public function __construct()
     {
         $this->request          = new Request();
-        $this->method           = $_SERVER["REQUEST_METHOD"];
+        $this->method           = $_SERVER['REQUEST_METHOD'];
         $this->VIEW             = View::getInstance();
         $this->LOGGER           = Log::getInstance('information');
         $this->ACCESS_LOGGER    = Log::getInstance('access');
@@ -201,7 +201,7 @@ abstract class ControllerBase
                 'ACCESS : ' . $controller . '::' . $action,
                 [
                     $_SERVER['HTTP_USER_AGENT'] ?? '',
-                    $_SERVER['HTTP_REFERER'] ?? ''
+                    $_SERVER['HTTP_REFERER'] ?? '',
                 ]
             );
         }
@@ -384,9 +384,9 @@ abstract class ControllerBase
      *
      * @return void
      */
-    final protected function logout(): void
+    final protected function logout(bool $destroySession = false): void
     {
-        $this->AUTH_SESSION->logout();
+        $this->AUTH_SESSION->logout($destroySession);
     }
 
     /**
