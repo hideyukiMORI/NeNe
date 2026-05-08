@@ -35,4 +35,11 @@ final class ApiResponseTest extends TestCase
             'errorMessage' => 'Wrong user ID or user PASS'
         ], $response);
     }
+
+    public function testFailureSetsHttpStatusFromErrorCode(): void
+    {
+        (new ApiResponse())->failure('TODO-TITLE-REQUIRED');
+
+        self::assertSame(400, http_response_code());
+    }
 }

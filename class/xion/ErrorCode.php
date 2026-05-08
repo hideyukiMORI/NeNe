@@ -67,11 +67,26 @@ class ErrorCode
      */
     final public function getErrorText(string $errorCode): string
     {
-        if (array_key_exists($errorCode, $this->ERROR_CODE)) {
-            return $this->ERROR_CODE[$errorCode];
+        if (isset($this->ERROR_CODE[$errorCode]['message'])) {
+            return (string)$this->ERROR_CODE[$errorCode]['message'];
         } else {
             return 'Error code [' . $errorCode . '] is not defined.';
         }
+    }
+
+    /**
+     * Get HTTP status for error code.
+     *
+     * @param string $errorCode Error code.
+     *
+     * @return integer HTTP status code.
+     */
+    final public function getHttpStatus(string $errorCode): int
+    {
+        if (isset($this->ERROR_CODE[$errorCode]['httpStatus'])) {
+            return (int)$this->ERROR_CODE[$errorCode]['httpStatus'];
+        }
+        return 500;
     }
 
     /**
