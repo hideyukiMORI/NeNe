@@ -30,6 +30,8 @@ Or directly:
 vendor/bin/phpunit
 ```
 
+`composer test` runs the lightweight unit test suite only.
+
 ## Docker
 
 Tests can also run in the Docker container:
@@ -37,6 +39,24 @@ Tests can also run in the Docker container:
 ```sh
 docker compose run --rm app sh -lc "composer install --no-interaction --prefer-dist && composer test"
 ```
+
+## HTTP Runtime Smoke Tests
+
+HTTP runtime tests exercise the Docker-served application through real HTTP requests. They cover the top page, Swagger UI, session login/logout, TODO CRUD, and REST method handling.
+
+Start the Docker environment first:
+
+```sh
+docker compose up --build -d
+```
+
+Then run:
+
+```sh
+NENE_HTTP_BASE_URL=http://localhost:8080 composer test:http
+```
+
+If `NENE_HTTP_BASE_URL` is not configured, or the target server is unreachable, the HTTP test suite is skipped. This keeps normal unit testing fast and independent from Docker.
 
 ## Strategy for Coupled Code
 

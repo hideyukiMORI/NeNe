@@ -21,6 +21,8 @@
         "phpunit/phpunit": "^10.5"
     },
     "scripts": {
-        "test": "phpunit"
+        "test": "phpunit --testsuite unit",
+        "test:http": "phpunit --testsuite http",
+        "test:all": "phpunit"
     }
 }
