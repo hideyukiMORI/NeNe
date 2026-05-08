@@ -59,6 +59,10 @@ REST endpoints should make accepted HTTP methods explicit.
 - Avoid new `{action}Rest` handlers because they accept every HTTP method through the legacy dispatcher fallback.
 - Use `{action}Rest` only when there is a documented compatibility or framework-level reason to accept all methods.
 - Authentication and state-changing endpoints must use method-specific REST handlers.
+- Build REST payloads through `Nene\Xion\ApiResponse` instead of hand-writing response arrays in controllers.
+- Success payloads use `status: success` and `errorCode: ""`; failure payloads use `status: failure`, `errorCode`, and `errorMessage`.
+- Error codes must be stable uppercase kebab-case strings with a domain prefix, such as `LOGIN-FAILED` or `TODO-NOT-FOUND`.
+- Define error code messages in `htdocs/message/error_code.js`; controllers should reference codes, not inline messages.
 
 ## OpenAPI
 

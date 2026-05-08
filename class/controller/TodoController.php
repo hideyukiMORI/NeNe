@@ -34,10 +34,9 @@ class TodoController extends ControllerBase
     {
         $userId = $this->getLoginUserId();
         $todoMapper = new Database\TodoMapper();
-        return [
-            'status' => 'success',
+        return $this->API_RESPONSE->success([
             'todos' => $this->normalizeRows($todoMapper->findRowsByUserId($userId))
-        ];
+        ]);
     }
 
     /**
@@ -51,17 +50,12 @@ class TodoController extends ControllerBase
         $title = trim((string)($this->REQUEST_JSON['title'] ?? ''));
         if ($title === '') {
             header('HTTP/1.0 400 Bad Request');
-            return [
-                'status' => 'failure',
-                'errorCode' => 'TODO-TITLE-REQUIRED',
-                'errorMessage' => 'TODO title is required.'
-            ];
+            return $this->API_RESPONSE->failure('TODO-TITLE-REQUIRED');
         }
         $todoMapper = new Database\TodoMapper();
-        return [
-            'status' => 'success',
+        return $this->API_RESPONSE->success([
             'todo' => $this->normalizeRow($todoMapper->createForUser($userId, $title))
-        ];
+        ]);
     }
 
     /**
@@ -75,11 +69,7 @@ class TodoController extends ControllerBase
         $id = $this->getTodoId();
         if ($id === null) {
             header('HTTP/1.0 400 Bad Request');
-            return [
-                'status' => 'failure',
-                'errorCode' => 'TODO-ID-REQUIRED',
-                'errorMessage' => 'TODO id is required.'
-            ];
+            return $this->API_RESPONSE->failure('TODO-ID-REQUIRED');
         }
         $title = array_key_exists('title', $this->REQUEST_JSON)
             ? trim((string)$this->REQUEST_JSON['title'])
@@ -89,26 +79,17 @@ class TodoController extends ControllerBase
             : null;
         if ($title === '') {
             header('HTTP/1.0 400 Bad Request');
-            return [
-                'status' => 'failure',
-                'errorCode' => 'TODO-TITLE-REQUIRED',
-                'errorMessage' => 'TODO title is required.'
-            ];
+            return $this->API_RESPONSE->failure('TODO-TITLE-REQUIRED');
         }
         $todoMapper = new Database\TodoMapper();
         $todo = $todoMapper->updateForUser($userId, $id, $title, $isCompleted);
         if ($todo === null) {
             header('HTTP/1.0 404 Not Found');
-            return [
-                'status' => 'failure',
-                'errorCode' => 'TODO-NOT-FOUND',
-                'errorMessage' => 'TODO item was not found.'
-            ];
+            return $this->API_RESPONSE->failure('TODO-NOT-FOUND');
         }
-        return [
-            'status' => 'success',
+        return $this->API_RESPONSE->success([
             'todo' => $this->normalizeRow($todo)
-        ];
+        ]);
     }
 
     /**
@@ -122,25 +103,16 @@ class TodoController extends ControllerBase
         $id = $this->getTodoId();
         if ($id === null) {
             header('HTTP/1.0 400 Bad Request');
-            return [
-                'status' => 'failure',
-                'errorCode' => 'TODO-ID-REQUIRED',
-                'errorMessage' => 'TODO id is required.'
-            ];
+            return $this->API_RESPONSE->failure('TODO-ID-REQUIRED');
         }
         $todoMapper = new Database\TodoMapper();
         if (!$todoMapper->deleteForUser($userId, $id)) {
             header('HTTP/1.0 404 Not Found');
-            return [
-                'status' => 'failure',
-                'errorCode' => 'TODO-NOT-FOUND',
-                'errorMessage' => 'TODO item was not found.'
-            ];
+            return $this->API_RESPONSE->failure('TODO-NOT-FOUND');
         }
-        return [
-            'status' => 'success',
+        return $this->API_RESPONSE->success([
             'id' => $id
-        ];
+        ]);
     }
 
     /**

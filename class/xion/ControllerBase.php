@@ -123,6 +123,13 @@ abstract class ControllerBase
     protected $AUTH_SESSION;
 
     /**
+     * REST response factory.
+     *
+     * @var ApiResponse
+     */
+    protected $API_RESPONSE;
+
+    /**
      * Rest post
      *
      * @var array
@@ -163,6 +170,7 @@ abstract class ControllerBase
         $this->ERROR_LOGGER     = Log::getInstance('error');
         $this->ERROR_CODE       = Xion\ErrorCode::getInstance();
         $this->AUTH_SESSION     = Xion\AuthSession::getInstance();
+        $this->API_RESPONSE     = new Xion\ApiResponse();
         $this->refController    = $_SESSION['global']['referer']['controller'] ?? '';
         $this->refAction        = $_SESSION['global']['referer']['action'] ?? '';
     }
@@ -343,15 +351,8 @@ abstract class ControllerBase
             if (APP_ACTION_MODE !== 'Rest') {
                 $this->location(LOGOUT_URI);
             } else {
-                $errorCode = 'SESSION-CLOSED';
-                $errorMessage = $this->ERROR_CODE->getErrorText($errorCode);
-                $return = [
-                    'status'        => 'failure',
-                    'errorCode'     => $errorCode,
-                    'errorMessage'  => $errorMessage
-                ];
                 Func\Json::outputArrayToJson(
-                    $return,
+                    $this->API_RESPONSE->failure('SESSION-CLOSED'),
                     $this->OUTPUT_JSON_STYLE,
                     filter_input(INPUT_GET, 'callback') ?: '',
                     $this->SESSION_CHECK
