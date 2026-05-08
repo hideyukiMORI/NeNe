@@ -48,6 +48,12 @@ composer analyze
 
 The initial `.phan/baseline.php` records issues that already exist in the legacy codebase. New work should avoid adding fresh Phan issues; reduce the baseline gradually in focused PRs rather than mixing broad static-analysis cleanup into unrelated changes.
 
+### ReactPHP Dependency Note
+
+Packages under `vendor/react/*` are ReactPHP packages pulled in through development tooling such as Phan. They are unrelated to browser React and do not mean the NeNe runtime depends on asynchronous PHP event loops.
+
+Runtime dependencies should be checked in `composer.json` under `require`; development-only tools belong under `require-dev`.
+
 ## Docker
 
 Tests can also run in the Docker container:
