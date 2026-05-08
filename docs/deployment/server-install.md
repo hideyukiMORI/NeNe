@@ -99,14 +99,27 @@ On shared hosting, PHP may live under a versioned path. Use the hosting provider
 
 NeNe reads runtime settings with `getenv()` in `ini/xSystemIni.php`.
 
-The `.env.example` file is mainly for Docker Compose. It is not automatically loaded by plain Apache/PHP. On a server, configure environment variables through one of these mechanisms:
+On a traditional server, copy `.env.example` to `.env` in the repository root and edit the values:
+
+```sh
+cp .env.example .env
+vi .env
+```
+
+The web front controller loads the repository-root `.env` before NeNe initializes configuration. Existing server or process environment values still take priority over file values, so hosting-level settings can override `.env` safely.
+
+You can also configure values through the server itself:
 
 - Hosting control panel environment variable settings.
 - Apache `SetEnv` directives.
 - Web server or process manager configuration.
 - A server-specific bootstrap approach approved for that hosting environment.
 
-For the setup CLI, it is fine to copy `.env.example` to `.env`, edit the database values, and run `php cli/setupDatabase.php --env=.env --yes`. The CLI loads that file explicitly. The web request path still needs the server to provide the same values through its normal environment mechanism.
+The setup CLI also loads `.env` explicitly when you pass `--env=.env`:
+
+```sh
+php cli/setupDatabase.php --env=.env --yes
+```
 
 Common production values:
 

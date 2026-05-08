@@ -25,6 +25,7 @@ error_reporting(E_ALL);
  */
 require_once '../vendor/autoload.php';
 
+Xion\EnvLoader::loadIfExists(dirname(__DIR__) . '/.env');
 Xion\Initialize::init();
 
 configurePublicErrorDisplay();
