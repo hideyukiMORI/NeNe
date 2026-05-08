@@ -56,7 +56,11 @@ class PdoConnection
         try {
             switch (DB_TYPE) {
                 case 'MySQL':
-                    $this->connection = new PDO('mysql:host=' . DB_HOST . '; dbname=' . DB_NAME, DB_USER, DB_PASS);
+                    $this->connection = new PDO(
+                        'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=utf8mb4',
+                        DB_USER,
+                        DB_PASS
+                    );
                     $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     $this->connection->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
                     break;
@@ -66,7 +70,6 @@ class PdoConnection
             }
         } catch (\PDOException $e) {
             die('Connection failed : ' . $e->getMessage());
-            exit();
         }
     }
 

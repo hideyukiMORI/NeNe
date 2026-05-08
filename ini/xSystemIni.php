@@ -39,13 +39,14 @@ const URI_IMG = 'https://' . OWN_DOMAIN;                // IMAGE DIR URI
 
 
 // DATABASE CONNECTION SETUP
-const DB_TYPE = 'SQLite3';                              // TYPE [MySQL|SQLite3]
-const DB_DIR = DIR_ROOT . 'data/';                      // DIRECTORY FOR SQLite3 DATABASE
-const DB_FILE = 'nene.db';                              // FILE NAME FOR SQLite3 DATABASE
-const DB_USER = 'root';                                 // USERNAME
-const DB_PASS = '';                                     // PASSWORD
-const DB_HOST = 'localhost';                            // HOSTNAME
-const DB_NAME = 'nene-php';                             // DATABASE NAME
+define('DB_TYPE', getenv('NENE_DB_TYPE') ?: 'SQLite3'); // TYPE [MySQL|SQLite3]
+define('DB_DIR', DIR_ROOT . 'data/');                   // DIRECTORY FOR SQLite3 DATABASE
+define('DB_FILE', getenv('NENE_DB_FILE') ?: 'nene.db'); // FILE NAME FOR SQLite3 DATABASE
+define('DB_USER', getenv('NENE_DB_USER') ?: 'root');    // USERNAME
+define('DB_PASS', getenv('NENE_DB_PASS') ?: '');        // PASSWORD
+define('DB_HOST', getenv('NENE_DB_HOST') ?: 'localhost'); // HOSTNAME
+define('DB_PORT', getenv('NENE_DB_PORT') ?: '3306');    // PORT
+define('DB_NAME', getenv('NENE_DB_NAME') ?: 'nene-php'); // DATABASE NAME
 
 // DATABASE
 const DB_COLUMN_TIMESTAMP = true;
