@@ -9,6 +9,7 @@ This directory contains project documentation for humans and AI agents.
 - `workflow.md`: Issue-driven workflow.
 - `development/coding-standards.md`: Coding standards.
 - `development/commit-conventions.md`: Commit message rules.
+- `development/docker.md`: Docker local development.
 - `roadmap.md`: Project direction.
 - `todo/current.md`: Current TODO summary.
 - `milestones/README.md`: Milestone management.

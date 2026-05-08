@@ -1,8 +1,9 @@
-
-tags
+.git
 vendor
-view/compile
 log
+view/compile
 data/*.db
 data/*.sqlite
 data/*.sqlite3
+.env
+.env.*
