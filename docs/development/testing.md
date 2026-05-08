@@ -73,6 +73,12 @@ NENE_HTTP_BASE_URL=http://localhost:8080 composer check
 
 HTTP tests use a test title prefix and clean up matching TODO rows before each runtime test. Tests that create TODOs also register them for cleanup during teardown, so failed tests should not leave long-lived sample data behind.
 
+## OpenAPI Contract Test Scope
+
+`OpenApiRuntimeContractTest` currently reads `docs/api/openapi.yaml` with a lightweight line-based parser. This is intentional for the current small contract: the test only verifies that documented REST operations exist and that observed runtime HTTP statuses are listed in OpenAPI.
+
+Do not treat that parser as a general YAML implementation. When OpenAPI grows to include broader `$ref` usage, shared response composition, many more paths, or response body schema validation, add a dev dependency such as `symfony/yaml` and parse the contract as structured data before expanding the assertions. If schema validation becomes a goal, evaluate an OpenAPI/JSON Schema validator separately instead of extending the regular expressions.
+
 ## Strategy for Coupled Code
 
 For coupled framework code, prefer this order:
