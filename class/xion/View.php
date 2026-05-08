@@ -85,8 +85,6 @@ class View
             self::$instance = new self();
             self::$instance
                 ->addCSS('common')
-                ->addCSS('components/common')
-                ->addJS('common')
                 ->setString('t_contents', '');
         }
         return self::$instance;
