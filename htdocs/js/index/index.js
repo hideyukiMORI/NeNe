@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebarLinks = [
         { href: '#getting-started', label: 'Getting Started' },
         { href: '#quick-start', label: 'Quick Start' },
+        { href: '#tutorial', label: 'Tutorial' },
         { href: '#authentication', label: 'Authentication' },
         { href: '#sample-app', label: 'Sample TODO' },
         { href: '#routing-guide', label: 'Routing Guide' },
@@ -42,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     e(Hero),
                     e(GuideGrid),
                     e(QuickStart),
+                    e(ServiceTutorial),
                     e(AuthenticationGuide),
                     e(SampleApp),
                     e(RoutingGuide),
@@ -115,6 +117,64 @@ document.addEventListener('DOMContentLoaded', function() {
             ),
             e('div', { className: 'quick-start-card' },
                 e('pre', null, e('code', null, 'git clone git@github.com:hideyukiMORI/NeNe.git\ncd NeNe\ndocker compose up --build'))
+            )
+        );
+    }
+
+    function ServiceTutorial() {
+        const tutorialSteps = [
+            {
+                number: '01',
+                title: 'Add a fixed page',
+                text: 'Use an HTML action such as PageController::aboutAction() and place its template under view/source/page/about.tpl.',
+                code: 'GET /page/about -> PageController::aboutAction()'
+            },
+            {
+                number: '02',
+                title: 'Add a REST endpoint',
+                text: 'Use method-specific handlers so everyone writes the same style of JSON endpoint.',
+                code: 'POST /article/index -> ArticleController::indexPostRest()'
+            },
+            {
+                number: '03',
+                title: 'Store data with a mapper',
+                text: 'Keep persistence explicit with a small model and mapper instead of hiding behavior behind a large ORM.',
+                code: 'ArticleMapper::create($title, $body)'
+            },
+            {
+                number: '04',
+                title: 'Document and test the contract',
+                text: 'Add error codes, update OpenAPI, and cover the behavior with unit or HTTP runtime tests.',
+                code: 'composer test && NENE_HTTP_BASE_URL=http://localhost:8080 composer test:http'
+            }
+        ];
+
+        return e('section', { className: 'developers__section tutorial', id: 'tutorial' },
+            e('div', { className: 'developers__section-heading' },
+                e('div', null,
+                    e('p', { className: 'developers__eyebrow' }, 'Tutorial'),
+                    e('h2', null, 'Build a small service')
+                ),
+                e('p', null, 'The docs remain the source of truth, but this page gives the shortest path from page to REST API.')
+            ),
+            e('div', { className: 'tutorial__intro' },
+                e('p', null, 'NeNe keeps the old-school URL and controller shape familiar to CodeIgniter or Zend Framework 1 users, then adds modern safety rails around it: JSON-only REST, OpenAPI, tests, Docker, and explicit error catalogs.'),
+                e('a', {
+                    className: 'tutorial__doc-link',
+                    href: 'https://github.com/hideyukiMORI/NeNe/blob/main/docs/tutorials/building-a-service.md'
+                }, 'Read the full Markdown tutorial')
+            ),
+            e('div', { className: 'tutorial__steps' },
+                tutorialSteps.map(function(step) {
+                    return e('article', { className: 'tutorial-step', key: step.number },
+                        e('div', { className: 'tutorial-step__meta' },
+                            e('span', null, step.number),
+                            e('h3', null, step.title)
+                        ),
+                        e('p', null, step.text),
+                        e('code', null, step.code)
+                    );
+                })
             )
         );
     }

@@ -198,7 +198,9 @@
 .guide-panel,
 .openapi-card,
 .quick-start-card,
-.sample-card {
+.sample-card,
+.tutorial__intro,
+.tutorial-step {
     background: rgba(18, 18, 18, 0.78);
     border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 14px;
@@ -255,6 +257,92 @@
 .guide-panel,
 .openapi-card {
     padding: 18px;
+}
+
+.tutorial__intro {
+    align-items: flex-start;
+    display: flex;
+    gap: 18px;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding: 18px;
+}
+
+.tutorial__intro p {
+    color: #aaa9a1;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    margin: 0;
+    max-width: 560px;
+}
+
+.tutorial__doc-link {
+    color: #8f82ff;
+    flex: 0 0 auto;
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.tutorial__doc-link:hover {
+    color: #f2f2ee;
+}
+
+.tutorial__steps {
+    display: grid;
+    gap: 12px;
+}
+
+.tutorial-step {
+    padding: 18px;
+}
+
+.tutorial-step__meta {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.tutorial-step__meta span {
+    align-items: center;
+    background: rgba(143, 130, 255, 0.16);
+    border: 1px solid rgba(143, 130, 255, 0.32);
+    border-radius: 999px;
+    color: #bdb7ff;
+    display: inline-flex;
+    font-size: 0.72rem;
+    font-weight: 700;
+    height: 28px;
+    justify-content: center;
+    letter-spacing: 0.06em;
+    width: 42px;
+}
+
+.tutorial-step h3 {
+    color: #f2f2ee;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.tutorial-step p {
+    color: #aaa9a1;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0 0 12px;
+}
+
+.tutorial-step code {
+    background: #050505;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: #f2f2ee;
+    display: block;
+    font-family: "IBM Plex Sans", "IBM Plex Sans JP", sans-serif;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    padding: 10px 12px;
 }
 
 .guide-panel {
@@ -456,6 +544,10 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         padding: 0 0 18px;
         position: static;
+    }
+
+    .tutorial__intro {
+        flex-direction: column;
     }
 
     .todo-panel__form {
