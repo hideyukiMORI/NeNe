@@ -2,6 +2,10 @@
 
 This tutorial shows the common implementation path for a small NeNe service.
 
+Read this as a guide for a renovated legacy framework. NeNe intentionally keeps the familiar shape of older PHP frameworks: URL segments select a controller and action, HTML pages use `actionAction()` methods, and data access stays close to small mapper classes. The modern parts are added around that shape: method-specific REST handlers, API response catalogs, OpenAPI, tests, Docker, and explicit security defaults.
+
+If you know frameworks such as CodeIgniter 2/3 or Zend Framework 1, the flow should feel familiar. The difference is that NeNe keeps the core much smaller and documents the modern safety rails you should add when building services.
+
 Use it as a checklist when adding application behavior:
 
 1. Add a server-rendered page when users need HTML.

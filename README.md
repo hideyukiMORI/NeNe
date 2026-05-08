@@ -2,7 +2,19 @@
 
 Simple web application framework.
 
-NeNe is a legacy, simple, lightweight PHP framework. It uses a front controller and URL path segments to resolve controller classes and action methods.
+NeNe is a renovated legacy PHP framework.
+
+The original idea is more than ten years old: keep a tiny front-controller framework that people familiar with older PHP frameworks can understand at a glance. This repository keeps that philosophy and structure, then updates the project for modern PHP development with Composer, Docker, tests, OpenAPI, explicit security defaults, and current stable packages.
+
+NeNe is intentionally much smaller than full-stack frameworks. It keeps only the parts needed to build small services:
+
+- Convention-based routing from URL segments.
+- Server-rendered pages with Smarty.
+- Method-specific REST handlers for JSON APIs.
+- Lightweight database mappers.
+- Session, CSRF, error catalog, logging, and testable boundaries.
+
+The goal is not to replace Laravel, Symfony, CodeIgniter, or Laminas. The goal is to give legacy-framework users a small codebase they can read, keep, and safely modernize.
 
 ## Documentation
 
@@ -27,7 +39,9 @@ The dispatcher resolves the URL to:
 
 - `Nene\Controller\{Controller}Controller`
 - `{action}Action` for server-rendered pages
-- `{action}Rest` for JSON/API responses
+- `{action}{HttpMethod}Rest` for JSON/API responses, such as `indexGetRest` or `loginPostRest`
+
+The legacy `{action}Rest` fallback remains only for compatibility. New REST endpoints should use method-specific handlers.
 
 ## Requirements
 

@@ -1,8 +1,41 @@
 # NeNe Project Overview
 
-NeNe is a legacy, simple, lightweight PHP web application framework.
+NeNe is a renovated legacy PHP web application framework.
+
+The project started from an older, intentionally small PHP framework style. Its purpose is not to erase that shape, but to make it usable today: PHP 8.4 target, Composer packages, Docker setup, PHPUnit, Phan, PHP CS Fixer, OpenAPI, stronger sessions, CSRF, password hashing, and safer error handling.
+
+NeNe is for developers who are comfortable with older convention-based PHP frameworks and want a codebase they can read from end to end. It keeps the familiar "URL segment -> controller -> action" flow while modernizing the boundaries around it.
 
 The project should remain small and understandable. New work should improve maintainability, security, and standards compatibility without turning NeNe into a large full-stack framework.
+
+## Renovation Philosophy
+
+NeNe is a renovation project, not a rewrite.
+
+Keep:
+
+- The front controller entry point.
+- The `/{controller}/{action}` URL convention.
+- Controller method names such as `indexAction()`.
+- Simple Smarty-based server rendering.
+- Lightweight database mapper classes instead of a heavy ORM.
+- A small codebase that one developer can inspect quickly.
+
+Modernize:
+
+- Composer autoloading and package management.
+- PHP 8.4-oriented typing and strictness where practical.
+- Method-specific REST handlers such as `indexGetRest()` and `indexPostRest()`.
+- Centralized API responses and error codes.
+- Session lifecycle, CSRF, password hashing, JSON/JSONP safety, and public error behavior.
+- OpenAPI contracts, Swagger UI, PHPUnit, Phan, PHP CS Fixer, and Docker development.
+
+Avoid:
+
+- Replacing the framework with a large dependency.
+- Adding configurable routing magic that hides the URL convention.
+- Introducing an ORM or plugin system before a real project need exists.
+- Refactoring legacy conventions only for aesthetic reasons.
 
 ## Current Shape
 

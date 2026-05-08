@@ -6,7 +6,9 @@ Use this directory to mirror important GitHub milestones when local context is u
 
 ### legacy-framework-stabilization
 
-Goal: finish the foundation needed to keep NeNe useful as a legacy, simple, lightweight PHP framework.
+Goal: finish the foundation needed to keep NeNe useful as a renovated legacy, simple, lightweight PHP framework.
+
+Context: NeNe keeps the philosophy of an older PHP framework that was built around a small front controller, URL segment routing, controller actions, Smarty templates, and lightweight database mappers. The milestone is not a rewrite into a modern full-stack framework. It is a careful renovation that keeps the familiar construction rules while making the codebase safer and usable with current PHP tooling.
 
 Completion criteria:
 
@@ -19,13 +21,30 @@ Completion criteria:
 - Keep NeNe easy, simple, and lightweight.
 - Maintain onboarding and implementation support docs under `docs/`, including ADR guidance.
 
-Current status: known stabilization Issues are complete, including local Docker setup, test foundation, REST dispatch behavior, OpenAPI/Swagger UI, SQLite fallback, and focused security hardening. No open Issues remain for this milestone.
+What was preserved:
+
+- The front controller and `/{controller}/{action}` routing style.
+- `Controller::actionAction()` for server-rendered pages.
+- Smarty templates and simple asset conventions.
+- Lightweight mapper/model classes instead of a heavy ORM.
+- A codebase small enough to understand without learning a large framework.
+
+What was renovated:
+
+- Docker-based local setup with MySQL and SQLite fallback.
+- PHPUnit unit tests and HTTP runtime smoke tests.
+- Method-specific REST dispatch such as `indexGetRest()` and `indexPostRest()`.
+- OpenAPI and Swagger UI for the sample REST contract.
+- Security-sensitive paths: sessions, cookies, password hashing, CSRF, JSONP, inline script JSON, error exposure, and request wrappers.
+- Static analysis and formatting foundations with Phan and PHP CS Fixer.
+
+Current status: known stabilization Issues are complete. No open Issues remain for this milestone.
 
 ### docs-foundation
 
 Purpose: establish project documentation, AI guidance, workflow, roadmap, TODO, and ADR practice.
 
-Current status: core project docs, workflow docs, API docs, TODO tracking, and the service implementation tutorial are in place. No open Issues remain for this milestone.
+Current status: core project docs, workflow docs, API docs, TODO tracking, renovation philosophy, and the service implementation tutorial are in place. No open Issues remain for this milestone.
 
 ### php-modernization
 
