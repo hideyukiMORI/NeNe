@@ -40,6 +40,7 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         self::assertStringContainsString('/serverinstall/index', $response->body());
         self::assertStringContainsString('/health/index', $response->body());
         self::assertStringContainsString('php cli/setupDatabase.php --env=.env --yes', $response->body());
+        self::assertStringContainsString('DB Type: ', $response->body());
     }
 
     public function testHealthEndpointReportsApiDatabaseAndSchemaStatus(): void
@@ -54,6 +55,8 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         self::assertSame(true, $payload['Data']['api']);
         self::assertSame(true, $payload['Data']['database']);
         self::assertSame(true, $payload['Data']['schema']);
+        self::assertSame('development', $payload['Data']['environment']);
+        self::assertSame('MySQL', $payload['Data']['databaseType']);
     }
 
     public function testServerInstallGuidePageRespondsWithDeploymentChecklist(): void

@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #129: Show the database type in the development health check card.
 - #127: Remove the tracked generated SQLite database artifact.
 - #125: Clarify the SQLite3 initialization command in install documentation.
 - #123: Load the repository-root `.env` before web runtime initialization.
@@ -49,7 +50,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
-- No active short-term TODO after #127. Use new GitHub Issues for follow-up work.
+- No active short-term TODO after #129. Use new GitHub Issues for follow-up work.
 
 ## Backlog Candidates
 

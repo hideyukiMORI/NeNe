@@ -46,6 +46,7 @@ final class DatabaseInstaller
             'api' => true,
             'database' => false,
             'schema' => false,
+            'environment' => defined('APP_ENV') ? APP_ENV : '',
             'databaseType' => defined('DB_TYPE') ? DB_TYPE : '',
         ];
 
