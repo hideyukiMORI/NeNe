@@ -83,6 +83,16 @@ NENE_HTTP_BASE_URL=http://localhost:8080 composer check
 
 HTTP tests use a test title prefix and clean up matching TODO rows before each runtime test. Tests that create TODOs also register them for cleanup during teardown, so failed tests should not leave long-lived sample data behind.
 
+### Error Exposure Check
+
+`HttpErrorExposureTest` is an optional HTTP runtime test for public error responses. It runs only when `NENE_HTTP_ERROR_BASE_URL` points to a deliberately broken production-like app, for example one started with `NENE_APP_DEBUG=0` and invalid database settings.
+
+```sh
+NENE_HTTP_ERROR_BASE_URL=http://localhost:8081 vendor/bin/phpunit tests/Http/HttpErrorExposureTest.php
+```
+
+The test confirms that database connection failures return a generic `Internal Server Error` body instead of leaking `SQLSTATE` or connection details.
+
 ## OpenAPI Contract Test Scope
 
 `OpenApiRuntimeContractTest` reads `docs/api/openapi.yaml` with `symfony/yaml` and verifies a small runtime contract: documented REST operations must exist, and observed runtime HTTP statuses must be listed in OpenAPI.

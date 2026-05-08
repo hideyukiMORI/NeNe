@@ -28,6 +28,11 @@ declare(strict_types=1);
  * - Use define() for values that are resolved at runtime, such as paths based
  *   on __DIR__ or values read from environment variables.
  *
+ * Runtime mode:
+ * - NENE_APP_ENV names the runtime environment.
+ * - NENE_APP_DEBUG controls whether detailed PHP errors may be shown in HTTP
+ *   responses. Keep it disabled outside trusted local development.
+ *
  * Local development:
  * - Docker Compose passes NENE_DB_* values into the application container.
  * - Without those variables, NeNe falls back to the SQLite-oriented defaults
@@ -66,12 +71,19 @@ $getEnv = static function (string $name, string $default): string {
 /*
  * Application.
  *
- * VERSION is exposed to templates for cache-busting and display. DEBUG_MODE is
- * currently a legacy integer flag because templates and framework code expect
- * 1 or 0 rather than a boolean.
+ * VERSION is exposed to templates for cache-busting and display. APP_DEBUG is
+ * the runtime boolean flag; DEBUG_MODE remains the legacy integer equivalent
+ * because templates and framework code expect 1 or 0.
  */
 const VERSION = '0.0.0.1';
-const DEBUG_MODE = 1; // 1 = on, 0 = off.
+define('APP_ENV', $getEnv('NENE_APP_ENV', 'development'));
+define('APP_DEBUG', in_array(strtolower($getEnv('NENE_APP_DEBUG', APP_ENV === 'production' ? '0' : '1')), [
+    '1',
+    'true',
+    'on',
+    'yes',
+], true));
+define('DEBUG_MODE', APP_DEBUG ? 1 : 0); // 1 = on, 0 = off.
 const LOG_LEVEL = 'INFO'; // EMERGENCY or INFO.
 
 // Session namespace used by the original framework session connection.
