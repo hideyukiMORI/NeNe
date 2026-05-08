@@ -19,6 +19,16 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         self::assertStringContainsString('/css/index/index.css', $response->body());
     }
 
+    public function testExplicitIndexRouteRespondsWithDevelopersHtml(): void
+    {
+        $response = $this->client->request('GET', '/index/index');
+
+        self::assertSame(200, $response->statusCode());
+        self::assertStringContainsString('text/html', $response->headerLine('Content-Type'));
+        self::assertStringContainsString('id="app"', $response->body());
+        self::assertStringContainsString('/js/index/index.js', $response->body());
+    }
+
     public function testSwaggerUiAndOpenApiDocumentAreServed(): void
     {
         $swaggerResponse = $this->client->request('GET', '/api-docs/');
@@ -63,6 +73,33 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         self::assertSame(200, $logoutResponse->statusCode());
         self::assertStringContainsString('PHPSESSID=', $logoutCookie);
         self::assertStringContainsString('expires=', strtolower($logoutCookie));
+    }
+
+    public function testLoginRestEndpointRejectsUnsupportedMethod(): void
+    {
+        $response = $this->client->request('GET', '/session/login');
+        $payload = $response->json();
+
+        self::assertSame(405, $response->statusCode());
+        self::assertSame('POST', $response->headerLine('Allow'));
+        self::assertSame(true, $payload['Result']);
+        self::assertSame('failure', $payload['Data']['status']);
+        self::assertSame('METHOD-NOT-ALLOWED', $payload['Data']['errorCode']);
+    }
+
+    public function testRestResponseStaysJsonWhenCallbackQueryIsPresent(): void
+    {
+        $response = $this->client->json('POST', '/session/login?callback=jsonCallback', [
+            'user_id' => 'admin',
+            'user_pass' => 'admin',
+        ]);
+        $payload = $response->json();
+
+        self::assertSame(200, $response->statusCode());
+        self::assertStringContainsString('application/json', $response->headerLine('Content-Type'));
+        self::assertStringNotContainsString('jsonCallback(', $response->body());
+        self::assertSame(true, $payload['Result']);
+        self::assertSame('success', $payload['Data']['status']);
     }
 
     public function testSessionAndTodoCrudFlowRunsThroughHttpRuntime(): void

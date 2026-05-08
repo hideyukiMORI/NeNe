@@ -64,7 +64,7 @@ docker compose run --rm app sh -lc "composer install --no-interaction --prefer-d
 
 ## HTTP Runtime Smoke Tests
 
-HTTP runtime tests exercise the Docker-served application through real HTTP requests. They cover the top page, Swagger UI, session login/logout, TODO CRUD, and REST method handling.
+HTTP runtime tests exercise the Docker-served application through real HTTP requests. They cover the top page, explicit URL routing, Swagger UI, session login/logout, TODO CRUD, REST method handling, and the JSON-only REST response policy.
 
 Start the Docker environment first:
 
