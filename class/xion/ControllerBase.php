@@ -347,7 +347,7 @@ abstract class ControllerBase
                 Func\Json::outputArrayToJson(
                     $return,
                     $this->OUTPUT_JSON_STYLE,
-                    filter_input(INPUT_GET, 'callback'),
+                    filter_input(INPUT_GET, 'callback') ?: '',
                     $this->SESSION_CHECK
                 );
             }

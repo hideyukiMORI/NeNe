@@ -120,9 +120,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const state = useState(false);
         const isSignedIn = state[0];
         const setIsSignedIn = state[1];
-        const emailState = useState('demo@example.com');
-        const email = emailState[0];
-        const setEmail = emailState[1];
+        const userIdState = useState('admin');
+        const userId = userIdState[0];
+        const setUserId = userIdState[1];
+        const passwordState = useState('admin');
+        const password = passwordState[0];
+        const setPassword = passwordState[1];
         const taskState = useState('');
         const task = taskState[0];
         const setTask = taskState[1];
@@ -132,6 +135,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const statusState = useState('');
         const status = statusState[0];
         const setStatus = statusState[1];
+        const loginErrorState = useState('');
+        const loginError = loginErrorState[0];
+        const setLoginError = loginErrorState[1];
+        const userState = useState(null);
+        const user = userState[0];
+        const setUser = userState[1];
 
         useEffect(function() {
             if (isSignedIn) {
@@ -153,6 +162,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                     ? body.Error.ErrorMessage
                                     : 'Request failed.'
                             );
+                        }
+                        if (body.Data && body.Data.status === 'failure') {
+                            throw new Error(body.Data.errorMessage || 'Request failed.');
                         }
                         return body.Data;
                     });
@@ -181,9 +193,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function signIn(event) {
             event.preventDefault();
-            if (email.trim()) {
-                setIsSignedIn(true);
+            setLoginError('');
+            if (!userId.trim() || !password.trim()) {
+                setLoginError('ID and password are required.');
+                return;
             }
+            requestJson('/session/login', {
+                method: 'POST',
+                body: JSON.stringify({
+                    user_id: userId,
+                    user_pass: password
+                })
+            }).then(function(data) {
+                setUser(data.user);
+                setIsSignedIn(true);
+            }).catch(function(error) {
+                setLoginError(error.message);
+            });
         }
 
         function addTodo(event) {
@@ -258,12 +284,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         task: task,
                         todos: todos,
                         status: status,
-                        toggleTodo: toggleTodo
+                        toggleTodo: toggleTodo,
+                        user: user
                     })
                     : e(LoginForm, {
-                        email: email,
-                        setEmail: setEmail,
-                        signIn: signIn
+                        loginError: loginError,
+                        password: password,
+                        setPassword: setPassword,
+                        setUserId: setUserId,
+                        signIn: signIn,
+                        userId: userId
                     })
             )
         );
@@ -271,23 +301,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function LoginForm(props) {
         return e('form', { className: 'sample-form', onSubmit: props.signIn },
+            props.loginError ? e('p', { className: 'sample-form__error' }, props.loginError) : null,
             e('label', null,
-                e('span', null, 'Email'),
+                e('span', null, 'User ID'),
                 e('input', {
-                    type: 'email',
-                    value: props.email,
+                    type: 'text',
+                    value: props.userId,
                     onChange: function(event) {
-                        props.setEmail(event.target.value);
+                        props.setUserId(event.target.value);
                     },
-                    placeholder: 'demo@example.com'
+                    placeholder: 'admin'
                 })
             ),
             e('label', null,
                 e('span', null, 'Password'),
                 e('input', {
                     type: 'password',
-                    defaultValue: 'password',
-                    placeholder: 'password'
+                    value: props.password,
+                    onChange: function(event) {
+                        props.setPassword(event.target.value);
+                    },
+                    placeholder: 'admin'
                 })
             ),
             e('button', { className: 'button button--primary', type: 'submit' }, 'Sign in')
@@ -296,6 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function TodoPanel(props) {
         return e('div', { className: 'todo-panel' },
+            props.user ? e('p', { className: 'todo-panel__user' }, 'Signed in as ' + props.user.user_id) : null,
             props.status ? e('p', { className: 'todo-panel__status' }, props.status) : null,
             e('form', { className: 'todo-panel__form', onSubmit: props.addTodo },
                 e('input', {
