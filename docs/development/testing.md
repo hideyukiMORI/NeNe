@@ -15,7 +15,7 @@ Good early targets:
 Avoid as first targets:
 
 - Functions that call `header()`
-- Functions that `echo` and `exit()`
+- Functions that emit HTTP output directly instead of returning or throwing a response boundary value
 - Code that requires global constants, `$_SERVER`, sessions, database connections, or Smarty setup
 
 ## Run Tests

@@ -19,7 +19,6 @@ namespace Nene\Xion;
 
 use Monolog\Logger;
 use Nene\Database as Database;
-use Nene\Func as Func;
 use Nene\Xion as Xion;
 use PDO;
 use PDOStatement;
@@ -322,7 +321,6 @@ abstract class DataMapperBase
             $stmt->execute();
         } catch (\PDOException $e) {
             $this->handleDatabaseException($e);
-            exit();
         }
         return $stmt;
     }
@@ -341,7 +339,6 @@ abstract class DataMapperBase
             $stmt = $this->DB->query($query);
         } catch (\PDOException $e) {
             $this->handleDatabaseException($e);
-            exit();
         }
         return $stmt;
     }
@@ -351,13 +348,15 @@ abstract class DataMapperBase
      *
      * @param \PDOException $exception Database exception.
      *
-     * @return void
+     * @return never
      */
-    private function handleDatabaseException(\PDOException $exception): void
+    private function handleDatabaseException(\PDOException $exception): never
     {
         $this->LOGGER->error('Database query failed.', ['exception' => $exception]);
-        http_response_code(500);
-        echo APP_DEBUG ? $exception->getMessage() : 'Internal Server Error';
+        throw new HttpTermination(HttpResponse::text(
+            APP_DEBUG ? $exception->getMessage() : 'Internal Server Error',
+            500
+        ));
     }
 
     /**
@@ -418,6 +417,6 @@ abstract class DataMapperBase
      */
     final protected function error(string $errorCode, string $errorMessage): void
     {
-        Func\Json::outputErrorInJson($errorCode, $errorMessage);
+        JsonResponder::outputError($errorCode, $errorMessage);
     }
 }

@@ -51,6 +51,6 @@ Cookie-authenticated state-changing REST requests must send the `X-CSRF-Token` h
 
 Authentication failures use HTTP `401 Unauthorized`. `LOGIN-FAILED` means submitted credentials were rejected, and `SESSION-CLOSED` means a cookie-authenticated endpoint was called without a valid login session.
 
-## JSONP
+## JSON Response Policy
 
-JSON is the default REST response format. Legacy JSONP output remains for compatibility, but callbacks must be valid JavaScript identifier paths such as `jsonCallback` or `App.callbacks.done`; invalid callback values fall back to `jsonCallback`.
+REST responses are JSON only. Legacy JSONP output was removed in #108 so new services have one clear response style, and controllers do not need to choose between JSON and JSONP.

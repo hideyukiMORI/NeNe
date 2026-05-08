@@ -33,17 +33,18 @@ echo 'Do you want to initialize SQLite? (Y/N)' . PHP_EOL;
 $answer = trim((string)fgets(STDIN));
 if (!in_array(strtolower($answer), ['y', 'yes'], true)) {
     echo 'OK. Bye!' . PHP_EOL;
-    exit(0);
+    return 0;
 }
 
 try {
     initializeSQLite(DB_DIR, DB_FILE);
 } catch (Throwable $exception) {
     fwrite(STDERR, 'SQLite initialization failed: ' . $exception->getMessage() . PHP_EOL);
-    exit(1);
+    return 1;
 }
 
 echo 'Processing has been completed.' . PHP_EOL;
+return 0;
 
 /**
  * Initialize a SQLite database with the same sample tables as MySQL.

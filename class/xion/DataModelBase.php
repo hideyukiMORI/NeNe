@@ -106,9 +106,7 @@ abstract class DataModelBase
         } elseif (isset(static::$schema[$prop])) {
             return null;
         } else {
-            echo 'DATA MODEL ERROR. Unable to get parameters. The property "' . $prop . '" may not be defined.';
             throw new \InvalidArgumentException('GET ' . $prop . ' IS DISABLE.');
-            exit();
         }
     }
 
@@ -203,9 +201,7 @@ abstract class DataModelBase
     public function __set(string $prop, mixed $val)
     {
         if (!isset(static::$schema[$prop])) {
-            echo 'DATA MODEL ERROR. Unable to set parameters. The property "' . $prop . '" may not be defined.';
             throw new \InvalidArgumentException('SET ' . $prop . ' IS DISABLE.');
-            exit();
         }
 
         $schema = static::$schema[$prop];

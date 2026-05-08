@@ -88,7 +88,7 @@ Completed:
 - Hardened session lifecycle and cookie attributes.
 - Switched sample credentials to password hashes.
 - Added CSRF protection for state-changing cookie-authenticated REST requests.
-- Validated JSONP callbacks.
+- Removed legacy JSONP output and standardized REST responses on JSON.
 - Safely encoded inline script JSON.
 - Moved Dispatcher errors into the shared JSON error responder.
 - Changed authentication failures to HTTP `401`.

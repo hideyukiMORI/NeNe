@@ -48,7 +48,7 @@ class ApiResponse
     {
         return array_merge([
             'status' => 'success',
-            'errorCode' => ''
+            'errorCode' => '',
         ], $data);
     }
 
@@ -61,11 +61,10 @@ class ApiResponse
      */
     public function failure(string $errorCode): array
     {
-        http_response_code($this->errorCode->getHttpStatus($errorCode));
         return [
             'status' => 'failure',
             'errorCode' => $errorCode,
-            'errorMessage' => $this->errorCode->getErrorText($errorCode)
+            'errorMessage' => $this->errorCode->getErrorText($errorCode),
         ];
     }
 }

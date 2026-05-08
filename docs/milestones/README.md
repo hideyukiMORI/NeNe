@@ -35,7 +35,7 @@ What was renovated:
 - PHPUnit unit tests and HTTP runtime smoke tests.
 - Method-specific REST dispatch such as `indexGetRest()` and `indexPostRest()`.
 - OpenAPI and Swagger UI for the sample REST contract.
-- Security-sensitive paths: sessions, cookies, password hashing, CSRF, JSONP, inline script JSON, error exposure, and request wrappers.
+- Security-sensitive paths: sessions, cookies, password hashing, CSRF, JSON-only REST responses, inline script JSON, error exposure, and request wrappers.
 - Static analysis and formatting foundations with Phan and PHP CS Fixer.
 
 Current status: known stabilization Issues are complete. No open Issues remain for this milestone.
@@ -56,7 +56,7 @@ Current status: modernization foundation is in place. Composer packages were upd
 
 Purpose: reduce security risk through dependency updates, secure defaults, input/output review, and safer error handling.
 
-Current status: focused security hardening is complete for the reviewed request/session/template/error-handling paths. Sessions, cookie attributes, password hashing, CSRF, JSONP callback validation, inline script JSON encoding, Dispatcher JSON errors, authentication status codes, and request variable storage have been hardened. Future security work should be handled as new small Issues when findings appear.
+Current status: focused security hardening is complete for the reviewed request/session/template/error-handling paths. Sessions, cookie attributes, password hashing, CSRF, JSON-only REST responses, inline script JSON encoding, Dispatcher JSON errors, authentication status codes, and request variable storage have been hardened. Future security work should be handled as new small Issues when findings appear.
 
 ### openapi-contracts
 

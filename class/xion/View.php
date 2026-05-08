@@ -324,12 +324,13 @@ class View
      *
      * @param string $p_message Error message text.
      *
-     * @return void
+     * @return never
      */
-    final public function error(string $p_message): void
+    final public function error(string $p_message): never
     {
         $routeContext = RouteContext::getInstance();
         $controller = $routeContext->controller();
+        ob_start();
         self::$instance
             ->setString('t_root', URI_ROOT)
             ->setString('t_controller', $controller)
@@ -338,7 +339,8 @@ class View
             ->setString('t_message', $p_message)
             ->setTemplate('error.tpl')
             ->execute();
-        exit;
+        $body = ob_get_clean();
+        throw new HttpTermination(HttpResponse::html(is_string($body) ? $body : '', 500));
     }
 
     /**
