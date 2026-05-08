@@ -37,7 +37,7 @@ class User extends DataModelBase
         'user_pass'  => parent::STRING,
         'user_name'  => parent::STRING,
         'e_mail'     => parent::STRING,
-        'is_deleted' => parent::STRING
+        'is_deleted' => parent::STRING,
     ];
 
     /**
@@ -46,13 +46,12 @@ class User extends DataModelBase
      * @var array
      */
     protected static $validation = [
-        'user_id'    => ['required' => true],
         'created_at' => ['required' => true],
         'updated_at' => ['required' => true],
         'user_id'    => ['required' => true, 'maxlength' => 64],
-        'user_pass'  => ['required' => true, 'maxlength' => 64, 'minlength' => 6],
+        'user_pass'  => ['required' => true, 'maxlength' => 255, 'minlength' => 6],
         'user_name'  => ['required' => true, 'maxlength' => 255],
         'e_mail'     => ['required' => true, 'maxlength' => 255],
-        'is_deleted' => ['required' => true, 'bool' => true]
+        'is_deleted' => ['required' => true, 'bool' => true],
     ];
 }

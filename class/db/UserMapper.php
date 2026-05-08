@@ -50,15 +50,28 @@ class UserMapper extends DataMapperBase
      */
     final public function checkLogin(string $user_id, string $user_pass): int
     {
+        return $this->findByCredentials($user_id, $user_pass) === null ? 0 : 1;
+    }
+
+    /**
+     * Find an active user by user ID.
+     *
+     * @param string $user_id User ID.
+     *
+     * @return array<string,mixed>|null User row including password hash.
+     */
+    private function findActiveUserByUserId(string $user_id): ?array
+    {
         $stmt = $this->DB->prepare('
-            SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
-            WHERE   user_id =:user_id
-            AND     user_pass =:user_pass
+            SELECT id, user_id, user_pass, user_name, e_mail
+            FROM ' . static::TARGET_TABLE . '
+            WHERE user_id = :user_id
+            AND is_deleted = 0
             LIMIT 1
         ');
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_STR);
-        $stmt->bindParam(':user_pass', $user_pass, PDO::PARAM_STR);
-        return (int)$this->execute($stmt)->fetchColumn();
+        $stmt->bindValue(':user_id', $user_id, PDO::PARAM_STR);
+        $row = $this->execute($stmt)->fetch(PDO::FETCH_ASSOC);
+        return is_array($row) ? $row : null;
     }
 
     /**
@@ -71,17 +84,12 @@ class UserMapper extends DataMapperBase
      */
     final public function findByCredentials(string $user_id, string $user_pass): ?array
     {
-        $stmt = $this->DB->prepare('
-            SELECT id, user_id, user_name, e_mail
-            FROM ' . static::TARGET_TABLE . '
-            WHERE user_id = :user_id
-            AND user_pass = :user_pass
-            AND is_deleted = 0
-            LIMIT 1
-        ');
-        $stmt->bindValue(':user_id', $user_id, PDO::PARAM_STR);
-        $stmt->bindValue(':user_pass', $user_pass, PDO::PARAM_STR);
-        $row = $this->execute($stmt)->fetch(PDO::FETCH_ASSOC);
-        return is_array($row) ? $row : null;
+        $row = $this->findActiveUserByUserId($user_id);
+        if ($row === null || !password_verify($user_pass, (string)$row['user_pass'])) {
+            return null;
+        }
+
+        unset($row['user_pass']);
+        return $row;
     }
 }

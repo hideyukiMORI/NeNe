@@ -87,7 +87,7 @@ user: admin
 password: admin
 ```
 
-Do not use this account in production.
+The seed stores this password with PHP `password_hash()` and the app verifies it with `password_verify()`. The credential is only for the local sample; do not use this account in production.
 
 To expose MySQL on another host port:
 
@@ -107,6 +107,12 @@ The SQLite initializer remains available for non-Docker or fallback usage. It cr
 
 ```sh
 docker compose run --rm app sh -lc "printf 'Y\n' | php cli/initSQLite.php"
+```
+
+For SQLite-only sample data, `NENE_SAMPLE_ADMIN_PASSWORD` can override the inserted admin password before it is hashed:
+
+```sh
+NENE_DB_TYPE=SQLite3 NENE_SAMPLE_ADMIN_PASSWORD=local-secret docker compose run --rm app sh -lc "printf 'Y\n' | php cli/initSQLite.php"
 ```
 
 To run the application against SQLite instead of the Docker MySQL service, start the app with SQLite environment values:
