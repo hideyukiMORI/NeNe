@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace Nene\Xion;
 
+use Monolog\Logger;
 use Nene\Model          as Model;
 use Nene\Database       as Database;
 use Nene\Xion           as Xion;
@@ -165,14 +166,14 @@ abstract class ControllerBase
      *
      * Controller execution.
      *
-     * @return mix
+     * @return mixed
      */
     final public function run()
     {
         if (APP_CONTROLLER != 'debug') {
             $_SESSION['global']['referer']['controller']    = APP_CONTROLLER;
             $_SESSION['global']['referer']['action']        = APP_ACTION;
-            $this->ACCESS_LOGGER->addInfo(
+            $this->ACCESS_LOGGER->info(
                 'ACCESS : ' . APP_CONTROLLER . '::' . APP_ACTION,
                 [
                     $_SERVER['HTTP_USER_AGENT'] ?? '',

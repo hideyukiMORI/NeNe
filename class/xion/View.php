@@ -17,8 +17,8 @@ declare(strict_types=1);
 
 namespace Nene\Xion;
 
-use Smarty;
 use PDOStatement;
+use Smarty\Smarty;
 
 /**
  * VIEW
@@ -67,11 +67,10 @@ class View
     final private function __construct()
     {
         $this->smarty = new Smarty();                           // SMARTY OBJECT
-        $this->smarty->template_dir  = DIR_SMARTY_TEMPLATE;     // TEMPLATE DIR
-        $this->smarty->compile_dir   = DIR_SMARTY_COMPILE;      // TEMPLATE COMPILE DIR
-        $this->smarty->config_dir    = DIR_SMARTY_CONFIG;       // CONFIG DIR
-        $this->smarty->addPluginsDir(DIR_SMARTY_PLUGINS);       // PLUGINS DIR
-        $this->smarty->escape_html   = true;
+        $this->smarty->setTemplateDir(DIR_SMARTY_TEMPLATE);     // TEMPLATE DIR
+        $this->smarty->setCompileDir(DIR_SMARTY_COMPILE);       // TEMPLATE COMPILE DIR
+        $this->smarty->setConfigDir(DIR_SMARTY_CONFIG);         // CONFIG DIR
+        $this->smarty->setEscapeHtml(true);
     }
 
     /**
@@ -318,7 +317,7 @@ class View
         self::$instance
             ->setCSS()
             ->setJS()
-            ->smarty->display(self::$instance->smarty->template_dir[0] . self::$instance->template);
+            ->smarty->display(self::$instance->template);
     }
 
     /**

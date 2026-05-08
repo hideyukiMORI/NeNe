@@ -17,8 +17,9 @@ declare(strict_types=1);
 
 namespace Nene\Xion;
 
-use Monolog\Logger;
 use Monolog\Handler\RotatingFileHandler;
+use Monolog\Level;
+use Monolog\Logger;
 
 /**
  * LOGGING class
@@ -32,28 +33,28 @@ class Log
     /**
      * Instance to pass as a singleton.
      *
-     * @var [type]
+     * @var Log
      */
     private static $instance;
 
     /**
      * Logger class for access log
      *
-     * @var [type]
+     * @var Logger
      */
     public $accessLog;
 
     /**
      * Logger class for information log
      *
-     * @var [type]
+     * @var Logger
      */
     public $informationLog;
 
     /**
      * Logger class for error log
      *
-     * @var [type]
+     * @var Logger
      */
     public $errorLog;
 
@@ -63,16 +64,16 @@ class Log
     final private function __construct()
     {
         $this->accessLog = new Logger('Nene');
-        $this->accessLog->pushHandler(new RotatingFileHandler(ACCESS_LOG_PATH, 60, Logger::INFO));
+        $this->accessLog->pushHandler(new RotatingFileHandler(ACCESS_LOG_PATH, 60, Level::Info));
         $this->informationLog = new Logger('Nene');
         $this->errorLog = new Logger('Nene');
-        $this->errorLog->pushHandler(new RotatingFileHandler(ERROR_LOG_PATH, 60, Logger::ERROR));
+        $this->errorLog->pushHandler(new RotatingFileHandler(ERROR_LOG_PATH, 60, Level::Error));
         if (LOG_LEVEL == 'EMERGENCY') {
             // $this->logger->pushHandler(new StreamHandler(APP_LOG_PATH, Logger::EMERGENCY));
-            $this->informationLog->pushHandler(new RotatingFileHandler(APP_LOG_PATH, 100, Logger::EMERGENCY));
+            $this->informationLog->pushHandler(new RotatingFileHandler(APP_LOG_PATH, 100, Level::Emergency));
         } else {
             // $this->logger->pushHandler(new StreamHandler(APP_LOG_PATH, Logger::INFO));
-            $this->informationLog->pushHandler(new RotatingFileHandler(APP_LOG_PATH, 100, Logger::INFO));
+            $this->informationLog->pushHandler(new RotatingFileHandler(APP_LOG_PATH, 100, Level::Info));
         }
     }
 
@@ -83,7 +84,7 @@ class Log
      *
      * @return Logger
      */
-    final public static function getInstance(string $mode = 'information')
+    final public static function getInstance(string $mode = 'information'): Logger
     {
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -91,13 +92,10 @@ class Log
         switch ($mode) {
             case 'information':
                 return self::$instance->informationLog;
-                break;
             case 'error':
                 return self::$instance->errorLog;
-                break;
             default:
                 return self::$instance->accessLog;
-                break;
         }
     }
 
