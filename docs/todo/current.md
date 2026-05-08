@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #16: Add PHPUnit test foundation and first pure function tests.
 - #8: Rename default branch from `master` to `main`.
 - #6: Add project documentation, AI guide, coding standards, workflow, roadmap, TODO, milestones, and ADR foundation.
 
