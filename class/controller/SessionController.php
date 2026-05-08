@@ -17,8 +17,8 @@ declare(strict_types=1);
 
 namespace Nene\Controller;
 
-use Nene\Xion\ControllerBase;
 use Nene\Database as Database;
+use Nene\Xion\ControllerBase;
 
 /**
  * SessionController
@@ -61,7 +61,7 @@ class SessionController extends ControllerBase
      */
     public function logoutPostRest(): array
     {
-        $this->logout();
+        $this->logout(true);
         return $this->API_RESPONSE->success();
     }
 }

@@ -58,11 +58,15 @@ class AuthSession
      */
     final public function login(array $user): array
     {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
+
         $loginUser = [
             'id'        => (int)$user['id'],
             'user_id'   => (string)$user['user_id'],
             'user_name' => (string)$user['user_name'],
-            'e_mail'    => (string)$user['e_mail']
+            'e_mail'    => (string)$user['e_mail'],
         ];
         $_SESSION['xion']['login_mode'] = 'login';
         $_SESSION['xion']['user'] = $loginUser;
@@ -74,9 +78,44 @@ class AuthSession
      *
      * @return void
      */
-    final public function logout(): void
+    final public function logout(bool $destroySession = false): void
     {
         unset($_SESSION['xion']);
+
+        if ($destroySession) {
+            $_SESSION = [];
+        }
+
+        if ($destroySession && session_status() === PHP_SESSION_ACTIVE) {
+            $this->expireSessionCookie();
+            session_destroy();
+        }
+    }
+
+    /**
+     * Expire the browser session Cookie using the active Cookie parameters.
+     *
+     * @return void
+     */
+    private function expireSessionCookie(): void
+    {
+        if (headers_sent()) {
+            return;
+        }
+
+        $params = session_get_cookie_params();
+        $cookieOptions = [
+            'expires' => time() - 3600,
+            'path' => $params['path'] ?? '/',
+            'secure' => (bool)($params['secure'] ?? false),
+            'httponly' => (bool)($params['httponly'] ?? true),
+            'samesite' => (string)($params['samesite'] ?? 'Lax'),
+        ];
+        if (($params['domain'] ?? '') !== '') {
+            $cookieOptions['domain'] = $params['domain'];
+        }
+
+        setcookie(session_name(), '', $cookieOptions);
     }
 
     /**

@@ -31,13 +31,32 @@ cp .env.example .env
 
 The local `.env` file is ignored by Git. Keep real secrets out of the repository.
 
-The application reads database settings through `getenv()` in `ini/xSystemIni.php`. In Docker, Compose injects the connection type, host, and container port into the app service. The shared credentials and exposed host ports can be changed through `.env`.
+The application reads runtime, session, and database settings through `getenv()` in `ini/xSystemIni.php`. In Docker, Compose injects the connection type, host, and container port into the app service. The shared credentials and exposed host ports can be changed through `.env`.
 
 Use another port if needed:
 
 ```sh
 NENE_PORT=8081 docker compose up --build
 ```
+
+## Session Cookie Settings
+
+The app explicitly configures PHP session Cookie attributes before `session_start()`:
+
+```text
+HttpOnly: enabled
+SameSite: Lax
+Secure: disabled for local HTTP development
+Lifetime: browser session
+```
+
+For production behind HTTPS, set:
+
+```sh
+NENE_APP_ENV=production NENE_APP_DEBUG=0 NENE_SESSION_SECURE=1 docker compose up --build
+```
+
+`Secure` is not enabled by default in local Docker because the sample app is served over plain `http://localhost:8080/`. Enabling it on plain HTTP prevents browsers from sending the session Cookie.
 
 ## MySQL Development Database
 

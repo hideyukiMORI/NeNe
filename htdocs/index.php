@@ -28,6 +28,7 @@ require_once '../vendor/autoload.php';
 Xion\Initialize::init();
 
 configurePublicErrorDisplay();
+configureSessionCookie();
 session_cache_expire(180);
 date_default_timezone_set('Asia/Tokyo');
 session_start();
@@ -43,4 +44,18 @@ function configurePublicErrorDisplay(): void
 {
     ini_set('display_errors', APP_DEBUG ? '1' : '0');
     ini_set('display_startup_errors', APP_DEBUG ? '1' : '0');
+}
+
+/**
+ * Configure PHP session Cookie attributes before session_start().
+ */
+function configureSessionCookie(): void
+{
+    session_set_cookie_params([
+        'lifetime' => SESSION_COOKIE_LIFETIME,
+        'path' => URI_ROOT,
+        'secure' => SESSION_COOKIE_SECURE,
+        'httponly' => SESSION_COOKIE_HTTPONLY,
+        'samesite' => SESSION_COOKIE_SAMESITE,
+    ]);
 }
