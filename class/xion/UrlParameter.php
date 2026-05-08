@@ -38,13 +38,15 @@ class UrlParameter extends RequestVariables
      */
     final protected function setValues(): void
     {
-        $param = rtrim($_SERVER['REQUEST_URI'], '/');
+        $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '';
+        $param = trim($requestPath, '/');
         $params = [];
         if ('' != $param) {
             $params = explode('/', $param);
         }
-        if (LAYERS_NUM + 3 < count($params)) {
-            foreach ($params as $param) {
+        if (LAYERS_NUM + 2 < count($params)) {
+            $urlParams = array_slice($params, LAYERS_NUM + 2);
+            foreach ($urlParams as $param) {
                 $split = explode('_', $param);
                 if (2 == count($split)) {
                     $key = $split[0];

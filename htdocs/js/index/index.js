@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const e = React.createElement;
+    const useEffect = React.useEffect;
     const useState = React.useState;
     const tagline = root.dataset.tagline || 'A small legacy PHP framework for URL-based applications.';
 
@@ -116,10 +117,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function SampleApp() {
-        const initialTodos = [
-            { id: 1, text: 'Read the routing guide', completed: true },
-            { id: 2, text: 'Create a controller action', completed: false }
-        ];
         const state = useState(false);
         const isSignedIn = state[0];
         const setIsSignedIn = state[1];
@@ -129,9 +126,58 @@ document.addEventListener('DOMContentLoaded', function() {
         const taskState = useState('');
         const task = taskState[0];
         const setTask = taskState[1];
-        const todosState = useState(initialTodos);
+        const todosState = useState([]);
         const todos = todosState[0];
         const setTodos = todosState[1];
+        const statusState = useState('');
+        const status = statusState[0];
+        const setStatus = statusState[1];
+
+        useEffect(function() {
+            if (isSignedIn) {
+                loadTodos();
+            }
+        }, [isSignedIn]);
+
+        function requestJson(url, options) {
+            const requestOptions = options || {};
+            requestOptions.headers = Object.assign({
+                'Content-Type': 'application/json'
+            }, requestOptions.headers || {});
+            return fetch(url, requestOptions)
+                .then(function(response) {
+                    return response.json().then(function(body) {
+                        if (!response.ok || !body.Result) {
+                            throw new Error(
+                                body.Error
+                                    ? body.Error.ErrorMessage
+                                    : 'Request failed.'
+                            );
+                        }
+                        return body.Data;
+                    });
+                });
+        }
+
+        function normalizeTodo(todo) {
+            return {
+                id: todo.id,
+                text: todo.title,
+                completed: todo.is_completed
+            };
+        }
+
+        function loadTodos() {
+            setStatus('Loading TODOs...');
+            return requestJson('/todo/index')
+                .then(function(data) {
+                    setTodos(data.todos.map(normalizeTodo));
+                    setStatus('');
+                })
+                .catch(function(error) {
+                    setStatus(error.message);
+                });
+        }
 
         function signIn(event) {
             event.preventDefault();
@@ -146,31 +192,53 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!text) {
                 return;
             }
-            setTodos(todos.concat({
-                id: Date.now(),
-                text: text,
-                completed: false
-            }));
-            setTask('');
+            setStatus('Creating TODO...');
+            requestJson('/todo/index', {
+                method: 'POST',
+                body: JSON.stringify({ title: text })
+            }).then(function(data) {
+                setTodos(todos.concat(normalizeTodo(data.todo)));
+                setTask('');
+                setStatus('');
+            }).catch(function(error) {
+                setStatus(error.message);
+            });
         }
 
         function toggleTodo(id) {
-            setTodos(todos.map(function(todo) {
-                if (todo.id !== id) {
-                    return todo;
-                }
-                return {
-                    id: todo.id,
-                    text: todo.text,
-                    completed: !todo.completed
-                };
-            }));
+            const target = todos.find(function(todo) {
+                return todo.id === id;
+            });
+            if (!target) {
+                return;
+            }
+            setStatus('Updating TODO...');
+            requestJson('/todo/item/id_' + id, {
+                method: 'PUT',
+                body: JSON.stringify({ is_completed: !target.completed })
+            }).then(function(data) {
+                const updatedTodo = normalizeTodo(data.todo);
+                setTodos(todos.map(function(todo) {
+                    return todo.id === id ? updatedTodo : todo;
+                }));
+                setStatus('');
+            }).catch(function(error) {
+                setStatus(error.message);
+            });
         }
 
         function removeTodo(id) {
-            setTodos(todos.filter(function(todo) {
-                return todo.id !== id;
-            }));
+            setStatus('Deleting TODO...');
+            requestJson('/todo/item/id_' + id, {
+                method: 'DELETE'
+            }).then(function() {
+                setTodos(todos.filter(function(todo) {
+                    return todo.id !== id;
+                }));
+                setStatus('');
+            }).catch(function(error) {
+                setStatus(error.message);
+            });
         }
 
         return e('section', { className: 'developers__section developers__sample', id: 'sample-app' },
@@ -189,6 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         setTask: setTask,
                         task: task,
                         todos: todos,
+                        status: status,
                         toggleTodo: toggleTodo
                     })
                     : e(LoginForm, {
@@ -227,6 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function TodoPanel(props) {
         return e('div', { className: 'todo-panel' },
+            props.status ? e('p', { className: 'todo-panel__status' }, props.status) : null,
             e('form', { className: 'todo-panel__form', onSubmit: props.addTodo },
                 e('input', {
                     value: props.task,
