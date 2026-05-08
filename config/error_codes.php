@@ -5,11 +5,11 @@ declare(strict_types=1);
 return [
     'SESSION-CLOSED' => [
         'message' => 'Session timeout. Please log in again.',
-        'httpStatus' => 200,
+        'httpStatus' => 401,
     ],
     'LOGIN-FAILED' => [
         'message' => 'Wrong user ID or user PASS',
-        'httpStatus' => 200,
+        'httpStatus' => 401,
     ],
     'CSRF-TOKEN-INVALID' => [
         'message' => 'Invalid CSRF token.',

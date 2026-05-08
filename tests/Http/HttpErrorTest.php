@@ -16,7 +16,7 @@ final class HttpErrorTest extends HttpRuntimeTestCase
         ]);
         $payload = $response->json();
 
-        self::assertSame(200, $response->statusCode());
+        self::assertSame(401, $response->statusCode());
         self::assertSame('failure', $payload['Data']['status']);
         self::assertSame('LOGIN-FAILED', $payload['Data']['errorCode']);
     }

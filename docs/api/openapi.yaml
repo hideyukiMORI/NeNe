@@ -33,13 +33,11 @@ paths:
                   user_pass: admin
       responses:
         "200":
-          description: Login succeeded or credentials were rejected.
+          description: Login succeeded.
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: "#/components/schemas/LoginSuccessEnvelope"
-                  - $ref: "#/components/schemas/LoginFailureEnvelope"
+                $ref: "#/components/schemas/LoginSuccessEnvelope"
               examples:
                 success:
                   value:
@@ -51,6 +49,13 @@ paths:
                       user:
                         id: 1
                         user_id: admin
+        "401":
+          description: Credentials were rejected.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginFailureEnvelope"
+              examples:
                 failure:
                   value:
                     Result: true
@@ -90,13 +95,17 @@ paths:
         - sessionCookie: []
       responses:
         "200":
-          description: TODO list or session failure.
+          description: TODO list.
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: "#/components/schemas/TodoListSuccessEnvelope"
-                  - $ref: "#/components/schemas/SessionClosedEnvelope"
+                $ref: "#/components/schemas/TodoListSuccessEnvelope"
+        "401":
+          description: Session is missing or expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionClosedEnvelope"
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
     post:
@@ -119,13 +128,17 @@ paths:
                   title: Write OpenAPI docs
       responses:
         "200":
-          description: TODO created or session failure.
+          description: TODO created.
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: "#/components/schemas/TodoSuccessEnvelope"
-                  - $ref: "#/components/schemas/SessionClosedEnvelope"
+                $ref: "#/components/schemas/TodoSuccessEnvelope"
+        "401":
+          description: Session is missing or expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionClosedEnvelope"
         "400":
           description: TODO title was missing.
           content:
@@ -166,13 +179,17 @@ paths:
                   title: Review OpenAPI docs
       responses:
         "200":
-          description: TODO updated or session failure.
+          description: TODO updated.
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: "#/components/schemas/TodoSuccessEnvelope"
-                  - $ref: "#/components/schemas/SessionClosedEnvelope"
+                $ref: "#/components/schemas/TodoSuccessEnvelope"
+        "401":
+          description: Session is missing or expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionClosedEnvelope"
         "400":
           description: TODO id or title was invalid.
           content:
@@ -203,13 +220,17 @@ paths:
         - $ref: "#/components/parameters/TodoId"
       responses:
         "200":
-          description: TODO deleted or session failure.
+          description: TODO deleted.
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: "#/components/schemas/TodoDeleteSuccessEnvelope"
-                  - $ref: "#/components/schemas/SessionClosedEnvelope"
+                $ref: "#/components/schemas/TodoDeleteSuccessEnvelope"
+        "401":
+          description: Session is missing or expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionClosedEnvelope"
         "400":
           description: TODO id was missing or invalid.
           content:
