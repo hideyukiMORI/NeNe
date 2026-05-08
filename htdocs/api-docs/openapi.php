@@ -8,7 +8,7 @@ if (!is_file($openApiPath)) {
     http_response_code(404);
     header('Content-Type: text/plain; charset=utf-8');
     echo 'OpenAPI document was not found.';
-    exit;
+    return;
 }
 
 header('Content-Type: application/yaml; charset=utf-8');

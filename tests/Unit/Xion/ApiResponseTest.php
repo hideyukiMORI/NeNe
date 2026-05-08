@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nene\Tests\Unit\Xion;
 
 use Nene\Xion\ApiResponse;
+use Nene\Xion\JsonResponder;
 use PHPUnit\Framework\TestCase;
 
 final class ApiResponseTest extends TestCase
@@ -32,14 +33,14 @@ final class ApiResponseTest extends TestCase
         self::assertSame([
             'status' => 'failure',
             'errorCode' => 'LOGIN-FAILED',
-            'errorMessage' => 'Wrong user ID or user PASS'
+            'errorMessage' => 'Wrong user ID or user PASS',
         ], $response);
     }
 
-    public function testFailureSetsHttpStatusFromErrorCode(): void
+    public function testJsonResponderSetsFailureHttpStatusFromErrorCode(): void
     {
-        (new ApiResponse())->failure('TODO-TITLE-REQUIRED');
+        $response = JsonResponder::responseArray((new ApiResponse())->failure('TODO-TITLE-REQUIRED'));
 
-        self::assertSame(400, http_response_code());
+        self::assertSame(400, $response->statusCode());
     }
 }

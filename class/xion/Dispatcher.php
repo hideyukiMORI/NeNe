@@ -17,8 +17,6 @@ declare(strict_types=1);
 
 namespace Nene\Xion;
 
-use Nene\Func as Func;
-
 /**
  * Dispatches controllers and models.
  */
@@ -53,12 +51,9 @@ class Dispatcher
             $_SERVER['REQUEST_METHOD'] ?? 'GET'
         );
         if ($route['status'] === 404) {
-            header('HTTP/1.0 404 Not Found');
-            echo file_get_contents(DIR_ROOT . '/404.html');
-            exit;
+            throw new HttpTermination($this->notFoundResponse());
         } elseif ($route['status'] === 405) {
-            header('Allow: ' . implode(', ', $route['allowed']));
-            $this->outputJsonFailure('METHOD-NOT-ALLOWED');
+            $this->outputJsonFailure('METHOD-NOT-ALLOWED', ['Allow' => implode(', ', $route['allowed'])]);
         } elseif ($route['status'] === 500) {
             Log::getInstance('error')->error('Route conflict detected.', [
                 'controller' => $controller,
@@ -207,9 +202,7 @@ class Dispatcher
         $className = ucfirst(strtolower($controller)) . 'Controller';
         $className = '\\Nene\\Controller\\' . $className;
         if (!class_exists($className)) {
-            header('HTTP/1.0 404 Not Found');
-            echo file_get_contents(DIR_ROOT . '/404.html');
-            exit;
+            throw new HttpTermination($this->notFoundResponse());
         }
         $controllerInstance = new $className();
         return $controllerInstance;
@@ -218,12 +211,24 @@ class Dispatcher
     /**
      * Output a catalog-backed JSON failure response and terminate dispatch.
      *
-     * @param string $errorCode Catalog error code.
+     * @param string               $errorCode Catalog error code.
+     * @param array<string,string> $headers   Extra response headers.
      *
      * @return void
      */
-    private function outputJsonFailure(string $errorCode): void
+    private function outputJsonFailure(string $errorCode, array $headers = []): void
     {
-        Func\Json::outputArrayToJson((new ApiResponse())->failure($errorCode), 'json', '');
+        $response = JsonResponder::responseArray((new ApiResponse())->failure($errorCode));
+        throw new HttpTermination(new HttpResponse($response->statusCode(), array_merge($response->headers(), $headers), $response->body()));
+    }
+
+    /**
+     * Build the shared 404 response.
+     *
+     * @return HttpResponse 404 response.
+     */
+    private function notFoundResponse(): HttpResponse
+    {
+        return HttpResponse::html((string)file_get_contents(DIR_ROOT . '/404.html'), 404);
     }
 }

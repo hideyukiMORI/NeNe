@@ -48,8 +48,10 @@ class PdoConnection
     {
         /* CHECK DATABASE TYPE */
         if (!in_array(DB_TYPE, ['MySQL', 'SQLite3'])) {
-            echo('There is an error in the Database type setting. Check the configuration file.');
-            exit();
+            throw new HttpTermination(HttpResponse::text(
+                'There is an error in the Database type setting. Check the configuration file.',
+                500
+            ));
         }
 
         /* CREATE DB OBJECT */
@@ -72,9 +74,10 @@ class PdoConnection
             }
         } catch (\PDOException $e) {
             error_log('Database connection failed: ' . $e->getMessage());
-            http_response_code(500);
-            echo APP_DEBUG ? 'Connection failed : ' . $e->getMessage() : 'Internal Server Error';
-            exit();
+            throw new HttpTermination(HttpResponse::text(
+                APP_DEBUG ? 'Connection failed : ' . $e->getMessage() : 'Internal Server Error',
+                500
+            ));
         }
     }
 

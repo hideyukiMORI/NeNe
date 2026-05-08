@@ -18,7 +18,6 @@ declare(strict_types=1);
 namespace Nene\Xion;
 
 use Monolog\Logger;
-use Nene\Func as Func;
 use Nene\Xion as Xion;
 
 /**
@@ -144,13 +143,6 @@ abstract class ControllerBase
     protected $REQUEST_JSON = [];
 
     /**
-     * Json format at rest.
-     *
-     * @var string
-     */
-    protected $OUTPUT_JSON_STYLE = 'json';
-
-    /**
      * Referrer controller name.
      *
      * @var string
@@ -206,7 +198,7 @@ abstract class ControllerBase
             );
         }
         if ($this->ROUTE_CONTEXT->isRest() && in_array($this->method, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
-            $this->REQUEST_JSON = Func\Json::inputPostJsonToArray();
+            $this->REQUEST_JSON = Xion\JsonResponder::inputJsonToArray();
         } elseif ($this->ROUTE_CONTEXT->isAction()) {
             $this->setTemplate();
         }
@@ -216,24 +208,14 @@ abstract class ControllerBase
             $this->sessionCheck();
         }
         if ($this->requiresCsrfProtection() && !$this->AUTH_SESSION->verifyCsrfToken($this->csrfTokenFromRequest())) {
-            Func\Json::outputArrayToJson(
-                $this->API_RESPONSE->failure('CSRF-TOKEN-INVALID'),
-                $this->OUTPUT_JSON_STYLE,
-                filter_input(INPUT_GET, 'callback') ?: '',
-                $this->SESSION_CHECK
-            );
+            Xion\JsonResponder::outputArray($this->API_RESPONSE->failure('CSRF-TOKEN-INVALID'));
         }
 
         $methodName = $this->ROUTE_CONTEXT->method();
         $return = $this->$methodName();
 
         if ($this->ROUTE_CONTEXT->isRest()) {
-            Func\Json::outputArrayToJson(
-                $return,
-                $this->OUTPUT_JSON_STYLE,
-                filter_input(INPUT_GET, 'callback') ?: '',
-                $this->SESSION_CHECK
-            );
+            Xion\JsonResponder::outputArray($return);
             return $return;
         } else {
             $this->setCSS();
@@ -274,19 +256,6 @@ abstract class ControllerBase
     final protected function setTitle(string $title): void
     {
         $this->TITLE = $title;
-    }
-
-    /**
-     * Set output format of json
-     *
-     * @param string $style Format is jsonp or json.
-     *
-     * @return  void
-     *
-     */
-    final protected function setOutputJsonStyle(string $style = 'jsonp'): void
-    {
-        $this->OUTPUT_JSON_STYLE = $style == 'jsonp' ? 'jsonp' : 'json';
     }
 
     /**
@@ -375,12 +344,7 @@ abstract class ControllerBase
             if (!$this->ROUTE_CONTEXT->isRest()) {
                 $this->location(LOGOUT_URI);
             } else {
-                Func\Json::outputArrayToJson(
-                    $this->API_RESPONSE->failure('SESSION-CLOSED'),
-                    $this->OUTPUT_JSON_STYLE,
-                    filter_input(INPUT_GET, 'callback') ?: '',
-                    $this->SESSION_CHECK
-                );
+                Xion\JsonResponder::outputArray($this->API_RESPONSE->failure('SESSION-CLOSED'));
             }
         }
     }
@@ -431,15 +395,14 @@ abstract class ControllerBase
      * @param string  $uri  URI.
      * @param boolean $flag In service or not (true = inside service | false = outside).
      *
-     * @return void
+     * @return never
      */
-    final protected function location(string $uri, bool $flag = true): void
+    final protected function location(string $uri, bool $flag = true): never
     {
         if ($flag) {
             $uri = URI_ROOT . $uri;
         }
-        header('Location: ' . $uri);
-        exit();
+        throw new Xion\HttpTermination(Xion\HttpResponse::redirect($uri));
     }
 
     /**
@@ -447,12 +410,10 @@ abstract class ControllerBase
      *
      * Output 404 page.
      *
-     * @return void
+     * @return never
      */
-    final protected function notFound(): void
+    final protected function notFound(): never
     {
-        header('HTTP/1.0 404 Not Found');
-        echo file_get_contents(DIR_ROOT . '/404.html');
-        exit;
+        throw new Xion\HttpTermination(Xion\HttpResponse::html((string)file_get_contents(DIR_ROOT . '/404.html'), 404));
     }
 }

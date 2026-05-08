@@ -34,8 +34,17 @@ date_default_timezone_set('Asia/Tokyo');
 session_start();
 
 $dispatcher = new Xion\Dispatcher();
-$dispatcher->dispatch();
-exit();
+try {
+    $dispatcher->dispatch();
+} catch (Xion\HttpTermination $termination) {
+    Xion\HttpEmitter::emit($termination->response());
+} catch (\Throwable $throwable) {
+    Xion\Log::getInstance('error')->error('Unhandled application error.', ['exception' => $throwable]);
+    Xion\HttpEmitter::emit(Xion\HttpResponse::text(
+        APP_DEBUG ? $throwable->getMessage() : 'Internal Server Error',
+        500
+    ));
+}
 
 /**
  * Configure whether PHP errors can be shown in HTTP responses.

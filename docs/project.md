@@ -27,7 +27,7 @@ Modernize:
 - PHP 8.4-oriented typing and strictness where practical.
 - Method-specific REST handlers such as `indexGetRest()` and `indexPostRest()`.
 - Centralized API responses and error codes.
-- Session lifecycle, CSRF, password hashing, JSON/JSONP safety, and public error behavior.
+- Session lifecycle, CSRF, password hashing, JSON-only REST responses, and public error behavior.
 - OpenAPI contracts, Swagger UI, PHPUnit, Phan, PHP CS Fixer, and Docker development.
 
 Avoid:

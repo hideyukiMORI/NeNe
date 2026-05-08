@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #108: Remove legacy JSONP output and move JSON handling to the response boundary.
 - #106: Update roadmap and milestones to reflect current status and architecture policy.
 - #104: Clarify NeNe's renovation philosophy and target audience.
 - #102: Add a service implementation tutorial for pages, REST endpoints, database-backed features, OpenAPI, and tests.
@@ -17,7 +18,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 - #87: Decide and apply non-200 HTTP status policy for authentication failures.
 - #86: Route Dispatcher errors through the shared JSON error responder.
 - #85: Safely encode template data-object JSON for inline script output.
-- #84: Validate legacy JSONP callback output.
+- #84: Harden legacy callback output before the JSON-only policy superseded it.
 - #83: Add CSRF protection to cookie-authenticated state-changing APIs.
 - #82: Hash stored passwords and clean up sample credentials.
 - #81: Harden authentication session lifecycle and cookie attributes.
@@ -42,7 +43,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
-- No active short-term TODO after #102. Use new GitHub Issues for follow-up work.
+- No active short-term TODO after #108. Use new GitHub Issues for follow-up work.
 
 ## Backlog Candidates
 
