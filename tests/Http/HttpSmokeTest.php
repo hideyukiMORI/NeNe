@@ -37,6 +37,36 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         self::assertStringContainsString('Tutorial', $response->body());
         self::assertStringContainsString('Build a small service', $response->body());
         self::assertStringContainsString('docs/tutorials/building-a-service.md', $response->body());
+        self::assertStringContainsString('/serverinstall/index', $response->body());
+        self::assertStringContainsString('/health/index', $response->body());
+        self::assertStringContainsString('php cli/setupDatabase.php --env=.env --yes', $response->body());
+    }
+
+    public function testHealthEndpointReportsApiDatabaseAndSchemaStatus(): void
+    {
+        $response = $this->client->request('GET', '/health/index');
+        $payload = $response->json();
+
+        self::assertSame(200, $response->statusCode());
+        self::assertSame(true, $payload['Result']);
+        self::assertSame('success', $payload['Data']['status']);
+        self::assertSame('ok', $payload['Data']['healthStatus']);
+        self::assertSame(true, $payload['Data']['api']);
+        self::assertSame(true, $payload['Data']['database']);
+        self::assertSame(true, $payload['Data']['schema']);
+    }
+
+    public function testServerInstallGuidePageRespondsWithDeploymentChecklist(): void
+    {
+        $response = $this->client->request('GET', '/serverinstall/index');
+
+        self::assertSame(200, $response->statusCode());
+        self::assertStringContainsString('text/html', $response->headerLine('Content-Type'));
+        self::assertStringContainsString('Install NeNe after git clone', $response->body());
+        self::assertStringContainsString('composer install --no-dev --optimize-autoloader', $response->body());
+        self::assertStringContainsString('php cli/setupDatabase.php --env=.env --yes', $response->body());
+        self::assertStringContainsString('NENE_APP_ENV=production', $response->body());
+        self::assertStringContainsString('nene-php.com', $response->body());
     }
 
     public function testSwaggerUiAndOpenApiDocumentAreServed(): void

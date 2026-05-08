@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebarLinks = [
         { href: '#getting-started', label: 'Getting Started' },
         { href: '#quick-start', label: 'Quick Start' },
+        { href: '#health-check', label: 'Health Check' },
         { href: '#tutorial', label: 'Tutorial' },
         { href: '#authentication', label: 'Authentication' },
         { href: '#sample-app', label: 'Sample TODO' },
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     e(Hero),
                     e(GuideGrid),
                     e(QuickStart),
+                    e(HealthStatus),
                     e(ServiceTutorial),
                     e(AuthenticationGuide),
                     e(SampleApp),
@@ -121,6 +123,77 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     }
 
+    function HealthStatus() {
+        const healthState = useState({
+            status: 'loading',
+            api: false,
+            database: false,
+            schema: false,
+            message: 'Checking runtime...'
+        });
+        const health = healthState[0];
+        const setHealth = healthState[1];
+
+        useEffect(function() {
+            fetch('/health/index')
+                .then(function(response) {
+                    return response.json().then(function(body) {
+                        if (!response.ok || !body.Result || !body.Data) {
+                            throw new Error('Health check failed.');
+                        }
+                        setHealth({
+                            status: body.Data.healthStatus || 'degraded',
+                            api: Boolean(body.Data.api),
+                            database: Boolean(body.Data.database),
+                            schema: Boolean(body.Data.schema),
+                            message: body.Data.healthStatus === 'ok'
+                                ? 'API, database, and sample schema are ready.'
+                                : 'API is reachable, but database setup is not complete.'
+                        });
+                    });
+                })
+                .catch(function(error) {
+                    setHealth({
+                        status: 'degraded',
+                        api: false,
+                        database: false,
+                        schema: false,
+                        message: error.message
+                    });
+                });
+        }, []);
+
+        return e('section', { className: 'developers__section', id: 'health-check' },
+            e('div', { className: 'developers__section-heading' },
+                e('div', null,
+                    e('p', { className: 'developers__eyebrow' }, 'Health Check'),
+                    e('h2', null, 'Confirm API and database setup')
+                ),
+                e('p', null, 'The sample page checks whether the runtime can reach the API, database, and required tables.')
+            ),
+            e('div', { className: 'health-card health-card--' + health.status },
+                e('div', { className: 'health-card__summary' },
+                    e('span', null, health.status === 'ok' ? 'Ready' : health.status === 'loading' ? 'Checking' : 'Needs setup'),
+                    e('p', null, health.message)
+                ),
+                e('div', { className: 'health-card__checks' },
+                    e(HealthBadge, { label: 'API', ok: health.api }),
+                    e(HealthBadge, { label: 'DB', ok: health.database }),
+                    e(HealthBadge, { label: 'Schema', ok: health.schema })
+                ),
+                health.status === 'ok'
+                    ? null
+                    : e('code', null, 'php cli/setupDatabase.php --env=.env --yes')
+            )
+        );
+    }
+
+    function HealthBadge(props) {
+        return e('span', {
+            className: props.ok ? 'health-badge is-ok' : 'health-badge is-ng'
+        }, props.label + ': ' + (props.ok ? 'OK' : 'NG'));
+    }
+
     function ServiceTutorial() {
         const tutorialSteps = [
             {
@@ -159,10 +232,16 @@ document.addEventListener('DOMContentLoaded', function() {
             ),
             e('div', { className: 'tutorial__intro' },
                 e('p', null, 'NeNe keeps the old-school URL and controller shape familiar to CodeIgniter or Zend Framework 1 users, then adds modern safety rails around it: JSON-only REST, OpenAPI, tests, Docker, and explicit error catalogs.'),
-                e('a', {
-                    className: 'tutorial__doc-link',
-                    href: 'https://github.com/hideyukiMORI/NeNe/blob/main/docs/tutorials/building-a-service.md'
-                }, 'Read the full Markdown tutorial')
+                e('div', { className: 'tutorial__links' },
+                    e('a', {
+                        className: 'tutorial__doc-link',
+                        href: 'https://github.com/hideyukiMORI/NeNe/blob/main/docs/tutorials/building-a-service.md'
+                    }, 'Read the full Markdown tutorial'),
+                    e('a', {
+                        className: 'tutorial__doc-link',
+                        href: '/serverinstall/index'
+                    }, 'Server install guide')
+                )
             ),
             e('div', { className: 'tutorial__steps' },
                 tutorialSteps.map(function(step) {

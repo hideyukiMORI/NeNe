@@ -10,6 +10,7 @@ This directory contains project documentation for humans and AI agents.
 - `development/coding-standards.md`: Coding standards.
 - `development/commit-conventions.md`: Commit message rules.
 - `development/docker.md`: Docker local development.
+- `deployment/server-install.md`: Traditional Apache/PHP server installation after `git clone`.
 - `development/testing.md`: Testing strategy and commands.
 - `tutorials/building-a-service.md`: Practical guide for adding pages, REST endpoints, database-backed features, OpenAPI, and tests.
 - `roadmap.md`: Project direction.
