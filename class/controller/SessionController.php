@@ -48,19 +48,10 @@ class SessionController extends ControllerBase
         $user = $userMapper->findByCredentials($user_id, $user_pass);
         if ($user === null) {
             $this->logout();
-            $errorCode = 'LOGIN-FAILED';
-            return ([
-                'status'        => 'failure',
-                'errorCode'     => $errorCode,
-                'errorMessage'  => $this->ERROR_CODE->getErrorText($errorCode)
-            ]);
+            return $this->API_RESPONSE->failure('LOGIN-FAILED');
         }
         $loginUser = $this->AUTH_SESSION->login($user);
-        return ([
-            'status'    => 'success',
-            'user'      => $loginUser,
-            'errorCode' => ''
-        ]);
+        return $this->API_RESPONSE->success(['user' => $loginUser]);
     }
 
     /**
@@ -71,9 +62,6 @@ class SessionController extends ControllerBase
     public function logoutPostRest(): array
     {
         $this->logout();
-        return [
-            'status' => 'success',
-            'errorCode' => ''
-        ];
+        return $this->API_RESPONSE->success();
     }
 }
