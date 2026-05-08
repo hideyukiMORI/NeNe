@@ -8,6 +8,15 @@ require_once __DIR__ . '/HttpRuntimeTestCase.php';
 
 final class OpenApiRuntimeContractTest extends HttpRuntimeTestCase
 {
+    /*
+     * This test intentionally uses a lightweight line-based OpenAPI reader.
+     * Its current purpose is a runtime smoke check: documented REST operations
+     * should exist, and observed HTTP statuses should be listed in the contract.
+     *
+     * It is not a general YAML parser. When the OpenAPI contract grows beyond
+     * this simple path/method/status check, replace this extraction logic with
+     * a dev dependency such as symfony/yaml before adding richer assertions.
+     */
     public function testDocumentedRestOperationsRespondWithDocumentedStatuses(): void
     {
         $openApiResponse = $this->client->request('GET', '/api-docs/openapi.php');
