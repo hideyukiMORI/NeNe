@@ -6,9 +6,10 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      NENE_DB_TYPE: MySQL
-      NENE_DB_HOST: mysql
-      NENE_DB_PORT: 3306
+      NENE_DB_TYPE: "${NENE_DB_TYPE:-MySQL}"
+      NENE_DB_HOST: "${NENE_DB_HOST:-mysql}"
+      NENE_DB_PORT: "${NENE_DB_PORT:-3306}"
+      NENE_DB_FILE: "${NENE_DB_FILE:-nene.db}"
       NENE_DB_NAME: "${NENE_DB_NAME:-nene}"
       NENE_DB_USER: "${NENE_DB_USER:-nene}"
       NENE_DB_PASS: "${NENE_DB_PASS:-nene}"

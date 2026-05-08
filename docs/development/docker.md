@@ -84,10 +84,16 @@ NENE_DB_NAME=nene_local NENE_DB_USER=nene NENE_DB_PASS=nene docker compose up --
 
 ## Optional SQLite Initialization
 
-The legacy SQLite initializer remains available for non-Docker or fallback usage:
+The SQLite initializer remains available for non-Docker or fallback usage. It creates the same sample tables as the MySQL initializer and inserts the default `admin` account with sample TODO rows:
 
 ```sh
 docker compose run --rm app sh -lc "printf 'Y\n' | php cli/initSQLite.php"
+```
+
+To run the application against SQLite instead of the Docker MySQL service, start the app with SQLite environment values:
+
+```sh
+NENE_DB_TYPE=SQLite3 NENE_DB_FILE=nene.db docker compose up --build app
 ```
 
 ## Stop
