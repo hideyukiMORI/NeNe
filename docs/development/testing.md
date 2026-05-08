@@ -85,9 +85,9 @@ HTTP tests use a test title prefix and clean up matching TODO rows before each r
 
 ## OpenAPI Contract Test Scope
 
-`OpenApiRuntimeContractTest` currently reads `docs/api/openapi.yaml` with a lightweight line-based parser. This is intentional for the current small contract: the test only verifies that documented REST operations exist and that observed runtime HTTP statuses are listed in OpenAPI.
+`OpenApiRuntimeContractTest` reads `docs/api/openapi.yaml` with `symfony/yaml` and verifies a small runtime contract: documented REST operations must exist, and observed runtime HTTP statuses must be listed in OpenAPI.
 
-Do not treat that parser as a general YAML implementation. When OpenAPI grows to include broader `$ref` usage, shared response composition, many more paths, or response body schema validation, add a dev dependency such as `symfony/yaml` and parse the contract as structured data before expanding the assertions. If schema validation becomes a goal, evaluate an OpenAPI/JSON Schema validator separately instead of extending the regular expressions.
+This is not a full OpenAPI validator. When OpenAPI grows to require response body schema validation, evaluate an OpenAPI/JSON Schema validator separately instead of expanding this smoke test into a custom validator.
 
 ## Strategy for Coupled Code
 
