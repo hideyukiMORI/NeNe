@@ -12,6 +12,7 @@ NeNe is a legacy, simple, lightweight PHP framework. It uses a front controller 
 - Workflow: `docs/workflow.md`
 - Coding standards: `docs/development/coding-standards.md`
 - Docker development: `docs/development/docker.md`
+- Testing: `docs/development/testing.md`
 - AI agent guide: `AGENTS.md`
 
 ## Routing
@@ -45,6 +46,12 @@ To initialize the SQLite database:
 
 ```sh
 docker compose run --rm app sh -lc "printf 'Y\n' | php cli/initSQLite.php"
+```
+
+## Testing
+
+```sh
+composer test
 ```
 
 ## License
