@@ -28,9 +28,9 @@ abstract class RequestVariables
     /**
      * Request variables
      *
-     * @var [type]
+     * @var array<string,mixed>
      */
-    protected $values;
+    protected $values = [];
 
     /**
      * CONSTRUCTOR.
@@ -47,7 +47,7 @@ abstract class RequestVariables
      *
      * @return void
      */
-    abstract protected function setValues();
+    abstract protected function setValues(): void;
 
     /**
      * Get value.

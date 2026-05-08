@@ -39,7 +39,7 @@ class Post extends RequestVariables
     final protected function setValues(): void
     {
         foreach ($_POST as $key => $value) {
-            $this->_values[$key] = $value;
+            $this->values[$key] = $value;
         }
     }
 }
