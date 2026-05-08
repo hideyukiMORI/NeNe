@@ -71,7 +71,10 @@ class PdoConnection
                     break;
             }
         } catch (\PDOException $e) {
-            die('Connection failed : ' . $e->getMessage());
+            error_log('Database connection failed: ' . $e->getMessage());
+            http_response_code(500);
+            echo APP_DEBUG ? 'Connection failed : ' . $e->getMessage() : 'Internal Server Error';
+            exit();
         }
     }
 

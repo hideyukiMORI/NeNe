@@ -6,6 +6,8 @@ services:
       mysql:
         condition: service_healthy
     environment:
+      NENE_APP_ENV: "${NENE_APP_ENV:-development}"
+      NENE_APP_DEBUG: "${NENE_APP_DEBUG:-1}"
       NENE_DB_TYPE: "${NENE_DB_TYPE:-MySQL}"
       NENE_DB_HOST: "${NENE_DB_HOST:-mysql}"
       NENE_DB_PORT: "${NENE_DB_PORT:-3306}"

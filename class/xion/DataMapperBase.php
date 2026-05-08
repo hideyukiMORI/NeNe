@@ -18,11 +18,11 @@ declare(strict_types=1);
 namespace Nene\Xion;
 
 use Monolog\Logger;
-use Nene\Database   as Database;
-use Nene\Xion       as Xion;
-use Nene\Func       as Func;
-use PDOStatement;
+use Nene\Database as Database;
+use Nene\Func as Func;
+use Nene\Xion as Xion;
 use PDO;
+use PDOStatement;
 
 /**
  * Abstract class for data mapper
@@ -266,7 +266,7 @@ abstract class DataMapperBase
      */
     public function findALL(int $limit = 0): PDOStatement
     {
-        $limitSQL = $limit === 0 ? '' : " LIMIT " . (int)$limit;
+        $limitSQL = $limit === 0 ? '' : ' LIMIT ' . (int)$limit;
         $stmt = $this->executeQuery('
             SELECT * FROM ' . static::TARGET_TABLE . '
             WHERE 1
@@ -321,7 +321,7 @@ abstract class DataMapperBase
         try {
             $stmt->execute();
         } catch (\PDOException $e) {
-            echo $e->getMessage();
+            $this->handleDatabaseException($e);
             exit();
         }
         return $stmt;
@@ -340,10 +340,24 @@ abstract class DataMapperBase
         try {
             $stmt = $this->DB->query($query);
         } catch (\PDOException $e) {
-            echo $e->getMessage();
+            $this->handleDatabaseException($e);
             exit();
         }
         return $stmt;
+    }
+
+    /**
+     * Handle database exceptions without exposing details in production.
+     *
+     * @param \PDOException $exception Database exception.
+     *
+     * @return void
+     */
+    private function handleDatabaseException(\PDOException $exception): void
+    {
+        $this->LOGGER->error('Database query failed.', ['exception' => $exception]);
+        http_response_code(500);
+        echo APP_DEBUG ? $exception->getMessage() : 'Internal Server Error';
     }
 
     /**
