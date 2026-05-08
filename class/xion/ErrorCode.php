@@ -18,7 +18,7 @@ declare(strict_types=1);
 namespace Nene\Xion;
 
 /**
- * Share error code with javascript.
+ * Error code catalog.
  */
 class ErrorCode
 {
@@ -38,15 +38,12 @@ class ErrorCode
 
     /**
      * CONSTRUCTOR
-     * Convert from javascript format to json and define as array.
+     * Load the server-side error code catalog.
      */
     final private function __construct()
     {
-        $error_code_file    = file_get_contents(ERROR_CODE_PATH);
-        $error_json         = str_replace('var ERROR_CODE = ', '', $error_code_file);
-        $error_json         = substr($error_json, 0, -1);
-        $error_array        = json_decode($error_json, true);
-        $this->ERROR_CODE   = $error_array;
+        $errorCode = require ERROR_CODE_PATH;
+        $this->ERROR_CODE = is_array($errorCode) ? $errorCode : [];
     }
 
     /**

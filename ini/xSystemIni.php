@@ -58,7 +58,7 @@ const DB_IS_PHYSICAL_DELETE = true;                     // WHETHER TO DELETE PHY
 
 // OUTPUT
 const JSON_OUTPUT = true;                               // JSON OUTPUT
-const ERROR_CODE_PATH = DOCUMENT_ROOT . 'message/error_code.js'; // ERROR CODE PATH
+const ERROR_CODE_PATH = DIR_ROOT . 'config/error_codes.php'; // ERROR CODE CATALOG PATH
 
 // LOG
 const LOG_PATH = DIR_ROOT . 'log/';                     // LOGGING PATH

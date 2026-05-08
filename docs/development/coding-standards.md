@@ -62,7 +62,8 @@ REST endpoints should make accepted HTTP methods explicit.
 - Build REST payloads through `Nene\Xion\ApiResponse` instead of hand-writing response arrays in controllers.
 - Success payloads use `status: success` and `errorCode: ""`; failure payloads use `status: failure`, `errorCode`, and `errorMessage`.
 - Error codes must be stable uppercase kebab-case strings with a domain prefix, such as `LOGIN-FAILED` or `TODO-NOT-FOUND`.
-- Define error code messages in `htdocs/message/error_code.js`; controllers should reference codes, not inline messages.
+- Define error code messages in the server-side catalog at `config/error_codes.php`; controllers should reference codes, not inline messages.
+- Treat browser-visible error-code assets as exports or compatibility files, not the source of truth.
 
 ## OpenAPI
 

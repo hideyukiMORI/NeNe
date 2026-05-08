@@ -12,7 +12,7 @@ final class ApiResponseTest extends TestCase
     protected function setUp(): void
     {
         if (!defined('ERROR_CODE_PATH')) {
-            define('ERROR_CODE_PATH', dirname(__DIR__, 3) . '/htdocs/message/error_code.js');
+            define('ERROR_CODE_PATH', dirname(__DIR__, 3) . '/config/error_codes.php');
         }
     }
 
