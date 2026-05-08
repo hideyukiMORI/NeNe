@@ -25,18 +25,6 @@ use Nene\Xion\ControllerBase;
  */
 class TodoController extends ControllerBase
 {
-    private const DEMO_USER_ID = 1;
-
-    /**
-     * Processed before the controller method is executed.
-     *
-     * @return void
-     */
-    protected function preAction()
-    {
-        $this->SESSION_CHECK = false;
-    }
-
     /**
      * Get TODO items.
      *
@@ -44,10 +32,11 @@ class TodoController extends ControllerBase
      */
     public function indexGetRest(): array
     {
+        $userId = $this->getLoginUserId();
         $todoMapper = new Database\TodoMapper();
         return [
             'status' => 'success',
-            'todos' => $this->normalizeRows($todoMapper->findRowsByUserId(self::DEMO_USER_ID))
+            'todos' => $this->normalizeRows($todoMapper->findRowsByUserId($userId))
         ];
     }
 
@@ -58,6 +47,7 @@ class TodoController extends ControllerBase
      */
     public function indexPostRest(): array
     {
+        $userId = $this->getLoginUserId();
         $title = trim((string)($this->REQUEST_JSON['title'] ?? ''));
         if ($title === '') {
             header('HTTP/1.0 400 Bad Request');
@@ -70,7 +60,7 @@ class TodoController extends ControllerBase
         $todoMapper = new Database\TodoMapper();
         return [
             'status' => 'success',
-            'todo' => $this->normalizeRow($todoMapper->createForUser(self::DEMO_USER_ID, $title))
+            'todo' => $this->normalizeRow($todoMapper->createForUser($userId, $title))
         ];
     }
 
@@ -81,6 +71,7 @@ class TodoController extends ControllerBase
      */
     public function itemPutRest(): array
     {
+        $userId = $this->getLoginUserId();
         $id = $this->getTodoId();
         if ($id === null) {
             header('HTTP/1.0 400 Bad Request');
@@ -105,7 +96,7 @@ class TodoController extends ControllerBase
             ];
         }
         $todoMapper = new Database\TodoMapper();
-        $todo = $todoMapper->updateForUser(self::DEMO_USER_ID, $id, $title, $isCompleted);
+        $todo = $todoMapper->updateForUser($userId, $id, $title, $isCompleted);
         if ($todo === null) {
             header('HTTP/1.0 404 Not Found');
             return [
@@ -127,6 +118,7 @@ class TodoController extends ControllerBase
      */
     public function itemDeleteRest(): array
     {
+        $userId = $this->getLoginUserId();
         $id = $this->getTodoId();
         if ($id === null) {
             header('HTTP/1.0 400 Bad Request');
@@ -137,7 +129,7 @@ class TodoController extends ControllerBase
             ];
         }
         $todoMapper = new Database\TodoMapper();
-        if (!$todoMapper->deleteForUser(self::DEMO_USER_ID, $id)) {
+        if (!$todoMapper->deleteForUser($userId, $id)) {
             header('HTTP/1.0 404 Not Found');
             return [
                 'status' => 'failure',
@@ -163,6 +155,16 @@ class TodoController extends ControllerBase
             return null;
         }
         return (int)$id;
+    }
+
+    /**
+     * Get the current login user's primary key.
+     *
+     * @return int User primary key.
+     */
+    private function getLoginUserId(): int
+    {
+        return (int)$_SESSION['xion']['user']['id'];
     }
 
     /**

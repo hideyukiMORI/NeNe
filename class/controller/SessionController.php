@@ -43,12 +43,12 @@ class SessionController extends ControllerBase
      */
     public function loginRest(): array
     {
-        sleep(3);
-        $user_id     = filter_input(INPUT_POST, 'user_id');
-        $user_pass   = filter_input(INPUT_POST, 'user_pass');
+        $user_id = (string)($this->REQUEST_JSON['user_id'] ?? filter_input(INPUT_POST, 'user_id') ?? '');
+        $user_pass = (string)($this->REQUEST_JSON['user_pass'] ?? filter_input(INPUT_POST, 'user_pass') ?? '');
         $userMapper = new Database\UserMapper();
-        $count = $userMapper->checkLogin($user_id, $user_pass);
-        if ($count === 0) {
+        $user = $userMapper->findByCredentials($user_id, $user_pass);
+        if ($user === null) {
+            $this->logout();
             $errorCode = 'LOGIN-FAILED';
             return ([
                 'status'        => 'failure',
@@ -56,10 +56,16 @@ class SessionController extends ControllerBase
                 'errorMessage'  => $this->ERROR_CODE->getErrorText($errorCode)
             ]);
         }
+        $_SESSION['xion']['login_mode'] = 'login';
+        $_SESSION['xion']['user'] = [
+            'id'        => (int)$user['id'],
+            'user_id'   => (string)$user['user_id'],
+            'user_name' => (string)$user['user_name'],
+            'e_mail'    => (string)$user['e_mail']
+        ];
         return ([
             'status'    => 'success',
-            'user_id'   => $user_id,
-            'user_pass' => $user_pass,
+            'user'      => $_SESSION['xion']['user'],
             'errorCode' => ''
         ]);
     }
