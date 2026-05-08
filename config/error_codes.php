@@ -15,6 +15,14 @@ return [
         'message' => 'Invalid CSRF token.',
         'httpStatus' => 403,
     ],
+    'METHOD-NOT-ALLOWED' => [
+        'message' => 'The HTTP method is not allowed for this endpoint.',
+        'httpStatus' => 405,
+    ],
+    'ROUTE-CONFLICT' => [
+        'message' => 'Route configuration conflict.',
+        'httpStatus' => 500,
+    ],
     'TODO-ID-REQUIRED' => [
         'message' => 'TODO id is required.',
         'httpStatus' => 400,

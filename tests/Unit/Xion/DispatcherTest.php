@@ -35,7 +35,7 @@ final class DispatcherTest extends TestCase
 
     public function testResolveActionRoutePrefersHttpMethodRestHandler(): void
     {
-        $controller = new class {
+        $controller = new class () {
             public function indexGetRest(): array
             {
                 return [];
@@ -57,7 +57,7 @@ final class DispatcherTest extends TestCase
 
     public function testResolveActionRouteKeepsLegacyRestFallbackForCompatibility(): void
     {
-        $controller = new class {
+        $controller = new class () {
             public function loginRest(): array
             {
                 return [];
@@ -73,7 +73,7 @@ final class DispatcherTest extends TestCase
 
     public function testResolveActionRouteReturnsMethodNotAllowedWhenOnlyOtherRestMethodsExist(): void
     {
-        $controller = new class {
+        $controller = new class () {
             public function itemPutRest(): array
             {
                 return [];
@@ -89,5 +89,23 @@ final class DispatcherTest extends TestCase
 
         self::assertSame(405, $route['status']);
         self::assertSame(['DELETE', 'PUT'], $route['allowed']);
+    }
+
+    public function testResolveActionRouteReturnsConflictForActionAndLegacyRestDuplicate(): void
+    {
+        $controller = new class () {
+            public function indexAction(): void
+            {
+            }
+
+            public function indexRest(): array
+            {
+                return [];
+            }
+        };
+
+        $route = (new Dispatcher())->resolveActionRoute($controller, 'index', 'GET');
+
+        self::assertSame(500, $route['status']);
     }
 }
