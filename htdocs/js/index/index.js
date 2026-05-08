@@ -27,10 +27,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebarLinks = [
         { href: '#getting-started', label: 'Getting Started' },
         { href: '#quick-start', label: 'Quick Start' },
-        { href: '#sample-app', label: 'Authentication' },
+        { href: '#authentication', label: 'Authentication' },
         { href: '#sample-app', label: 'Sample TODO' },
-        { href: '#getting-started', label: 'Routing Guide' },
-        { href: '/api-docs/', label: 'OpenAPI' }
+        { href: '#routing-guide', label: 'Routing Guide' },
+        { href: '#openapi', label: 'OpenAPI' }
     ];
 
     function App() {
@@ -42,7 +42,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     e(Hero),
                     e(GuideGrid),
                     e(QuickStart),
-                    e(SampleApp)
+                    e(AuthenticationGuide),
+                    e(SampleApp),
+                    e(RoutingGuide),
+                    e(OpenApiGuide)
                 )
             )
         );
@@ -112,6 +115,41 @@ document.addEventListener('DOMContentLoaded', function() {
             ),
             e('div', { className: 'quick-start-card' },
                 e('pre', null, e('code', null, 'git clone git@github.com:hideyukiMORI/NeNe.git\ncd NeNe\ndocker compose up --build'))
+            )
+        );
+    }
+
+    function AuthenticationGuide() {
+        const authItems = [
+            {
+                title: 'Sample account',
+                text: 'The local seed creates admin / admin for development. The password is stored as a hash in MySQL or SQLite seed data.'
+            },
+            {
+                title: 'Session cookie',
+                text: 'Successful login creates the PHP session and returns the signed-in user in the shared JSON envelope.'
+            },
+            {
+                title: 'CSRF token',
+                text: 'Login also returns Data.csrfToken. State-changing REST requests send it as X-CSRF-Token.'
+            }
+        ];
+
+        return e('section', { className: 'developers__section', id: 'authentication' },
+            e('div', { className: 'developers__section-heading' },
+                e('div', null,
+                    e('p', { className: 'developers__eyebrow' }, 'Authentication'),
+                    e('h2', null, 'Session and CSRF basics')
+                ),
+                e('p', null, 'The sample app shows the minimum cookie-based authentication flow used by NeNe REST endpoints.')
+            ),
+            e('div', { className: 'developers__cards' },
+                authItems.map(function(item) {
+                    return e('article', { className: 'developers__card', key: item.title },
+                        e('h3', null, item.title),
+                        e('p', null, item.text)
+                    );
+                })
             )
         );
     }
@@ -319,6 +357,67 @@ document.addEventListener('DOMContentLoaded', function() {
                         signIn: signIn,
                         userId: userId
                     })
+            )
+        );
+    }
+
+    function RoutingGuide() {
+        const routes = [
+            {
+                label: 'HTML action',
+                code: '/index/index -> IndexController::indexAction()'
+            },
+            {
+                label: 'REST GET',
+                code: 'GET /todo/index -> TodoController::indexGetRest()'
+            },
+            {
+                label: 'REST POST',
+                code: 'POST /todo/index -> TodoController::indexPostRest()'
+            },
+            {
+                label: 'REST item',
+                code: 'PUT /todo/item/id_1 -> TodoController::itemPutRest()'
+            }
+        ];
+
+        return e('section', { className: 'developers__section', id: 'routing-guide' },
+            e('div', { className: 'developers__section-heading' },
+                e('div', null,
+                    e('p', { className: 'developers__eyebrow' }, 'Routing Guide'),
+                    e('h2', null, 'URL segments choose controllers and methods')
+                ),
+                e('p', null, 'NeNe keeps the legacy URL convention while REST handlers opt into explicit HTTP method suffixes.')
+            ),
+            e('div', { className: 'guide-panel' },
+                routes.map(function(route) {
+                    return e('div', { className: 'guide-panel__row', key: route.label },
+                        e('span', null, route.label),
+                        e('code', null, route.code)
+                    );
+                })
+            )
+        );
+    }
+
+    function OpenApiGuide() {
+        return e('section', { className: 'developers__section', id: 'openapi' },
+            e('div', { className: 'developers__section-heading' },
+                e('div', null,
+                    e('p', { className: 'developers__eyebrow' }, 'OpenAPI'),
+                    e('h2', null, 'Explore the REST contract')
+                ),
+                e('p', null, 'The committed OpenAPI document describes the current Session and TODO sample endpoints.')
+            ),
+            e('div', { className: 'openapi-card' },
+                e('p', null, 'Use Swagger UI for interactive reading, or review the source contract under docs/api/openapi.yaml. Runtime smoke tests verify that documented operations and observed statuses stay aligned.'),
+                e('div', { className: 'developers__actions' },
+                    e('a', { className: 'button button--primary', href: '/api-docs/' }, 'Open Swagger UI'),
+                    e('a', {
+                        className: 'button button--secondary',
+                        href: 'https://github.com/hideyukiMORI/NeNe/blob/main/docs/api/openapi.yaml'
+                    }, 'View openapi.yaml')
+                )
             )
         );
     }

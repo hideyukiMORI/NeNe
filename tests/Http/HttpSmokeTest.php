@@ -16,6 +16,7 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         self::assertStringContainsString('text/html', $response->headerLine('Content-Type'));
         self::assertStringContainsString('id="app"', $response->body());
         self::assertStringContainsString('/js/index/index.js', $response->body());
+        self::assertStringContainsString('/css/index/index.css', $response->body());
     }
 
     public function testSwaggerUiAndOpenApiDocumentAreServed(): void
