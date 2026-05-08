@@ -51,6 +51,13 @@ abstract class ModelBase
     protected $ERROR_CODE;
 
     /**
+     * Authentication session boundary.
+     *
+     * @var AuthSession
+     */
+    protected $AUTH_SESSION;
+
+    /**
      * CONSTRUCTOR.
      */
     public function __construct()
@@ -62,6 +69,7 @@ abstract class ModelBase
             $this->LOGGER->debug('NEW : ' . $this->CLASS);
         }
         $this->ERROR_CODE = Xion\ErrorCode::getInstance();
+        $this->AUTH_SESSION = Xion\AuthSession::getInstance();
     }
 
     /**
@@ -71,11 +79,7 @@ abstract class ModelBase
      */
     final protected function checkLogin()
     {
-        $login = $_SESSION['xion']['login_mode'] ?? '';
-        if ($login != 'login') {
-            return false;
-        }
-        return true;
+        return $this->AUTH_SESSION->isLoggedIn();
     }
 
     /**
@@ -100,10 +104,8 @@ abstract class ModelBase
      */
     final protected function accessLog(string $API = '')
     {
-        $user_id = $_SESSION['xion']['user_id'] ?? '';
-
         $log = date('[Y-m-d H:i:s]') . ' ' .
-            $user_id . ' ' .
+            $this->AUTH_SESSION->userIdentifier() . ' ' .
             APP_CONTROLLER . '   ' .
             APP_ACTION . '   ' .
             $API . PHP_EOL;
