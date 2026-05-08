@@ -116,6 +116,13 @@ abstract class ControllerBase
     protected $ERROR_CODE;
 
     /**
+     * Authentication session boundary.
+     *
+     * @var AuthSession
+     */
+    protected $AUTH_SESSION;
+
+    /**
      * Rest post
      *
      * @var array
@@ -155,6 +162,7 @@ abstract class ControllerBase
         $this->ACCESS_LOGGER    = Log::getInstance('access');
         $this->ERROR_LOGGER     = Log::getInstance('error');
         $this->ERROR_CODE       = Xion\ErrorCode::getInstance();
+        $this->AUTH_SESSION     = Xion\AuthSession::getInstance();
         $this->refController    = $_SESSION['global']['referer']['controller'] ?? '';
         $this->refAction        = $_SESSION['global']['referer']['action'] ?? '';
     }
@@ -330,7 +338,7 @@ abstract class ControllerBase
      */
     final protected function sessionCheck(): void
     {
-        if (($_SESSION['xion']['login_mode'] ?? '') !== 'login') {
+        if (!$this->AUTH_SESSION->isLoggedIn()) {
             $this->logout();
             if (APP_ACTION_MODE !== 'Rest') {
                 $this->location(LOGOUT_URI);
@@ -361,7 +369,7 @@ abstract class ControllerBase
      */
     final protected function logout(): void
     {
-        unset($_SESSION['xion']);
+        $this->AUTH_SESSION->logout();
     }
 
     /**

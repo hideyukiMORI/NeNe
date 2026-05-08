@@ -17,7 +17,6 @@ declare(strict_types=1);
 
 namespace Nene\Controller;
 
-use Nene\Model as Model;
 use Nene\Xion\ControllerBase;
 use Nene\Database as Database;
 
@@ -56,16 +55,10 @@ class SessionController extends ControllerBase
                 'errorMessage'  => $this->ERROR_CODE->getErrorText($errorCode)
             ]);
         }
-        $_SESSION['xion']['login_mode'] = 'login';
-        $_SESSION['xion']['user'] = [
-            'id'        => (int)$user['id'],
-            'user_id'   => (string)$user['user_id'],
-            'user_name' => (string)$user['user_name'],
-            'e_mail'    => (string)$user['e_mail']
-        ];
+        $loginUser = $this->AUTH_SESSION->login($user);
         return ([
             'status'    => 'success',
-            'user'      => $_SESSION['xion']['user'],
+            'user'      => $loginUser,
             'errorCode' => ''
         ]);
     }

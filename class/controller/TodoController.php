@@ -164,7 +164,7 @@ class TodoController extends ControllerBase
      */
     private function getLoginUserId(): int
     {
-        return (int)$_SESSION['xion']['user']['id'];
+        return (int)$this->AUTH_SESSION->userId();
     }
 
     /**
