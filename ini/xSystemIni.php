@@ -15,59 +15,76 @@
 
 declare(strict_types=1);
 
-// PHP CORE SETTING
+// Use const for static configuration values. Use define() for runtime values,
+// such as filesystem paths and environment-based settings.
 
-// APP SETTING
-const VERSION = '0.0.0.1';                              // APPLICATION VERSION
-const DEBUG_MODE = 1;                                   // DEBUG MODE 1=ON / 0=OFF
-const LOG_LEVEL = 'INFO';                               // EMERGENCY / INFO
-const CONNECT = 'sessionConnect';                       // SESSION CONNECTION NAME
+// Runtime paths.
+define('DIR_ROOT', dirname(__DIR__) . '/');
+define('DB_DIR', DIR_ROOT . 'data/');
 
-// ROOTING
-const OWN_DOMAIN = 'localhost';                         // DOMAIN
-const URI_ROOT = '/';                                   // ROOT URI
-const LAYERS_NUM = 0;                                   // NUMBER OF LAYERS
-const LOGOUT_URI = '/';                                 // URI TO MOVE TO AFTER LOGOUT
+/**
+ * Return an environment variable value, or a default when it is not set.
+ */
+$getEnv = static function (string $name, string $default): string {
+    $value = getenv($name);
 
-// DEFINE DIR
-define('DIR_ROOT', dirname(dirname(__FILE__)) . '/');   // ROOT DIR
-const DOCUMENT_ROOT = DIR_ROOT . 'htdocs/';             // DOCUMENT DIR
-const URI_CSS = URI_ROOT . 'css/';                      // CSS URI
-const URI_JS = URI_ROOT . 'js/';                        // JS URI
-const URI_IMG = 'https://' . OWN_DOMAIN;                // IMAGE DIR URI
+    if ($value === false || $value === '') {
+        return $default;
+    }
 
-// DATABASE CONNECTION SETUP
-define('DB_TYPE', getenv('NENE_DB_TYPE') ?: 'SQLite3'); // TYPE [MySQL|SQLite3]
-define('DB_DIR', DIR_ROOT . 'data/');                   // DIRECTORY FOR SQLite3 DATABASE
-define('DB_FILE', getenv('NENE_DB_FILE') ?: 'nene.db'); // FILE NAME FOR SQLite3 DATABASE
-define('DB_USER', getenv('NENE_DB_USER') ?: 'root');    // USERNAME
-define('DB_PASS', getenv('NENE_DB_PASS') ?: '');        // PASSWORD
-define('DB_HOST', getenv('NENE_DB_HOST') ?: 'localhost'); // HOSTNAME
-define('DB_PORT', getenv('NENE_DB_PORT') ?: '3306');    // PORT
-define('DB_NAME', getenv('NENE_DB_NAME') ?: 'nene-php'); // DATABASE NAME
+    return $value;
+};
 
-// DATABASE
+// Application.
+const VERSION = '0.0.0.1';
+const DEBUG_MODE = 1; // 1 = on, 0 = off.
+const LOG_LEVEL = 'INFO'; // EMERGENCY or INFO.
+const CONNECT = 'sessionConnect';
+
+// Routing.
+const OWN_DOMAIN = 'localhost';
+const URI_ROOT = '/';
+const LAYERS_NUM = 0;
+const LOGOUT_URI = '/';
+
+// Public assets.
+const DOCUMENT_ROOT = DIR_ROOT . 'htdocs/';
+const URI_CSS = URI_ROOT . 'css/';
+const URI_JS = URI_ROOT . 'js/';
+const URI_IMG = 'https://' . OWN_DOMAIN;
+
+// Database connection.
+define('DB_TYPE', $getEnv('NENE_DB_TYPE', 'SQLite3'));
+define('DB_FILE', $getEnv('NENE_DB_FILE', 'nene.db'));
+define('DB_USER', $getEnv('NENE_DB_USER', 'root'));
+define('DB_PASS', $getEnv('NENE_DB_PASS', ''));
+define('DB_HOST', $getEnv('NENE_DB_HOST', 'localhost'));
+define('DB_PORT', $getEnv('NENE_DB_PORT', '3306'));
+define('DB_NAME', $getEnv('NENE_DB_NAME', 'nene-php'));
+
+unset($getEnv);
+
+// Database behavior.
 const DB_COLUMN_TIMESTAMP = true;
-const DB_COLUMN_NAME_CREATED = 'created_at';            // COLUMN NAME OF ROW CREATION DATE
-const DB_COLUMN_NAME_UPDATED = 'updated_at';            // COLUMN NAME OF ROW UPDATE DATE
-const DB_AUTO_CREATED_STAMP = true;                     // WHETHER TO SET THE CREATION DATE AUTOMATICALLY
-const DB_AUTO_UPDATED_STAMP = true;                     // WHETHER TO SET THE UPDATE DATE AUTOMATICALLY
-// WORKAROUND WHEN THE COLUMN NAME STARTS WITH A NUMBER FOR SOME REASON.
+const DB_COLUMN_NAME_CREATED = 'created_at';
+const DB_COLUMN_NAME_UPDATED = 'updated_at';
+const DB_AUTO_CREATED_STAMP = true;
+const DB_AUTO_UPDATED_STAMP = true;
 const DB_NUM_PREFIX = 'numPrefix_';
-const DB_IS_PHYSICAL_DELETE = true;                     // WHETHER TO DELETE PHYSICALLY
+const DB_IS_PHYSICAL_DELETE = true;
 
-// OUTPUT
-const JSON_OUTPUT = true;                               // JSON OUTPUT
-const ERROR_CODE_PATH = DIR_ROOT . 'config/error_codes.php'; // ERROR CODE CATALOG PATH
+// Output and error catalog.
+const JSON_OUTPUT = true;
+const ERROR_CODE_PATH = DIR_ROOT . 'config/error_codes.php';
 
-// LOG
-const LOG_PATH = DIR_ROOT . 'log/';                     // LOGGING PATH
-const APP_LOG_PATH = LOG_PATH . 'debug.log';            // APP LOG PATH
-const ACCESS_LOG_PATH = LOG_PATH . 'access.log';        // ACCESS LOG PATH
-const ERROR_LOG_PATH = LOG_PATH . 'error.log';          // ERROR LOG PATH
+// Logs.
+const LOG_PATH = DIR_ROOT . 'log/';
+const APP_LOG_PATH = LOG_PATH . 'debug.log';
+const ACCESS_LOG_PATH = LOG_PATH . 'access.log';
+const ERROR_LOG_PATH = LOG_PATH . 'error.log';
 
-// VIEW
-const DIR_SMARTY_TEMPLATE = DIR_ROOT . 'view/source';   // SMARTY TEMPLATE
-const DIR_SMARTY_COMPILE = DIR_ROOT . 'view/compile';   // SMARTY TEMPLATE COMPILE
-const DIR_SMARTY_CONFIG = DIR_ROOT . 'view/config';     // SMARTY CONFIG
-const DIR_SMARTY_PLUGINS = DIR_ROOT . 'view/plugins';   // SMARTY PLUGIN
+// Smarty view paths.
+const DIR_SMARTY_TEMPLATE = DIR_ROOT . 'view/source';
+const DIR_SMARTY_COMPILE = DIR_ROOT . 'view/compile';
+const DIR_SMARTY_CONFIG = DIR_ROOT . 'view/config';
+const DIR_SMARTY_PLUGINS = DIR_ROOT . 'view/plugins';
