@@ -293,6 +293,15 @@
     justify-content: flex-end;
 }
 
+.health-card__meta {
+    color: #8f82ff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    grid-column: 1 / -1;
+    letter-spacing: 0.02em;
+    margin: 0;
+}
+
 .health-badge {
     border-radius: 999px;
     font-size: 0.78rem;

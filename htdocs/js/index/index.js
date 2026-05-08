@@ -128,6 +128,8 @@ document.addEventListener('DOMContentLoaded', function() {
             status: 'loading',
             api: false,
             database: false,
+            databaseType: '',
+            environment: '',
             schema: false,
             message: 'Checking runtime...'
         });
@@ -145,6 +147,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             status: body.Data.healthStatus || 'degraded',
                             api: Boolean(body.Data.api),
                             database: Boolean(body.Data.database),
+                            databaseType: body.Data.databaseType || '',
+                            environment: body.Data.environment || '',
                             schema: Boolean(body.Data.schema),
                             message: body.Data.healthStatus === 'ok'
                                 ? 'API, database, and sample schema are ready.'
@@ -157,6 +161,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         status: 'degraded',
                         api: false,
                         database: false,
+                        databaseType: '',
+                        environment: '',
                         schema: false,
                         message: error.message
                     });
@@ -181,6 +187,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     e(HealthBadge, { label: 'DB', ok: health.database }),
                     e(HealthBadge, { label: 'Schema', ok: health.schema })
                 ),
+                health.environment && health.environment !== 'production' && health.databaseType
+                    ? e('p', { className: 'health-card__meta' }, 'DB Type: ' + health.databaseType)
+                    : null,
                 health.status === 'ok'
                     ? null
                     : e('code', null, 'php cli/setupDatabase.php --env=.env --yes')
