@@ -39,7 +39,8 @@ class Dispatcher
      */
     final public function dispatch(): void
     {
-        $param = ltrim($_SERVER['REQUEST_URI'], '/');
+        $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '';
+        $param = ltrim($requestPath, '/');
         $param = rtrim($param, '/');
         $params = [];
         if ($param != '') {
@@ -54,22 +55,135 @@ class Dispatcher
 
         /* ========== SET ACTION ========== */
         define('APP_ACTION', $action);
-        if (
-            method_exists($controllerInstance, $action . 'Action')
-            && method_exists($controllerInstance, $action . 'Rest')
-        ) {
-            echo $action . 'Action' . ' and ' . $action . 'Rest Duplicate';
-            exit();
-        } elseif (method_exists($controllerInstance, $action . 'Action')) {
-            define('APP_ACTION_MODE', 'Action');
-        } elseif (method_exists($controllerInstance, $action . 'Rest')) {
-            define('APP_ACTION_MODE', 'Rest');
-        } else {
+        $route = $this->resolveActionRoute(
+            $controllerInstance,
+            $action,
+            $_SERVER['REQUEST_METHOD'] ?? 'GET'
+        );
+        if ($route['status'] === 404) {
             header('HTTP/1.0 404 Not Found');
             echo file_get_contents(DIR_ROOT . '/404.html');
             exit;
+        } elseif ($route['status'] === 405) {
+            header('HTTP/1.0 405 Method Not Allowed');
+            header('Allow: ' . implode(', ', $route['allowed']));
+            echo json_encode([
+                'Result' => false,
+                'Error' => [
+                    'ErrorCode' => 'METHOD-NOT-ALLOWED',
+                    'ErrorMessage' => 'The HTTP method is not allowed for this endpoint.'
+                ]
+            ]);
+            exit;
+        } elseif ($route['status'] === 500) {
+            echo $action . 'Action' . ' and ' . $action . 'Rest Duplicate';
+            exit();
         }
+        define('APP_ACTION_MODE', $route['mode']);
+        define('APP_ACTION_METHOD', $route['method']);
         $controllerInstance->run();
+    }
+
+    /**
+     * Resolve the controller method for an action.
+     *
+     * REST handlers may opt into HTTP-method dispatch with names like indexGetRest.
+     * The legacy indexRest convention remains supported as a fallback.
+     *
+     * @param object $controllerInstance Controller instance.
+     * @param string $action             Action name.
+     * @param string $requestMethod      HTTP request method.
+     *
+     * @return array{status:int, mode:string, method:string, allowed:array<int,string>}
+     */
+    final public function resolveActionRoute(object $controllerInstance, string $action, string $requestMethod): array
+    {
+        $actionMethod = $action . 'Action';
+        $legacyRestMethod = $action . 'Rest';
+        $methodRestMethod = $action . $this->getRestMethodSuffix($requestMethod) . 'Rest';
+        $allowedMethods = $this->getAllowedRestMethods($controllerInstance, $action);
+
+        if (method_exists($controllerInstance, $methodRestMethod)) {
+            return [
+                'status' => 200,
+                'mode' => 'Rest',
+                'method' => $methodRestMethod,
+                'allowed' => $allowedMethods
+            ];
+        }
+        if (
+            method_exists($controllerInstance, $actionMethod)
+            && method_exists($controllerInstance, $legacyRestMethod)
+        ) {
+            return [
+                'status' => 500,
+                'mode' => '',
+                'method' => '',
+                'allowed' => $allowedMethods
+            ];
+        }
+        if (method_exists($controllerInstance, $actionMethod)) {
+            return [
+                'status' => 200,
+                'mode' => 'Action',
+                'method' => $actionMethod,
+                'allowed' => $allowedMethods
+            ];
+        }
+        if (method_exists($controllerInstance, $legacyRestMethod)) {
+            return [
+                'status' => 200,
+                'mode' => 'Rest',
+                'method' => $legacyRestMethod,
+                'allowed' => $allowedMethods
+            ];
+        }
+        if ($allowedMethods !== []) {
+            return [
+                'status' => 405,
+                'mode' => '',
+                'method' => '',
+                'allowed' => $allowedMethods
+            ];
+        }
+        return [
+            'status' => 404,
+            'mode' => '',
+            'method' => '',
+            'allowed' => []
+        ];
+    }
+
+    /**
+     * Get the REST method suffix for an HTTP method.
+     *
+     * @param string $requestMethod HTTP request method.
+     *
+     * @return string REST method suffix.
+     */
+    private function getRestMethodSuffix(string $requestMethod): string
+    {
+        return ucfirst(strtolower($requestMethod));
+    }
+
+    /**
+     * Get HTTP methods supported by method-specific REST handlers.
+     *
+     * @param object $controllerInstance Controller instance.
+     * @param string $action             Action name.
+     *
+     * @return array<int,string> Supported HTTP methods.
+     */
+    private function getAllowedRestMethods(object $controllerInstance, string $action): array
+    {
+        $allowedMethods = [];
+        foreach (get_class_methods($controllerInstance) as $methodName) {
+            if (preg_match('/^' . preg_quote($action, '/') . '(Get|Post|Put|Patch|Delete)Rest$/', $methodName, $matches)) {
+                $allowedMethods[] = strtoupper($matches[1]);
+            }
+        }
+        sort($allowedMethods);
+        return $allowedMethods;
     }
 
     /**

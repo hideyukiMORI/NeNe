@@ -181,7 +181,7 @@ abstract class ControllerBase
                 ]
             );
         }
-        if (APP_ACTION_MODE == 'Rest' && $this->method == 'POST') {
+        if (APP_ACTION_MODE == 'Rest' && in_array($this->method, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
             $this->REQUEST_JSON = Func\Json::inputPostJsonToArray();
         } elseif (APP_ACTION_MODE == 'Action') {
             $this->setTemplate();
@@ -192,7 +192,7 @@ abstract class ControllerBase
             $this->sessionCheck();
         }
 
-        $methodName = sprintf('%s' . APP_ACTION_MODE, APP_ACTION);
+        $methodName = defined('APP_ACTION_METHOD') ? APP_ACTION_METHOD : sprintf('%s' . APP_ACTION_MODE, APP_ACTION);
         $return = $this->$methodName();
 
         if (APP_ACTION_MODE == 'Rest') {

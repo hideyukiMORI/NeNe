@@ -303,6 +303,12 @@
     margin-bottom: 18px;
 }
 
+.todo-panel__status {
+    color: #8f82ff;
+    font-size: 0.86rem;
+    margin: 0 0 12px;
+}
+
 .todo-list {
     display: grid;
     gap: 10px;
