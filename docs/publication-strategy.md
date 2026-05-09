@@ -265,14 +265,15 @@ Show HN: NeNe, a tiny renovated legacy-style PHP framework
 
 ## Suggested Execution TODO
 
-1. Improve GitHub repository metadata.
-2. Strengthen the README public entry.
-3. Improve Composer/Packagist metadata.
-4. Complete #145 reference implementation.
-5. Write the Zenn renovation story.
-6. Write the Qiita hands-on guide.
-7. Publish a short DEV Community English article.
-8. Consider Reddit or Hacker News after feedback from the first articles.
+1. Done: improve GitHub repository metadata.
+2. Done: strengthen the README public entry.
+3. Done: clarify that `git clone` is the recommended install path for now.
+4. #176: improve Composer/Packagist-facing metadata for discovery.
+5. #177: write the Zenn renovation story.
+6. #178: write the Qiita hands-on guide.
+7. #179: publish a short DEV Community English article.
+8. #180: consider Reddit or Hacker News after feedback from the first articles.
+9. #165/#145: continue the reviewable Controller-Service-Mapper reference implementation after the public-entry sequence.
 
 ## Success Criteria
 
