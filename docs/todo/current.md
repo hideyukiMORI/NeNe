@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #135: Refactor `ControllerBase` responsibilities into a testable CSRF protection boundary.
 - #144: Adjust Phase 6 around reference implementations and small-service delivery.
 - #142: Document AI readability and small-service delivery as the next project phase.
 - #140: Clarify Docker development database credentials for phpMyAdmin and MySQL.
@@ -58,7 +59,6 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 ## Next
 
 - #145: Add an AI-assisted small-service reference implementation covering page, REST, mapper, OpenAPI, and tests.
-- #135: Refactor `ControllerBase` responsibilities into smaller testable boundaries.
 
 ## Backlog Candidates
 
