@@ -6,7 +6,7 @@ The project started from an older, intentionally small PHP framework style. Its 
 
 NeNe is for developers who are comfortable with older convention-based PHP frameworks and want a codebase they can read from end to end. It keeps the familiar "URL segment -> controller -> action" flow while modernizing the boundaries around it.
 
-NeNe should also be friendly to AI-assisted development. That does not mean promising that every generated change is automatically good. It means keeping the framework small, explicit, documented, and testable enough that code written by a human or an AI agent can be reviewed by a human without first decoding a large amount of framework magic.
+NeNe is also a good fit for AI-assisted development because its existing conventions are visible and predictable. That does not mean promising that every generated change is automatically good. It means keeping the framework small, explicit, documented, and testable enough that code written by a human or assisted by an AI agent can be reviewed by a human without first decoding a large amount of framework magic.
 
 The project should remain small and understandable. New work should improve maintainability, security, and standards compatibility without turning NeNe into a large full-stack framework.
 

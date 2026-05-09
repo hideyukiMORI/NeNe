@@ -14,7 +14,7 @@ NeNe should continue to emphasize:
 - Smarty-based server rendering as the default HTML path.
 - Lightweight mapper/model classes instead of a heavy ORM.
 - Small, readable framework code over large abstractions.
-- Human-friendly and AI-readable conventions that make generated or hand-written changes reviewable in the same way.
+- Explicit conventions that make generated or hand-written changes reviewable in the same way.
 - A short path from `git clone` to local verification and small-service delivery.
 - Modern safety rails around the legacy shape: Docker, tests, OpenAPI, Phan, PHP CS Fixer, CSRF, password hashing, error catalogs, and safer output handling.
 
@@ -141,22 +141,23 @@ Status: next phase.
 
 Goal:
 
-NeNe should become a framework that is pleasant to use with both human and AI-assisted development. The target is not to claim that AI output is always correct. The target is to keep the codebase explicit enough that AI-written and human-written changes look similar, follow the same conventions, and remain practical for a human developer to review.
+NeNe already has several AI-era strengths: visible URL conventions, predictable controller and REST method names, small framework code, OpenAPI, and focused tests. Phase 6 should not turn "AI-readable" into a broad redesign goal. It should prove those existing strengths through repeatable examples and a delivery path that stays easy for humans to review.
 
-This phase should strengthen NeNe as a small-service delivery framework: quick to clone, quick to run, quick to inspect, and safe enough by default for realistic small projects.
+This phase should strengthen NeNe as a small-service delivery framework: quick to clone, quick to run, quick to inspect, and safe enough by default for realistic small projects. AI assistance is useful when it produces changes that look like normal NeNe changes and remain practical for a human developer to review.
 
 Principles:
 
 - Prefer visible conventions over hidden framework magic.
 - Keep routing, controller names, REST method boundaries, configuration, and database setup easy to trace.
-- Keep docs, examples, OpenAPI contracts, and tests close to the behavior they describe.
+- Prefer working reference implementations over extra explanation when examples can show the expected shape.
+- Keep docs, OpenAPI contracts, and tests close to the behavior they describe.
 - Preserve a fast Docker-based local workflow and a clear traditional Apache/PHP server install path.
 - Treat security defaults, explicit errors, CSRF, password hashing, session settings, and dependency hygiene as part of the developer experience.
 - Avoid adding large abstractions that make the code harder for humans or AI agents to understand.
 
 Future candidates:
 
+- #145: Add a small-service reference implementation that shows the expected shape of AI-assisted changes: page, REST endpoint, mapper, OpenAPI, and test.
 - Make the first-service tutorial even more repeatable from clone to local verification.
-- Add focused examples that show the expected shape of AI-assisted changes: page, REST endpoint, mapper, OpenAPI, and test.
 - Improve comments and PHPDoc only where they help readers understand framework boundaries.
 - Add lightweight checklists for small-service delivery readiness, including environment, database, OpenAPI, tests, and production safety notes.

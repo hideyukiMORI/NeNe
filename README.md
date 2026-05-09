@@ -6,7 +6,7 @@ NeNe is a renovated legacy PHP framework.
 
 The original idea is more than ten years old: keep a tiny front-controller framework that people familiar with older PHP frameworks can understand at a glance. This repository keeps that philosophy and structure, then updates the project for modern PHP development with Composer, Docker, tests, OpenAPI, explicit security defaults, and current stable packages.
 
-NeNe is intentionally much smaller than full-stack frameworks. It is designed to stay readable by both humans and AI agents, so code generated or edited with AI assistance should still be easy for a developer to inspect, understand, and keep.
+NeNe is intentionally much smaller than full-stack frameworks. Its visible conventions are meant to stay readable by both humans and AI agents, so code generated or edited with AI assistance can follow the same shape a developer would normally review.
 
 NeNe keeps only the parts needed to build small services:
 

@@ -8,6 +8,10 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #144: Adjust Phase 6 around reference implementations and small-service delivery.
+- #142: Document AI readability and small-service delivery as the next project phase.
+- #140: Clarify Docker development database credentials for phpMyAdmin and MySQL.
+- #138: Add phpMyAdmin with the darkwolf theme to the Docker development environment.
 - #136: Change the project license to MIT.
 - #133: Document the `v0.1.0` release milestone and prepare the first framework tag.
 - #131: Show the runtime environment label in the development health check card.
@@ -53,6 +57,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
+- #145: Add an AI-assisted small-service reference implementation covering page, REST, mapper, OpenAPI, and tests.
 - #135: Refactor `ControllerBase` responsibilities into smaller testable boundaries.
 
 ## Backlog Candidates
