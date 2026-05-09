@@ -140,7 +140,7 @@ abstract class ControllerBase
      *
      * @var CsrfProtectionPolicy
      */
-    protected $CSRF_PROTECTION_POLICY;
+    private $csrfProtectionPolicy;
 
     /**
      * Rest post
@@ -178,7 +178,7 @@ abstract class ControllerBase
         $this->AUTH_SESSION     = Xion\AuthSession::getInstance();
         $this->API_RESPONSE     = new Xion\ApiResponse();
         $this->ROUTE_CONTEXT    = Xion\RouteContext::getInstance();
-        $this->CSRF_PROTECTION_POLICY = new Xion\CsrfProtectionPolicy();
+        $this->csrfProtectionPolicy = new Xion\CsrfProtectionPolicy();
         $this->refController    = $_SESSION['global']['referer']['controller'] ?? '';
         $this->refAction        = $_SESSION['global']['referer']['action'] ?? '';
     }
@@ -375,7 +375,7 @@ abstract class ControllerBase
      */
     final protected function requiresCsrfProtection(): bool
     {
-        return $this->CSRF_PROTECTION_POLICY->requiresToken(
+        return $this->csrfProtectionPolicy->requiresToken(
             $this->ROUTE_CONTEXT,
             $this->method,
             $this->AUTH_SESSION->isLoggedIn()
