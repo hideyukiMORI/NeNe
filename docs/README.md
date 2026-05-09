@@ -13,6 +13,7 @@ This directory contains project documentation for humans and AI agents.
 - `deployment/server-install.md`: Traditional Apache/PHP server installation after `git clone`.
 - `development/testing.md`: Testing strategy and commands.
 - `tutorials/building-a-service.md`: Practical guide for adding pages, REST endpoints, database-backed features, OpenAPI, and tests.
+- `ai/README.md`: AI-assisted implementation and self-review checklists.
 - `roadmap.md`: Project direction.
 - `releases.md`: Human-readable release notes and version checkpoints.
 - `todo/current.md`: Current TODO summary.

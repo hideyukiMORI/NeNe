@@ -72,6 +72,19 @@ Do not treat legacy style as a defect by itself. In NeNe, some legacy shape is i
 - Smarty is used for server-rendered templates.
 - Monolog is used for logging.
 
+## Framework and Application Boundaries
+
+NeNe keeps framework core and the bundled sample/application code in the same repository, but they have different responsibilities:
+
+- `class/xion/` is framework core. It contains dispatching, controller base behavior, request/session helpers, response helpers, database base classes, logging, and transaction boundaries.
+- `class/controller/`, `class/db/`, `class/model/`, and `class/func/` are the current sample/application-side namespaces. The bundled TODO, session, health, and documentation pages live here to show how a small NeNe service is built.
+- `view/source/`, `htdocs/css/`, and `htdocs/js/` are application-facing presentation assets discovered by convention.
+- `docs/api/`, `config/error_codes.php`, database setup scripts, and tests are part of the application contract whenever a sample or real service exposes public behavior.
+
+The current rule is documentation-first separation. Do not add a second dispatcher scan path, alternate controller namespace, or `app/` directory unless an Issue and ADR decide that the project is ready for that compatibility change.
+
+For now, new examples and reference implementations should make the boundary visible by treating `class/xion/` as the framework and all feature code as application code that uses it.
+
 ## Routing Convention
 
 NeNe routes by URL path segments.

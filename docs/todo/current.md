@@ -4,7 +4,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Active
 
-- None.
+- #160: Document AI self-review checklists and service-layer implementation standards.
 
 ## Recently Completed
 

@@ -8,6 +8,7 @@ This file is the first document for AI agents and automation working on NeNe.
 - Contributor guide: `docs/CONTRIBUTING.md`
 - Workflow: `docs/workflow.md`
 - Coding standards: `docs/development/coding-standards.md`
+- AI self-review: `docs/ai/README.md`
 - Commit conventions: `docs/development/commit-conventions.md`
 - Roadmap: `docs/roadmap.md`
 - Current TODO: `docs/todo/current.md`
