@@ -6,7 +6,9 @@ NeNe is a renovated legacy PHP framework.
 
 The original idea is more than ten years old: keep a tiny front-controller framework that people familiar with older PHP frameworks can understand at a glance. This repository keeps that philosophy and structure, then updates the project for modern PHP development with Composer, Docker, tests, OpenAPI, explicit security defaults, and current stable packages.
 
-NeNe is intentionally much smaller than full-stack frameworks. It keeps only the parts needed to build small services:
+NeNe is intentionally much smaller than full-stack frameworks. It is designed to stay readable by both humans and AI agents, so code generated or edited with AI assistance should still be easy for a developer to inspect, understand, and keep.
+
+NeNe keeps only the parts needed to build small services:
 
 - Convention-based routing from URL segments.
 - Server-rendered pages with Smarty.
@@ -14,7 +16,7 @@ NeNe is intentionally much smaller than full-stack frameworks. It keeps only the
 - Lightweight database mappers.
 - Session, CSRF, error catalog, logging, and testable boundaries.
 
-The goal is not to replace Laravel, Symfony, CodeIgniter, or Laminas. The goal is to give legacy-framework users a small codebase they can read, keep, and safely modernize.
+The goal is not to replace Laravel, Symfony, CodeIgniter, or Laminas. The goal is to give legacy-framework users a small codebase they can read, keep, safely modernize, and move from clone to a working small-service delivery path quickly.
 
 ## Documentation
 
