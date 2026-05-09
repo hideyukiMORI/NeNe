@@ -92,9 +92,11 @@ New public HTTP APIs should be documented with OpenAPI.
 
 ## Database Transactions
 
-Data mapper methods should keep `DataMapperBase::execute()` as a single-statement execution boundary. Do not start and commit a transaction inside every `execute()` call.
+`Nene\Xion\TransactionManager` is the canonical transaction boundary for NeNe application code. Humans and AI agents should use this pattern when adding multi-step database writes.
 
-Use `Nene\Xion\TransactionManager` at the service or use-case boundary when one logical operation needs multiple writes, multiple SQL statements, or multiple mappers:
+Data mapper methods must keep `DataMapperBase::execute()` as a single-statement execution boundary. Do not start and commit a transaction inside every `execute()` call.
+
+Use `TransactionManager` at the service, controller, or use-case boundary when one logical operation needs multiple writes, multiple SQL statements, or multiple mappers:
 
 ```php
 $transaction = new TransactionManager();
@@ -105,6 +107,8 @@ $transaction->run(function () use ($userMapper, $profileMapper): void {
 ```
 
 The transaction manager commits when the callback succeeds and rolls back when it throws. If a transaction is already active, it leaves the outer transaction responsible for the final commit or rollback.
+
+Do not create an alternate transaction helper for new features unless an Issue and ADR explain why `TransactionManager` is insufficient.
 
 ## Testing and Static Analysis
 
