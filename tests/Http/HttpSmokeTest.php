@@ -40,6 +40,7 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         self::assertStringContainsString('/serverinstall/index', $response->body());
         self::assertStringContainsString('/health/index', $response->body());
         self::assertStringContainsString('php cli/setupDatabase.php --env=.env --yes', $response->body());
+        self::assertStringContainsString('TransactionManager::run', $response->body());
         self::assertStringContainsString('Environment: ', $response->body());
         self::assertStringContainsString("health.environment === 'development'", $response->body());
         self::assertStringContainsString('DB Type: ', $response->body());

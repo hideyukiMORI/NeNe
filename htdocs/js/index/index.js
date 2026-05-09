@@ -228,6 +228,12 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             {
                 number: '04',
+                title: 'Wrap multi-step writes in a transaction',
+                text: 'Use TransactionManager at the use-case boundary when one operation needs multiple writes, SQL statements, or mappers.',
+                code: 'TransactionManager::run(fn () => $mapper->create($title, $body))'
+            },
+            {
+                number: '05',
                 title: 'Document and test the contract',
                 text: 'Add error codes, update OpenAPI, and cover the behavior with unit or HTTP runtime tests.',
                 code: 'composer test && NENE_HTTP_BASE_URL=http://localhost:8080 composer test:http'
