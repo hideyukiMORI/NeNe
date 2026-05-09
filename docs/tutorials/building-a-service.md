@@ -15,6 +15,8 @@ Use it as a checklist when adding application behavior:
 
 NeNe is intentionally small. Prefer explicit controller methods, clear data mappers, and focused tests over hidden framework behavior.
 
+Treat `class/xion/` as framework core. Most page, REST, service, mapper, and model work should happen in the application-side namespaces such as `class/controller/`, `class/model/`, `class/db/`, and `class/func/`. Do not change dispatcher or core behavior for a normal service feature.
+
 ## Before You Start
 
 Work from a GitHub Issue and a topic branch.
@@ -183,6 +185,79 @@ GET  /article/item/id_1 -> ArticleController::itemGetRest()
 ```
 
 State-changing REST requests such as `POST`, `PUT`, `PATCH`, and `DELETE` require a valid login session and `X-CSRF-Token` when the user is logged in. `/session/login` returns the token as `Data.csrfToken`.
+
+## Keep Controllers Thin
+
+Small read-only or single-write endpoints may call a mapper directly from the controller. Move logic into a service/use-case class when a controller method starts to coordinate business decisions, multiple mappers, multiple SQL statements, or a transaction.
+
+Use the existing `Nene\Model\` namespace under `class/model/` for application service classes. This keeps the current Composer autoload shape and avoids adding a second dispatcher path.
+
+Controller example:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Nene\Controller;
+
+use Nene\Model\ArticleService;
+use Nene\Xion\ControllerBase;
+
+class ArticleController extends ControllerBase
+{
+    public function indexPostRest(): array
+    {
+        $title = trim((string)($this->REQUEST_JSON['title'] ?? ''));
+        $body = trim((string)($this->REQUEST_JSON['body'] ?? ''));
+
+        $service = new ArticleService();
+        $result = $service->createArticle($title, $body);
+        if (!$result['ok']) {
+            return $this->API_RESPONSE->failure($result['errorCode']);
+        }
+
+        return $this->API_RESPONSE->success([
+            'article' => $result['article'],
+        ]);
+    }
+}
+```
+
+Service example:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Nene\Model;
+
+use Nene\Database as Database;
+use Nene\Xion\TransactionManager;
+
+class ArticleService
+{
+    public function createArticle(string $title, string $body): array
+    {
+        if ($title === '') {
+            return ['ok' => false, 'errorCode' => 'ARTICLE-TITLE-REQUIRED'];
+        }
+
+        $mapper = new Database\ArticleMapper();
+        $transaction = new TransactionManager();
+
+        return [
+            'ok' => true,
+            'article' => $transaction->run(function () use ($mapper, $title, $body): array {
+                return $mapper->create($title, $body);
+            }),
+        ];
+    }
+}
+```
+
+The service returns plain application data. The controller decides how to turn that result into a REST response. Mappers still own SQL.
 
 ## Add Database Transactions
 
@@ -433,11 +508,13 @@ Before opening a PR:
 
 - Create or confirm the GitHub Issue.
 - Add or update controller methods.
+- Add service/use-case code when business logic would make a controller method hard to read.
 - Add templates/assets for HTML pages.
 - Add mapper/model/schema changes for database-backed features.
 - Add error codes to `config/error_codes.php`.
 - Update `docs/api/openapi.yaml` for public REST endpoints.
 - Add focused unit or HTTP runtime tests.
+- Review `docs/ai/self-review/` before opening the PR.
 - Run `composer test`.
 - Run `composer analyze`.
 - Run `NENE_HTTP_BASE_URL=http://localhost:8080 composer test:http` when HTTP behavior changes.

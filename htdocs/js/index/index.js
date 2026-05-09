@@ -210,30 +210,36 @@ document.addEventListener('DOMContentLoaded', function() {
         const tutorialSteps = [
             {
                 number: '01',
+                title: 'Know the boundary',
+                text: 'Treat class/xion as framework core. Add page, REST, service, mapper, and model code in the application-side namespaces.',
+                code: 'class/controller + class/model + class/db use class/xion'
+            },
+            {
+                number: '02',
                 title: 'Add a fixed page',
                 text: 'Use an HTML action such as PageController::aboutAction() and place its template under view/source/page/about.tpl.',
                 code: 'GET /page/about -> PageController::aboutAction()'
             },
             {
-                number: '02',
+                number: '03',
                 title: 'Add a REST endpoint',
                 text: 'Use method-specific handlers so everyone writes the same style of JSON endpoint.',
                 code: 'POST /article/index -> ArticleController::indexPostRest()'
             },
             {
-                number: '03',
+                number: '04',
                 title: 'Store data with a mapper',
                 text: 'Keep persistence explicit with a small model and mapper instead of hiding behavior behind a large ORM.',
                 code: 'ArticleMapper::create($title, $body)'
             },
             {
-                number: '04',
+                number: '05',
                 title: 'Wrap multi-step writes in a transaction',
                 text: 'Use TransactionManager at the use-case boundary when one operation needs multiple writes, SQL statements, or mappers.',
                 code: 'TransactionManager::run(fn () => $mapper->create($title, $body))'
             },
             {
-                number: '05',
+                number: '06',
                 title: 'Document and test the contract',
                 text: 'Add error codes, update OpenAPI, and cover the behavior with unit or HTTP runtime tests.',
                 code: 'composer test && NENE_HTTP_BASE_URL=http://localhost:8080 composer test:http'

@@ -82,6 +82,33 @@ REST endpoints should make accepted HTTP methods explicit.
 - Define error code messages and HTTP status values in the server-side catalog at `config/error_codes.php`; controllers should reference codes, not inline messages or direct HTTP status headers.
 - Treat browser-visible error-code assets as exports or compatibility files, not the source of truth.
 
+## Service and Use-Case Logic
+
+Controllers are HTTP boundaries. Keep business decisions in service/use-case code once a controller method does more than simple request parsing, mapper delegation, and response selection.
+
+Use the existing `Nene\Model\` namespace under `class/model/` for application service classes when a feature needs a separate business-logic boundary. This uses the current Composer autoload map and does not require a new dispatcher path or framework abstraction.
+
+Controller responsibilities:
+
+- Read request JSON, route parameters, query values, and session/auth state.
+- Call a mapper for very small CRUD behavior, or call a service when the use case has business rules.
+- Convert service results into `ApiResponse` success or failure payloads.
+- Set template values for server-rendered pages.
+
+Service/use-case responsibilities:
+
+- Express one application operation with a clear method name, such as `createArticle()` or `completeTodoForUser()`.
+- Validate business rules that are not purely HTTP shape checks.
+- Coordinate multiple mappers, multiple SQL statements, or side effects.
+- Own the `TransactionManager::run()` boundary when one logical operation must commit or roll back as a unit.
+- Return plain domain/application data, not HTTP responses, Smarty templates, or raw controller payload envelopes.
+
+Mapper responsibilities:
+
+- Keep SQL and database row conversion inside mapper classes.
+- Do not know about HTTP request shape, templates, or `ApiResponse`.
+- Do not start transactions for every statement; leave transaction boundaries to service/use-case code.
+
 ## OpenAPI
 
 New public HTTP APIs should be documented with OpenAPI.
