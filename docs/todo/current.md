@@ -4,12 +4,13 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Active
 
-- #167: Add the reviewer-scarcity angle around modern pattern learning costs.
-- #163: Reframe the next phase around reducing code review cost through consistent implementation conventions.
-- #162: Document the publication and outreach strategy for NeNe after `v0.2.0`.
+- #169: Position the publication strategy document as a public OSS release case study.
 
 ## Recently Completed
 
+- #167: Add the reviewer-scarcity angle around modern pattern learning costs.
+- #163: Reframe the next phase around reducing code review cost through consistent implementation conventions.
+- #162: Document the publication and outreach strategy for NeNe after `v0.2.0`.
 - #160: Document AI self-review checklists and service-layer implementation standards.
 - #158: Prepare the `v0.2.0` release notes and runtime version.
 - #154, #155, #156: Clean up release-blocking code quality concerns in `ControllerBase` and `DataMapperBase`.
