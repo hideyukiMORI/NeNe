@@ -278,9 +278,6 @@ abstract class ControllerBase
         $controller = $this->ROUTE_CONTEXT->controller();
         $action = $this->ROUTE_CONTEXT->action();
         $template = 'common';
-        if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, $controller))) {
-            $template = $controller;
-        }
         if (file_exists(sprintf('%s/%s.tpl', DIR_SMARTY_TEMPLATE, $controller . '/' . $template))) {
             $template = $controller . '/' . $template;
         }

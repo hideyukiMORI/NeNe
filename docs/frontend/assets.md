@@ -58,13 +58,7 @@ view/source/page/about.tpl
 
 If the action-specific template does not exist, NeNe falls back through broader templates. This keeps very small pages possible while still allowing action-specific templates when the page needs its own markup.
 
-The legacy controller-level template form is also supported:
-
-```text
-view/source/{controller}.tpl
-```
-
-Prefer `view/source/{controller}/common.tpl` for new shared controller markup. It keeps all templates for the same controller in one directory and makes the route-to-template relationship easier to scan.
+Use `view/source/{controller}/common.tpl` for shared controller markup. NeNe does not load `view/source/{controller}.tpl`; keeping templates inside the controller directory makes the route-to-template relationship easier to scan.
 
 Most new pages should extend the shared layout:
 
