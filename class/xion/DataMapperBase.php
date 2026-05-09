@@ -18,7 +18,6 @@ declare(strict_types=1);
 namespace Nene\Xion;
 
 use Monolog\Logger;
-use Nene\Database as Database;
 use Nene\Xion as Xion;
 use PDO;
 use PDOStatement;
@@ -87,15 +86,14 @@ abstract class DataMapperBase
      *
      * @param string  $key_sid         Column name for sequence ID of auto increment.
      * @param boolean $is_exclude_date Whether to exclude the creation date and update date of the database row.
-     * @param string  $className       The target class name.
+     * @param string  $className       Mapper or model class name.
      *
      * @return array Column name array.
      */
     public function getTableColumn(string $key_sid, bool $is_exclude_date = false, string $className = ''): array
     {
-        $className = $className === '' ? static::MODEL_CLASS : $className;
-        $DataMODEL  = str_replace('Mapper', '', $className);
-        $DataObj    = new $DataMODEL();
+        $modelClassName = $this->resolveModelClass($className);
+        $DataObj    = new $modelClassName();
         $column     = $DataObj->getSchema();
         if ($is_exclude_date) {
             unset($column[DB_COLUMN_NAME_CREATED]);
@@ -139,6 +137,7 @@ abstract class DataMapperBase
         if (!is_array($data)) {
             $data = [$data];
         }
+        $lastInsertId = 0;
         foreach ($data as $row) {
             if (!$row instanceof DataModelBase) {
                 throw new \InvalidArgumentException(
@@ -155,9 +154,10 @@ abstract class DataMapperBase
                 $stmt->bindValue(':' . $col, $row->$key);
             }
             $this->execute($stmt);
-            $row->{static::KEY_SID} = $this->DB->lastInsertId();
+            $lastInsertId = (int)$this->DB->lastInsertId();
+            $row->{static::KEY_SID} = $lastInsertId;
         }
-        return $row->{static::KEY_SID};
+        return $lastInsertId;
     }
 
     /**
@@ -210,7 +210,7 @@ abstract class DataMapperBase
      *
      * @return void
      */
-    public function delete(mixed $data)
+    public function delete(mixed $data): void
     {
         if (DB_IS_PHYSICAL_DELETE) {
             $stmt = $this->DB->prepare('
@@ -240,9 +240,9 @@ abstract class DataMapperBase
      *
      * @param integer $sid Primary key value to search.
      *
-     * @return mixed  Search results.
+     * @return object|false Search result.
      */
-    public function find(int $sid)
+    public function find(int $sid): object|false
     {
         $stmt = $this->DB->prepare('
             SELECT * FROM ' . static::TARGET_TABLE . '
@@ -289,22 +289,22 @@ abstract class DataMapperBase
             WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID . '
         ');
         $stmt->bindParam(':' . static::KEY_SID, $sid, PDO::PARAM_INT);
-        return $this->execute($stmt)->fetchColumn();
+        return (int)$this->execute($stmt)->fetchColumn();
     }
 
     /**
      * Count all
      * Returns the number of rows in a database table.
      *
-     * @return integer number of rows.
+     * @return integer Number of rows.
      */
-    public function countAll()
+    public function countAll(): int
     {
         $stmt = $this->executeQuery('
             SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
             WHERE 1
         ');
-        return $stmt->fetchColumn();
+        return (int)$stmt->fetchColumn();
     }
 
     /**
@@ -315,7 +315,7 @@ abstract class DataMapperBase
      *
      * @return PDOStatement PDOStatement after try.
      */
-    final public function execute(PDOStatement $stmt)
+    final public function execute(PDOStatement $stmt): PDOStatement
     {
         try {
             $stmt->execute();
@@ -357,6 +357,24 @@ abstract class DataMapperBase
             APP_DEBUG ? $exception->getMessage() : 'Internal Server Error',
             500
         ));
+    }
+
+    /**
+     * Resolve the model class that provides schema metadata.
+     *
+     * @param string $className Mapper or model class name.
+     *
+     * @return class-string<DataModelBase> Model class name.
+     */
+    private function resolveModelClass(string $className = ''): string
+    {
+        if ($className === '') {
+            return static::MODEL_CLASS;
+        }
+        if (is_subclass_of($className, self::class)) {
+            return $className::MODEL_CLASS;
+        }
+        return $className;
     }
 
     /**

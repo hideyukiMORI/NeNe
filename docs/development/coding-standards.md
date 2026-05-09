@@ -27,6 +27,7 @@ NeNe is a legacy PHP framework, but new work should move the codebase toward cur
 - Use PHP CS Fixer as the primary formatter when formatting is needed.
 - Do not mix formatting-only changes into unrelated PRs.
 - Preserve the existing namespace layout unless an Issue and ADR approve a migration.
+- Preserve legacy uppercase properties only where they are part of existing framework surface. New private/protected implementation details should use normal camelCase names unless compatibility requires the legacy style.
 
 PHP CS Fixer is configured in `.php-cs-fixer.dist.php`.
 

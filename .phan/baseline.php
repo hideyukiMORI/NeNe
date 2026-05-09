@@ -9,10 +9,7 @@
  */
 return [
     // # Issue statistics:
-    // PhanTypeMismatchReturn : 3 occurrences
-    // PhanPossiblyUndeclaredVariable : 2 occurrences
-    // PhanUndeclaredProperty : 2 occurrences
-    // PhanUnreferencedUseNormal : 2 occurrences
+    // PhanPossiblyUndeclaredVariable : 1 occurrence
     // PhanTypeMagicVoidWithReturn : 1 occurrence
     // PhanTypeMismatchArgument : 1 occurrence
     // PhanTypeMismatchArgumentInternal : 1 occurrence
@@ -24,18 +21,16 @@ return [
     // PhanUndeclaredConstantOfClass : 1 occurrence
     // PhanUndeclaredTypeThrowsType : 1 occurrence
     // PhanUndeclaredVariableDim : 1 occurrence
-    // PhanUnextractableAnnotation : 1 occurrence
+    // PhanUnreferencedUseNormal : 1 occurrence
 
     'file_suppressions' => [
         'class/xion/ControllerBase.php' => [
             'PhanTypeMissingReturn' => ['\\Nene\\Xion\\ControllerBase::preAction']
         ],
         'class/xion/DataMapperBase.php' => [
-            'PhanPossiblyUndeclaredVariable' => ['\\Nene\\Xion\\DataMapperBase::insert', '\\Nene\\Xion\\DataMapperBase::update'],
-            'PhanTypeMismatchReturn' => ['\\Nene\\Xion\\DataMapperBase::countAll', '\\Nene\\Xion\\DataMapperBase::countById', '\\Nene\\Xion\\DataMapperBase::insert'],
+            'PhanPossiblyUndeclaredVariable' => ['\\Nene\\Xion\\DataMapperBase::update'],
             'PhanTypeSuspiciousStringExpression' => ['\\Nene\\Xion\\DataMapperBase::update'],
-            'PhanUndeclaredVariableDim' => ['\\Nene\\Xion\\DataMapperBase::update'],
-            'PhanUnreferencedUseNormal' => ['class/xion/DataMapperBase.php']
+            'PhanUndeclaredVariableDim' => ['\\Nene\\Xion\\DataMapperBase::update']
         ],
         'class/xion/DataModelBase.php' => [
             'PhanTypeMagicVoidWithReturn' => ['\\Nene\\Xion\\DataModelBase::__set'],
@@ -50,15 +45,6 @@ return [
         'class/xion/PdoConnection.php' => [
             'PhanTypeMismatchPropertyProbablyReal' => ['\\Nene\\Xion\\PdoConnection::__destruct'],
             'PhanUndeclaredConstantOfClass' => ['\\Nene\\Xion\\PdoConnection::__construct']
-        ],
-        'class/xion/Post.php' => [
-            'PhanUndeclaredProperty' => ['\\Nene\\Xion\\Post::setValues']
-        ],
-        'class/xion/QueryString.php' => [
-            'PhanUndeclaredProperty' => ['\\Nene\\Xion\\QueryString::setValues']
-        ],
-        'class/xion/RequestVariables.php' => [
-            'PhanUnextractableAnnotation' => ['\\Nene\\Xion\\RequestVariables']
         ],
         'class/xion/View.php' => [
             'PhanUndeclaredTypeThrowsType' => ['\\Nene\\Xion\\View::__clone']
