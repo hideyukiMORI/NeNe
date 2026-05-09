@@ -17,6 +17,7 @@ This directory contains project documentation for humans and AI agents.
 - `roadmap.md`: Project direction.
 - `releases.md`: Human-readable release notes and version checkpoints.
 - `publication-strategy.md`: Public release strategy and OSS publication case-study notes.
+- `articles/zenn-renovating-legacy-php-framework.md`: Published Zenn article about renovating NeNe for modern PHP.
 - `todo/current.md`: Current TODO summary.
 - `milestones/README.md`: Milestone management.
 - `adr/README.md`: Architecture decision records.
