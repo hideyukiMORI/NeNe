@@ -147,12 +147,12 @@ This phase should strengthen NeNe as a small-service delivery framework where a 
 
 The legacy shape is a strength here. NeNe should preserve the old PHP framework habit of "look at the URL, find the controller, read the method," then add modern review aids around it: clear responsibility boundaries, self-review checklists, tests, OpenAPI, and secure defaults.
 
-Modern design patterns and current coding styles are useful, but they can also concentrate review ability in the few people who have learned them deeply. NeNe should avoid making small-service delivery depend on specialist pattern fluency when a visible convention is enough.
+Modern design patterns and current coding styles are useful, but very open implementation style can make each review start with a different architecture lesson. NeNe should avoid making small-service delivery depend on decoding every contributor's preferred pattern when a visible convention is enough.
 
 Principles:
 
 - Prefer visible conventions over hidden framework magic.
-- Prefer broadly reviewable patterns over fashionable patterns when both solve the same small-service problem.
+- Prefer broadly reviewable conventions over fashionable patterns when both solve the same small-service problem.
 - Optimize for reviewability: a human should quickly know where to inspect HTTP input, business rules, SQL, API contracts, and tests.
 - Keep routing, controller names, REST method boundaries, configuration, and database setup easy to trace.
 - Keep Controller / Service / Mapper responsibilities stable enough that different humans and AI agents produce similar shapes.
@@ -167,7 +167,7 @@ Future candidates:
 - #163: Reframe the next phase around reducing code review cost through consistent implementation conventions.
 - #164: Present NeNe publicly as a reviewable small-service PHP framework.
 - #165: Use the reference implementation to prove the reviewable Controller-Service-Mapper shape.
-- #167: Explain how stable conventions help avoid reviewer scarcity caused by specialized pattern knowledge.
+- #167: Explain how stable conventions reduce review load caused by highly variable implementation styles.
 - #145: Add a small-service reference implementation that shows the expected shape of page, REST endpoint, service/use-case, mapper, OpenAPI, and test changes.
 - Make the first-service tutorial even more repeatable from clone to local verification.
 - Improve comments and PHPDoc only where they help readers understand framework boundaries.
