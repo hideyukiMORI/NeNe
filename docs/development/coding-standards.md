@@ -90,6 +90,22 @@ New public HTTP APIs should be documented with OpenAPI.
 - Prefer JSON responses for API endpoints.
 - Keep OpenAPI files in `docs/api/` unless a future ADR chooses another location.
 
+## Database Transactions
+
+Data mapper methods should keep `DataMapperBase::execute()` as a single-statement execution boundary. Do not start and commit a transaction inside every `execute()` call.
+
+Use `Nene\Xion\TransactionManager` at the service or use-case boundary when one logical operation needs multiple writes, multiple SQL statements, or multiple mappers:
+
+```php
+$transaction = new TransactionManager();
+$transaction->run(function () use ($userMapper, $profileMapper): void {
+    $userMapper->create($user);
+    $profileMapper->create($profile);
+});
+```
+
+The transaction manager commits when the callback succeeds and rolls back when it throws. If a transaction is already active, it leaves the outer transaction responsible for the final commit or rollback.
+
 ## Testing and Static Analysis
 
 - At minimum, run PHP syntax checks for changed PHP files.
