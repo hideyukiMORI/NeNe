@@ -136,6 +136,13 @@ abstract class ControllerBase
     protected $ROUTE_CONTEXT;
 
     /**
+     * CSRF validation decision boundary.
+     *
+     * @var CsrfProtectionPolicy
+     */
+    protected $CSRF_PROTECTION_POLICY;
+
+    /**
      * Rest post
      *
      * @var array
@@ -171,6 +178,7 @@ abstract class ControllerBase
         $this->AUTH_SESSION     = Xion\AuthSession::getInstance();
         $this->API_RESPONSE     = new Xion\ApiResponse();
         $this->ROUTE_CONTEXT    = Xion\RouteContext::getInstance();
+        $this->CSRF_PROTECTION_POLICY = new Xion\CsrfProtectionPolicy();
         $this->refController    = $_SESSION['global']['referer']['controller'] ?? '';
         $this->refAction        = $_SESSION['global']['referer']['action'] ?? '';
     }
@@ -367,13 +375,11 @@ abstract class ControllerBase
      */
     final protected function requiresCsrfProtection(): bool
     {
-        if (!$this->ROUTE_CONTEXT->isRest() || !in_array($this->method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
-            return false;
-        }
-        if ($this->ROUTE_CONTEXT->method() === 'loginPostRest') {
-            return false;
-        }
-        return $this->AUTH_SESSION->isLoggedIn();
+        return $this->CSRF_PROTECTION_POLICY->requiresToken(
+            $this->ROUTE_CONTEXT,
+            $this->method,
+            $this->AUTH_SESSION->isLoggedIn()
+        );
     }
 
     /**
