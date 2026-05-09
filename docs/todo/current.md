@@ -4,10 +4,12 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Active
 
-- #169: Position the publication strategy document as a public OSS release case study.
+- #165: Prove the reviewable Controller-Service-Mapper shape through the reference implementation.
 
 ## Recently Completed
 
+- #164: Update the public entry to present NeNe as a reviewable small-service PHP framework.
+- #169: Position the publication strategy document as a public OSS release case study.
 - #167: Add the reviewer-scarcity angle around modern pattern learning costs.
 - #163: Reframe the next phase around reducing code review cost through consistent implementation conventions.
 - #162: Document the publication and outreach strategy for NeNe after `v0.2.0`.
@@ -67,10 +69,6 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
-- #164: Update the public entry to present NeNe as a reviewable small-service PHP framework.
-- #165: Prove the reviewable Controller-Service-Mapper shape through the reference implementation.
-- Prepare GitHub repository metadata: About, homepage, topics, and MIT license detection.
-- Strengthen the README public entry with demo, latest release, license, tutorial, and "what NeNe is not" links.
 - Improve Composer and Packagist metadata: PHP requirement, keywords, homepage, support, and authors.
 - #145: Add an AI-assisted small-service reference implementation covering page, REST, mapper, OpenAPI, and tests.
 - Write the Zenn renovation story and the Qiita hands-on guide after the public entry is ready.

@@ -1,12 +1,18 @@
 # NeNe
 
-Simple web application framework.
+Tiny renovated legacy-style PHP framework for reviewable small services.
+
+- Demo: <https://nene-php.com/>
+- Latest release: [`v0.2.0`](https://github.com/hideyukiMORI/NeNe/releases/tag/v0.2.0)
+- License: MIT
+- Service tutorial: `docs/tutorials/building-a-service.md`
+- AI self-review checklists: `docs/ai/README.md`
 
 NeNe is a renovated legacy PHP framework.
 
 The original idea is more than ten years old: keep a tiny front-controller framework that people familiar with older PHP frameworks can understand at a glance. This repository keeps that philosophy and structure, then updates the project for modern PHP development with Composer, Docker, tests, OpenAPI, explicit security defaults, and current stable packages.
 
-NeNe is intentionally much smaller than full-stack frameworks. Its visible conventions are meant to stay readable by both humans and AI agents, so code generated or edited with AI assistance can follow the same shape a developer would normally review.
+NeNe is intentionally much smaller than full-stack frameworks. Its visible conventions are meant to stay readable by both humans and AI agents, so code generated or edited with AI assistance can follow the same shape a developer would normally review. The goal is to lower code review cost for small services by keeping HTTP input, controller actions, service rules, mapper SQL, OpenAPI, and tests in predictable places.
 
 NeNe keeps only the parts needed to build small services:
 
@@ -17,6 +23,13 @@ NeNe keeps only the parts needed to build small services:
 - Session, CSRF, error catalog, logging, and testable boundaries.
 
 The goal is not to replace Laravel, Symfony, CodeIgniter, or Laminas. The goal is to give legacy-framework users a small codebase they can read, keep, safely modernize, and move from clone to a working small-service delivery path quickly.
+
+## What NeNe Is Not
+
+- Not a large enterprise full-stack framework.
+- Not a Laravel, Symfony, CodeIgniter, or Laminas replacement.
+- Not an ORM, plugin ecosystem, or SPA-first architecture.
+- Not an attempt to hide legacy-style URL routing behind a new router abstraction.
 
 ## Documentation
 
