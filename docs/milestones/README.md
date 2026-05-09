@@ -82,22 +82,26 @@ Purpose: make framework progress visible through small versioned tags.
 
 Current status: `v0.1.0` is the first planned tag. It represents the point where NeNe has a working local Docker setup, traditional server install documentation, MySQL/SQLite sample database setup, a public `nene-php.com` sample deployment, OpenAPI/Swagger UI, tests, and a clear renovated-legacy framework policy.
 
-### ai-readable-small-service-delivery
+### reviewable-small-service-delivery
 
-Goal: make NeNe a small PHP framework that proves its existing human-friendly and AI-readable shape through working examples while supporting fast, secure small-service delivery.
+Goal: make NeNe a small PHP framework that lowers code review cost by keeping human-written and AI-assisted small-service changes in the same visible implementation shape.
 
-Context: NeNe's next phase should build on the renovated legacy foundation. The framework should not grow into a large full-stack platform, and it does not need a broad redesign just to become "AI-readable." It already has visible `/{controller}/{action}` flow, predictable controller and REST method names, a small codebase, Docker setup, OpenAPI, tests, and security defaults. The next step is to prove those strengths with reference implementations and a delivery path that a human can review comfortably, whether the change was written by a person or assisted by an AI agent.
+Context: NeNe's next phase should build on the renovated legacy foundation. The framework should not grow into a large full-stack platform, and it does not need a broad redesign just to become "AI-readable." It already has visible `/{controller}/{action}` flow, predictable controller and REST method names, a small codebase, Docker setup, OpenAPI, tests, security defaults, and self-review checklists. The next step is to make those strengths reduce real review friction: a reviewer should quickly know where to inspect HTTP input, business rules, SQL, API contracts, and tests.
+
+The legacy inheritance matters. Older PHP frameworks often made control flow easy to trace because the route, controller, action, and mapper were visible. This milestone keeps that readability, then adds modern review aids so different humans and different AI tools still produce code that looks like normal NeNe code.
 
 Positioning:
 
-- AI-readable as an outcome of explicit conventions, not as a separate architecture goal.
-- Human-friendly, not magic-heavy.
+- Review-cost reduction as the practical value of explicit conventions.
+- AI-readable as an outcome of stable human-reviewable patterns, not as a separate architecture goal.
+- Human-friendly and review-friendly, not magic-heavy.
 - Fast for small services, not a replacement for large enterprise frameworks.
 - Secure by default for realistic local development and small deployments.
 
 Scope:
 
 - Keep conventions explicit enough that AI-assisted and human-written changes follow the same shape.
+- Keep Controller / Service / Mapper responsibilities stable enough that implementation style does not vary by author or AI tool.
 - Use working reference implementations to show the preferred shape for small features.
 - Improve tutorials, examples, comments, and PHPDoc where they reduce review friction.
 - Keep the path from clone to local verification short and repeatable.
@@ -106,9 +110,11 @@ Scope:
 
 Completion criteria:
 
-- Documentation clearly describes NeNe as human-friendly and AI-readable without overstating AI guarantees or implying a broad architecture rewrite.
-- A first service can be built by following docs from page/controller through REST endpoint, database access, OpenAPI, and tests.
-- #145 defines a concrete reference implementation for the expected page, REST, mapper, OpenAPI, and test workflow.
+- Documentation clearly describes NeNe as review-friendly and AI-readable as a result of stable conventions, without overstating AI guarantees or implying a broad architecture rewrite.
+- A first service can be built by following docs from page/controller through Service/use-case, REST endpoint, database access, OpenAPI, and tests.
+- #163 defines the review-cost-reduction framing for Phase 6.
+- #164 updates the public entry message around reviewable small-service delivery.
+- #165 and #145 define a concrete reference implementation for the expected Controller, Service, Mapper, OpenAPI, and test workflow.
 - Local Docker setup remains simple, including app, MySQL, phpMyAdmin, Swagger UI, and test commands.
 - Production-facing docs continue to warn about secrets, debug output, local Docker credentials, phpMyAdmin exposure, and database initialization.
 - New examples do not introduce hidden routing, heavy ORM behavior, or broad framework abstractions.

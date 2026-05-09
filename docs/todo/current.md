@@ -4,10 +4,12 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Active
 
-- #160: Document AI self-review checklists and service-layer implementation standards.
+- #163: Reframe the next phase around reducing code review cost through consistent implementation conventions.
+- #162: Document the publication and outreach strategy for NeNe after `v0.2.0`.
 
 ## Recently Completed
 
+- #160: Document AI self-review checklists and service-layer implementation standards.
 - #158: Prepare the `v0.2.0` release notes and runtime version.
 - #154, #155, #156: Clean up release-blocking code quality concerns in `ControllerBase` and `DataMapperBase`.
 - #152: Add the canonical transaction pattern to the sample page tutorial.
@@ -63,7 +65,13 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
+- #164: Update the public entry to present NeNe as a reviewable small-service PHP framework.
+- #165: Prove the reviewable Controller-Service-Mapper shape through the reference implementation.
+- Prepare GitHub repository metadata: About, homepage, topics, and MIT license detection.
+- Strengthen the README public entry with demo, latest release, license, tutorial, and "what NeNe is not" links.
+- Improve Composer and Packagist metadata: PHP requirement, keywords, homepage, support, and authors.
 - #145: Add an AI-assisted small-service reference implementation covering page, REST, mapper, OpenAPI, and tests.
+- Write the Zenn renovation story and the Qiita hands-on guide after the public entry is ready.
 
 ## Backlog Candidates
 
