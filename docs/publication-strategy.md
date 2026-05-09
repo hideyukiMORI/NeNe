@@ -117,16 +117,18 @@ The README should stay concise. Detailed setup and design explanations belong in
 
 ### 3. Composer and Packagist Metadata
 
-If NeNe should be discoverable as a PHP package, improve `composer.json` before Packagist registration:
+NeNe's current recommended install path is `git clone`, then `composer install`. Treat the repository as a small-service base, not as a library that is added to an existing application with `composer require`.
+
+If NeNe should become discoverable on Packagist later, improve `composer.json` before registration:
 
 - Add a PHP requirement that matches the documented target.
 - Add `keywords`.
 - Add `homepage`.
 - Add `support.issues`.
 - Add `authors`.
-- Clarify whether NeNe is used as a package, an application skeleton, or a repository to clone.
+- Keep the README clear that the primary install path is still repository clone unless a later Issue changes the distribution model.
 
-Packagist expectations should be explicit. If the recommended install path is still `git clone`, say that clearly in README and release notes.
+Packagist expectations should be explicit. Packagist can help discovery, but it should not imply that NeNe is currently a drop-in library for existing applications.
 
 ### 4. Reference Implementation
 
