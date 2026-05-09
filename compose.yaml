@@ -48,6 +48,18 @@ services:
       timeout: 5s
       retries: 20
 
+  phpmyadmin:
+    build:
+      context: ./docker/phpmyadmin
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    ports:
+      - "${NENE_PHPMYADMIN_PORT:-8081}:80"
+
 volumes:
   mysql-data:
   vendor:

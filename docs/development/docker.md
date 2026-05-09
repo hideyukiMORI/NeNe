@@ -21,6 +21,22 @@ Open:
 http://localhost:8080/
 ```
 
+phpMyAdmin is also available for the local MySQL development database:
+
+```text
+http://localhost:8081/
+```
+
+Log in with the development database credentials:
+
+```text
+server: mysql
+user: nene
+password: nene
+```
+
+The phpMyAdmin image includes the darkwolf theme for phpMyAdmin 5.2. It is intended only for trusted local development; do not expose this service in production.
+
 ## Environment Variables
 
 Docker Compose includes local development defaults, so `.env` is optional. To customize ports or database credentials, copy the committed example and edit your local file:
@@ -36,7 +52,13 @@ The application reads runtime, session, and database settings through `getenv()`
 Use another port if needed:
 
 ```sh
-NENE_PORT=8081 docker compose up --build
+NENE_PORT=8082 docker compose up --build
+```
+
+Use another phpMyAdmin port if needed:
+
+```sh
+NENE_PHPMYADMIN_PORT=8083 docker compose up --build
 ```
 
 ## Session Cookie Settings
@@ -79,6 +101,8 @@ The first MySQL startup runs `docker/mysql/init/001_schema.sql`, which creates:
 It also inserts the default development account and sample TODO rows.
 
 The MySQL container is exposed on host port `3307` by default to avoid colliding with a host MySQL server.
+
+The phpMyAdmin container connects to MySQL through the internal Compose service name `mysql` and is exposed on host port `8081` by default. It uses the same development database credentials shown above, and selects the bundled darkwolf theme by default.
 
 Default development account:
 
@@ -133,4 +157,5 @@ docker compose down
 - `mod_rewrite` is enabled so `htdocs/.htaccess` can route URLs to `index.php`.
 - Composer dependencies are stored in a Docker named volume named `vendor`.
 - MySQL data is stored in a Docker named volume named `mysql-data`.
+- phpMyAdmin is a local development helper and should not be exposed from production deployments.
 - Generated files under `log/`, `view/compile/`, and SQLite database files are ignored by Git.
