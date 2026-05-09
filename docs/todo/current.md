@@ -4,11 +4,12 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Active
 
-- #172: Clarify that the review-cost message is about implementation-style variance, not outside reviewer scarcity.
+- #174: Clarify that `git clone` is the recommended install path for now.
 - #165: Prove the reviewable Controller-Service-Mapper shape through the reference implementation.
 
 ## Recently Completed
 
+- #172: Clarify that the review-cost message is about implementation-style variance, not outside reviewer scarcity.
 - #164: Update the public entry to present NeNe as a reviewable small-service PHP framework.
 - #169: Position the publication strategy document as a public OSS release case study.
 - #167: Add the review-cost angle around modern pattern learning and implementation-style variance.
@@ -70,7 +71,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
-- Improve Composer and Packagist metadata: PHP requirement, keywords, homepage, support, and authors.
+- Improve Composer and Packagist metadata for discovery after the `git clone` install story is clear.
 - #145: Add an AI-assisted small-service reference implementation covering page, REST, mapper, OpenAPI, and tests.
 - Write the Zenn renovation story and the Qiita hands-on guide after the public entry is ready.
 

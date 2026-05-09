@@ -65,6 +65,18 @@ The legacy `{action}Rest` fallback remains only for compatibility. New REST endp
 - The Docker development target is PHP 8.4.
 - Composer is required for dependency installation and autoloading.
 
+## Recommended Install Path
+
+For now, NeNe is intended to be cloned as a small-service base repository:
+
+```sh
+git clone git@github.com:hideyukiMORI/NeNe.git
+cd NeNe
+composer install
+```
+
+Composer is used after cloning to install dependencies and build autoloading. NeNe is not currently positioned as a library that should be added to an existing application with `composer require`.
+
 ## Docker Quick Start
 
 ```sh
