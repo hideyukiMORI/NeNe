@@ -16,7 +16,7 @@ This directory contains project documentation for humans and AI agents.
 - `ai/README.md`: AI-assisted implementation and self-review checklists.
 - `roadmap.md`: Project direction.
 - `releases.md`: Human-readable release notes and version checkpoints.
-- `publication-strategy.md`: Public release, article, Packagist, and outreach strategy.
+- `publication-strategy.md`: Public release strategy and OSS publication case-study notes.
 - `todo/current.md`: Current TODO summary.
 - `milestones/README.md`: Milestone management.
 - `adr/README.md`: Architecture decision records.

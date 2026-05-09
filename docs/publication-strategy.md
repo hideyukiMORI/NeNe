@@ -1,6 +1,10 @@
-# Publication Strategy
+# Publication Strategy and Release Case Study
 
-This document records how NeNe should be introduced after the `v0.2.0` release.
+This document records how NeNe should be introduced after the `v0.2.0` release, and why that introduction should happen in this order.
+
+It is intentionally public. Treat it as a case-study note for turning a small legacy-style PHP framework into a readable OSS project, not as a private marketing playbook. The value is in making the preparation process visible: what was modernized, what was intentionally kept small, what still needs proof, and how the project explains itself before asking outside developers for attention.
+
+Keeping this plan in the repository also helps human contributors and AI agents share the same context. Public messaging, README work, reference implementations, and article drafts should all point to the same project shape instead of drifting into separate stories.
 
 NeNe should not be presented as another general-purpose full-stack framework. Its strongest message is narrower and clearer:
 
@@ -27,6 +31,22 @@ NeNe already has enough material for a first public introduction:
 - AI-assisted development guidance focused on visible conventions, self-review, and lower human review cost.
 
 The main gap is not implementation depth. The main gap is discovery: README, GitHub repository metadata, Packagist metadata, and article entry points should make the project easier to understand from outside.
+
+## Why Keep This Public
+
+This document should be useful even before any article is published.
+
+- For maintainers, it keeps release preparation tied to concrete project gaps instead of vague promotion.
+- For contributors, it explains why README, Packagist, reference implementation, and docs polish matter.
+- For reviewers, it makes NeNe's positioning explicit enough to challenge before public outreach.
+- For AI-assisted work, it gives agents a durable source for tone, audience, and scope.
+
+What this document is not:
+
+- It is not a promise to post on every listed site.
+- It is not a growth-hacking checklist.
+- It is not a claim that NeNe is ready for every production team.
+- It is not criticism of Laravel, Symfony, modern PHP patterns, or developers who prefer them.
 
 ## Positioning
 
@@ -177,9 +197,9 @@ Recommended outline:
 
 Use `docs/tutorials/building-a-service.md` as the source material.
 
-## English Outreach Strategy
+## English Outreach Candidates
 
-Start with low-pressure channels before posting to highly critical communities.
+Start with low-pressure channels before considering highly critical communities. The goal is to document the renovation story and invite technical feedback, not to maximize traffic.
 
 ### DEV Community
 
@@ -213,7 +233,7 @@ Good angle:
 
 ### Reddit
 
-Use carefully, preferably after README and Packagist metadata are improved.
+Consider only after README and Packagist metadata are improved.
 
 Suggested framing:
 
@@ -225,7 +245,7 @@ Post to `r/PHP` only when ready for direct technical criticism. Avoid promotiona
 
 ### Hacker News
 
-Use only after the public entry is polished:
+Consider only after the public entry is polished:
 
 - README is strong.
 - Demo works.
