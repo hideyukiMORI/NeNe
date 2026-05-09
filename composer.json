@@ -1,7 +1,29 @@
 {
     "name": "hideyukimori/nene",
-    "description": "Simple web application framework",
+    "description": "A tiny renovated legacy-style PHP framework for reviewable small services",
+    "type": "project",
     "license": "MIT",
+    "homepage": "https://nene-php.com/",
+    "keywords": [
+        "php",
+        "framework",
+        "php-framework",
+        "openapi",
+        "smarty",
+        "docker",
+        "legacy-modernization",
+        "micro-framework"
+    ],
+    "authors": [
+        {
+            "name": "Hideyuki MORI",
+            "email": "info@ayane.co.jp"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/hideyukiMORI/NeNe/issues",
+        "source": "https://github.com/hideyukiMORI/NeNe"
+    },
     "autoload": {
 		"psr-4": {
 			"Nene\\Init\\"      : "class/init/",

@@ -4,10 +4,11 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Active
 
-- #176: Prepare Composer and Packagist-facing metadata for public discovery while keeping `git clone` as the recommended install path.
+- #177: Prepare the Zenn renovation-story article.
 
 ## Recently Completed
 
+- #176: Prepare Composer and Packagist-facing metadata for public discovery while keeping `git clone` as the recommended install path.
 - #174: Clarify that `git clone` is the recommended install path for now.
 - #172: Clarify that the review-cost message is about implementation-style variance, not outside reviewer scarcity.
 - #164: Update the public entry to present NeNe as a reviewable small-service PHP framework.
@@ -71,7 +72,6 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Next
 
-- #177: Prepare the Zenn renovation-story article.
 - #178: Prepare the Qiita hands-on implementation tutorial article.
 - #179: Prepare the DEV Community English introduction article.
 - #180: Decide on Reddit/Hacker News only after the first article feedback.

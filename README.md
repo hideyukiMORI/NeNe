@@ -77,6 +77,8 @@ composer install
 
 Composer is used after cloning to install dependencies and build autoloading. NeNe is not currently positioned as a library that should be added to an existing application with `composer require`.
 
+The Composer package metadata uses `type: project` for public discovery and future Packagist compatibility. The recommended install story remains repository clone unless a later release changes the distribution model.
+
 ## Docker Quick Start
 
 ```sh
