@@ -10,6 +10,10 @@ The public angle should speak to a common developer pain:
 
 > Have you ever lost time in code review just trying to understand the writer's style? NeNe aims to lower that cost by keeping small-service changes in the same visible shape, whether they are written by a person or assisted by an AI tool.
 
+Another useful angle:
+
+> Modern design patterns and fashionable coding styles can be powerful. But when only a few people have learned those patterns deeply enough to review them, a project can slow down because reviewers become scarce. NeNe favors visible, repeatable conventions so more developers can participate in review without first learning a large framework-specific style.
+
 ## Current Public State
 
 NeNe already has enough material for a first public introduction:
@@ -33,12 +37,14 @@ Use this positioning consistently:
 - Legacy-friendly, not legacy-bound.
 - Review-friendly first: human-written and AI-assisted changes should follow the same visible conventions.
 - Human-readable and AI-readable because conventions are stable and explicit.
+- Modern enough to be safe and testable, but intentionally not pattern-heavy when a simple visible convention is enough.
 - Explicit URL routing and controller methods over hidden framework magic.
 - OpenAPI and tests around real endpoints, not documentation for its own sake.
 
 Avoid these messages:
 
 - Do not call NeNe a Laravel, Symfony, CodeIgniter, or Laminas replacement.
+- Do not attack modern design patterns. Explain that NeNe optimizes for small-service reviewability when the team does not want reviewer availability to depend on specialist pattern knowledge.
 - Do not overstate AI support. Say that NeNe is reviewable for human-written or AI-assisted changes.
 - Do not imply production readiness for large multi-team systems.
 - Do not hide that Smarty and URL-segment routing are intentional old-school choices.
@@ -191,6 +197,7 @@ Core message:
 - Small explicit conventions.
 - URL routing and controller methods are visible.
 - Reviewers can find HTTP input, business rules, SQL, API contracts, and tests in predictable places.
+- Review participation should not require deep familiarity with trendy architecture patterns before basic behavior can be checked.
 - OpenAPI and tests were added around the old shape.
 - Not a Laravel or Symfony competitor.
 
@@ -250,6 +257,7 @@ NeNe's first public outreach is successful if readers can quickly understand:
 - Who NeNe is for.
 - Why it keeps a legacy-style shape.
 - How it lowers review cost by keeping implementation patterns consistent.
+- Why it avoids making reviewer availability depend on specialized design-pattern fluency.
 - How to run it locally.
 - How to build a first feature.
 - Why it is intentionally smaller than mainstream frameworks.

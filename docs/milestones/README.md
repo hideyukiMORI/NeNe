@@ -90,11 +90,14 @@ Context: NeNe's next phase should build on the renovated legacy foundation. The 
 
 The legacy inheritance matters. Older PHP frameworks often made control flow easy to trace because the route, controller, action, and mapper were visible. This milestone keeps that readability, then adds modern review aids so different humans and different AI tools still produce code that looks like normal NeNe code.
 
+Modern patterns remain useful, but this milestone should avoid making review participation depend on specialist pattern knowledge. For small services, a simple visible convention is often more valuable than a cooler abstraction if it lets more people review changes confidently.
+
 Positioning:
 
 - Review-cost reduction as the practical value of explicit conventions.
 - AI-readable as an outcome of stable human-reviewable patterns, not as a separate architecture goal.
 - Human-friendly and review-friendly, not magic-heavy.
+- Modern safety rails without requiring fashionable architecture-pattern fluency for ordinary reviews.
 - Fast for small services, not a replacement for large enterprise frameworks.
 - Secure by default for realistic local development and small deployments.
 
@@ -115,6 +118,7 @@ Completion criteria:
 - #163 defines the review-cost-reduction framing for Phase 6.
 - #164 updates the public entry message around reviewable small-service delivery.
 - #165 and #145 define a concrete reference implementation for the expected Controller, Service, Mapper, OpenAPI, and test workflow.
+- #167 explains how stable conventions help avoid reviewer scarcity caused by specialized design-pattern knowledge.
 - Local Docker setup remains simple, including app, MySQL, phpMyAdmin, Swagger UI, and test commands.
 - Production-facing docs continue to warn about secrets, debug output, local Docker credentials, phpMyAdmin exposure, and database initialization.
 - New examples do not introduce hidden routing, heavy ORM behavior, or broad framework abstractions.

@@ -4,6 +4,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Active
 
+- #167: Add the reviewer-scarcity angle around modern pattern learning costs.
 - #163: Reframe the next phase around reducing code review cost through consistent implementation conventions.
 - #162: Document the publication and outreach strategy for NeNe after `v0.2.0`.
 
