@@ -27,13 +27,22 @@ phpMyAdmin is also available for the local MySQL development database:
 http://localhost:8081/
 ```
 
-Log in with the development database credentials:
+phpMyAdmin does not have a separate NeNe-specific account. Log in with a MySQL user from the development database container:
 
 ```text
 server: mysql
 user: nene
 password: nene
 ```
+
+For administrative database inspection, the default MySQL root account is:
+
+```text
+user: root
+password: root
+```
+
+The `admin` / `admin` credential is only the sample app login seeded into the `users` table. It is not a phpMyAdmin or MySQL login.
 
 The phpMyAdmin image includes the darkwolf theme for phpMyAdmin 5.2. It is intended only for trusted local development; do not expose this service in production.
 
@@ -93,6 +102,17 @@ user: nene
 password: nene
 ```
 
+These defaults come from `.env.example` and the fallback values in `compose.yaml`. When you copy `.env.example` to `.env`, these variables control the Docker MySQL account used by the app and phpMyAdmin:
+
+```text
+NENE_DB_NAME=nene
+NENE_DB_USER=nene
+NENE_DB_PASS=nene
+NENE_DB_ROOT_PASS=root
+```
+
+MySQL applies these account values when the database volume is initialized for the first time. If `mysql-data` already exists, changing `.env` does not automatically rewrite existing MySQL users.
+
 The first MySQL startup runs `docker/mysql/init/001_schema.sql`, which creates:
 
 - `users`
@@ -102,9 +122,9 @@ It also inserts the default development account and sample TODO rows.
 
 The MySQL container is exposed on host port `3307` by default to avoid colliding with a host MySQL server.
 
-The phpMyAdmin container connects to MySQL through the internal Compose service name `mysql` and is exposed on host port `8081` by default. It uses the same development database credentials shown above, and selects the bundled darkwolf theme by default.
+The phpMyAdmin container connects to MySQL through the internal Compose service name `mysql` and is exposed on host port `8081` by default. It uses the MySQL credentials shown above, and selects the bundled darkwolf theme by default.
 
-Default development account:
+Default sample app account:
 
 ```text
 user: admin
