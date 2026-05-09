@@ -58,9 +58,9 @@ docker compose up --build
 
 Open `http://localhost:8080/`.
 
-Docker Compose starts MySQL 8.4 and initializes the development `users` and `todos` tables automatically. The default development login is `admin` / `admin`.
+Docker Compose starts MySQL 8.4 and initializes the development `users` and `todos` tables automatically. The default sample app login is `admin` / `admin`.
 
-For local database inspection, open phpMyAdmin at `http://localhost:8081/` and log in with the development database user `nene` / `nene`. The Docker image includes the darkwolf phpMyAdmin theme.
+For local database inspection, open phpMyAdmin at `http://localhost:8081/` and log in with the MySQL development database user `nene` / `nene`. The MySQL root user is `root` / `root` by default. These are Docker-only defaults and can be changed through `.env`. The Docker image includes the darkwolf phpMyAdmin theme.
 
 For a traditional Apache/PHP server install, run Composer and then initialize the sample database:
 
