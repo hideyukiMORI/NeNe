@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #187: Remove the controller-level Smarty template fallback.
 - #185: Document Smarty template, CSS, and JavaScript placement conventions.
 - #177: Prepare the Zenn renovation-story article.
 - #176: Prepare Composer and Packagist-facing metadata for public discovery while keeping `git clone` as the recommended install path.
