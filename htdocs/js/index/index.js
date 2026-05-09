@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', function() {
         {
             title: 'Modernization',
             text: 'Add tests, OpenAPI, and safer conventions without losing the legacy shape.'
+        },
+        {
+            title: 'Reviewable Code',
+            text: 'Modern patterns are useful, but NeNe favors visible conventions so more reviewers can check small-service changes.'
         }
     ];
 
@@ -256,6 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ),
             e('div', { className: 'tutorial__intro' },
                 e('p', null, 'NeNe keeps the old-school URL and controller shape familiar to CodeIgniter or Zend Framework 1 users, then adds modern safety rails around it: JSON-only REST, OpenAPI, tests, Docker, and explicit error catalogs.'),
+                e('p', null, 'The goal is not to chase fashionable architecture patterns. The goal is to keep small-service changes reviewable by many people: HTTP input, business rules, SQL, API contracts, and tests should live in predictable places.'),
                 e('div', { className: 'tutorial__links' },
                     e('a', {
                         className: 'tutorial__doc-link',

@@ -41,6 +41,8 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         self::assertStringContainsString('/health/index', $response->body());
         self::assertStringContainsString('php cli/setupDatabase.php --env=.env --yes', $response->body());
         self::assertStringContainsString('class/xion as framework core', $response->body());
+        self::assertStringContainsString('Reviewable Code', $response->body());
+        self::assertStringContainsString('reviewable by many people', $response->body());
         self::assertStringContainsString('TransactionManager::run', $response->body());
         self::assertStringContainsString('Environment: ', $response->body());
         self::assertStringContainsString("health.environment === 'development'", $response->body());
