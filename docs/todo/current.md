@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #150: Document the canonical transaction pattern for service tutorials and coding standards.
 - #148: Add a database transaction boundary for multi-step mapper work.
 - #135: Refactor `ControllerBase` responsibilities into a testable CSRF protection boundary.
 - #144: Adjust Phase 6 around reference implementations and small-service delivery.

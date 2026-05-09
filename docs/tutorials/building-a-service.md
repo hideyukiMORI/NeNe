@@ -124,6 +124,7 @@ namespace Nene\Controller;
 
 use Nene\Database as Database;
 use Nene\Xion\ControllerBase;
+use Nene\Xion\TransactionManager;
 
 class ArticleController extends ControllerBase
 {
@@ -144,9 +145,12 @@ class ArticleController extends ControllerBase
         }
 
         $mapper = new Database\ArticleMapper();
+        $transaction = new TransactionManager();
 
         return $this->API_RESPONSE->success([
-            'article' => $mapper->create($title),
+            'article' => $transaction->run(function () use ($mapper, $title): array {
+                return $mapper->create($title);
+            }),
         ]);
     }
 
@@ -179,6 +183,40 @@ GET  /article/item/id_1 -> ArticleController::itemGetRest()
 ```
 
 State-changing REST requests such as `POST`, `PUT`, `PATCH`, and `DELETE` require a valid login session and `X-CSRF-Token` when the user is logged in. `/session/login` returns the token as `Data.csrfToken`.
+
+## Add Database Transactions
+
+Use `Nene\Xion\TransactionManager` as the standard transaction boundary. This is the canonical pattern for humans and AI agents when one logical operation needs multiple SQL statements, multiple writes, or multiple mappers.
+
+Do not start a transaction inside `DataMapperBase::execute()`. That method is a single-statement execution boundary. Transactions belong around the use case that needs all writes to succeed or fail together.
+
+Single mapper example:
+
+```php
+$mapper = new Database\ArticleMapper();
+$transaction = new TransactionManager();
+
+$article = $transaction->run(function () use ($mapper, $title, $body): array {
+    return $mapper->create($title, $body);
+});
+```
+
+Multiple mapper example:
+
+```php
+$articleMapper = new Database\ArticleMapper();
+$auditMapper = new Database\AuditLogMapper();
+$transaction = new TransactionManager();
+
+$article = $transaction->run(function () use ($articleMapper, $auditMapper, $title, $body): array {
+    $article = $articleMapper->create($title, $body);
+    $auditMapper->record('article.created', (int)$article['id']);
+
+    return $article;
+});
+```
+
+`TransactionManager::run()` commits when the callback returns and rolls back when the callback throws. If another transaction is already active, the outer boundary remains responsible for the final commit or rollback.
 
 ## Add Error Codes
 
