@@ -103,6 +103,8 @@ htdocs/js/page/about.js
 
 The dispatcher resolves `/page/about` to `PageController::aboutAction()`. `ControllerBase` automatically chooses `view/source/page/about.tpl` when it exists.
 
+For the full template, CSS, JavaScript, and auto-loading rules, see `docs/frontend/assets.md`.
+
 ## Add a REST Endpoint
 
 Use method-specific REST handlers for JSON endpoints. Avoid new `{action}Rest()` handlers unless a compatibility reason is documented, because they accept every HTTP method through the legacy fallback.
