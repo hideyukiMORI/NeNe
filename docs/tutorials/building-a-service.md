@@ -15,6 +15,8 @@ Use it as a checklist when adding application behavior:
 
 NeNe is intentionally small. Prefer explicit controller methods, clear data mappers, and focused tests over hidden framework behavior.
 
+Treat `class/xion/` as framework core. Most page, REST, service, mapper, and model work should happen in the application-side namespaces such as `class/controller/`, `class/model/`, `class/db/`, and `class/func/`. Do not change dispatcher or core behavior for a normal service feature.
+
 ## Before You Start
 
 Work from a GitHub Issue and a topic branch.
