@@ -82,6 +82,35 @@ Purpose: make framework progress visible through small versioned tags.
 
 Current status: `v0.1.0` is the first planned tag. It represents the point where NeNe has a working local Docker setup, traditional server install documentation, MySQL/SQLite sample database setup, a public `nene-php.com` sample deployment, OpenAPI/Swagger UI, tests, and a clear renovated-legacy framework policy.
 
+### ai-readable-small-service-delivery
+
+Goal: make NeNe a small PHP framework that stays friendly to both human developers and AI agents while supporting fast, secure small-service delivery.
+
+Context: NeNe's next phase should build on the renovated legacy foundation. The framework should not grow into a large full-stack platform. Instead, it should keep the visible `/{controller}/{action}` flow, small codebase, Docker setup, OpenAPI, tests, and security defaults as a practical advantage: a developer should be able to clone the project, understand the shape quickly, let an AI agent help with routine code, and still review the result without fighting hidden framework behavior.
+
+Positioning:
+
+- AI-readable, not AI-only.
+- Human-friendly, not magic-heavy.
+- Fast for small services, not a replacement for large enterprise frameworks.
+- Secure by default for realistic local development and small deployments.
+
+Scope:
+
+- Keep conventions explicit enough that AI-written and human-written changes follow the same shape.
+- Improve tutorials, examples, comments, and PHPDoc where they reduce review friction.
+- Keep the path from clone to local verification short and repeatable.
+- Keep traditional Apache/PHP deployment guidance clear for small real-world projects.
+- Maintain focused tests, OpenAPI contracts, and security defaults as part of the delivery workflow.
+
+Completion criteria:
+
+- Documentation clearly describes NeNe as human-friendly and AI-readable without overstating AI guarantees.
+- A first service can be built by following docs from page/controller through REST endpoint, database access, OpenAPI, and tests.
+- Local Docker setup remains simple, including app, MySQL, phpMyAdmin, Swagger UI, and test commands.
+- Production-facing docs continue to warn about secrets, debug output, local Docker credentials, phpMyAdmin exposure, and database initialization.
+- New examples do not introduce hidden routing, heavy ORM behavior, or broad framework abstractions.
+
 ## Maintenance Rule
 
 When a GitHub milestone becomes active, update this directory with:

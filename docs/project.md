@@ -6,7 +6,11 @@ The project started from an older, intentionally small PHP framework style. Its 
 
 NeNe is for developers who are comfortable with older convention-based PHP frameworks and want a codebase they can read from end to end. It keeps the familiar "URL segment -> controller -> action" flow while modernizing the boundaries around it.
 
+NeNe should also be friendly to AI-assisted development. That does not mean promising that every generated change is automatically good. It means keeping the framework small, explicit, documented, and testable enough that code written by a human or an AI agent can be reviewed by a human without first decoding a large amount of framework magic.
+
 The project should remain small and understandable. New work should improve maintainability, security, and standards compatibility without turning NeNe into a large full-stack framework.
+
+For small services, the desired experience is a short path from `git clone` to local verification, then to a simple deployable shape: Docker for local work, traditional Apache/PHP documentation for server install, explicit database setup, OpenAPI where public APIs exist, and focused tests around behavior that matters.
 
 ## Renovation Philosophy
 
@@ -29,6 +33,7 @@ Modernize:
 - Centralized API responses and error codes.
 - Session lifecycle, CSRF, password hashing, JSON-only REST responses, and public error behavior.
 - OpenAPI contracts, Swagger UI, PHPUnit, Phan, PHP CS Fixer, and Docker development.
+- AI-readable conventions, docs, and tests that keep human review practical.
 
 Avoid:
 
@@ -96,6 +101,8 @@ Examples:
 NeNe should evolve as:
 
 - A legacy-compatible but modernizing PHP framework.
+- A human-friendly and AI-readable framework where generated or hand-written changes follow the same visible conventions.
+- A fast path for building and delivering small, secure services without adopting a large full-stack framework.
 - PSR-aware, especially for autoloading, coding style, HTTP/API boundaries, and logging.
 - Composer-based, with packages kept on current stable versions where practical.
 - Security-conscious by default.
