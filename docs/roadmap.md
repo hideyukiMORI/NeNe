@@ -14,7 +14,7 @@ NeNe should continue to emphasize:
 - Smarty-based server rendering as the default HTML path.
 - Lightweight mapper/model classes instead of a heavy ORM.
 - Small, readable framework code over large abstractions.
-- Explicit conventions that make generated or hand-written changes reviewable in the same way.
+- Explicit conventions that reduce code review cost by making generated or hand-written changes follow the same shape.
 - A short path from `git clone` to local verification and small-service delivery.
 - Modern safety rails around the legacy shape: Docker, tests, OpenAPI, Phan, PHP CS Fixer, CSRF, password hashing, error catalogs, and safer output handling.
 
@@ -135,20 +135,27 @@ Future candidates:
 - Reduce legacy static-analysis baseline issues in focused cleanup PRs.
 - Revisit CI Docker runtime coverage when repository resources and runtime cost make it practical.
 
-## 6. AI-Readable Small-Service Delivery
+## 6. Reviewable Small-Service Delivery
 
 Status: next phase.
 
 Goal:
 
-NeNe already has several AI-era strengths: visible URL conventions, predictable controller and REST method names, small framework code, OpenAPI, and focused tests. Phase 6 should not turn "AI-readable" into a broad redesign goal. It should prove those existing strengths through repeatable examples and a delivery path that stays easy for humans to review.
+NeNe already has several review-cost strengths: visible URL conventions, predictable controller and REST method names, small framework code, OpenAPI, focused tests, and AI self-review checklists. Phase 6 should not turn "AI-readable" into a broad redesign goal. It should make the practical promise clearer: reduce the cost of understanding and reviewing small-service changes.
 
-This phase should strengthen NeNe as a small-service delivery framework: quick to clone, quick to run, quick to inspect, and safe enough by default for realistic small projects. AI assistance is useful when it produces changes that look like normal NeNe changes and remain practical for a human developer to review.
+This phase should strengthen NeNe as a small-service delivery framework where a reviewer does not need to decode each contributor's personal style before checking behavior. Whether code is written by a person or assisted by an AI agent, Controller, Service, Mapper, OpenAPI, error-code, and test changes should follow the same visible pattern.
+
+The legacy shape is a strength here. NeNe should preserve the old PHP framework habit of "look at the URL, find the controller, read the method," then add modern review aids around it: clear responsibility boundaries, self-review checklists, tests, OpenAPI, and secure defaults.
+
+Modern design patterns and current coding styles are useful, but they can also concentrate review ability in the few people who have learned them deeply. NeNe should avoid making small-service delivery depend on specialist pattern fluency when a visible convention is enough.
 
 Principles:
 
 - Prefer visible conventions over hidden framework magic.
+- Prefer broadly reviewable patterns over fashionable patterns when both solve the same small-service problem.
+- Optimize for reviewability: a human should quickly know where to inspect HTTP input, business rules, SQL, API contracts, and tests.
 - Keep routing, controller names, REST method boundaries, configuration, and database setup easy to trace.
+- Keep Controller / Service / Mapper responsibilities stable enough that different humans and AI agents produce similar shapes.
 - Prefer working reference implementations over extra explanation when examples can show the expected shape.
 - Keep docs, OpenAPI contracts, and tests close to the behavior they describe.
 - Preserve a fast Docker-based local workflow and a clear traditional Apache/PHP server install path.
@@ -157,7 +164,11 @@ Principles:
 
 Future candidates:
 
-- #145: Add a small-service reference implementation that shows the expected shape of AI-assisted changes: page, REST endpoint, mapper, OpenAPI, and test.
+- #163: Reframe the next phase around reducing code review cost through consistent implementation conventions.
+- #164: Present NeNe publicly as a reviewable small-service PHP framework.
+- #165: Use the reference implementation to prove the reviewable Controller-Service-Mapper shape.
+- #167: Explain how stable conventions help avoid reviewer scarcity caused by specialized pattern knowledge.
+- #145: Add a small-service reference implementation that shows the expected shape of page, REST endpoint, service/use-case, mapper, OpenAPI, and test changes.
 - Make the first-service tutorial even more repeatable from clone to local verification.
 - Improve comments and PHPDoc only where they help readers understand framework boundaries.
 - Add lightweight checklists for small-service delivery readiness, including environment, database, OpenAPI, tests, and production safety notes.
