@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #158: Prepare the `v0.2.0` release notes and runtime version.
 - #154, #155, #156: Clean up release-blocking code quality concerns in `ControllerBase` and `DataMapperBase`.
 - #152: Add the canonical transaction pattern to the sample page tutorial.
 - #150: Document the canonical transaction pattern for service tutorials and coding standards.

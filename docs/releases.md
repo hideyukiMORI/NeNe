@@ -2,6 +2,31 @@
 
 This file records human-readable release notes for NeNe framework tags.
 
+## v0.2.0
+
+Status: release tag.
+
+`v0.2.0` is the small-service delivery preparation release. It keeps the renovated legacy framework shape from `v0.1.0`, then improves local development comfort, documents the next AI-assisted delivery phase, and adds clearer framework boundaries for controller security and database transactions.
+
+### Highlights
+
+- Changed the project license to MIT.
+- Added phpMyAdmin to the Docker development environment with the `darkwolf` theme.
+- Documented local Docker MySQL/phpMyAdmin credentials and development-only security expectations.
+- Added Phase 6 direction for AI-readable, human-reviewable small-service delivery.
+- Extracted CSRF protection decision logic from `ControllerBase` into a testable policy boundary.
+- Added `Nene\Xion\TransactionManager` as the canonical transaction boundary for multi-step mapper work.
+- Documented the transaction pattern in coding standards, service tutorials, and the sample page tutorial.
+- Tightened selected `DataMapperBase` return types and reduced the Phan baseline.
+- Changed mapper/model schema lookup to use `MODEL_CLASS` instead of mapper-name string replacement.
+- Updated the runtime `VERSION` constant to `0.2.0`.
+
+### Verification
+
+- `composer test`
+- `composer analyze`
+- GitHub Actions `unit` check on release-preparation PRs.
+
 ## v0.1.0
 
 Status: initial release tag.
