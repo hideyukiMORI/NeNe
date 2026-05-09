@@ -4,13 +4,14 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Active
 
+- #172: Clarify that the review-cost message is about implementation-style variance, not outside reviewer scarcity.
 - #165: Prove the reviewable Controller-Service-Mapper shape through the reference implementation.
 
 ## Recently Completed
 
 - #164: Update the public entry to present NeNe as a reviewable small-service PHP framework.
 - #169: Position the publication strategy document as a public OSS release case study.
-- #167: Add the reviewer-scarcity angle around modern pattern learning costs.
+- #167: Add the review-cost angle around modern pattern learning and implementation-style variance.
 - #163: Reframe the next phase around reducing code review cost through consistent implementation conventions.
 - #162: Document the publication and outreach strategy for NeNe after `v0.2.0`.
 - #160: Document AI self-review checklists and service-layer implementation standards.
