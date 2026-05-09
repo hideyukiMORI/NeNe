@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #185: Document Smarty template, CSS, and JavaScript placement conventions.
 - #177: Prepare the Zenn renovation-story article.
 - #176: Prepare Composer and Packagist-facing metadata for public discovery while keeping `git clone` as the recommended install path.
 - #174: Clarify that `git clone` is the recommended install path for now.
