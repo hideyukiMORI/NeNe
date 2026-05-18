@@ -8,6 +8,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #217: Add `?self` type to singleton `$instance` in 6 classes; add `: void` to `IndexController::indexAction()`; fix `@return` PHPDoc in `Dispatcher`.
 - #212: Add native type declarations to all properties in remaining `class/xion/` base classes (ModelBase, DataMapperBase, DataModelBase, RouteContext, TransactionManager, ApiResponse, Log, ErrorCode); propagate `array` type to `Todo`/`User` subclass `$schema`.
 - #213: Add `: never` to `__clone()` in 6 singleton classes, `: void` to `PdoConnection::__destruct()`, `: mixed` to `DataModelBase::__get()`.
 - #207: Add native type declarations to all properties in `ControllerBase`; move `$TITLE`/`$HEADER_TITLE` initialization to constructor.
