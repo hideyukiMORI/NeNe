@@ -162,12 +162,15 @@ Principles:
 - Treat security defaults, explicit errors, CSRF, password hashing, session settings, and dependency hygiene as part of the developer experience.
 - Avoid adding large abstractions that make the code harder for humans or AI agents to understand.
 
+Completed:
+
+- #163: Reframed the next phase around reducing code review cost through consistent implementation conventions.
+- #164: Updated the public entry to present NeNe as a reviewable small-service PHP framework.
+- #167: Added the review-cost angle around modern pattern learning and implementation-style variance.
+
 Future candidates:
 
-- #163: Reframe the next phase around reducing code review cost through consistent implementation conventions.
-- #164: Present NeNe publicly as a reviewable small-service PHP framework.
 - #165: Use the reference implementation to prove the reviewable Controller-Service-Mapper shape.
-- #167: Explain how stable conventions reduce review load caused by highly variable implementation styles.
 - #145: Add a small-service reference implementation that shows the expected shape of page, REST endpoint, service/use-case, mapper, OpenAPI, and test changes.
 - Make the first-service tutorial even more repeatable from clone to local verification.
 - Improve comments and PHPDoc only where they help readers understand framework boundaries.

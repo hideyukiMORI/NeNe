@@ -276,7 +276,7 @@ class View
     /**
      * Set data object.
      *
-     * @param array $dataArray Pass the data to vue.js.
+     * @param array $dataArray Data to expose as a JavaScript variable in the template.
      *
      * @return View
      */
