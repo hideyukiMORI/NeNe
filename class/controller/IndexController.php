@@ -29,7 +29,7 @@ class IndexController extends ControllerBase
      *
      * @return void
      */
-    protected function preAction()
+    protected function preAction(): void
     {
         $this->SESSION_CHECK = false;
     }
