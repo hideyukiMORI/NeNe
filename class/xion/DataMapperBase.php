@@ -172,7 +172,7 @@ abstract class DataMapperBase
         $column = $this->getTableColumn(static::KEY_SID, DB_COLUMN_TIMESTAMP);
         $param = [];
         foreach ($column as $key => $val) {
-            $key = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
+            $key = (string)preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
             $param[] = $key . '=:' . $key;
         }
         $stmt = $this->DB->prepare(sprintf(
@@ -191,11 +191,11 @@ abstract class DataMapperBase
             } elseif (!$row->isValid()) {
                 throw new \InvalidArgumentException(
                     'DATA MAPPER ERROR. The specified "' .
-                        static::MODEL_CLASS . '.' . $row->isValid() . '" is in violation of validation'
+                        static::MODEL_CLASS . '.' . $row->validate() . '" is in violation of validation'
                 );
             }
             foreach ($column as $key => $var) {
-                $col = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
+                $col = (string)preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
                 $stmt->bindValue(':' . $col, $row->$key);
             }
             $stmt->bindValue(':' . static::KEY_SID, $row->{static::KEY_SID});

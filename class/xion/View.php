@@ -346,7 +346,7 @@ class View
     /**
      * Copy inhibit.
      *
-     * @throws RuntimeException If you try to duplicate it, it will throw an exception because it is a singleton.
+     * @throws \RuntimeException If you try to duplicate it, it will throw an exception because it is a singleton.
      *
      * @return  void
      */
