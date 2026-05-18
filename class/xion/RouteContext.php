@@ -25,9 +25,9 @@ class RouteContext
     /**
      * Instance to pass as a singleton.
      *
-     * @var RouteContext
+     * @var RouteContext|null
      */
-    private static $instance;
+    private static ?self $instance = null;
 
     /**
      * Controller name.

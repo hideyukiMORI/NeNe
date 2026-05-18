@@ -25,9 +25,9 @@ class ErrorCode
     /**
      * Instance to pass as a singleton.
      *
-     * @var ErrorCode
+     * @var ErrorCode|null
      */
-    private static $instance;
+    private static ?self $instance = null;
 
     /**
      * Error code array.

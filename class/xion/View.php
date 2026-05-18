@@ -29,9 +29,9 @@ class View
     /**
      * Instance to pass as a singleton.
      *
-     * @var View
+     * @var View|null
      */
-    private static $instance;
+    private static ?self $instance = null;
 
     /**
      * Smarty object
