@@ -1,6 +1,7 @@
 
 tags
 vendor
+package-lock.json
 .env
 .env.*
 !.env.example
