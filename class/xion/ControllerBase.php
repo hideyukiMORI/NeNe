@@ -246,9 +246,9 @@ abstract class ControllerBase
      * preAction
      * Executed before the main process of run.
      *
-     * @return mixed
+     * @return void
      */
-    protected function preAction()
+    protected function preAction(): void
     {
     }
 
