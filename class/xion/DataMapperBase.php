@@ -170,6 +170,7 @@ abstract class DataMapperBase
     public function update(mixed $data): void
     {
         $column = $this->getTableColumn(static::KEY_SID, DB_COLUMN_TIMESTAMP);
+        $param = [];
         foreach ($column as $key => $val) {
             $key = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
             $param[] = $key . '=:' . $key;
@@ -336,11 +337,10 @@ abstract class DataMapperBase
     final public function executeQuery(string $query): PDOStatement
     {
         try {
-            $stmt = $this->DB->query($query);
+            return $this->DB->query($query);
         } catch (\PDOException $e) {
             $this->handleDatabaseException($e);
         }
-        return $stmt;
     }
 
     /**

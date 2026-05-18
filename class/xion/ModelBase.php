@@ -18,7 +18,6 @@ declare(strict_types=1);
 namespace Nene\Xion;
 
 use Monolog\Logger;
-use Nene\Model;
 use Nene\Xion as Xion;
 
 /**
@@ -79,7 +78,7 @@ abstract class ModelBase
      *
      * @return boolean
      */
-    final protected function checkLogin()
+    final protected function checkLogin(): bool
     {
         return $this->AUTH_SESSION->isLoggedIn();
     }
