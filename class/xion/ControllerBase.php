@@ -45,20 +45,6 @@ abstract class ControllerBase
     protected $method;
 
     /**
-     * Controller name.
-     *
-     * @var string
-     */
-    protected $controller = 'index';
-
-    /**
-     * Action name.
-     *
-     * @var string
-     */
-    protected $action = 'index';
-
-    /**
      * Site title.
      *
      * @var string
