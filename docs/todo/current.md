@@ -8,6 +8,8 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #212: Add native type declarations to all properties in remaining `class/xion/` base classes (ModelBase, DataMapperBase, DataModelBase, RouteContext, TransactionManager, ApiResponse, Log, ErrorCode); propagate `array` type to `Todo`/`User` subclass `$schema`.
+- #213: Add `: never` to `__clone()` in 6 singleton classes, `: void` to `PdoConnection::__destruct()`, `: mixed` to `DataModelBase::__get()`.
 - #207: Add native type declarations to all properties in `ControllerBase`; move `$TITLE`/`$HEADER_TITLE` initialization to constructor.
 - #206: Replace `file_put_contents` in `ModelBase::accessLog()` with `$this->LOGGER->info()` to unify logging via Monolog.
 - #205: Add `(string)` casts to `preg_replace` in `DataMapperBase`; add missing `: void`, `: mixed`, `: static` return types across `xion/` base classes.
