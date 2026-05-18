@@ -42,21 +42,21 @@ class Log
      *
      * @var Logger
      */
-    public $accessLog;
+    public Logger $accessLog;
 
     /**
      * Logger class for information log
      *
      * @var Logger
      */
-    public $informationLog;
+    public Logger $informationLog;
 
     /**
      * Logger class for error log
      *
      * @var Logger
      */
-    public $errorLog;
+    public Logger $errorLog;
 
     /**
      * CONSTRUCTOR

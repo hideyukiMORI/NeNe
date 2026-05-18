@@ -34,7 +34,7 @@ class ErrorCode
      *
      * @var array
      */
-    public $ERROR_CODE;
+    public array $ERROR_CODE;
 
     /**
      * CONSTRUCTOR

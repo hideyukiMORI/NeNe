@@ -30,7 +30,7 @@ class TransactionManager
      *
      * @var PDO
      */
-    private $pdo;
+    private PDO $pdo;
 
     /**
      * CONSTRUCTOR.

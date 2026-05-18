@@ -33,28 +33,28 @@ abstract class ModelBase
      *
      * @var Logger
      */
-    protected $LOGGER;
+    protected Logger $LOGGER;
 
     /**
      * Class name.
      *
      * @var string
      */
-    protected $CLASS;
+    protected string $CLASS;
 
     /**
      * Error code
      *
      * @var ErrorCode
      */
-    protected $ERROR_CODE;
+    protected ErrorCode $ERROR_CODE;
 
     /**
      * Authentication session boundary.
      *
      * @var AuthSession
      */
-    protected $AUTH_SESSION;
+    protected AuthSession $AUTH_SESSION;
 
     /**
      * CONSTRUCTOR.
