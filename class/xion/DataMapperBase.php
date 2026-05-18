@@ -118,7 +118,7 @@ abstract class DataMapperBase
         $values = [];
         $column = $this->getTableColumn(static::KEY_SID, DB_COLUMN_TIMESTAMP, $targetClassName);
         foreach ($column as $key => $var) {
-            $key = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
+            $key = (string)preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
             $fields[] = $key;
             $values[] = ':' . $key;
         }
@@ -150,7 +150,7 @@ abstract class DataMapperBase
                 );
             }
             foreach ($column as $key => $var) {
-                $col = preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
+                $col = (string)preg_replace('/^' . DB_NUM_PREFIX . '/', '', $key);
                 $stmt->bindValue(':' . $col, $row->$key);
             }
             $this->execute($stmt);
@@ -390,7 +390,7 @@ abstract class DataMapperBase
         $searchKey = str_replace(',', ' ', $searchKey);
         $searchKey = str_replace('、', ' ', $searchKey);
         $searchKey = str_replace('　', ' ', $searchKey);
-        $searchKey = preg_replace('/\s(?=\s)/', '', $searchKey);
+        $searchKey = (string)preg_replace('/\s(?=\s)/', '', $searchKey);
         $searchKey = trim($searchKey);
         $searchArray = explode(' ', $searchKey);
         return $searchArray;
