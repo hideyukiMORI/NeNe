@@ -30,9 +30,9 @@ class PdoConnection
     /**
      * Instance to pass as a singleton.
      *
-     * @var PdoConnection
+     * @var PdoConnection|null
      */
-    private static $instance;
+    private static ?self $instance = null;
 
     /**
      * Database connect object

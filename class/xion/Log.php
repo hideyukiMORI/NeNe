@@ -33,9 +33,9 @@ class Log
     /**
      * Instance to pass as a singleton.
      *
-     * @var Log
+     * @var Log|null
      */
-    private static $instance;
+    private static ?self $instance = null;
 
     /**
      * Logger class for access log

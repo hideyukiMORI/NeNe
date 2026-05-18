@@ -195,7 +195,7 @@ class Dispatcher
      *
      * @param string $controller Controller name.
      *
-     * @return ControllerBase $ControllerBase Controller alias specified by argument.
+     * @return ControllerBase Controller alias specified by argument.
      */
     private function getControllerInstance(string $controller): ControllerBase
     {

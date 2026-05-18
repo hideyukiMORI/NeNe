@@ -40,7 +40,7 @@ class IndexController extends ControllerBase
      *
      * @return void
      */
-    public function indexAction()
+    public function indexAction(): void
     {
         $this->setTitle('NeNe - Simple Legacy PHP Framework');
         $this->VIEW->addJS('https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js')
