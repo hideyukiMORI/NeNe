@@ -348,9 +348,9 @@ class View
      *
      * @throws \RuntimeException If you try to duplicate it, it will throw an exception because it is a singleton.
      *
-     * @return  void
+     * @return never
      */
-    final public function __clone()
+    final public function __clone(): never
     {
         throw new \RuntimeException('Clone is not allowed against ' . get_class($this));
     }

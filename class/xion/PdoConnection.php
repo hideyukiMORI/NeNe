@@ -84,7 +84,7 @@ class PdoConnection
     /**
      * DESTRUCTOR.
      */
-    final public function __destruct()
+    final public function __destruct(): void
     {
         $this->connection = null;
     }
@@ -105,9 +105,9 @@ class PdoConnection
     /**
      * Copy inhibit.
      *
-     * @return void
+     * @return never
      */
-    final public function __clone()
+    final public function __clone(): never
     {
         throw new \RuntimeException('Clone is not allowed against ' . get_class($this));
     }

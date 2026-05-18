@@ -99,7 +99,7 @@ abstract class DataModelBase
      *
      * @return string|null
      */
-    public function __get(string $prop)
+    public function __get(string $prop): mixed
     {
         if (isset($this->data[$prop])) {
             return $this->data[$prop];
