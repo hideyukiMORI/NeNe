@@ -103,13 +103,12 @@ abstract class ModelBase
      *
      * @return void
      */
-    final protected function accessLog(string $API = '')
+    final protected function accessLog(string $API = ''): void
     {
-        $log = date('[Y-m-d H:i:s]') . ' ' .
-            $this->AUTH_SESSION->userIdentifier() . ' ' .
-            Xion\RouteContext::getInstance()->controller() . '   ' .
-            Xion\RouteContext::getInstance()->action() . '   ' .
-            $API . PHP_EOL;
-        file_put_contents(ACCESS_LOG_PATH, $log, FILE_APPEND);
+        $routeContext = Xion\RouteContext::getInstance();
+        $this->LOGGER->info(
+            'ACCESS : ' . $routeContext->controller() . '::' . $routeContext->action() . ($API !== '' ? ' ' . $API : ''),
+            ['user' => $this->AUTH_SESSION->userIdentifier()]
+        );
     }
 }
