@@ -37,7 +37,7 @@ class PdoConnection
     /**
      * Database connect object
      *
-     * @var PDO
+     * @var PDO|null
      */
     public $connection;
 

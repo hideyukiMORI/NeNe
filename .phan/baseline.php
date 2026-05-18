@@ -9,29 +9,14 @@
  */
 return [
     // # Issue statistics:
-    // PhanPossiblyUndeclaredVariable : 1 occurrence
     // PhanTypeMagicVoidWithReturn : 1 occurrence
     // PhanTypeMismatchArgument : 1 occurrence
     // PhanTypeMismatchArgumentInternal : 1 occurrence
     // PhanTypeMismatchDimFetch : 1 occurrence
     // PhanTypeMismatchForeach : 1 occurrence
-    // PhanTypeMismatchPropertyProbablyReal : 1 occurrence
-    // PhanTypeMissingReturn : 1 occurrence
-    // PhanTypeSuspiciousStringExpression : 1 occurrence
     // PhanUndeclaredConstantOfClass : 1 occurrence
-    // PhanUndeclaredTypeThrowsType : 1 occurrence
-    // PhanUndeclaredVariableDim : 1 occurrence
-    // PhanUnreferencedUseNormal : 1 occurrence
 
     'file_suppressions' => [
-        'class/xion/ControllerBase.php' => [
-            'PhanTypeMissingReturn' => ['\\Nene\\Xion\\ControllerBase::preAction']
-        ],
-        'class/xion/DataMapperBase.php' => [
-            'PhanPossiblyUndeclaredVariable' => ['\\Nene\\Xion\\DataMapperBase::update'],
-            'PhanTypeSuspiciousStringExpression' => ['\\Nene\\Xion\\DataMapperBase::update'],
-            'PhanUndeclaredVariableDim' => ['\\Nene\\Xion\\DataMapperBase::update']
-        ],
         'class/xion/DataModelBase.php' => [
             'PhanTypeMagicVoidWithReturn' => ['\\Nene\\Xion\\DataModelBase::__set'],
             'PhanTypeMismatchArgument' => ['\\Nene\\Xion\\DataModelBase::validate'],
@@ -39,15 +24,8 @@ return [
             'PhanTypeMismatchDimFetch' => ['\\Nene\\Xion\\DataModelBase::validate'],
             'PhanTypeMismatchForeach' => ['\\Nene\\Xion\\DataModelBase::validate']
         ],
-        'class/xion/ModelBase.php' => [
-            'PhanUnreferencedUseNormal' => ['class/xion/ModelBase.php']
-        ],
         'class/xion/PdoConnection.php' => [
-            'PhanTypeMismatchPropertyProbablyReal' => ['\\Nene\\Xion\\PdoConnection::__destruct'],
             'PhanUndeclaredConstantOfClass' => ['\\Nene\\Xion\\PdoConnection::__construct']
-        ],
-        'class/xion/View.php' => [
-            'PhanUndeclaredTypeThrowsType' => ['\\Nene\\Xion\\View::__clone']
         ],
     ],
     // 'directory_suppressions' => ['src/directory_name' => ['PhanIssueName1', 'PhanIssueName2']] can be manually added if needed.
