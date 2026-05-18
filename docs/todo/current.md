@@ -8,6 +8,9 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #207: Add native type declarations to all properties in `ControllerBase`; move `$TITLE`/`$HEADER_TITLE` initialization to constructor.
+- #206: Replace `file_put_contents` in `ModelBase::accessLog()` with `$this->LOGGER->info()` to unify logging via Monolog.
+- #205: Add `(string)` casts to `preg_replace` in `DataMapperBase`; add missing `: void`, `: mixed`, `: static` return types across `xion/` base classes.
 - #201: Further reduce Phan baseline from 13 to 6 issues; fix DataMapperBase::update() bug using isValid() instead of validate() in error message.
 - #199: Add return type declaration to preAction() overrides in IndexController and SessionController.
 - #195: Update actions/checkout from v4 to v6 in CI workflow.
