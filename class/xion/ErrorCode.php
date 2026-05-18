@@ -92,9 +92,9 @@ class ErrorCode
     /**
      * Copy inhibit.
      *
-     * @return void
+     * @return never
      */
-    final public function __clone()
+    final public function __clone(): never
     {
         throw new \RuntimeException('Clone is not allowed against ' . get_class($this));
     }

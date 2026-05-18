@@ -9,19 +9,19 @@
  */
 return [
     // # Issue statistics:
+    // PhanTypeArraySuspicious : 1 occurrence
     // PhanTypeMagicVoidWithReturn : 1 occurrence
-    // PhanTypeMismatchArgument : 1 occurrence
     // PhanTypeMismatchArgumentInternal : 1 occurrence
-    // PhanTypeMismatchDimFetch : 1 occurrence
+    // PhanTypeMismatchArgumentNullableInternal : 1 occurrence
     // PhanTypeMismatchForeach : 1 occurrence
     // PhanUndeclaredConstantOfClass : 1 occurrence
 
     'file_suppressions' => [
         'class/xion/DataModelBase.php' => [
+            'PhanTypeArraySuspicious' => ['\\Nene\\Xion\\DataModelBase::validate'],
             'PhanTypeMagicVoidWithReturn' => ['\\Nene\\Xion\\DataModelBase::__set'],
-            'PhanTypeMismatchArgument' => ['\\Nene\\Xion\\DataModelBase::validate'],
             'PhanTypeMismatchArgumentInternal' => ['\\Nene\\Xion\\DataModelBase::validate'],
-            'PhanTypeMismatchDimFetch' => ['\\Nene\\Xion\\DataModelBase::validate'],
+            'PhanTypeMismatchArgumentNullableInternal' => ['\\Nene\\Xion\\DataModelBase::setNow'],
             'PhanTypeMismatchForeach' => ['\\Nene\\Xion\\DataModelBase::validate']
         ],
         'class/xion/PdoConnection.php' => [
