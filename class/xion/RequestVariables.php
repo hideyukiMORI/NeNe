@@ -56,7 +56,7 @@ abstract class RequestVariables
      *
      * @return mixed value [string or array]
      */
-    public function get(?string $key = null)
+    public function get(?string $key = null): mixed
     {
         $ret = null;
         if ($key == null) {

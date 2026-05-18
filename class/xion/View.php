@@ -310,7 +310,7 @@ class View
      *
      * @return void
      */
-    final public function execute()
+    final public function execute(): void
     {
         self::$instance
             ->setCSS()

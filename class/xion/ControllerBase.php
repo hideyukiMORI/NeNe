@@ -176,7 +176,7 @@ abstract class ControllerBase
      *
      * @return void
      */
-    final public function run()
+    final public function run(): void
     {
         $controller = $this->ROUTE_CONTEXT->controller();
         $action = $this->ROUTE_CONTEXT->action();

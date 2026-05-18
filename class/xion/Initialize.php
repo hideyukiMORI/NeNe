@@ -35,7 +35,7 @@ class Initialize
      *
      * @return void
      */
-    final public static function init()
+    final public static function init(): void
     {
         require_once dirname(__FILE__) . '/../../ini/xSystemIni.php';       // SYSTEM INITIALIZE
         require_once dirname(__FILE__) . '/../../ini/xSiteIni.php';         // SITE INITIALIZE

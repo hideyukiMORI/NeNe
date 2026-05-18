@@ -148,7 +148,7 @@ abstract class DataModelBase
      *
      * @return DataModelBase
      */
-    public function setParam(string $prop, mixed $val)
+    public function setParam(string $prop, mixed $val): static
     {
         if (!$this->validate($prop, $val)) {
             throw new \Exception('Parameter ' . $prop . ' is a validation error. (value : ' . $val . ')');
@@ -167,7 +167,7 @@ abstract class DataModelBase
      *
      * @return DataModelBase
      */
-    public function setParamPostString(string $prop, string $postProp = '')
+    public function setParamPostString(string $prop, string $postProp = ''): static
     {
         $postProp = $postProp == '' ? $prop : $postProp;
         return $this->setParam($prop, (string)filter_input(INPUT_POST, $postProp));
@@ -183,7 +183,7 @@ abstract class DataModelBase
      *
      * @return DataModelBase
      */
-    public function setParamPostInt(string $prop, string $postProp = '')
+    public function setParamPostInt(string $prop, string $postProp = ''): static
     {
         $postProp = $postProp == '' ? $prop : $postProp;
         return $this->setParam($prop, (int)filter_input(INPUT_POST, $postProp));
