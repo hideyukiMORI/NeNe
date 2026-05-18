@@ -8,6 +8,10 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Recently Completed
 
+- #195: Update actions/checkout from v4 to v6 in CI workflow.
+- #193: Remove dead `$controller` and `$action` properties from `ControllerBase`.
+- #190: Clean up `.gitignore`, Vue.js comment in `View`, and completed Issues in `roadmap.md`.
+- #189: Improve type declarations and reduce Phan baseline in `class/xion/`.
 - #187: Remove the controller-level Smarty template fallback.
 - #185: Document Smarty template, CSS, and JavaScript placement conventions.
 - #177: Prepare the Zenn renovation-story article.
