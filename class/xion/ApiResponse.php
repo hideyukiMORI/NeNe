@@ -27,7 +27,7 @@ class ApiResponse
      *
      * @var ErrorCode
      */
-    private $errorCode;
+    private ErrorCode $errorCode;
 
     /**
      * CONSTRUCTOR.

@@ -36,28 +36,28 @@ abstract class DataMapperBase
      *
      * @var PDO
      */
-    protected $DB;
+    protected PDO $DB;
 
     /**
      * Logger
      *
      * @var Logger
      */
-    protected $LOGGER;
+    protected Logger $LOGGER;
 
     /**
      * Class name.
      *
      * @var string
      */
-    protected $CLASS;
+    protected string $CLASS;
 
     /**
      * Error code
      *
      * @var ErrorCode
      */
-    protected $ERROR_CODE;
+    protected ErrorCode $ERROR_CODE;
 
     protected const MODEL_CLASS = 'Nene\Xion\DataModelBase';
     protected const TARGET_TABLE = '';

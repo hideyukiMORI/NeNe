@@ -29,7 +29,7 @@ class Todo extends DataModelBase
      *
      * @var array
      */
-    protected static $schema = [
+    protected static array $schema = [
         'id'           => parent::INTEGER,
         'created_at'   => parent::DATETIME,
         'updated_at'   => parent::DATETIME,

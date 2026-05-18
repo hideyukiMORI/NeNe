@@ -47,35 +47,35 @@ abstract class DataModelBase
      *
      * @var array
      */
-    protected $data    = [];
+    protected array $data = [];
 
     /**
      * Table schema
      *
      * @var array
      */
-    protected static $schema  = [];
+    protected static array $schema = [];
 
     /**
      * Logger
      *
      * @var Logger
      */
-    protected $LOGGER;
+    protected Logger $LOGGER;
 
     /**
      * Class name
      *
      * @var string
      */
-    protected $CLASS;
+    protected string $CLASS;
 
     /**
      * Error code
      *
      * @var ErrorCode
      */
-    protected $ERROR_CODE;
+    protected ErrorCode $ERROR_CODE;
 
     /**
      * CONSTRUCTOR.

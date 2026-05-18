@@ -34,28 +34,28 @@ class RouteContext
      *
      * @var string
      */
-    private $controller = 'index';
+    private string $controller = 'index';
 
     /**
      * Action name.
      *
      * @var string
      */
-    private $action = 'index';
+    private string $action = 'index';
 
     /**
      * Action mode.
      *
      * @var string
      */
-    private $mode = 'Action';
+    private string $mode = 'Action';
 
     /**
      * Controller method name.
      *
      * @var string
      */
-    private $method = 'indexAction';
+    private string $method = 'indexAction';
 
     /**
      * CONSTRUCTOR.
