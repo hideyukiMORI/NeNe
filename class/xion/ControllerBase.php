@@ -35,119 +35,119 @@ abstract class ControllerBase
      *
      * @var Request
      */
-    protected $request;
+    protected Request $request;
 
     /**
      * Request method.
      *
      * @var string
      */
-    protected $method;
+    protected string $method;
 
     /**
      * Site title.
      *
      * @var string
      */
-    protected $TITLE = SITE_TITLE;
+    protected string $TITLE;
 
     /**
      * Site header title.
      *
      * @var string
      */
-    protected $HEADER_TITLE = SITE_HEADER_TITLE;
+    protected string $HEADER_TITLE;
 
     /**
      * View management class.
      *
      * @var View
      */
-    protected $VIEW;
+    protected View $VIEW;
 
     /**
      * Session check flag.
      *
      * @var boolean
      */
-    protected $SESSION_CHECK = true;
+    protected bool $SESSION_CHECK = true;
 
     /**
      * Monolog information log.
      *
      * @var Logger
      */
-    protected $LOGGER;
+    protected Logger $LOGGER;
 
     /**
-     * Undocumented variable
+     * Access log.
      *
      * @var Logger
      */
-    protected $ACCESS_LOGGER;
+    protected Logger $ACCESS_LOGGER;
 
     /**
      * Monolog error log.
      *
      * @var Logger
      */
-    protected $ERROR_LOGGER;
+    protected Logger $ERROR_LOGGER;
 
     /**
      * Error code.
      *
      * @var ErrorCode
      */
-    protected $ERROR_CODE;
+    protected ErrorCode $ERROR_CODE;
 
     /**
      * Authentication session boundary.
      *
      * @var AuthSession
      */
-    protected $AUTH_SESSION;
+    protected AuthSession $AUTH_SESSION;
 
     /**
      * REST response factory.
      *
      * @var ApiResponse
      */
-    protected $API_RESPONSE;
+    protected ApiResponse $API_RESPONSE;
 
     /**
      * Current route context.
      *
      * @var RouteContext
      */
-    protected $ROUTE_CONTEXT;
+    protected RouteContext $ROUTE_CONTEXT;
 
     /**
      * CSRF validation decision boundary.
      *
      * @var CsrfProtectionPolicy
      */
-    private $csrfProtectionPolicy;
+    private CsrfProtectionPolicy $csrfProtectionPolicy;
 
     /**
      * Rest post
      *
      * @var array
      */
-    protected $REQUEST_JSON = [];
+    protected array $REQUEST_JSON = [];
 
     /**
      * Referrer controller name.
      *
      * @var string
      */
-    protected $refController;
+    protected string $refController;
 
     /**
      * Referrer action name.
      *
      * @var string
      */
-    protected $refAction;
+    protected string $refAction;
 
     /**
      * CONSTRUCTOR.
@@ -156,6 +156,8 @@ abstract class ControllerBase
     {
         $this->request          = new Request();
         $this->method           = $_SERVER['REQUEST_METHOD'];
+        $this->TITLE            = SITE_TITLE;
+        $this->HEADER_TITLE     = SITE_HEADER_TITLE;
         $this->VIEW             = View::getInstance();
         $this->LOGGER           = Log::getInstance('information');
         $this->ACCESS_LOGGER    = Log::getInstance('access');
