@@ -31,3 +31,44 @@ jobs:
 
       - name: Confirm HTTP tests skip without runtime
         run: composer test:http
+
+  runtime-smoke:
+    name: HTTP runtime smoke (Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Prepare environment
+        run: cp .env.example .env
+
+      - name: Build app image
+        run: docker compose build app
+
+      - name: Start app
+        run: docker compose up -d app
+
+      - name: Wait for /health
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/health > /dev/null 2>&1; then
+              echo "App became healthy after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "App did not become healthy within 60s" >&2
+          docker compose logs app | tail -100 >&2
+          exit 1
+
+      - name: Run HTTP smoke tests
+        run: |
+          docker compose exec -T -e NENE_HTTP_BASE_URL=http://localhost:80 app composer test:http
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs app | tail -200
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v
