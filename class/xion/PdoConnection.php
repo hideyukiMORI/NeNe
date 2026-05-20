@@ -84,7 +84,7 @@ class PdoConnection
     /**
      * DESTRUCTOR.
      */
-    final public function __destruct(): void
+    final public function __destruct()
     {
         $this->connection = null;
     }
