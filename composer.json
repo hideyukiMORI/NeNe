@@ -46,7 +46,10 @@
     },
     "scripts": {
         "test": "phpunit --testsuite unit",
-        "test:http": "phpunit --testsuite http",
+        "test:http": [
+            "@php tools/test-http-preflight.php",
+            "phpunit --testsuite http"
+        ],
         "test:all": "phpunit",
         "analyze": "phan --allow-polyfill-parser --load-baseline .phan/baseline.php",
         "format": "php-cs-fixer fix --config=.php-cs-fixer.dist.php",
