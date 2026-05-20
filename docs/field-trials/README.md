@@ -102,9 +102,10 @@ When in doubt, omit. A trial report is more valuable as a small, safe record tha
 After a trial:
 
 1. Open one GitHub Issue per actionable finding. Reference the report file and the `F-N` row.
-2. Update `docs/todo/current.md` with a short "FT{N}" block linking the Issues.
-3. Update `docs/roadmap.md` if the trial moved a phase forward.
-4. Delete the trial clone under `../NeNe-FT/` when its work is done, unless it has independent value (for example as a future public sample).
+2. Append `defer` and unfiled `legacy-preserved` findings to `docs/field-trials/follow-ups.md` so they remain searchable when a later trial revisits the same surface.
+3. Update `docs/todo/current.md` with a short "FT{N}" block linking the Issues.
+4. Update `docs/roadmap.md` if the trial moved a phase forward.
+5. Delete the trial clone under `../NeNe-FT/` when its work is done, unless it has independent value (for example as a future public sample).
 
 The trial is finished when its Issues are merged or closed with a recorded rationale. A trial does not need to "succeed" — recording friction is the success condition.
 
