@@ -165,6 +165,32 @@ To run the application against SQLite instead of the Docker MySQL service, start
 NENE_DB_TYPE=SQLite3 NENE_DB_FILE=nene.db docker compose up --build app
 ```
 
+## Schema Parity Between SQLite and MySQL
+
+NeNe initializes two separate development databases through two separate scripts:
+
+- `cli/initSQLite.php` — PHP code that creates SQLite tables and `updated_at` triggers when the SQLite3 fallback is used.
+- `docker/mysql/init/001_schema.sql` — declarative SQL applied by the MySQL container on first boot under Docker Compose.
+
+These files **do not share a source of truth**. Nothing in CI enforces parity between them. When a contributor adds or alters a table, both files must be edited in the same change, and both runtimes must be verified locally.
+
+When in doubt about whether the two paths agree, compare the table sets:
+
+```sh
+docker compose down -v && docker compose up -d app
+
+# MySQL tables (root password is the Docker dev default; never use this in production).
+docker compose exec mysql mysql -uroot -proot nene -e 'SHOW TABLES;'
+
+# SQLite tables (run after `php cli/initSQLite.php`).
+docker compose exec app sh -lc "printf 'Y\n' | php cli/initSQLite.php"
+docker compose exec app php -r '$pdo = new PDO("sqlite:/var/www/html/data/nene.db"); foreach ($pdo->query("SELECT name FROM sqlite_master WHERE type=\"table\" ORDER BY name") as $r) echo $r["name"], PHP_EOL;'
+```
+
+If the two outputs disagree, the schema files have drifted. The two paths are intentionally kept in parallel for now because the legacy SQLite-and-MySQL split predates the project's modernization step; a future ADR could consolidate to a shared schema source (for example, generating the SQLite path from the MySQL SQL) but that decision is out of scope here.
+
+This note exists because adding or altering tables in only one path is a silent regression source — the runtime continues to look healthy on the path that received the change while breaking on the other.
+
 ## Stop
 
 ```sh
