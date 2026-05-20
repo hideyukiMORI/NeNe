@@ -183,6 +183,33 @@ The transaction manager commits when the callback succeeds and rolls back when i
 
 Do not create an alternate transaction helper for new features unless an Issue and ADR explain why `TransactionManager` is insufficient.
 
+### Surfacing domain errors from inside a transaction
+
+A `TransactionManager::run()` callback that throws a plain `Throwable` rolls back the transaction, but the exception then escapes to `htdocs/index.php`'s catch-all and produces a plain-text 500 response. That is the wrong shape for domain-level failures such as "referenced row not found" or "duplicate name".
+
+For these cases, throw `Nene\Xion\DomainException` with a registered error code. The top-level handler in `htdocs/index.php` catches it and converts to the standard JSON failure envelope with the HTTP status declared in `config/error_codes.php`:
+
+```php
+use Nene\Xion\DomainException;
+use Nene\Xion\TransactionManager;
+
+$transaction = new TransactionManager();
+$transaction->run(function () use ($bookmarkMapper, $junctionMapper, $tagIds): void {
+    foreach ($tagIds as $tagId) {
+        if (!$tagMapper->exists($tagId)) {
+            throw new DomainException('BOOKMARK-TAG-IDS-INVALID');
+        }
+    }
+    $junctionMapper->replaceTagsForBookmark($bookmarkId, $tagIds);
+});
+```
+
+When this throws, `TransactionManager` rolls back, the top-level handler emits `ApiResponse::failure('BOOKMARK-TAG-IDS-INVALID')`, and the client sees the normal JSON envelope plus the 400 (or whichever HTTP status the catalog declares) from `config/error_codes.php`.
+
+The error code must already exist in `config/error_codes.php`. Throwing an unknown code falls back to the generic 500 path, which is intentional — domain errors are part of the API contract and must be registered first.
+
+For purely pre-flight input validation (no DB writes), prefer returning `$this->API_RESPONSE->failure($code)` directly from the controller before opening the transaction. `DomainException` is for cases where the validation must run alongside the writes, for example a row-existence check whose target may change between the validation and the write.
+
 ## Testing and Static Analysis
 
 - At minimum, run PHP syntax checks for changed PHP files.
