@@ -24,3 +24,4 @@ Create an ADR when a change affects:
 ## Index
 
 - `0001-record-architecture-decisions.md`: Start recording architecture decisions.
+- `0002-adopt-field-trial-methodology.md`: Adopt the field trial methodology as a continuous quality practice.
