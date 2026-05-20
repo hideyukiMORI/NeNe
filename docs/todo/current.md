@@ -94,7 +94,7 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Field Trials
 
-No trials have been run yet. The methodology is documented in `docs/field-trials/README.md` and `docs/templates/field-trial-report.md`. Trials are cloned into `../NeNe-FT/ft{N}-{topic}/`.
+The methodology is documented in `docs/field-trials/README.md` and `docs/templates/field-trial-report.md`. Trials are cloned into `../NeNe-FT/ft{N}-{topic}/`.
 
 When a trial is run, summarize it here with the format below, then move the block to `Recently Completed` once all follow-up Issues are merged or closed.
 
@@ -105,6 +105,10 @@ When a trial is run, summarize it here with the format below, then move the bloc
 - Baseline: {NeNe ref}
 - Findings: F-1 (severity / decision / Issue #), F-2 (...), ...
 ```
+
+### Recently Completed
+
+- **FT1** — baseline trial from `ft1-bookmarklog`. Pivoted from a Bookmark+Tag implementation when baseline phase produced enough findings to fill the trial on its own. Closed 5 Issues: #222 (PdoConnection runtime fatal hotfix), #224 (CI runtime smoke job), #225 (`composer test:http` preflight), #226 (`NENE_HTTP_BASE_URL` docs), #227 (Docker `safe.directory`). Report: `docs/field-trials/2026-05-field-trial-1.md`. The originally planned Bookmark+Tag scope shifts to FT2.
 
 ## Backlog Candidates
 
