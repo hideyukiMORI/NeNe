@@ -66,26 +66,49 @@ docker compose run --rm app sh -lc "composer install --no-interaction --prefer-d
 
 HTTP runtime tests exercise the Docker-served application through real HTTP requests. They cover the top page, explicit URL routing, Swagger UI, session login/logout, TODO CRUD, REST method handling, and the JSON-only REST response policy.
 
+These tests are conditional. They require `NENE_HTTP_BASE_URL` to point to a running NeNe instance, and they are all skipped when the variable is empty or the target is unreachable. This keeps `composer test` fast and independent from Docker, while keeping `composer test:http` available for full runtime verification on demand.
+
+### Required environment variables
+
+| Variable | Purpose | Example |
+| --- | --- | --- |
+| `NENE_HTTP_BASE_URL` | Base URL the HTTP smoke suite targets. | `http://localhost:8080` (from the host) or `http://localhost:80` (from inside the running `app` container) |
+| `NENE_HTTP_ERROR_BASE_URL` | Optional base URL for the error-exposure suite (see *Error Exposure Check* below). | `http://localhost:8081` |
+
+If neither variable is set, `composer test:http` will report `OK` while skipping every test. The summary line `Tests: N, Skipped: N` is the signal that the suite was not actually run.
+
+### Run from the host
+
 Start the Docker environment first:
 
 ```sh
 docker compose up --build -d
 ```
 
-Then run:
+Then run from the host shell:
 
 ```sh
 NENE_HTTP_BASE_URL=http://localhost:8080 composer test:http
 ```
 
-If `NENE_HTTP_BASE_URL` is not configured, or the target server is unreachable, the HTTP test suite is skipped. This keeps normal unit testing fast and independent from Docker.
-
-For a full local runtime check:
+For a full local runtime check together with unit tests and static analysis:
 
 ```sh
 docker compose up --build -d
 NENE_HTTP_BASE_URL=http://localhost:8080 composer check
 ```
+
+### Run from inside the `app` container
+
+When the runtime is exercised from inside the same `app` container, the base URL is the container-local port (`80`), not the host port:
+
+```sh
+docker compose exec -T -e NENE_HTTP_BASE_URL=http://localhost:80 app composer test:http
+```
+
+This is the form used by Field Trial workflows (see `docs/field-trials/README.md`) and by future CI jobs that boot the runtime in the same step that runs the suite.
+
+### Cleanup behavior
 
 HTTP tests use a test title prefix and clean up matching TODO rows before each runtime test. Tests that create TODOs also register them for cleanup during teardown, so failed tests should not leave long-lived sample data behind.
 

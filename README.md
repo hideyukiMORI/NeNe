@@ -112,6 +112,8 @@ SQLite database files under `data/` are generated locally and are not committed.
 composer test
 ```
 
+`composer test` runs the unit suite. HTTP smoke tests (`composer test:http`) are conditional on `NENE_HTTP_BASE_URL` — see `docs/development/testing.md` for the runtime workflow.
+
 ## License
 
 MIT.
