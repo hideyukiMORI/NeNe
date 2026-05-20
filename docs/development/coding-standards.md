@@ -82,6 +82,37 @@ REST endpoints should make accepted HTTP methods explicit.
 - Define error code messages and HTTP status values in the server-side catalog at `config/error_codes.php`; controllers should reference codes, not inline messages or direct HTTP status headers.
 - Treat browser-visible error-code assets as exports or compatibility files, not the source of truth.
 
+## URL Parameter Format
+
+NeNe encodes URL parameters as `key_value` path segments after the controller and action, separated by underscores. This is a legacy-preserved convention — NeNe intentionally keeps the older PHP framework shape rather than adopting modern REST `{id}` templates.
+
+For example, the route `/todo/item/id_42` resolves to:
+
+- Controller: `TodoController`
+- Action: `item` → method `itemGetRest` / `itemPutRest` / `itemDeleteRest` depending on the HTTP method
+- URL parameter: `id = 42`
+
+Inside the controller method, read the value via `Request::getParam($key)`:
+
+```php
+$id = $this->request->getParam('id');
+if ($id === null || !ctype_digit((string)$id)) {
+    return $this->API_RESPONSE->failure('TODO-ID-REQUIRED');
+}
+$id = (int)$id;
+```
+
+Multiple parameters use additional `key_value` segments. `/foo/bar/page_3/sort_name` resolves to `page = 3` and `sort = name`.
+
+A few consequences worth flagging when generating routes (by hand or with an AI agent):
+
+- The path on the wire is `/{controller}/{action}/id_X`, not `/{controller}/{action}/{id}`.
+- OpenAPI `paths` keys use the literal underscore form (`/todo/item/id_{id}`) so the documented and runtime paths stay aligned.
+- Query strings (`?key=value`) still work via `Request::getQuery($key)` when filter-style parameters are needed instead.
+- A REST client written against a `{id}` template will hit 404 because the dispatcher takes only the first two URL segments as controller and action.
+
+When in doubt, read `class/xion/UrlParameter.php` for the parsing logic and existing samples in `class/controller/TodoController.php`.
+
 ## Service and Use-Case Logic
 
 Controllers are HTTP boundaries. Keep business decisions in service/use-case code once a controller method does more than simple request parsing, mapper delegation, and response selection.

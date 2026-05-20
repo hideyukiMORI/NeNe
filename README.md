@@ -60,6 +60,8 @@ The dispatcher resolves the URL to:
 
 The legacy `{action}Rest` fallback remains only for compatibility. New REST endpoints should use method-specific handlers.
 
+URL parameters are passed in the `key_value` segment form (for example `/todo/item/id_42`), not REST `{id}` templates. See `docs/development/coding-standards.md` for the full convention.
+
 ## Requirements
 
 - The Docker development target is PHP 8.4.
