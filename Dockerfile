@@ -16,6 +16,11 @@ RUN apt-get update \
 
 WORKDIR /var/www/html
 
+# Mark the host bind-mounted working tree as safe so git invocations inside
+# the container do not print `dubious ownership` warnings for every command
+# when the host uid differs from the container's root uid.
+RUN git config --global --add safe.directory /var/www/html
+
 COPY composer.json composer.lock ./
 RUN composer install --no-interaction --prefer-dist --no-progress
 
