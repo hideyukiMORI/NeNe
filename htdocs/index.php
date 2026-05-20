@@ -39,6 +39,11 @@ try {
     $dispatcher->dispatch();
 } catch (Xion\HttpTermination $termination) {
     Xion\HttpEmitter::emit($termination->response());
+} catch (Xion\DomainException $domainException) {
+    $apiResponse = new Xion\ApiResponse();
+    Xion\HttpEmitter::emit(
+        Xion\JsonResponder::responseArray($apiResponse->failure($domainException->errorCode()))
+    );
 } catch (\Throwable $throwable) {
     Xion\Log::getInstance('error')->error('Unhandled application error.', ['exception' => $throwable]);
     Xion\HttpEmitter::emit(Xion\HttpResponse::text(
