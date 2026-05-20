@@ -140,6 +140,20 @@ Mapper responsibilities:
 - Do not know about HTTP request shape, templates, or `ApiResponse`.
 - Do not start transactions for every statement; leave transaction boundaries to service/use-case code.
 
+### Junction tables (many-to-many)
+
+`DataMapperBase` assumes a single-column primary key (the `KEY_SID` constant) and exposes id-centric helpers such as `find($sid)`, `update($model)`, and `delete($model)`. These helpers are **not** designed for many-to-many junction tables like `article_tags (article_id, tag_id)`, where the natural primary key is composite.
+
+For junction tables:
+
+- Still inherit from `DataMapperBase` to keep PDO acquisition (`$this->DB`) and the logger (`$this->LOGGER`) consistent with the rest of the codebase.
+- Leave `KEY_SID` unset — do not invent a synthetic id just to satisfy the base class.
+- Do not use `find()` / `update()` / `delete()` from the base class; they assume single-column PK.
+- Write the relation operations (find ids by left, replace tag set, clear all rows for one parent) as small raw prepared statements through `$this->execute($stmt)`.
+- Keep schema-level cascade behavior (`ON DELETE CASCADE` in MySQL / `FOREIGN KEY ... ON DELETE CASCADE` in SQLite) on the junction table so the relation rows disappear when either side is hard-deleted.
+- When the parent uses soft delete (`is_deleted = 1`), the cascade does not fire automatically; clear the junction rows explicitly inside the same `TransactionManager::run()` block as the parent's soft-delete write.
+- Callers (controllers or service code) own the transaction boundary when more than one statement must commit atomically — for example a parent update that re-syncs the relation set.
+
 ## OpenAPI
 
 New public HTTP APIs should be documented with OpenAPI.
