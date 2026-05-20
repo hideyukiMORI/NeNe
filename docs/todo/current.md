@@ -109,6 +109,7 @@ When a trial is run, summarize it here with the format below, then move the bloc
 ### Recently Completed
 
 - **FT1** — baseline trial from `ft1-bookmarklog`. Pivoted from a Bookmark+Tag implementation when baseline phase produced enough findings to fill the trial on its own. Closed 5 Issues: #222 (PdoConnection runtime fatal hotfix), #224 (CI runtime smoke job), #225 (`composer test:http` preflight), #226 (`NENE_HTTP_BASE_URL` docs), #227 (Docker `safe.directory`). Report: `docs/field-trials/2026-05-field-trial-1.md`. The originally planned Bookmark+Tag scope shifts to FT2.
+- **FT2** — Bookmark + Tag M:N CRUD trial from `ft2-bookmark-tag`. Two-entity REST service with transactional relation diff, dual DB schema (SQLite + MySQL), OpenAPI extension, 6 new HTTP smoke tests. 7 findings recorded. Follow-up Issues (F-1 / F-3 / F-6 / F-7) tracked below. F-2 / F-4 / F-5 deferred. Report: `docs/field-trials/2026-05-field-trial-2.md`.
 
 ## Backlog Candidates
 

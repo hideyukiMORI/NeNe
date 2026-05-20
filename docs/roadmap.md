@@ -178,7 +178,7 @@ Future candidates:
 
 ## 7. Field Trials
 
-Status: methodology adopted; FT1 complete; FT2 starting.
+Status: methodology adopted; FT1 + FT2 complete; FT3 starting.
 
 Goal:
 
@@ -202,8 +202,9 @@ Methodology and templates:
 Completed:
 
 - **FT1** — baseline trial from `ft1-bookmarklog`. The intended scope was a Bookmark+Tag CRUD service, but the baseline phase produced enough findings to fill the trial. Outcomes: a 1-line `main` hotfix (PR #223 closing a PHP fatal in `PdoConnection::__destruct()`), a new CI HTTP runtime smoke job (#230), three small UX and docs improvements (#228, #229, #231). Report: `docs/field-trials/2026-05-field-trial-1.md`.
+- **FT2** — Bookmark + Tag M:N CRUD trial from `ft2-bookmark-tag`. Two-entity REST service with transactional relation diff against the clean post-FT1 baseline. 7 findings; 4 filed as Issues for follow-up (TransactionManager domain-error path, URL parameter convention docs, junction-table guidance, schema parity note). Report: `docs/field-trials/2026-05-field-trial-2.md`.
 
 Future candidates:
 
-- FT2: Bookmark + Tag CRUD against the post-FT1 baseline. Same M:N + transaction surfaces that FT1 did not reach.
-- Subsequent trials should each target a different surface (Smarty rendering, OpenAPI workflow, database setup, deployment) rather than retesting the same paths.
+- FT3 (after FT2 follow-up Issues close): a different surface — candidates are session/CSRF flow, Smarty rendering, OpenAPI workflow polish, or deployment.
+- Subsequent trials should each target a different surface rather than retesting the same paths.

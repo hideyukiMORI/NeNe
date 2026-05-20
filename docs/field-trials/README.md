@@ -120,3 +120,4 @@ The trial is finished when its Issues are merged or closed with a recorded ratio
 | Trial | Date | Topic | Report |
 | --- | --- | --- | --- |
 | FT1 | 2026-05-20 | Baseline trial (from `bookmarklog` clone). Pivoted from Bookmark+Tag implementation when baseline findings filled the trial. Closed 5 Issues (#222–#227) including a `main`-fatal hotfix and a new CI runtime smoke job. | [`2026-05-field-trial-1.md`](2026-05-field-trial-1.md) |
+| FT2 | 2026-05-21 | Bookmark + Tag CRUD against post-FT1 baseline. Two-entity M:N service with transactional relation diff, dual DB setup, OpenAPI extension, 6 new HTTP tests. 7 findings, 4 filed as Issues for follow-up. | [`2026-05-field-trial-2.md`](2026-05-field-trial-2.md) |
