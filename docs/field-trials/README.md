@@ -117,4 +117,6 @@ The trial is finished when its Issues are merged or closed with a recorded ratio
 
 ## Index
 
-No trials have been recorded yet. The first trial should be `docs/field-trials/YYYY-MM-field-trial-1.md`.
+| Trial | Date | Topic | Report |
+| --- | --- | --- | --- |
+| FT1 | 2026-05-20 | Baseline trial (from `bookmarklog` clone). Pivoted from Bookmark+Tag implementation when baseline findings filled the trial. Closed 5 Issues (#222–#227) including a `main`-fatal hotfix and a new CI runtime smoke job. | [`2026-05-field-trial-1.md`](2026-05-field-trial-1.md) |

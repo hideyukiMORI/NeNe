@@ -178,7 +178,7 @@ Future candidates:
 
 ## 7. Field Trials
 
-Status: methodology adopted; first trial pending.
+Status: methodology adopted; FT1 complete; FT2 starting.
 
 Goal:
 
@@ -199,7 +199,11 @@ Methodology and templates:
 - `docs/field-trials/README.md`: full methodology, clone layout, friction kinds, decisions, and safety rules.
 - `docs/templates/field-trial-report.md`: report skeleton copied per trial.
 
+Completed:
+
+- **FT1** — baseline trial from `ft1-bookmarklog`. The intended scope was a Bookmark+Tag CRUD service, but the baseline phase produced enough findings to fill the trial. Outcomes: a 1-line `main` hotfix (PR #223 closing a PHP fatal in `PdoConnection::__destruct()`), a new CI HTTP runtime smoke job (#230), three small UX and docs improvements (#228, #229, #231). Report: `docs/field-trials/2026-05-field-trial-1.md`.
+
 Future candidates:
 
-- FT1: small service following `docs/tutorials/building-a-service.md` from a fresh clone, focused on the routing convention, REST method handlers, CSRF flow, and error catalog.
+- FT2: Bookmark + Tag CRUD against the post-FT1 baseline. Same M:N + transaction surfaces that FT1 did not reach.
 - Subsequent trials should each target a different surface (Smarty rendering, OpenAPI workflow, database setup, deployment) rather than retesting the same paths.
