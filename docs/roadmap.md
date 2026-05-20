@@ -175,3 +175,31 @@ Future candidates:
 - Make the first-service tutorial even more repeatable from clone to local verification.
 - Improve comments and PHPDoc only where they help readers understand framework boundaries.
 - Add lightweight checklists for small-service delivery readiness, including environment, database, OpenAPI, tests, and production safety notes.
+
+## 7. Field Trials
+
+Status: methodology adopted; first trial pending.
+
+Goal:
+
+Verify NeNe from the outside by cloning it into `../NeNe-FT/ft{N}-{topic}/` and building a small realistic service while recording every point of friction as a numbered finding (`F-1`, `F-2`, ...). Trials drive small framework and documentation Issues. Findings that turn out to be intentional legacy shapes are recorded as `legacy-preserved` with a documentation-only decision, rather than as defects.
+
+Field trials are a continuous quality gate rather than a single project. A new trial should run whenever a meaningful release, modernization step, or documentation rewrite lands and external usability should be re-checked.
+
+Principles:
+
+- One trial, one short report. Quantity does not matter; readable evidence does.
+- Use a fresh clone every time. The trial directory is independent and never committed back into this repository.
+- Record what surprised, blocked, or slowed down the work. Do not pad reports with speculative improvements.
+- Distinguish documentation gaps from intentional legacy shapes. NeNe is a renovation, not a redesign.
+- Each finding ends in a Decision: `fix-in-framework`, `document`, `keep-legacy`, or `defer`.
+
+Methodology and templates:
+
+- `docs/field-trials/README.md`: full methodology, clone layout, friction kinds, decisions, and safety rules.
+- `docs/templates/field-trial-report.md`: report skeleton copied per trial.
+
+Future candidates:
+
+- FT1: small service following `docs/tutorials/building-a-service.md` from a fresh clone, focused on the routing convention, REST method handlers, CSRF flow, and error catalog.
+- Subsequent trials should each target a different surface (Smarty rendering, OpenAPI workflow, database setup, deployment) rather than retesting the same paths.

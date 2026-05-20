@@ -23,6 +23,8 @@ This directory contains project documentation for humans and AI agents.
 - `milestones/README.md`: Milestone management.
 - `adr/README.md`: Architecture decision records.
 - `api/README.md`: OpenAPI and API documentation policy.
+- `field-trials/README.md`: Field trial methodology and clone-based trial layout under `../NeNe-FT/`.
+- `templates/field-trial-report.md`: Report skeleton copied for each new trial.
 
 ## Source of Truth
 

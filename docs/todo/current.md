@@ -92,6 +92,20 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 - #165: Prove the reviewable Controller-Service-Mapper shape through the reference implementation.
 - #145: Add an AI-assisted small-service reference implementation covering page, REST, mapper, OpenAPI, and tests.
 
+## Field Trials
+
+No trials have been run yet. The methodology is documented in `docs/field-trials/README.md` and `docs/templates/field-trial-report.md`. Trials are cloned into `../NeNe-FT/ft{N}-{topic}/`.
+
+When a trial is run, summarize it here with the format below, then move the block to `Recently Completed` once all follow-up Issues are merged or closed.
+
+```
+## FT{N} — {topic}
+
+- Report: `docs/field-trials/YYYY-MM-field-trial-{N}.md`
+- Baseline: {NeNe ref}
+- Findings: F-1 (severity / decision / Issue #), F-2 (...), ...
+```
+
 ## Backlog Candidates
 
 - Improve PHPDoc accuracy and native types across `class/xion/`, starting with shared base classes.

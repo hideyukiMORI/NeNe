@@ -13,6 +13,7 @@ This file is the first document for AI agents and automation working on NeNe.
 - Roadmap: `docs/roadmap.md`
 - Current TODO: `docs/todo/current.md`
 - ADR index: `docs/adr/README.md`
+- Field trial methodology: `docs/field-trials/README.md`
 
 ## Operating Rules
 
