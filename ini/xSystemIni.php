@@ -122,7 +122,7 @@ define('SESSION_COOKIE_LIFETIME', (int)$getEnv('NENE_SESSION_LIFETIME', '0'));
 const OWN_DOMAIN = 'localhost';
 const URI_ROOT = '/';
 const LAYERS_NUM = 0;
-const LOGOUT_URI = (getenv('NENE_LOGOUT_URI') !== false) ? (string)getenv('NENE_LOGOUT_URI') : '/';
+define('LOGOUT_URI', $getEnv('NENE_LOGOUT_URI', '/'));
 
 /*
  * Public assets.
