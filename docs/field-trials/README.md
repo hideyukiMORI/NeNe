@@ -28,7 +28,15 @@ All NeNe field trials are run from a fresh `git clone` placed under the `../NeNe
     └── ...
 ```
 
-Setup for a new trial:
+Setup for a new trial — one-shot helper:
+
+```sh
+tools/nene-ft-new.sh {topic-kebab}
+```
+
+This auto-detects the next `N`, clones from the local framework HEAD into `../NeNe-FT/ft{N}-{topic}/`, sets host port offsets (`app=8080+N`, `mysql=3307+N`) so the clone can run alongside the framework, drops a `.claude/settings.local.json` with the FT autonomy permissions, and writes an `FT{N}-PLAN.md` skeleton. The script prints the next steps (`docker compose up`, `/health` probe, Issue filing).
+
+Manual equivalent, if the helper is not available:
 
 ```sh
 mkdir -p ../NeNe-FT
@@ -37,7 +45,7 @@ cd ../NeNe-FT/ft{N}-{topic}
 composer install
 ```
 
-Each trial directory is independent. It is a real clone, so its own `.git`, `.env`, and `data/` live inside it. None of those artifacts are committed back into this framework repository.
+Either path produces an independent trial directory. It is a real clone, so its own `.git`, `.env`, and `data/` live inside it. None of those artifacts are committed back into this framework repository.
 
 When a trial uncovers framework or documentation changes, those changes are made in this repository (`hideyukiMORI/NeNe`) through the normal Issue-driven workflow, not inside the trial directory. The trial directory exists only for the duration of the trial.
 
