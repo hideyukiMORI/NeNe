@@ -48,17 +48,22 @@ jobs:
       - name: Start app
         run: docker compose up -d app
 
-      - name: Wait for /health
+      - name: Wait for /health to report healthStatus=ok
         run: |
+          # Require healthStatus=ok (not just HTTP 200), because /health returns
+          # 200 even when the database is degraded — letting smoke tests run too
+          # early and fail with SQLSTATE[HY000] [2002] Connection refused.
           for i in $(seq 1 60); do
-            if curl -fsS http://localhost:8080/health > /dev/null 2>&1; then
-              echo "App became healthy after ${i}s"
+            status=$(curl -fsS http://localhost:8080/health/index 2>/dev/null | jq -r '.Data.healthStatus // "unknown"')
+            if [ "$status" = "ok" ]; then
+              echo "App became healthy (healthStatus=ok) after ${i}s"
               exit 0
             fi
             sleep 1
           done
-          echo "App did not become healthy within 60s" >&2
+          echo "App did not reach healthStatus=ok within 60s" >&2
           docker compose logs app | tail -100 >&2
+          docker compose logs mysql | tail -50 >&2
           exit 1
 
       - name: Run HTTP smoke tests
