@@ -70,6 +70,28 @@ await call('POST', '/session/logout');
 - The session cookie (`PHPSESSID`) is `HttpOnly` and `SameSite=Lax`. JavaScript cannot read it; the browser handles it. Set `Secure` in production via `NENE_SESSION_SECURE=1`.
 - The CSRF token is returned in the JSON body — not a cookie — and the client is expected to hold it in memory for the duration of the session. Do not persist it to local storage or send it cross-origin; if the token leaks, an attacker with a valid session id can impersonate the user.
 
+## Session id regeneration on login
+
+`POST /session/login` calls `session_regenerate_id(true)` server-side. As a side effect, the response carries **two** `Set-Cookie: PHPSESSID=...` headers — first the old session id (immediately invalidated), then the newly regenerated one. Your client must keep the **last** `PHPSESSID=` value, not the first.
+
+Most HTTP clients handle this correctly because they update the cookie store as headers stream in. Hand-rolled clients that loop over headers manually — `curl -c jar` with custom parsing, raw `file_get_contents` + `$http_response_header`, low-level socket reads — must iterate `Set-Cookie` headers and take the last one with a matching name:
+
+```php
+// Hand-rolled cookie extraction: take the LAST PHPSESSID=, not the first.
+$latest = '';
+foreach ($http_response_header as $line) {
+    if (preg_match('/^Set-Cookie:\s*PHPSESSID=([^;]+)/i', $line, $m)) {
+        $latest = $m[1];
+    }
+}
+```
+
+Using the first `PHPSESSID=` keeps the old, already-invalidated session id and every subsequent request will appear unauthenticated.
+
+## Notes for HTML login (not REST)
+
+If you implement a server-rendered login form rather than calling REST `/session/login`, the same `AuthSession::login(array $user)` API is used internally. The `$user` array is the row returned by `UserMapper::findByCredentials($user_id, $user_pass)`; pass it through directly. The fields read by `AuthSession::login()` are `id`, `user_id`, `user_name`, and `e_mail` — any extra columns on the row are ignored. See `docs/tutorials/building-a-service.md` for the HTML login pattern.
+
 ## Failure modes
 
 | Response | Cause | Fix |
