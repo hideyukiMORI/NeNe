@@ -10,7 +10,7 @@ Source policies:
 
 ## Checklist
 
-- [ ] Schema changes are mirrored in **both** `docker/mysql/init/001_schema.sql` **and** `cli/initSQLite.php`. The two files do not share a source of truth; CI does not enforce parity.
+- [ ] Schema changes are mirrored in **all three** locations: `docker/mysql/init/001_schema.sql`, `cli/initSQLite.php`, and `class/xion/DatabaseInstaller.php` (used by `cli/setupDatabase.php`). The three sites do not share a source of truth; CI does not enforce parity.
 - [ ] SQLite path includes an `..._updated_at_trigger` to mirror MySQL's `ON UPDATE CURRENT_TIMESTAMP`.
 - [ ] Foreign keys cascade-delete or restrict deliberately; the choice matches the entity lifecycle.
 - [ ] Per-user tables expose `user_id` as a `BIGINT UNSIGNED` FK to `users.id`, indexed (`KEY ..._user_id_index`).
