@@ -88,11 +88,11 @@ paths:
                         id: 1
                         user_id: admin
         "401":
-          description: Credentials were rejected.
+          description: Credentials were rejected (`LOGIN-FAILED`).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginFailureEnvelope"
+                $ref: "#/components/schemas/ApiFailureEnvelope"
               examples:
                 failure:
                   value:
@@ -118,11 +118,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/BasicSuccessEnvelope"
         "403":
-          description: CSRF token was missing or invalid.
+          description: CSRF token was missing or invalid (`CSRF-TOKEN-INVALID`).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CsrfTokenInvalidEnvelope"
+                $ref: "#/components/schemas/ApiFailureEnvelope"
+              examples:
+                csrfTokenInvalid:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: CSRF-TOKEN-INVALID
+                      errorMessage: Invalid CSRF token.
   /todo/index:
     get:
       tags:
@@ -139,11 +147,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/TodoListSuccessEnvelope"
         "401":
-          description: Session is missing or expired.
+          description: Session is missing or expired (`SESSION-CLOSED`).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionClosedEnvelope"
+                $ref: "#/components/schemas/ApiFailureEnvelope"
+              examples:
+                sessionClosed:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: SESSION-CLOSED
+                      errorMessage: Session timeout. Please log in again.
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
     post:
@@ -172,23 +188,47 @@ paths:
               schema:
                 $ref: "#/components/schemas/TodoSuccessEnvelope"
         "401":
-          description: Session is missing or expired.
+          description: Session is missing or expired (`SESSION-CLOSED`).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionClosedEnvelope"
+                $ref: "#/components/schemas/ApiFailureEnvelope"
+              examples:
+                sessionClosed:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: SESSION-CLOSED
+                      errorMessage: Session timeout. Please log in again.
         "400":
-          description: TODO title was missing.
+          description: TODO title was missing (`TODO-TITLE-REQUIRED`).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TodoTitleRequiredEnvelope"
+                $ref: "#/components/schemas/ApiFailureEnvelope"
+              examples:
+                titleRequired:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: TODO-TITLE-REQUIRED
+                      errorMessage: TODO title is required.
         "403":
-          description: CSRF token was missing or invalid.
+          description: CSRF token was missing or invalid (`CSRF-TOKEN-INVALID`).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CsrfTokenInvalidEnvelope"
+                $ref: "#/components/schemas/ApiFailureEnvelope"
+              examples:
+                csrfTokenInvalid:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: CSRF-TOKEN-INVALID
+                      errorMessage: Invalid CSRF token.
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
   /todo/item/id_{id}:
@@ -223,27 +263,56 @@ paths:
               schema:
                 $ref: "#/components/schemas/TodoSuccessEnvelope"
         "401":
-          description: Session is missing or expired.
+          description: Session is missing or expired (`SESSION-CLOSED`).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionClosedEnvelope"
+                $ref: "#/components/schemas/ApiFailureEnvelope"
+              examples:
+                sessionClosed:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: SESSION-CLOSED
+                      errorMessage: Session timeout. Please log in again.
         "400":
-          description: TODO id or title was invalid.
+          description: TODO id or title was invalid (`TODO-ID-REQUIRED` / `TODO-TITLE-REQUIRED`).
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: "#/components/schemas/TodoIdRequiredEnvelope"
-                  - $ref: "#/components/schemas/TodoTitleRequiredEnvelope"
+                $ref: "#/components/schemas/ApiFailureEnvelope"
+              examples:
+                idRequired:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: TODO-ID-REQUIRED
+                      errorMessage: TODO id is required.
+                titleRequired:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: TODO-TITLE-REQUIRED
+                      errorMessage: TODO title is required.
         "404":
           $ref: "#/components/responses/TodoNotFound"
         "403":
-          description: CSRF token was missing or invalid.
+          description: CSRF token was missing or invalid (`CSRF-TOKEN-INVALID`).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CsrfTokenInvalidEnvelope"
+                $ref: "#/components/schemas/ApiFailureEnvelope"
+              examples:
+                csrfTokenInvalid:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: CSRF-TOKEN-INVALID
+                      errorMessage: Invalid CSRF token.
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
     delete:
@@ -264,25 +333,49 @@ paths:
               schema:
                 $ref: "#/components/schemas/TodoDeleteSuccessEnvelope"
         "401":
-          description: Session is missing or expired.
+          description: Session is missing or expired (`SESSION-CLOSED`).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionClosedEnvelope"
+                $ref: "#/components/schemas/ApiFailureEnvelope"
+              examples:
+                sessionClosed:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: SESSION-CLOSED
+                      errorMessage: Session timeout. Please log in again.
         "400":
-          description: TODO id was missing or invalid.
+          description: TODO id was missing or invalid (`TODO-ID-REQUIRED`).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TodoIdRequiredEnvelope"
+                $ref: "#/components/schemas/ApiFailureEnvelope"
+              examples:
+                idRequired:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: TODO-ID-REQUIRED
+                      errorMessage: TODO id is required.
         "404":
           $ref: "#/components/responses/TodoNotFound"
         "403":
-          description: CSRF token was missing or invalid.
+          description: CSRF token was missing or invalid (`CSRF-TOKEN-INVALID`).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CsrfTokenInvalidEnvelope"
+                $ref: "#/components/schemas/ApiFailureEnvelope"
+              examples:
+                csrfTokenInvalid:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: CSRF-TOKEN-INVALID
+                      errorMessage: Invalid CSRF token.
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
 components:
@@ -308,13 +401,21 @@ components:
         minimum: 1
   responses:
     TodoNotFound:
-      description: TODO item was not found for the signed-in user.
+      description: TODO item was not found for the signed-in user (`TODO-NOT-FOUND`).
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/TodoNotFoundEnvelope"
+            $ref: "#/components/schemas/ApiFailureEnvelope"
+          examples:
+            notFound:
+              value:
+                Result: true
+                Data:
+                  status: failure
+                  errorCode: TODO-NOT-FOUND
+                  errorMessage: TODO item was not found.
     MethodNotAllowed:
-      description: HTTP method is not allowed for this endpoint.
+      description: HTTP method is not allowed for this endpoint (`METHOD-NOT-ALLOWED`).
       headers:
         Allow:
           description: Comma-separated allowed HTTP methods.
@@ -323,7 +424,15 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/MethodNotAllowedEnvelope"
+            $ref: "#/components/schemas/ApiFailureEnvelope"
+          examples:
+            methodNotAllowed:
+              value:
+                Result: true
+                Data:
+                  status: failure
+                  errorCode: METHOD-NOT-ALLOWED
+                  errorMessage: The HTTP method is not allowed for this endpoint.
   schemas:
     JsonEnvelope:
       type: object
@@ -444,8 +553,6 @@ components:
                       $ref: "#/components/schemas/LoginUser"
                     csrfToken:
                       type: string
-    LoginFailureEnvelope:
-      $ref: "#/components/schemas/LoginFailedEnvelope"
     Todo:
       type: object
       required:
@@ -531,108 +638,15 @@ components:
                   properties:
                     id:
                       type: integer
-    ErrorEnvelope:
+    ApiFailureEnvelope:
+      description: |
+        Canonical failure envelope for every documented error response. The
+        specific `errorCode` and `errorMessage` values are not constrained
+        here; the catalog lives at `docs/development/error-codes.md`, and
+        each operation may include an `example` showing the code it returns.
       allOf:
         - $ref: "#/components/schemas/JsonEnvelope"
         - type: object
           properties:
             Data:
               $ref: "#/components/schemas/ApiFailureData"
-    SessionClosedEnvelope:
-      allOf:
-        - $ref: "#/components/schemas/ErrorEnvelope"
-        - type: object
-          properties:
-            Data:
-              allOf:
-                - $ref: "#/components/schemas/ApiFailureData"
-                - type: object
-                  properties:
-                    errorCode:
-                      const: SESSION-CLOSED
-                    errorMessage:
-                      const: Session timeout. Please log in again.
-    LoginFailedEnvelope:
-      allOf:
-        - $ref: "#/components/schemas/ErrorEnvelope"
-        - type: object
-          properties:
-            Data:
-              allOf:
-                - $ref: "#/components/schemas/ApiFailureData"
-                - type: object
-                  properties:
-                    errorCode:
-                      const: LOGIN-FAILED
-                    errorMessage:
-                      const: Wrong user ID or user PASS
-    CsrfTokenInvalidEnvelope:
-      allOf:
-        - $ref: "#/components/schemas/ErrorEnvelope"
-        - type: object
-          properties:
-            Data:
-              allOf:
-                - $ref: "#/components/schemas/ApiFailureData"
-                - type: object
-                  properties:
-                    errorCode:
-                      const: CSRF-TOKEN-INVALID
-                    errorMessage:
-                      const: Invalid CSRF token.
-    TodoIdRequiredEnvelope:
-      allOf:
-        - $ref: "#/components/schemas/ErrorEnvelope"
-        - type: object
-          properties:
-            Data:
-              allOf:
-                - $ref: "#/components/schemas/ApiFailureData"
-                - type: object
-                  properties:
-                    errorCode:
-                      const: TODO-ID-REQUIRED
-                    errorMessage:
-                      const: TODO id is required.
-    TodoNotFoundEnvelope:
-      allOf:
-        - $ref: "#/components/schemas/ErrorEnvelope"
-        - type: object
-          properties:
-            Data:
-              allOf:
-                - $ref: "#/components/schemas/ApiFailureData"
-                - type: object
-                  properties:
-                    errorCode:
-                      const: TODO-NOT-FOUND
-                    errorMessage:
-                      const: TODO item was not found.
-    TodoTitleRequiredEnvelope:
-      allOf:
-        - $ref: "#/components/schemas/ErrorEnvelope"
-        - type: object
-          properties:
-            Data:
-              allOf:
-                - $ref: "#/components/schemas/ApiFailureData"
-                - type: object
-                  properties:
-                    errorCode:
-                      const: TODO-TITLE-REQUIRED
-                    errorMessage:
-                      const: TODO title is required.
-    MethodNotAllowedEnvelope:
-      allOf:
-        - $ref: "#/components/schemas/ErrorEnvelope"
-        - type: object
-          properties:
-            Data:
-              allOf:
-                - $ref: "#/components/schemas/ApiFailureData"
-                - type: object
-                  properties:
-                    errorCode:
-                      const: METHOD-NOT-ALLOWED
-                    errorMessage:
-                      const: The HTTP method is not allowed for this endpoint.
