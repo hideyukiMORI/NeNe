@@ -140,6 +140,40 @@ This keeps browser caches from hiding local asset changes during development and
 
 External URLs added through `View::addCSS()` or `View::addJS()` are passed through as-is.
 
+## Smarty HTML Escaping
+
+`class/xion/View.php` enables Smarty's `setEscapeHtml(true)` framework-wide so any `{$variable}` in a template is HTML-escaped before being written. This is the right default for a server-rendered surface and removes the need to write `{$variable|escape:'html'}` on every output.
+
+The subtlety: **auto-escape runs after the modifier chain**. Modifiers that emit markup will have that markup escaped again, which usually breaks the intent. The most common case is `nl2br`:
+
+```smarty
+{$body|nl2br}
+```
+
+`nl2br` produces `<br />` from `\n`, then the auto-escape turns it into `&lt;br /&gt;`. The line break does not render — the literal `<br />` text shows up.
+
+Two safe patterns:
+
+1. **Use `nofilter` to opt that variable out of auto-escape, and call `escape` explicitly first** when the modifier you want emits markup intentionally:
+
+   ```smarty
+   {$body|escape:'html'|nl2br nofilter}
+   ```
+
+2. **Avoid the markup-emitting modifier entirely** and let CSS preserve formatting. For line breaks, `white-space: pre-line` works well:
+
+   ```smarty
+   <div class="note-body">{$body}</div>
+   ```
+
+   ```css
+   .note-body { white-space: pre-line; }
+   ```
+
+Option 2 keeps the template trivial and the auto-escape contract intact, at the cost of one CSS rule. Prefer it unless you specifically need HTML output from a modifier (e.g. `{$markdown_html|nofilter}` for already-sanitized markup).
+
+When you write a custom Smarty plugin or chain another markup-emitting modifier (`replace` with HTML, `html_*` series, etc.), reach for `nofilter` in the same way and treat any HTML the plugin produces as already trusted.
+
 ## Recommended Shape
 
 Prefer this shape for new server-rendered pages:
