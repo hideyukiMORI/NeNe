@@ -334,11 +334,27 @@ abstract class ControllerBase
         if (!$this->AUTH_SESSION->isLoggedIn()) {
             $this->logout();
             if (!$this->ROUTE_CONTEXT->isRest()) {
-                $this->location(LOGOUT_URI);
+                $this->location($this->unauthorizedRedirect());
             } else {
                 Xion\JsonResponder::outputArray($this->API_RESPONSE->failure('SESSION-CLOSED'));
             }
         }
+    }
+
+    /**
+     * Return the URI an unauthenticated HTML visitor is redirected to.
+     *
+     * Override in a subclass to send specific protected sections to a
+     * dedicated login page (for example `/admin/login` for admin
+     * controllers). The default value is the framework-wide `LOGOUT_URI`
+     * constant, which can be overridden globally via the `NENE_LOGOUT_URI`
+     * environment variable.
+     *
+     * @return string
+     */
+    protected function unauthorizedRedirect(): string
+    {
+        return LOGOUT_URI;
     }
 
     /**
