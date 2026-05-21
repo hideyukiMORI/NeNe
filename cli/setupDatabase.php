@@ -31,7 +31,15 @@ if (isset($options['help'])) {
     return 0;
 }
 
-$envPath = resolveEnvPath(is_string($options['env'] ?? null) ? $options['env'] : '.env');
+$envOptionRaw = $options['env'] ?? null;
+$envExplicit = is_string($envOptionRaw);
+$envPath = resolveEnvPath($envExplicit ? $envOptionRaw : '.env');
+
+if ($envExplicit && !is_file($envPath)) {
+    fwrite(STDERR, 'Specified env file not found: ' . $envPath . PHP_EOL);
+    return 1;
+}
+
 $loadedEnv = EnvLoader::loadIfExists($envPath);
 
 Initialize::init();
