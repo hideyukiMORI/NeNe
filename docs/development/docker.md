@@ -197,6 +197,16 @@ This note exists because adding or altering tables in only one path is a silent 
 docker compose down
 ```
 
+## Clearing the Smarty Compile Cache
+
+`view/compile/` is written by the container's `www-data` user, so a host-side `rm view/compile/*` fails with `Permission denied`. To force a full recompile of all templates during development:
+
+```sh
+docker compose exec -T app find view/compile -type f -delete
+```
+
+The cache is regenerated on the next page request. Smarty also recompiles automatically when a `.tpl` source file's mtime changes; the manual delete is only needed when the cache itself looks stale (e.g. after editing a Smarty plugin or config).
+
 ## Notes
 
 - The Apache document root is `htdocs/`.
