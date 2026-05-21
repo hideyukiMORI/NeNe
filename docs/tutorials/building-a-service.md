@@ -108,6 +108,99 @@ The dispatcher resolves `/page/about` to `PageController::aboutAction()`. `Contr
 
 For the full template, CSS, JavaScript, and auto-loading rules, see `docs/frontend/assets.md`.
 
+## Handle a Form POST
+
+A server-rendered page often needs to accept a form submission. NeNe does not provide a separate `actionPostAction()` convention for HTML form posts — the dispatcher resolves `POST /xxx/index` like this:
+
+1. If `indexPostRest` exists on the controller, the request is treated as a REST call (JSON in / JSON out, CSRF enforced).
+2. Otherwise, the request falls through to `indexAction`, regardless of HTTP method.
+
+For a normal HTML form, do not define `indexPostRest`. Let the dispatcher hand POST to `indexAction()`, and branch on `$this->method` inside the controller. Use `$this->request->getPost($key)` to read form fields, and `$this->location($uri)` to redirect after a successful write (the post/redirect/get pattern).
+
+Example goal:
+
+```text
+GET  /note/index   → list view
+POST /note/index   → create a note, redirect to detail
+GET  /note/new     → form view
+```
+
+Controller:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Nene\Controller;
+
+use Nene\Database;
+use Nene\Xion\ControllerBase;
+
+class NoteController extends ControllerBase
+{
+    protected function preAction(): void
+    {
+        $this->SESSION_CHECK = false; // public sandbox page
+    }
+
+    public function indexAction(): void
+    {
+        if ($this->method === 'POST') {
+            $this->handleCreate();
+            return;
+        }
+        $mapper = new Database\NoteMapper();
+        $this->setTitle('All notes');
+        $this->VIEW->setValues('t_notes', $mapper->findRows());
+    }
+
+    public function newAction(): void
+    {
+        $this->setTitle('New note');
+        $this->VIEW->setString('t_error', '');
+    }
+
+    private function handleCreate(): void
+    {
+        $title = trim((string)($this->request->getPost('title') ?? ''));
+        $body  = trim((string)($this->request->getPost('body')  ?? ''));
+        if ($title === '' || $body === '') {
+            // Re-render the form template with an error message. The
+            // auto-selected template for indexAction is note/index.tpl;
+            // setTemplate() switches to note/new.tpl for the re-render.
+            $this->VIEW
+                ->setString('t_error', 'Title and body are both required.')
+                ->setString('t_form_title', $title)
+                ->setString('t_form_body', $body)
+                ->setTemplate('note/new.tpl');
+            return;
+        }
+        $id = (new Database\NoteMapper())->create($title, $body);
+        $this->location('/note/item/id_' . $id);
+    }
+}
+```
+
+Form template (`view/source/note/new.tpl`):
+
+```smarty
+{extends file='layout/app.tpl'}
+{block name='content'}
+                <form method="post" action="{$t_root}note/index">
+                    {if strlen($t_error) > 0}<p class="error">{$t_error}</p>{/if}
+                    <label>Title <input name="title" value="{$t_form_title|default:''}"></label>
+                    <label>Body <textarea name="body">{$t_form_body|default:''}</textarea></label>
+                    <button type="submit">Save</button>
+                </form>
+{/block}
+```
+
+Two cautions worth knowing up front:
+
+- `actionAction()` is invoked for **any** HTTP method when no method-specific REST handler exists. If you write a `createAction()` reachable at `GET /note/create`, the action runs on GET too — guard with `$this->method !== 'POST'` before performing any side effect, or use the `indexAction` + internal dispatch shape shown above so write logic lives next to a 'POST' branch.
+- CSRF checking is only enforced by the framework for REST mode (`indexPostRest`, etc.) when the user is logged in. HTML actions reached as `actionAction` skip the framework's CSRF gate by design — if a form posts authenticated state-changing data, add your own CSRF check (typically a hidden token field + `$this->AUTH_SESSION->verifyCsrfToken(...)`).
+
 ## Add a REST Endpoint
 
 Use method-specific REST handlers for JSON endpoints. Avoid new `{action}Rest()` handlers unless a compatibility reason is documented, because they accept every HTTP method through the legacy fallback.
