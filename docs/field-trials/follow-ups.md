@@ -46,15 +46,8 @@ Source: `2026-05-field-trial-2.md`.
 - **Re-evaluation trigger**: Issue #145 (small-service reference implementation) lands and continues to skip `TransactionManager`, OR a trial uncovers a contributor who reached for an ad-hoc PDO transaction because the canonical pattern was not findable.
 - **ADR likely?**: No. The decision was already made (ADR-class behavior is in coding standards). This is a sample-implementation gap.
 
-### F-5 — OpenAPI per-error-code envelope boilerplate
-
-- **Status**: Escalated in FT3 (see `2026-05-field-trial-3.md`, finding F-1). FT3 added a third entity (`Memo`) and paid the per-code envelope boilerplate again, meeting the trigger documented below. Tracked from FT3 onward; remove this entry once the FT3-spawned Issue is resolved.
-- **Original friction (FT2)**: The existing TODO contract defines a separate envelope schema per error code (`TodoNotFoundEnvelope`, `TodoIdRequiredEnvelope`, `TodoTitleRequiredEnvelope`, ...). Adding two new entities in FT2 would have required seven additional per-code envelopes; FT2 used a single generic `ApiFailureEnvelope` instead to keep the trial in scope.
-- **Original decision (FT2)**: `defer` (FT2 made an executive call locally; long-term shape was undecided).
-- **Original re-evaluation trigger**: a third entity gets added to the OpenAPI contract and the decision repeats, OR a contributor proposes a generic envelope migration for the existing per-code schemas. **Trigger fired in FT3.**
-- **ADR likely?**: Yes. FT3 requests an ADR decision on canonical envelope shape.
-
 ## Notes
 
+- FT2 F-5 (OpenAPI per-error-code envelope boilerplate) was escalated in FT3 and resolved by PR #256, which adopted a single generic `ApiFailureEnvelope` per ADR 0003. The entry has been removed from this file.
 - `legacy-preserved` findings (FT2 F-3 — URL parameter `key_value` format) were closed in PR #241 via documentation, not deferred, so they do not appear here. The `legacy-preserved` kind itself does not imply deferral; it means the fix is documentation rather than redesign.
 - The longer this file becomes without entries getting escalated or removed, the more it suggests that NeNe's friction surface is stable. The shorter it stays, the more it suggests every trial is actionable.
