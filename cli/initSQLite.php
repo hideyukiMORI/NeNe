@@ -23,17 +23,33 @@ ini_set('display_errors', '1');
 error_reporting(E_ALL);
 date_default_timezone_set('Asia/Tokyo');
 
+$options = getopt('', ['yes', 'help']) ?: [];
+if (isset($options['help'])) {
+    echo <<<'TEXT'
+Usage:
+  php cli/initSQLite.php [--yes] [--help]
+
+Options:
+  --yes   Run without the confirmation prompt.
+  --help  Show this help.
+
+TEXT;
+    return 0;
+}
+
 Initialize::init();
 
 echo 'Welcome NeNe-PHP CLI!' . PHP_EOL . PHP_EOL;
 echo 'This command initializes the SQLite database used by the fallback sample runtime.' . PHP_EOL;
 echo 'Target file: ' . DB_DIR . DB_FILE . PHP_EOL . PHP_EOL;
-echo 'Do you want to initialize SQLite? (Y/N)' . PHP_EOL;
 
-$answer = trim((string)fgets(STDIN));
-if (!in_array(strtolower($answer), ['y', 'yes'], true)) {
-    echo 'OK. Bye!' . PHP_EOL;
-    return 0;
+if (!isset($options['yes'])) {
+    echo 'Do you want to initialize SQLite? (Y/N)' . PHP_EOL;
+    $answer = trim((string)fgets(STDIN));
+    if (!in_array(strtolower($answer), ['y', 'yes'], true)) {
+        echo 'OK. Bye!' . PHP_EOL;
+        return 0;
+    }
 }
 
 try {
