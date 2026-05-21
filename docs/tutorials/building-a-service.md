@@ -614,6 +614,115 @@ For state-changing REST endpoints:
 
 External clients (curl, fetch, custom SDK) also need to manage the `PHPSESSID` cookie returned by login. [`docs/api/reference-client.md`](../api/reference-client.md) covers the full mechanics with runnable examples.
 
+### Add an HTML Login Form
+
+The bundled `SessionController` is REST-only — it handles `POST /session/login` as JSON in / JSON out. For a server-rendered application with a user-facing login page, create your own controller with HTML actions and reuse the framework's `AuthSession` directly. The `login()` accepts the row returned by `UserMapper::findByCredentials($userId, $userPass)`, so the controller stays short:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Nene\Controller;
+
+use Nene\Database;
+use Nene\Xion\ControllerBase;
+
+class AuthController extends ControllerBase
+{
+    protected function preAction(): void
+    {
+        $this->SESSION_CHECK = false; // the login page must be reachable while unauthenticated
+    }
+
+    public function loginAction(): void
+    {
+        if ($this->method === 'POST') {
+            $this->handleLoginPost();
+            return;
+        }
+        $this->setTitle('Sign in');
+        $this->VIEW
+            ->setString('t_error', '')
+            ->setString('t_form_user_id', '');
+    }
+
+    public function logoutAction(): void
+    {
+        if ($this->method !== 'POST') {
+            // Defense: a side-effect action should never run on GET.
+            $this->location('/auth/login');
+            return;
+        }
+        if (!$this->verifyCsrfFromPost()) {
+            http_response_code(403);
+            $this->VIEW
+                ->setString('t_detail', 'CSRF token check failed. Reload the page and try again.')
+                ->setTemplate('error/forbidden.tpl');
+            return;
+        }
+        $this->AUTH_SESSION->logout(true);
+        $this->location('/auth/login');
+    }
+
+    private function handleLoginPost(): void
+    {
+        $userId = trim((string)($this->request->getPost('user_id') ?? ''));
+        $userPass = (string)($this->request->getPost('user_pass') ?? '');
+        if ($userId === '' || $userPass === '') {
+            $this->renderLoginError($userId, 'Enter both user id and password.');
+            return;
+        }
+        $user = (new Database\UserMapper())->findByCredentials($userId, $userPass);
+        if ($user === null) {
+            $this->renderLoginError($userId, 'Wrong user id or password.');
+            return;
+        }
+        $this->AUTH_SESSION->login($user);
+        $this->location('/dashboard');
+    }
+
+    private function renderLoginError(string $userId, string $error): void
+    {
+        $this->setTitle('Sign in');
+        $this->VIEW
+            ->setString('t_error', $error)
+            ->setString('t_form_user_id', $userId)
+            ->setTemplate('auth/login.tpl');
+    }
+}
+```
+
+A few framework boundaries are worth pointing out:
+
+- `$this->SESSION_CHECK = false` in `preAction()` keeps the login page itself unauthenticated. Without it, `sessionCheck()` would redirect anonymous visitors away from the login form they need to fill in.
+- The login handler does **not** verify a CSRF token — the user has no session yet, so there is nothing to bind a token to. Logout and any subsequent protected forms do require CSRF; see "Protect an Authenticated Form" above.
+- `$this->AUTH_SESSION->login($user)` calls `session_regenerate_id(true)` internally. Browsers handle the two `Set-Cookie: PHPSESSID=...` headers correctly; hand-written clients should follow [`docs/api/reference-client.md`](../api/reference-client.md).
+- After login, redirect to a protected page (`/dashboard` here) via `$this->location()`. The framework's `sessionCheck()` will redirect unauthenticated visitors to `LOGOUT_URI` (set `NENE_LOGOUT_URI=/auth/login` so they land on this form, or override `unauthorizedRedirect()` per controller).
+
+Matching login form template (`view/source/auth/login.tpl`):
+
+```smarty
+{extends file='layout/app.tpl'}
+{block name='content'}
+                <form method="post" action="{$t_root}auth/login">
+                    {if strlen($t_error) > 0}<p class="error">{$t_error}</p>{/if}
+                    <label>User ID <input name="user_id" value="{$t_form_user_id|default:''}" autocomplete="username" required></label>
+                    <label>Password <input type="password" name="user_pass" autocomplete="current-password" required></label>
+                    <button type="submit">Sign in</button>
+                </form>
+{/block}
+```
+
+A logout button on a protected page is just a one-line form that posts the CSRF token to `logoutAction()`:
+
+```smarty
+<form method="post" action="{$t_root}auth/logout" style="display:inline">
+    <input type="hidden" name="csrf_token" value="{$t_csrf_token}">
+    <button type="submit">Sign out</button>
+</form>
+```
+
 ## Update OpenAPI
 
 Every public REST endpoint should be described in:
