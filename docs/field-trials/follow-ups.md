@@ -46,6 +46,17 @@ Source: `2026-05-field-trial-2.md`.
 - **Re-evaluation trigger**: Issue #145 (small-service reference implementation) lands and continues to skip `TransactionManager`, OR a trial uncovers a contributor who reached for an ad-hoc PDO transaction because the canonical pattern was not findable.
 - **ADR likely?**: No. The decision was already made (ADR-class behavior is in coding standards). This is a sample-implementation gap.
 
+## From FT4 (2026-05-21)
+
+Source: `2026-05-field-trial-4.md`.
+
+### F-8 — `Initialize::init()` required when HTTP tests touch framework classes directly
+
+- **Friction**: `tests/Http/NoteHtmlTest.php` cleanup helper wanted `\Nene\Xion\PdoConnection::getInstance()->exec(...)`. The call failed with `Undefined constant "Nene\Xion\DB_TYPE"` until `\Nene\Xion\Initialize::init()` was called in `setUp()`. Existing HTTP tests do not touch framework classes directly (they go through curl-style HTTP), so the requirement was not previously surfaced.
+- **Decision in FT4**: `defer` (workaround applied inside the trial — explicit `init()` call in `setUp()`).
+- **Re-evaluation trigger**: a future trial again needs to touch framework classes from within an HTTP test (cleanup helper, fixture setup, schema introspection, etc.) and re-discovers the requirement, OR `docs/development/testing.md` is rewritten and the gap can be closed there. Once confirmed as a recurring pattern, add a short "HTTP tests that need framework classes" subsection.
+- **ADR likely?**: No. This is documentation, not architecture.
+
 ## Notes
 
 - FT2 F-5 (OpenAPI per-error-code envelope boilerplate) was escalated in FT3 and resolved by PR #256, which adopted a single generic `ApiFailureEnvelope` per ADR 0003. The entry has been removed from this file.
