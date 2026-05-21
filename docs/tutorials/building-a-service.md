@@ -106,6 +106,8 @@ The same three patterns apply to `htdocs/js/...` for JavaScript. Files are emitt
 
 The dispatcher resolves `/page/about` to `PageController::aboutAction()`. `ControllerBase` automatically chooses `view/source/page/about.tpl` when it exists.
 
+URL controller segments must be a **single lowercase word** (`page`, `note`, `bookmark`), not kebab-case (`private-note`, `bookmark-tag`). The dispatcher forms the class name via `ucfirst(strtolower($controller)) . 'Controller'`, and PHP class names cannot contain hyphens. Multi-word concepts should be joined: `/privatenote/index` → `PrivatenoteController::indexAction()`, not `/private-note/index`. Action segments follow the same rule.
+
 For the full template, CSS, JavaScript, and auto-loading rules, see `docs/frontend/assets.md`.
 
 ## Handle a Form POST
