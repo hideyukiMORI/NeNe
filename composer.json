@@ -45,6 +45,7 @@
         "symfony/yaml": "^6.4"
     },
     "scripts": {
+        "setup": "@php cli/setupDatabase.php --env=.env --yes",
         "test": "phpunit --testsuite unit",
         "test:http": [
             "@php tools/test-http-preflight.php",
