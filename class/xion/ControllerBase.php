@@ -390,7 +390,7 @@ abstract class ControllerBase
     final protected function location(string $uri, bool $flag = true): never
     {
         if ($flag) {
-            $uri = URI_ROOT . $uri;
+            $uri = rtrim(URI_ROOT, '/') . '/' . ltrim($uri, '/');
         }
         throw new Xion\HttpTermination(Xion\HttpResponse::redirect($uri));
     }
