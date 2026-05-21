@@ -457,6 +457,8 @@ For state-changing REST endpoints:
 2. Read `Data.csrfToken`.
 3. Send `X-CSRF-Token` with `POST`, `PUT`, `PATCH`, or `DELETE`.
 
+External clients (curl, fetch, custom SDK) also need to manage the `PHPSESSID` cookie returned by login. [`docs/api/reference-client.md`](../api/reference-client.md) covers the full mechanics with runnable examples.
+
 ## Update OpenAPI
 
 Every public REST endpoint should be described in:
