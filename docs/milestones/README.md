@@ -84,6 +84,8 @@ Current status: `v0.1.0` is the first planned tag. It represents the point where
 
 ### reviewable-small-service-delivery
 
+Status: substantially complete as of 2026-05-21.
+
 Goal: make NeNe a small PHP framework that lowers code review cost by keeping human-written and AI-assisted small-service changes in the same visible implementation shape.
 
 Context: NeNe's next phase should build on the renovated legacy foundation. The framework should not grow into a large full-stack platform, and it does not need a broad redesign just to become "AI-readable." It already has visible `/{controller}/{action}` flow, predictable controller and REST method names, a small codebase, Docker setup, OpenAPI, tests, security defaults, and self-review checklists. The next step is to make those strengths reduce real review friction: a reviewer should quickly know where to inspect HTTP input, business rules, SQL, API contracts, and tests.
@@ -117,11 +119,38 @@ Completion criteria:
 - A first service can be built by following docs from page/controller through Service/use-case, REST endpoint, database access, OpenAPI, and tests.
 - #163 defines the review-cost-reduction framing for Phase 6.
 - #164 updates the public entry message around reviewable small-service delivery.
-- #165 and #145 define a concrete reference implementation for the expected Controller, Service, Mapper, OpenAPI, and test workflow.
+- ~~#165 and #145 define a concrete reference implementation~~ — both closed 2026-05-21; the FT3–FT6 trial-driven PRs, the tutorial extensions added during those trials, and the `docs/review/` self-review checklists (PR #291) deliver the same value through smaller reviewable changes.
 - #167 explains how stable conventions reduce review load caused by highly variable implementation styles.
 - Local Docker setup remains simple, including app, MySQL, phpMyAdmin, Swagger UI, and test commands.
 - Production-facing docs continue to warn about secrets, debug output, local Docker credentials, phpMyAdmin exposure, and database initialization.
 - New examples do not introduce hidden routing, heavy ORM behavior, or broad framework abstractions.
+
+Additional artifacts that consolidate this milestone:
+
+- ADR 0003 (canonical OpenAPI failure envelope shape).
+- ADR 0004 (`ControllerBase::unauthorizedRedirect()` hook for per-controller redirect targets).
+- `docs/review/` self-review checklists: REST controller, HTML controller, database, OpenAPI contract, docs/ADR, release/CI, field-trial report (PR #291, adapted from NENE2's pattern).
+- `docs/tutorials/building-a-service.md` now covers HTML form POST handling, Protect an Authenticated Form, HTML login form, asset auto-discovery convention, and URL controller naming, in addition to the original REST flow.
+- `docs/development/cli.md` (new) declares `cli/setupDatabase.php` as the canonical installer and `cli/initSQLite.php` as the legacy alternative.
+
+### field-trials-loop
+
+Status: continuous, running since 2026-05-20.
+
+Goal: keep external usability evidence-driven by running fresh-clone field trials (`tools/nene-ft-new.sh {topic}`) on different surfaces and closing every spawned Issue before the next trial starts.
+
+Context: methodology is documented in ADR 0002 and `docs/field-trials/README.md`. The loop is described as a continuous quality gate rather than a one-off project, so it lives as a rolling milestone instead of a closeable goal.
+
+Completion criteria:
+
+- The loop is **never** marked complete; it is alive as long as NeNe is maintained.
+- Each trial produces a report under `docs/field-trials/YYYY-MM-field-trial-{N}.md` from `docs/templates/field-trial-report.md`.
+- Each non-deferred finding is filed as a focused GitHub Issue with the `field-trial` label and closed by a merged PR before the next trial starts.
+- Deferred findings live in `docs/field-trials/follow-ups.md` with an explicit re-evaluation trigger.
+
+Completed trials (2026-05-20 → 2026-05-21): FT1, FT2, FT3, FT4, FT5, FT6.
+
+Linked Issues: every Issue carrying the `field-trial` label.
 
 ## Maintenance Rule
 

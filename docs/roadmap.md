@@ -137,7 +137,14 @@ Future candidates:
 
 ## 6. Reviewable Small-Service Delivery
 
-Status: next phase.
+Status: substantially complete as of 2026-05-21. The phase's principles are now reinforced by the field-trial loop (Phase 7) plus four trial-driven artifacts:
+
+- ADR 0003 (canonical OpenAPI failure envelope shape) keeps API contracts uniform across endpoints.
+- ADR 0004 (`ControllerBase::unauthorizedRedirect()` hook) keeps auth-redirect behavior overridable per controller without breaking the dispatch invariant.
+- `docs/review/` self-review checklists (REST controller, HTML controller, database, OpenAPI contract, docs/ADR, release/CI, field-trial report) document the standard shape humans and AI agents should produce.
+- The tutorial `docs/tutorials/building-a-service.md` now covers HTML form POST, Protect an Authenticated Form, HTML login form, asset auto-discovery, URL controller naming, OpenAPI integration — the previously missing reference flows.
+
+The two "reference implementation" Issues that originally framed this phase (#145, #165) were closed on 2026-05-21 because the trial-driven work delivers the same value through smaller, reviewable PRs.
 
 Goal:
 
@@ -167,18 +174,19 @@ Completed:
 - #163: Reframed the next phase around reducing code review cost through consistent implementation conventions.
 - #164: Updated the public entry to present NeNe as a reviewable small-service PHP framework.
 - #167: Added the review-cost angle around modern pattern learning and implementation-style variance.
+- #145, #165 (closed 2026-05-21): the AI-assisted reference implementation and the reviewable Controller-Service-Mapper proof are delivered through the FT3–FT6 trial-driven PRs, tutorial extensions, and `docs/review/` checklists rather than a single dedicated reference-implementation Issue.
+- ADR 0003 — canonical OpenAPI failure envelope shape.
+- ADR 0004 — `ControllerBase::unauthorizedRedirect()` hook.
+- #271: imported NENE2's `docs/review/` self-review checklist shape, adapted to NeNe's surfaces.
 
 Future candidates:
 
-- #165: Use the reference implementation to prove the reviewable Controller-Service-Mapper shape.
-- #145: Add a small-service reference implementation that shows the expected shape of page, REST endpoint, service/use-case, mapper, OpenAPI, and test changes.
-- Make the first-service tutorial even more repeatable from clone to local verification.
 - Improve comments and PHPDoc only where they help readers understand framework boundaries.
-- Add lightweight checklists for small-service delivery readiness, including environment, database, OpenAPI, tests, and production safety notes.
+- Promote the project (#178 / #179 / #180) once the Phase 6 conventions are stable enough to demo externally.
 
 ## 7. Field Trials
 
-Status: methodology adopted; FT1 + FT2 complete; FT3 starting.
+Status: methodology adopted (ADR 0002). FT1–FT6 complete as of 2026-05-21.
 
 Goal:
 
@@ -201,10 +209,22 @@ Methodology and templates:
 
 Completed:
 
-- **FT1** — baseline trial from `ft1-bookmarklog`. The intended scope was a Bookmark+Tag CRUD service, but the baseline phase produced enough findings to fill the trial. Outcomes: a 1-line `main` hotfix (PR #223 closing a PHP fatal in `PdoConnection::__destruct()`), a new CI HTTP runtime smoke job (#230), three small UX and docs improvements (#228, #229, #231). Report: `docs/field-trials/2026-05-field-trial-1.md`.
-- **FT2** — Bookmark + Tag M:N CRUD trial from `ft2-bookmark-tag`. Two-entity REST service with transactional relation diff against the clean post-FT1 baseline. 7 findings; 4 filed as Issues for follow-up (TransactionManager domain-error path, URL parameter convention docs, junction-table guidance, schema parity note). Report: `docs/field-trials/2026-05-field-trial-2.md`.
+- **FT1** — baseline trial from `ft1-bookmarklog`. The intended scope was Bookmark+Tag CRUD, but the baseline phase produced enough findings to fill the trial. Outcomes: a 1-line `main` hotfix (PR #223 closing a PHP fatal in `PdoConnection::__destruct()`), a new CI HTTP runtime smoke job (#230), and three small UX / docs improvements (#228, #229, #231). Report: `docs/field-trials/2026-05-field-trial-1.md`.
+- **FT2** — Bookmark + Tag M:N CRUD from `ft2-bookmark-tag`. 7 findings; 4 filed as Issues (TransactionManager domain-error path, URL parameter convention docs, junction-table guidance, schema parity note). FT2 F-5 was later escalated in FT3 and resolved via ADR-0003. Report: `docs/field-trials/2026-05-field-trial-2.md`.
+- **FT3** — auth + CSRF REST trial from `ft3-authlog`. 6 findings; ADR-0003 (canonical OpenAPI failure envelope shape) born from F-1 (escalation of FT2 F-5). Report: `docs/field-trials/2026-05-field-trial-3.md`.
+- **FT4** — server-rendered HTML trial from `ft4-smarty-html`. 9 findings covering Smarty escape behavior, asset auto-discovery convention, HTML form POST handling, compile cache hygiene, and a small `location()` URI fix. Report: `docs/field-trials/2026-05-field-trial-4.md`.
+- **FT5** — auth × HTML cross trial from `ft5-protected-notes`. 10 findings; ADR-0004 (`ControllerBase::unauthorizedRedirect()` hook) born. The CI workflow's `Wait for /health` step was hardened to require `healthStatus=ok` with a 120s budget after a debugging mis-diagnosis. Report: `docs/field-trials/2026-05-field-trial-5.md`.
+- **FT6** — CLI installer trial from `ft6-cli-tooling` (first CLI-only trial). 7 findings; `composer setup` shortcut, `cli/setupDatabase.php` `--env=PATH` strict mode, `cli/initSQLite.php` `--yes` / `--help`, schema 3-way parity documentation, new `docs/development/cli.md` declaring `setupDatabase.php` canonical and `initSQLite.php` legacy. Report: `docs/field-trials/2026-05-field-trial-6.md`.
+
+Infrastructure landed alongside the trials:
+
+- `tools/nene-ft-new.sh` one-shot clone bootstrap (port offset, `.claude/settings.local.json`, `.claude/CLAUDE.md`, `FT{N}-PLAN.md` skeleton, sanity check that blocks accidental clone-cwd invocation).
+- `field-trial` GitHub label applied retroactively to historical trial-related Issues.
+- `main` branch protection with required status checks; the FT3–FT6 follow-up loops merged via `gh pr merge --auto`.
+- `docs/review/field-trial-report.md` self-review checklist referenced by the methodology.
+- `docs/field-trials/follow-ups.md` rules for deferred findings, with FT2 F-5 escalated and removed during FT3.
 
 Future candidates:
 
-- FT3 (after FT2 follow-up Issues close): a different surface — candidates are session/CSRF flow, Smarty rendering, OpenAPI workflow polish, or deployment.
-- Subsequent trials should each target a different surface rather than retesting the same paths.
+- **FT7+** — remaining FT-untouched surfaces: error pages (404 / 500 templates and the `htdocs/index.php` catch-all), production-mode deployment probe (`NENE_APP_ENV=production` + secure cookie + log rotation behavior), Smarty custom plugin authoring (`view/plugins/`), OpenAPI authoring workflow round-trip, schema source-of-truth consolidation (ADR-class, triggered when a future trial actually trips on the three-site drift surfaced by FT6 F-2).
+- Subsequent trials should each target a different surface rather than retesting paths already exercised by FT1–FT6.
