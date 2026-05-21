@@ -70,6 +70,14 @@ Use another phpMyAdmin port if needed:
 NENE_PHPMYADMIN_PORT=8083 docker compose up --build
 ```
 
+Override the unauthenticated redirect target if your app has a custom login page:
+
+```sh
+NENE_LOGOUT_URI=/auth/login docker compose up --build
+```
+
+`LOGOUT_URI` is used by `ControllerBase::sessionCheck()` when an unauthenticated visitor hits an HTML page that requires login. The default `/` sends them to the site root; set this to your login URL (e.g. `/auth/login`) so they land on a useful page instead of the index splash.
+
 ## Session Cookie Settings
 
 The app explicitly configures PHP session Cookie attributes before `session_start()`:
