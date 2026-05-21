@@ -30,13 +30,15 @@ Then create the sample database tables. For MySQL, use the general setup command
 php cli/setupDatabase.php --env=.env --yes
 ```
 
-For SQLite3 fallback, initialize the SQLite file explicitly:
+For SQLite3 fallback, the same canonical installer works once `NENE_DB_TYPE=SQLite3` is in your `.env`:
 
 ```sh
-php cli/initSQLite.php
+php cli/setupDatabase.php --env=.env --yes
 ```
 
-Both commands are safe to run more than once. They create the current sample `users` and `todos` tables when missing and insert the default `admin` sample user only when that user does not already exist.
+The legacy `cli/initSQLite.php` script remains available for older deployment scripts (see `docs/development/cli.md`).
+
+The setup command is idempotent: it creates the current sample `users` and `todos` tables when missing and inserts the default `admin` sample user only when that user does not already exist.
 
 ## Requirements
 
@@ -213,23 +215,25 @@ The browser health endpoint returns the same idea through the NeNe JSON envelope
 
 When no database environment variables are provided, NeNe can fall back to SQLite-oriented defaults.
 
-When you intentionally use `NENE_DB_TYPE=SQLite3`, initialize the SQLite sample data from the repository root:
-
-```sh
-php cli/initSQLite.php
-```
-
-This creates the SQLite database file under `data/`, creates the `users` and `todos` tables, and inserts the default `admin` sample user. You can also use the general setup command with an env file that sets `NENE_DB_TYPE=SQLite3`:
+For the SQLite case, use the same canonical installer as MySQL with `NENE_DB_TYPE=SQLite3` in your env file:
 
 ```sh
 php cli/setupDatabase.php --env=.env --yes
 ```
 
-The SQLite database file is a generated runtime artifact and is not committed to Git. If the sample login stops matching the expected `admin / admin` credentials, move the old file aside and initialize it again:
+This creates the SQLite database file under `data/`, creates the `users` and `todos` tables, and inserts the default `admin` sample user. It is idempotent — re-running it is safe.
+
+`cli/initSQLite.php` is the older SQLite-only path that predates the general installer. It is kept for backwards compatibility, but new deployment guides should prefer `cli/setupDatabase.php` (see `docs/development/cli.md` for the canonical vs legacy split). If you do use the legacy path:
+
+```sh
+php cli/initSQLite.php --yes
+```
+
+The SQLite database file is a generated runtime artifact and is not committed to Git. If the sample login stops matching the expected `admin / admin` credentials, move the old file aside and re-install:
 
 ```sh
 mv data/nene.db data/nene.db.bak
-php cli/initSQLite.php
+php cli/setupDatabase.php --env=.env --yes
 ```
 
 SQLite is useful for a very small sample deployment or quick hosting verification. MySQL is recommended once the application stores real service data.
