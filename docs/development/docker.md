@@ -175,12 +175,13 @@ NENE_DB_TYPE=SQLite3 NENE_DB_FILE=nene.db docker compose up --build app
 
 ## Schema Parity Between SQLite and MySQL
 
-NeNe initializes two separate development databases through two separate scripts:
+NeNe initializes the sample database through **three** independent code paths:
 
-- `cli/initSQLite.php` — PHP code that creates SQLite tables and `updated_at` triggers when the SQLite3 fallback is used.
 - `docker/mysql/init/001_schema.sql` — declarative SQL applied by the MySQL container on first boot under Docker Compose.
+- `cli/initSQLite.php` — legacy PHP CLI that creates SQLite tables and `updated_at` triggers. Maintained for backwards compatibility; new deployment guides should prefer `cli/setupDatabase.php`.
+- `class/xion/DatabaseInstaller.php` — the generic installer invoked by `cli/setupDatabase.php`. Holds inline CREATE TABLE statements for both MySQL and SQLite paths. This is the canonical installation path.
 
-These files **do not share a source of truth**. Nothing in CI enforces parity between them. When a contributor adds or alters a table, both files must be edited in the same change, and both runtimes must be verified locally.
+These three sites **do not share a source of truth**. Nothing in CI enforces parity. When a contributor adds or alters a table, **all three** must be edited in the same change, and both runtimes verified locally.
 
 When in doubt about whether the two paths agree, compare the table sets:
 
