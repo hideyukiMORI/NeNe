@@ -142,6 +142,23 @@ cat > .claude/settings.local.json <<'EOF'
 }
 EOF
 
+echo "==> Writing .claude/CLAUDE.md (FT-specific notes for Claude Code sessions)"
+cat > .claude/CLAUDE.md <<EOF
+# FT${N} — ${TOPIC}
+
+Field trial clone. Original framework: \`${FRAMEWORK_ROOT}\`.
+
+- NeNe ref: \`${HEAD_SHA}\` (at clone time)
+- Host ports: app=${PORT_APP}, mysql=${PORT_MYSQL} (not the framework defaults 8080/3307)
+- HTTP tests: \`NENE_HTTP_BASE_URL=http://127.0.0.1:${PORT_APP} composer test:http\`
+- Trial Issue: (fill in after \`gh issue create\`)
+- Final report path (filed from framework branch, not from here): \`${FRAMEWORK_ROOT}/docs/field-trials/$(date +%Y-%m)-field-trial-${N}.md\`
+
+## Loop methodology
+
+See \`${FRAMEWORK_ROOT}/docs/field-trials/README.md\`. Nothing in this clone gets committed back to the framework except the final report (filed from a framework branch). Working notes live in \`FT${N}-PLAN.md\` here.
+EOF
+
 echo "==> Writing FT${N}-PLAN.md skeleton"
 cat > "FT${N}-PLAN.md" <<EOF
 # FT${N} — ${TOPIC}: Plan
