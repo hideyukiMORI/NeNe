@@ -54,6 +54,36 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FRAMEWORK_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Sanity check: the script must run from the NeNe framework repo, not from a
+# trial clone copy. Trial clones also contain tools/nene-ft-new.sh (since they
+# are git clones of the framework), so running the script via its in-clone path
+# would silently compute FRAMEWORK_ROOT as the clone — and FT_ROOT below would
+# point at a nonexistent nested dir.
+#
+# Two checks: the marker files must exist (catches non-framework dirs), and
+# FRAMEWORK_ROOT must not be located under a `NeNe-FT/` parent (catches the
+# trial-clone case, since trial clones contain the same marker files).
+case "$FRAMEWORK_ROOT" in
+    */NeNe-FT/*)
+        echo "ERROR: this script appears to run from inside a trial clone." >&2
+        echo "       FRAMEWORK_ROOT resolved to: $FRAMEWORK_ROOT" >&2
+        echo "       Trial clones are git clones of the framework and contain a copy of" >&2
+        echo "       this script, but running it from there would create nested wrong dirs." >&2
+        echo "       Hint: cd /path/to/NeNe && tools/nene-ft-new.sh $*" >&2
+        exit 1
+        ;;
+esac
+if [ ! -f "$FRAMEWORK_ROOT/class/xion/ControllerBase.php" ] \
+    || [ ! -d "$FRAMEWORK_ROOT/docs/field-trials" ]; then
+    echo "ERROR: this script must run from the NeNe framework repo." >&2
+    echo "       FRAMEWORK_ROOT resolved to: $FRAMEWORK_ROOT" >&2
+    echo "       Expected marker files were not found:" >&2
+    [ ! -f "$FRAMEWORK_ROOT/class/xion/ControllerBase.php" ] && echo "         - $FRAMEWORK_ROOT/class/xion/ControllerBase.php" >&2
+    [ ! -d "$FRAMEWORK_ROOT/docs/field-trials" ] && echo "         - $FRAMEWORK_ROOT/docs/field-trials/" >&2
+    exit 1
+fi
+
 FT_ROOT="${NENE_FT_ROOT:-$FRAMEWORK_ROOT/../NeNe-FT}"
 
 mkdir -p "$FT_ROOT"
