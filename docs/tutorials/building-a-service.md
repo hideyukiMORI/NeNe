@@ -94,12 +94,15 @@ view/source/page/about.tpl
 {/block}
 ```
 
-Optional page assets are discovered by convention:
+Optional page assets are discovered by convention. `ControllerBase::setCSS()` and `setJS()` check three locations in order — drop a file at any of them and it is auto-linked into the page without explicit registration:
 
-```text
-htdocs/css/page/about.css
-htdocs/js/page/about.js
-```
+| Path | Loaded for |
+| --- | --- |
+| `htdocs/css/{controller}.css` | every action of `{controller}` |
+| `htdocs/css/{controller}/common.css` | every action of `{controller}` |
+| `htdocs/css/{controller}/{action}.css` | only that one action |
+
+The same three patterns apply to `htdocs/js/...` for JavaScript. Files are emitted into the layout's `{foreach $t_css}` / `{foreach $t_js}` blocks with a cache-busting query string. Manual `addCSS()` / `addJS()` calls on `$this->VIEW` remain available when you need a CDN URL or a file outside the convention.
 
 The dispatcher resolves `/page/about` to `PageController::aboutAction()`. `ControllerBase` automatically chooses `view/source/page/about.tpl` when it exists.
 
