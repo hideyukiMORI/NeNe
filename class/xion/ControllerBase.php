@@ -394,6 +394,47 @@ abstract class ControllerBase
     }
 
     /**
+     * Return the current session's CSRF token for embedding in an HTML form.
+     *
+     * Use this in an HTML action to pass the token to the template:
+     *
+     *     $this->VIEW->setString('t_csrf_token', $this->csrfToken());
+     *
+     * In REST controllers, the token is automatically verified against the
+     * `X-CSRF-Token` header by the framework dispatcher; HTML actions must
+     * embed it in a hidden field and call {@see verifyCsrfFromPost()}.
+     *
+     * @return string Session CSRF token.
+     */
+    final protected function csrfToken(): string
+    {
+        return $this->AUTH_SESSION->csrfToken();
+    }
+
+    /**
+     * Verify the CSRF token submitted via a POST form field.
+     *
+     * Pairs with {@see csrfToken()}: the template emits the token as a hidden
+     * input, and the handler calls this method before performing any
+     * state-changing work.
+     *
+     *     if (!$this->verifyCsrfFromPost()) {
+     *         http_response_code(403);
+     *         // render an error template
+     *         return;
+     *     }
+     *
+     * @param string $field POST field name carrying the token (default `csrf_token`).
+     *
+     * @return boolean Whether the submitted token matched the session token.
+     */
+    final protected function verifyCsrfFromPost(string $field = 'csrf_token'): bool
+    {
+        $token = (string)($this->request->getPost($field) ?? '');
+        return $this->AUTH_SESSION->verifyCsrfToken($token);
+    }
+
+    /**
      * Move URL.
      *
      * Moves to the specified URL.

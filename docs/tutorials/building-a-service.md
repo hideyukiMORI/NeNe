@@ -201,7 +201,64 @@ Form template (`view/source/note/new.tpl`):
 Two cautions worth knowing up front:
 
 - `actionAction()` is invoked for **any** HTTP method when no method-specific REST handler exists. If you write a `createAction()` reachable at `GET /note/create`, the action runs on GET too — guard with `$this->method !== 'POST'` before performing any side effect, or use the `indexAction` + internal dispatch shape shown above so write logic lives next to a 'POST' branch.
-- CSRF checking is only enforced by the framework for REST mode (`indexPostRest`, etc.) when the user is logged in. HTML actions reached as `actionAction` skip the framework's CSRF gate by design — if a form posts authenticated state-changing data, add your own CSRF check (typically a hidden token field + `$this->AUTH_SESSION->verifyCsrfToken(...)`).
+- CSRF checking is only enforced by the framework for REST mode (`indexPostRest`, etc.) when the user is logged in. HTML actions reached as `actionAction` skip the framework's CSRF gate by design — for authenticated state-changing forms see "Protect an Authenticated Form" below.
+
+## Protect an Authenticated Form
+
+When a server-rendered form submits state-changing data behind a login (creating a note, updating an account, posting a comment), you need an explicit CSRF check. The framework provides two helpers on `ControllerBase` so the controller side is one line each:
+
+| Helper | Use in | What it does |
+| --- | --- | --- |
+| `$this->csrfToken()` | controller (GET form action) | returns the session's CSRF token to embed in a hidden field |
+| `$this->verifyCsrfFromPost()` | controller (POST handler) | reads `csrf_token` from `$_POST` and verifies it against the session token |
+
+Skeleton:
+
+```php
+class PrivateNoteController extends ControllerBase
+{
+    public function newAction(): void
+    {
+        $this->setTitle('New note');
+        $this->VIEW->setString('t_csrf_token', $this->csrfToken());
+    }
+
+    public function indexAction(): void
+    {
+        if ($this->method === 'POST') {
+            if (!$this->verifyCsrfFromPost()) {
+                http_response_code(403);
+                $this->VIEW
+                    ->setString('t_detail', 'CSRF token check failed. Reload the form and try again.')
+                    ->setTemplate('error/forbidden.tpl');
+                return;
+            }
+            // ... do the protected write, then redirect ...
+            return;
+        }
+        // ... GET: render the list, including a fresh csrf_token for any inline form ...
+        $this->VIEW->setString('t_csrf_token', $this->csrfToken());
+    }
+}
+```
+
+Form template emits the hidden field:
+
+```smarty
+<form method="post" action="{$t_root}privatenote/index">
+    <input type="hidden" name="csrf_token" value="{$t_csrf_token}">
+    <label>Title <input name="title"></label>
+    <label>Body <textarea name="body"></textarea></label>
+    <button type="submit">Save</button>
+</form>
+```
+
+The default field name is `csrf_token`. To use a different name, pass it to both sides: `$this->verifyCsrfFromPost('my_token')` and `<input type="hidden" name="my_token" value="...">`.
+
+Two notes:
+
+- The session token comes from `AuthSession::csrfToken()`. It is created at login and remains stable for the lifetime of the session, so the same `csrfToken()` value works across all forms in the same login. After logout (or session expiry) the token is regenerated on the next login and old hidden fields stop validating — surface that as a `403` and let the user reload.
+- The helpers do not change REST behavior. REST handlers (`indexPostRest` etc.) still go through the automatic framework gate that validates the `X-CSRF-Token` header.
 
 ## Add a REST Endpoint
 
