@@ -8,10 +8,11 @@ NeNe development is Issue driven. Every meaningful code, documentation, dependen
 2. Create a branch from `main`.
 3. Make a focused change.
 4. Run the relevant checks.
-5. Commit with the repository commit convention.
-6. Push and open a pull request.
-7. Merge after review or verification.
-8. Keep the Issue, milestone, TODO, roadmap, and ADRs aligned.
+5. Walk the self-review checklists in `docs/review/` that match the scope of the PR (see [`docs/review/README.md`](review/README.md) for the mapping).
+6. Commit with the repository commit convention.
+7. Push and open a pull request.
+8. Merge after review or verification.
+9. Keep the Issue, milestone, TODO, roadmap, and ADRs aligned.
 
 ## Branch Names
 

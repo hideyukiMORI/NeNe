@@ -9,11 +9,18 @@ NeNe uses an Issue driven workflow.
 3. Create a topic branch from `main`.
 4. Implement only the Issue scope.
 5. Run checks and record the results in the PR.
-6. Commit using the commit convention.
-7. Push and open a PR.
-8. Reference the Issue from the PR body.
-9. Merge after review or verification.
-10. Close or update the Issue.
+6. Walk the relevant self-review checklists under `docs/review/` (see below).
+7. Commit using the commit convention.
+8. Push and open a PR.
+9. Reference the Issue from the PR body.
+10. Merge after review or verification.
+11. Close or update the Issue.
+
+## Self-Review Checklists
+
+Before pushing, walk the checklists in `docs/review/` that match the scope of the change. The list at `docs/review/README.md` maps PR types to checklists (REST controller, HTML controller, database, OpenAPI, docs/ADR, release/CI, field trial report). A single PR may invoke more than one. Reference the checklist(s) you used in the PR body.
+
+Checklists are reminders to consult the source policy docs — they do not duplicate policy text. If a checklist item conflicts with the canonical policy, fix the checklist (or escalate via ADR).
 
 ## Pull Request Requirements
 
