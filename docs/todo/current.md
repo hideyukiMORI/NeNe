@@ -6,7 +6,36 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 - #178: Prepare the Qiita hands-on implementation tutorial article.
 
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously through 2026-05-21. As of that day's close: zero non-promotion Issues remain open, six trials (FT1–FT6) are complete, and four ADRs are in place (0001–0004). The framework is ready for the publication / outreach push (#178 → #179 → #180) which is the only currently active line of work.
+
 ## Recently Completed
+
+### 2026-05-21 — FT3 / FT4 / FT5 / FT6 + infra + checklists
+
+Single-day wave of trial-driven improvements across the framework, documentation, and process.
+
+**FT3 (authlog — REST auth + CSRF):** report PR #250; follow-ups #251–#253 → PR #254 (Reference Client docs), PR #255 (self-discovering contract test), PR #256 (ADR-0003 + generic `ApiFailureEnvelope` migration). All Issues closed.
+
+**FT4 (smarty-html — server-rendered HTML pages):** report PR #262; follow-ups #263–#267 → PR #268 (compile cache tip), #269 (`location()` URI normalize), #270 (asset auto-discovery convention), #272 (Smarty escape × `nl2br`), #273 (HTML form POST tutorial section). All Issues closed.
+
+**FT5 (protected-notes — auth × HTML cross):** report PR #275; follow-ups #276–#282 → PR #283 (bootstrap script sanity check), #284 (`LOGOUT_URI` env override), #285 (reference-client.md session-regen note), #286 (URL controller naming docs), #287 (ADR-0004 + `unauthorizedRedirect()` hook), #288 (CI health-wait timeout), #289 (HTML form CSRF helper), #290 (HTML login form tutorial). All Issues closed.
+
+**FT6 (cli-tooling — installer scripts):** report PR #293; follow-ups #294–#298 → PR #299 (`composer setup` shortcut), #300 (`--env=PATH` strict), #301 (`initSQLite.php` `--yes` / `--help`), #302 (schema 3-way parity docs), #303 (canonical / legacy CLI docs + new `docs/development/cli.md`). All Issues closed.
+
+**Process import:** PR #291 added `docs/review/` self-review checklists (8 files: REST controller, HTML controller, database, OpenAPI contract, docs/ADR, release/CI, field-trial report, README index) adapted from sibling NENE2's pattern. Referenced from `docs/workflow.md` and `docs/CONTRIBUTING.md`.
+
+**Stale Issue cleanup:** #234 (FT2 trial Issue, historically open), #145 (AI-readable reference implementation goal), #165 (reviewable Controller-Service-Mapper proof) — closed with explanatory comments. The goals these Issues encoded were effectively delivered through the FT3–FT6 tutorial additions, the `docs/review/` checklists, ADR-0003, and ADR-0004.
+
+**Infra changes that landed alongside the trial loops:**
+
+- `tools/nene-ft-new.sh` — one-shot FT clone bootstrap (port offset, `.claude/settings.local.json`, `.claude/CLAUDE.md`, PLAN skeleton). Sanity check (PR #283) blocks the "run-from-clone-cwd" footgun.
+- `field-trial` GitHub label — created and applied retroactively to 18 historical Issues.
+- `main` branch protection — required status checks (`unit`, `HTTP runtime smoke (Docker)`); the improvement loops were merged via `gh pr merge --auto`.
+- CI workflow — health-wait now requires `Data.healthStatus = ok` (not just HTTP 200) and the timeout is 120s (PR #259 / #288).
+- `~/.claude/settings.json` (developer-side) — broad dev-tool wildcards replaced the narrow per-command permission accumulation that had grown in `NeNe/.claude/settings.local.json`.
+- `jq` installed on the development host.
+
+### Earlier 2026-05
 
 - #217: Add `?self` type to singleton `$instance` in 6 classes; add `: void` to `IndexController::indexAction()`; fix `@return` PHPDoc in `Dispatcher`.
 - #212: Add native type declarations to all properties in remaining `class/xion/` base classes (ModelBase, DataMapperBase, DataModelBase, RouteContext, TransactionManager, ApiResponse, Log, ErrorCode); propagate `array` type to `Todo`/`User` subclass `$schema`.
@@ -89,8 +118,8 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 - #179: Prepare the DEV Community English introduction article.
 - #180: Decide on Reddit/Hacker News only after the first article feedback.
-- #165: Prove the reviewable Controller-Service-Mapper shape through the reference implementation.
-- #145: Add an AI-assisted small-service reference implementation covering page, REST, mapper, OpenAPI, and tests.
+
+The two earlier "AI-readable reference implementation" Issues (#145, #165) were closed on 2026-05-21 — the goals they encoded are now delivered through FT3–FT6 plus the tutorial and `docs/review/` checklists. New reference-implementation needs should be spawned as new field trials.
 
 ## Field Trials
 
@@ -109,12 +138,29 @@ When a trial is run, summarize it here with the format below, then move the bloc
 ### Recently Completed
 
 - **FT1** — baseline trial from `ft1-bookmarklog`. Pivoted from a Bookmark+Tag implementation when baseline phase produced enough findings to fill the trial on its own. Closed 5 Issues: #222 (PdoConnection runtime fatal hotfix), #224 (CI runtime smoke job), #225 (`composer test:http` preflight), #226 (`NENE_HTTP_BASE_URL` docs), #227 (Docker `safe.directory`). Report: `docs/field-trials/2026-05-field-trial-1.md`. The originally planned Bookmark+Tag scope shifts to FT2.
-- **FT2** — Bookmark + Tag M:N CRUD trial from `ft2-bookmark-tag`. Two-entity REST service with transactional relation diff, dual DB schema (SQLite + MySQL), OpenAPI extension, 6 new HTTP smoke tests. 7 findings recorded. Follow-up Issues (F-1 / F-3 / F-6 / F-7) tracked below. F-2 / F-4 / F-5 deferred. Report: `docs/field-trials/2026-05-field-trial-2.md`.
+- **FT2** — Bookmark + Tag M:N CRUD trial from `ft2-bookmark-tag`. Two-entity REST service with transactional relation diff, dual DB schema (SQLite + MySQL), OpenAPI extension, 6 new HTTP smoke tests. 7 findings. Follow-up Issues #237, #238, #239, #240, #241–#244 closed; F-5 escalated in FT3 and resolved via ADR-0003. Report: `docs/field-trials/2026-05-field-trial-2.md`.
+- **FT3** — auth-protected Memo CRUD from `ft3-authlog`. Session + CSRF flow against REST. 6 findings; 3 follow-up Issues #251–#253 closed by PRs #254 / #255 / #256. ADR-0003 (generic OpenAPI failure envelope) born from F-1 (escalation of FT2 F-5). Report: `docs/field-trials/2026-05-field-trial-3.md`.
+- **FT4** — server-rendered Note CRUD from `ft4-smarty-html`. Smarty + asset auto-discovery + HTML form POST. 9 findings; 5 follow-up Issues #263–#267 closed by PRs #268 / #269 / #270 / #272 / #273. Report: `docs/field-trials/2026-05-field-trial-4.md`.
+- **FT5** — protected-notes (auth × HTML cross) from `ft5-protected-notes`. HTML login form + CSRF helper + per-controller redirect target. 10 findings; 7 follow-up Issues #276–#282 closed by PRs #283 / #284 / #285 / #286 / #287 / #289 / #290 (#287 introduced ADR-0004 `unauthorizedRedirect()` hook). Side-effect: PR #288 bumped CI health-wait timeout to 120s. Report: `docs/field-trials/2026-05-field-trial-5.md`.
+- **FT6** — CLI installer tooling (`cli/initSQLite.php`, `cli/setupDatabase.php`) from `ft6-cli-tooling`. First CLI-only trial. 7 findings (5 actionable); 5 follow-up Issues #294–#298 closed by PRs #299 / #300 / #301 / #302 / #303 (including new `docs/development/cli.md` and `composer setup` shortcut). Report: `docs/field-trials/2026-05-field-trial-6.md`.
 
 ## Backlog Candidates
+
+### Next field trial themes (FT7+)
+
+FT1–FT6 covered REST, M:N relations, auth/CSRF, HTML rendering, auth × HTML cross, and CLI tooling. The remaining FT-untouched surfaces are:
+
+- **error pages** — 404 / 500 templates, the catch-all in `htdocs/index.php`, error rendering for HTML vs REST contexts. Small, well-bounded.
+- **production-mode deployment probe** — `NENE_APP_ENV=production` + `NENE_APP_DEBUG=0` + `NENE_SESSION_SECURE=1`, error display behavior, log file rotation. Medium surface.
+- **Smarty custom plugin authoring** — `view/plugins/` (referenced by `DIR_SMARTY_PLUGINS`), how to ship a project-specific Smarty modifier or function. Niche.
+- **OpenAPI authoring workflow** — now that ADR-0003 / the contract test / `docs/development/error-codes.md` / `docs/review/openapi-contract.md` are in place, a trial that adds a fresh small entity end-to-end and measures whether the documented workflow holds up.
+- **schema source-of-truth consolidation (ADR candidate)** — FT6 F-2 surfaced that schema lives in three sites (`docker/mysql/init/001_schema.sql`, `cli/initSQLite.php`, `class/xion/DatabaseInstaller.php`). Long-term consolidation into a single PHP source is ADR-class. Trigger this when a future trial actually trips on the drift.
+
+### General code-quality candidates
 
 - Improve PHPDoc accuracy and native types across `class/xion/`, starting with shared base classes.
 - Extract dispatcher route parsing and method resolution boundaries further if future tests need lower-level coverage.
 - Decide PHP minimum and target version policy in an ADR if support outside Docker PHP 8.4 becomes important.
 - Add CI coverage for Docker runtime checks when repository resources and runtime cost are acceptable.
 - Review GitHub Actions runtime deprecation warnings and update workflow actions when Node.js 24-ready versions are available.
+- Optionally deprecate `cli/initSQLite.php` toward a thin wrapper that delegates to `cli/setupDatabase.php` (would close the redundancy surfaced by FT6 F-1; held back for backwards-compat).
