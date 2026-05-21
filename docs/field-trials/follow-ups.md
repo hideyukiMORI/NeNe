@@ -48,10 +48,11 @@ Source: `2026-05-field-trial-2.md`.
 
 ### F-5 — OpenAPI per-error-code envelope boilerplate
 
-- **Friction**: The existing TODO contract defines a separate envelope schema per error code (`TodoNotFoundEnvelope`, `TodoIdRequiredEnvelope`, `TodoTitleRequiredEnvelope`, ...). Adding two new entities in FT2 would have required seven additional per-code envelopes; FT2 used a single generic `ApiFailureEnvelope` instead to keep the trial in scope.
-- **Decision in FT2**: `defer` (FT2 made an executive call locally; long-term shape is undecided).
-- **Re-evaluation trigger**: a third entity gets added to the OpenAPI contract and the decision repeats, OR a contributor proposes a generic envelope migration for the existing per-code schemas. Either way, the open question is whether per-code envelopes stay canonical (richer documentation, more boilerplate) or are migrated to a generic shape (less boilerplate, weaker per-code documentation).
-- **ADR likely?**: Yes, if escalated. This is a public OpenAPI shape decision.
+- **Status**: Escalated in FT3 (see `2026-05-field-trial-3.md`, finding F-1). FT3 added a third entity (`Memo`) and paid the per-code envelope boilerplate again, meeting the trigger documented below. Tracked from FT3 onward; remove this entry once the FT3-spawned Issue is resolved.
+- **Original friction (FT2)**: The existing TODO contract defines a separate envelope schema per error code (`TodoNotFoundEnvelope`, `TodoIdRequiredEnvelope`, `TodoTitleRequiredEnvelope`, ...). Adding two new entities in FT2 would have required seven additional per-code envelopes; FT2 used a single generic `ApiFailureEnvelope` instead to keep the trial in scope.
+- **Original decision (FT2)**: `defer` (FT2 made an executive call locally; long-term shape was undecided).
+- **Original re-evaluation trigger**: a third entity gets added to the OpenAPI contract and the decision repeats, OR a contributor proposes a generic envelope migration for the existing per-code schemas. **Trigger fired in FT3.**
+- **ADR likely?**: Yes. FT3 requests an ADR decision on canonical envelope shape.
 
 ## Notes
 
