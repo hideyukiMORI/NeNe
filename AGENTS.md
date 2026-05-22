@@ -11,6 +11,7 @@ This file is the first document for AI agents and automation working on NeNe.
 - Error codes & response decoration: `docs/development/error-codes.md` (envelope + the "error-path early-exit trap" — relevant whenever framework-wide response headers are added)
 - Error rendering (REST vs HTML): `docs/development/error-rendering.md` (404 / 500 / domain failure / CSRF / auth / 405 — what the caller actually sees on each side)
 - Production deployment: `docs/development/production-deployment.md` (env-var matrix, `compose.prod.yaml` overlay, log surface, Secure-cookie caveat, deployment checklist)
+- Smarty custom plugins: `docs/development/smarty-plugins.md` (modifier / function / block authoring under `view/plugins/`)
 - AI self-review: `docs/ai/README.md`
 - Commit conventions: `docs/development/commit-conventions.md`
 - Roadmap: `docs/roadmap.md`
