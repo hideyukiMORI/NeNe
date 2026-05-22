@@ -14,6 +14,7 @@ This file is the first document for AI agents and automation working on NeNe.
 - Current TODO: `docs/todo/current.md`
 - ADR index: `docs/adr/README.md`
 - Field trial methodology: `docs/field-trials/README.md`
+- MCP bridge (external package): [nene-mcp](https://github.com/hideyukiMORI/nene-mcp) — NeNe integration at `docs/integration/nene.md` in that repo; not part of NeNe core
 
 ## Operating Rules
 
@@ -24,6 +25,7 @@ This file is the first document for AI agents and automation working on NeNe.
 - Do not commit secrets, credentials, local `.env` files, generated logs, cache, or compiled templates.
 - Prefer explicit, typed, testable PHP over hidden behavior.
 - Preserve NeNe's small legacy framework character while gradually improving standards support.
+- MCP stdio servers belong in [nene-mcp](https://github.com/hideyukiMORI/nene-mcp), not in `class/xion/`. Link OpenAPI operations via app-owned `docs/mcp/tools.json` when adding MCP-facing docs or examples.
 
 ## Project Direction
 

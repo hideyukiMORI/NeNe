@@ -49,6 +49,24 @@ Cookie-authenticated state-changing REST requests must send the `X-CSRF-Token` h
 
 For an external client implementation (curl, fetch, custom SDK) see [`docs/api/reference-client.md`](reference-client.md), which spells out the cookie + CSRF mechanics with runnable examples.
 
+## MCP Tool Catalogs
+
+NeNe does not ship an MCP server. When you want AI agents (Cursor, Claude Desktop, etc.) to call local REST endpoints as tools, add the sibling package **[nene-mcp](https://github.com/hideyukiMORI/nene-mcp)** via Composer and maintain a tool catalog alongside OpenAPI.
+
+Recommended layout:
+
+```text
+docs/api/openapi.yaml    # HTTP contract (NeNe source of truth)
+docs/mcp/tools.json      # MCP tool entries aligned with OpenAPI operations
+```
+
+Keep catalog `method`, `path`, and `operationId` values consistent with `openapi.yaml`. Sample and integration steps:
+
+- [nene-mcp NeNe integration](https://github.com/hideyukiMORI/nene-mcp/blob/main/docs/integration/nene.md)
+- [Sample health tools.json](https://github.com/hideyukiMORI/nene-mcp/blob/main/docs/example-ne-health-catalog.md)
+
+Do not add MCP stdio code to `class/xion/`. The bridge runs from `vendor/bin/nene-mcp`.
+
 ## Authentication Failure Status
 
 Authentication failures use HTTP `401 Unauthorized`. `LOGIN-FAILED` means submitted credentials were rejected, and `SESSION-CLOSED` means a cookie-authenticated endpoint was called without a valid login session.

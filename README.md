@@ -43,6 +43,7 @@ The goal is not to replace Laravel, Symfony, CodeIgniter, or Laminas. The goal i
 - Releases: `docs/releases.md`
 - Testing: `docs/development/testing.md`
 - AI agent guide: `AGENTS.md`
+- MCP bridge (external): [nene-mcp](https://github.com/hideyukiMORI/nene-mcp) — Composer plugin for local stdio MCP; see [MCP with NeNe](#mcp-with-nene) below
 
 ## Routing
 
@@ -115,6 +116,21 @@ composer test
 ```
 
 `composer test` runs the unit suite. HTTP smoke tests (`composer test:http`) are conditional on `NENE_HTTP_BASE_URL` — see `docs/development/testing.md` for the runtime workflow.
+
+## MCP with NeNe
+
+NeNe does **not** embed MCP in framework core. Use the sibling package **[nene-mcp](https://github.com/hideyukiMORI/nene-mcp)** to expose local OpenAPI-backed REST as MCP tools for Cursor, Claude Desktop, and other MCP hosts.
+
+```sh
+composer require hideyukimori/nene-mcp
+```
+
+Add a NENE2-compatible tool catalog (convention: `docs/mcp/tools.json`) aligned with `docs/api/openapi.yaml`, then point your MCP client at `vendor/bin/nene-mcp`. Integration details live in the nene-mcp repository:
+
+- [NeNe integration guide](https://github.com/hideyukiMORI/nene-mcp/blob/main/docs/integration/nene.md)
+- [Sample health catalog](https://github.com/hideyukiMORI/nene-mcp/blob/main/docs/example-ne-health-catalog.md)
+
+MCP stdio handling stays in `vendor/`; do not add MCP code under `class/xion/`.
 
 ## License
 
