@@ -379,7 +379,8 @@ abstract class ControllerBase
         return $this->csrfProtectionPolicy->requiresToken(
             $this->ROUTE_CONTEXT,
             $this->method,
-            $this->AUTH_SESSION->isLoggedIn()
+            $this->AUTH_SESSION->isLoggedIn(),
+            $this->AUTH_SESSION->isBearerAuthenticated()
         );
     }
 

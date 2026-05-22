@@ -49,4 +49,19 @@ final class CsrfProtectionPolicyTest extends TestCase
 
         self::assertFalse((new CsrfProtectionPolicy())->requiresToken(RouteContext::getInstance(), 'POST', false));
     }
+
+    public function testDoesNotRequireTokenWhenAuthenticatedViaBearer(): void
+    {
+        // Bearer authentication is a stateless API surface (FT16 / ADR-0008).
+        // The Bearer token itself is the proof of intent, so CSRF skips
+        // even though the request is state-changing and "logged in".
+        RouteContext::getInstance()->set('todo', 'index', 'Rest', 'indexPostRest');
+
+        self::assertFalse((new CsrfProtectionPolicy())->requiresToken(
+            RouteContext::getInstance(),
+            'POST',
+            true,    // isLoggedIn (Bearer counts as logged in)
+            true     // isBearerAuthenticated
+        ));
+    }
 }

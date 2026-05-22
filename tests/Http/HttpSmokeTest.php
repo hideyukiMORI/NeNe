@@ -215,14 +215,31 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
 
     public function testUnsupportedRestMethodReturnsMethodNotAllowed(): void
     {
-        $response = $this->client->request('GET', '/todo/item/id_1');
+        // PATCH is not implemented on /todo/item/id_X (only GET/PUT/DELETE
+        // after FT16 #380 added itemGetRest). The dispatcher should still
+        // report 405 with the Allow header listing the supported verbs.
+        $response = $this->client->request('PATCH', '/todo/item/id_1');
         $payload = $response->json();
 
         self::assertSame(405, $response->statusCode());
         self::assertStringContainsString('DELETE', $response->headerLine('Allow'));
         self::assertStringContainsString('PUT', $response->headerLine('Allow'));
+        self::assertStringContainsString('GET', $response->headerLine('Allow'));
         self::assertSame(true, $payload['Result']);
         self::assertSame('failure', $payload['Data']['status']);
         self::assertSame('METHOD-NOT-ALLOWED', $payload['Data']['errorCode']);
+    }
+
+    public function testGetTodoItemReturnsSessionClosedWithoutAuth(): void
+    {
+        // FT16 #380: itemGetRest is now a documented operation. The
+        // unauthenticated probe lands on the documented 401 SESSION-CLOSED
+        // (not 405 as it did before the GET handler existed).
+        $response = $this->client->request('GET', '/todo/item/id_1');
+        $payload = $response->json();
+
+        self::assertSame(401, $response->statusCode());
+        self::assertSame('failure', $payload['Data']['status']);
+        self::assertSame('SESSION-CLOSED', $payload['Data']['errorCode']);
     }
 }

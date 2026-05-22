@@ -58,6 +58,28 @@ class TodoController extends ControllerBase
     }
 
     /**
+     * Read a single TODO item by id for the signed-in user.
+     *
+     * @return array<string,mixed> TODO response.
+     */
+    public function itemGetRest(): array
+    {
+        $userId = $this->getLoginUserId();
+        $id = $this->getTodoId();
+        if ($id === null) {
+            return $this->API_RESPONSE->failure('TODO-ID-REQUIRED');
+        }
+        $todoMapper = new Database\TodoMapper();
+        $todo = $todoMapper->findRowByUserIdAndId($userId, $id);
+        if ($todo === null) {
+            return $this->API_RESPONSE->failure('TODO-NOT-FOUND');
+        }
+        return $this->API_RESPONSE->success([
+            'todo' => $this->normalizeRow($todo)
+        ]);
+    }
+
+    /**
      * Update a TODO item.
      *
      * @return array<string,mixed> TODO response.

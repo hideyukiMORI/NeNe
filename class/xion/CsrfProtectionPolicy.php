@@ -32,14 +32,27 @@ class CsrfProtectionPolicy
     /**
      * Determine whether the current request must include a CSRF token.
      *
-     * @param RouteContext $routeContext  Current route context.
-     * @param string       $requestMethod HTTP request method.
-     * @param boolean      $isLoggedIn    Login state for the current session.
+     * Bearer-authenticated requests (FT16 / ADR-0008) intentionally skip
+     * CSRF — the Bearer token itself is the proof of intent, and
+     * stateless agent / MCP clients have no way to maintain the
+     * cookie+CSRF dance the browser path expects.
+     *
+     * @param RouteContext $routeContext          Current route context.
+     * @param string       $requestMethod         HTTP request method.
+     * @param boolean      $isLoggedIn            Login state (includes Bearer).
+     * @param boolean      $isBearerAuthenticated Whether the request authenticated via Bearer.
      *
      * @return boolean Whether CSRF validation is required.
      */
-    final public function requiresToken(RouteContext $routeContext, string $requestMethod, bool $isLoggedIn): bool
-    {
+    final public function requiresToken(
+        RouteContext $routeContext,
+        string $requestMethod,
+        bool $isLoggedIn,
+        bool $isBearerAuthenticated = false
+    ): bool {
+        if ($isBearerAuthenticated) {
+            return false;
+        }
         if (!$routeContext->isRest() || !in_array(strtoupper($requestMethod), self::STATE_CHANGING_METHODS, true)) {
             return false;
         }
