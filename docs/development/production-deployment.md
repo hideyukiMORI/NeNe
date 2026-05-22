@@ -45,6 +45,8 @@ The full list of env vars NeNe reads at boot lives in `ini/xSystemIni.php`. The 
 | `NENE_SECURITY_PERMISSIONS_POLICY` | unset           | `geolocation=(), microphone=(), camera=()` | Permissions-Policy. Deny by default; expand as features require. |
 | `NENE_REQUEST_ID_HEADER` | `X-Request-ID` (compose default) | `X-Request-ID` or the proxy's existing name | Response header that carries the per-request id (#393). Empty string disables emission (logs still tag). See `docs/development/observability.md`. |
 | `NENE_REQUEST_ID_TRUST_INBOUND` | `1` (compose default)   | `1` behind a trusted proxy; `0` when the app is the public boundary | Whether to honor an inbound request-id. Generates fresh when `0`. |
+| `NENE_AGENT_BEARER_TOKEN` | empty (feature off) | a long random secret (e.g. `openssl rand -hex 32`) | Optional `Authorization: Bearer` for stateless agent / MCP clients (#399, ADR-0008). Empty disables the feature. See `docs/development/agent-bearer-auth.md`. |
+| `NENE_AGENT_BEARER_USER` | `admin` (compose default) | the `user_id` the Bearer maps to | Identity the token authenticates as. Must exist in the `users` table. |
 
 **Important**: setting `NENE_APP_ENV=production` *alone* flips the safe defaults of `NENE_APP_DEBUG` (`0`) and `NENE_SESSION_SECURE` (`1`). If you set `NENE_APP_DEBUG=1` and forget `NENE_APP_ENV`, your "production" deploy will not have `Secure` cookies. The overlay `compose.prod.yaml` sets all three explicitly so this footgun is closed for the bundled deploy.
 

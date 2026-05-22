@@ -104,6 +104,32 @@ If you implement a server-rendered login form rather than calling REST `/session
 
 For the full error catalog, see `config/error_codes.php`.
 
+## Bearer for non-browser callers
+
+Stateless clients (MCP servers, scripted agents, internal tooling) can skip the cookie+CSRF dance by sending an `Authorization: Bearer <token>` header. The token value must match the server's `NENE_AGENT_BEARER_TOKEN` env, and the token authenticates as the user identified by `NENE_AGENT_BEARER_USER` (default `admin`). See ADR-0008 and `docs/development/agent-bearer-auth.md`.
+
+Minimal example — the entire client flow is one curl per request:
+
+```bash
+TOKEN=$NENE_AGENT_BEARER_TOKEN
+BASE=http://nene.example.com
+
+# list
+curl -H "Authorization: Bearer $TOKEN" "$BASE/todo/index"
+
+# create — no X-CSRF-Token, no cookie
+curl -X POST \
+     -H "Authorization: Bearer $TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"title":"Hello from MCP"}' \
+     "$BASE/todo/index"
+
+# read one
+curl -H "Authorization: Bearer $TOKEN" "$BASE/todo/item/id_42"
+```
+
+`X-CSRF-Token` is intentionally not used on Bearer requests — the Bearer header itself is the proof of intent, and CSRF protects only browser flows. The browser session-cookie + CSRF flow above is unchanged for browsers.
+
 ## See also
 
 - `docs/tutorials/building-a-service.md` — authoring side: how to write a controller that enforces this flow.
