@@ -52,6 +52,34 @@ final class HttpResponse
         return new self($statusCode, array_merge($headers, ['Location' => $uri]));
     }
 
+    /**
+     * Build a binary file response (Content-Type set by `$mime`; optionally
+     * marks the response as a download with `Content-Disposition: attachment;
+     * filename="..."`). Used by {@see ControllerBase::sendFile()}.
+     *
+     * The body is the full file contents; callers requiring streamed delivery
+     * of multi-gigabyte files should reach for `readfile()` outside this value
+     * object (out of scope for the small-app surface NeNe targets).
+     *
+     * @param string      $body         Raw file contents.
+     * @param string      $mime         Response `Content-Type` (e.g. `image/png`).
+     * @param string|null $downloadName Optional filename for `Content-Disposition`.
+     * @param integer     $statusCode   HTTP status code (default 200).
+     */
+    final public static function file(
+        string $body,
+        string $mime,
+        ?string $downloadName = null,
+        int $statusCode = 200
+    ): self {
+        $headers = ['Content-Type' => $mime];
+        if ($downloadName !== null) {
+            $safe = str_replace(['"', "\r", "\n"], '', $downloadName);
+            $headers['Content-Disposition'] = 'attachment; filename="' . $safe . '"';
+        }
+        return new self($statusCode, $headers, $body);
+    }
+
     final public function statusCode(): int
     {
         return $this->statusCode;
