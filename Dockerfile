@@ -34,7 +34,12 @@ WORKDIR /var/www/html
 RUN git config --global --add safe.directory /var/www/html
 
 COPY composer.json composer.lock ./
-RUN composer install --no-interaction --prefer-dist --no-progress
+
+# `NENE_NO_DEV=1` (passed via `--build-arg`, set by `compose.prod.yaml`) tells
+# the image build to skip dev composer packages. The default keeps dev
+# packages so the bundled image still runs `composer test` out of the box.
+ARG NENE_NO_DEV=
+RUN composer install --no-interaction --prefer-dist --no-progress ${NENE_NO_DEV:+--no-dev}
 
 COPY . .
 RUN ./init.sh
