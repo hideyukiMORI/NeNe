@@ -356,6 +356,7 @@ class View
      */
     final public function execute(): void
     {
+        ResponseDecorator::sendHeaders();
         self::$instance
             ->setCSS()
             ->setJS()

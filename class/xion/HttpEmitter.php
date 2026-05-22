@@ -24,10 +24,11 @@ final class HttpEmitter
 {
     final public static function emit(HttpResponse $response): void
     {
-        http_response_code($response->statusCode());
-        foreach ($response->headers() as $name => $value) {
+        $decorated = ResponseDecorator::decorate($response);
+        http_response_code($decorated->statusCode());
+        foreach ($decorated->headers() as $name => $value) {
             header($name . ': ' . $value);
         }
-        echo $response->body();
+        echo $decorated->body();
     }
 }
