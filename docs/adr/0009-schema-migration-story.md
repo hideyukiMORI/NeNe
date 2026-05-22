@@ -82,6 +82,8 @@ Neutral:
 
 ## Implementation tracking
 
-- This ADR is **drafted in parallel with #409** (the eval-report-derived issue) but the **implementation lands as a separate trial / PR**, not in this ADR's branch. The next FT (FT17 candidate: "schema-diff CLI") picks up the implementation when the trial-clone bandwidth is available.
+- **Implemented by FT17** (`docs/field-trials/2026-05-field-trial-17.md`, Trial Issue #417). The implementation PR is #419 (feat) — adds `Nene\Xion\SchemaDiffer`, `cli/schemaDiff.php`, promotes four `SchemaCompiler` helpers to `public static`, and ships `composer schema:diff` as the operator-facing entry point.
+- The docs / workflow side ships in #420 — `docs/development/schema-migrations.md`.
+- The **add-index path** is the only ADR-0009 scope item not in #419; it ships as the small follow-up Issue #421 (no new trial needed).
 - A future ADR may extend this surface to (a) include Phinx as an optional dep, or (b) move to Option B (auto-generated `ALTER TABLE` via versioned `SchemaDefinition`) if the operator-side friction surfaces again.
-- ADR-0005's Consequences section gets a cross-link to ADR-0009 ("Schema migrations: addressed by ADR-0009").
+- ADR-0005's Consequences section already cross-links to this ADR ("Schema migrations: addressed by ADR-0009").
