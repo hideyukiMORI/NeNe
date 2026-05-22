@@ -41,9 +41,18 @@ try {
     Xion\HttpEmitter::emit($termination->response());
 } catch (Xion\DomainException $domainException) {
     $apiResponse = new Xion\ApiResponse();
-    Xion\HttpEmitter::emit(
-        Xion\JsonResponder::responseArray($apiResponse->failure($domainException->errorCode()))
-    );
+    $failure = $apiResponse->failure($domainException->errorCode());
+    if (Xion\RouteContext::getInstance()->isRest()) {
+        Xion\HttpEmitter::emit(Xion\JsonResponder::responseArray($failure));
+    } else {
+        $template = (string)file_get_contents(DIR_ROOT . '/domain-error.html');
+        $body = strtr($template, [
+            '{{errorCode}}' => htmlspecialchars((string)$failure['errorCode'], ENT_QUOTES, 'UTF-8'),
+            '{{errorMessage}}' => htmlspecialchars((string)$failure['errorMessage'], ENT_QUOTES, 'UTF-8'),
+        ]);
+        $status = Xion\ErrorCode::getInstance()->getHttpStatus($domainException->errorCode());
+        Xion\HttpEmitter::emit(Xion\HttpResponse::html($body, $status));
+    }
 } catch (\Throwable $throwable) {
     Xion\Log::getInstance('error')->error('Unhandled application error.', ['exception' => $throwable]);
     if (Xion\RouteContext::getInstance()->isRest()) {

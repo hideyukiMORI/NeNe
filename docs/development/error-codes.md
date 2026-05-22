@@ -43,6 +43,15 @@ Every failure response uses the same envelope, documented in OpenAPI as `ApiFail
 3. If the code is referenced from a new OpenAPI endpoint, the endpoint's failure response references the shared `ApiFailureEnvelope` — no per-code schema is added. The endpoint MAY include an `example` showing the specific `errorCode` value it produces.
 4. The contract test (`tests/Http/OpenApiRuntimeContractTest`) automatically discovers new endpoints and asserts that observed statuses appear in the documented status list. No test changes are needed for a new error code on an existing endpoint.
 
+## HTML rendering of domain failures
+
+When a controller throws `Nene\Xion\DomainException` from inside an HTML `*Action()` method, the top-level catch in `htdocs/index.php` branches on `RouteContext::isRest()`:
+
+- REST callers receive the JSON `ApiFailureEnvelope` carrying the thrown `errorCode`, with HTTP status from the catalog (no change from prior behavior).
+- HTML callers receive the static `domain-error.html` page at the project root with `{{errorCode}}` and `{{errorMessage}}` placeholders substituted by `htmlspecialchars`-escaped values from the catalog. HTTP status still comes from the catalog (e.g. `TODO-NOT-FOUND` → 404).
+
+The HTML rendering uses a static file and simple `strtr()` substitution rather than Smarty so the catch path does not need to bootstrap a view layer. Replace the template at the project root to rebrand or extend the markup.
+
 ## Response decoration and the error-path early-exit trap
 
 NeNe currently emits no framework-level decoration on top of the envelope (no security headers, no request IDs). If a future change adds such decoration, the *placement* matters because several error paths exit before `ControllerBase::run()` returns:
