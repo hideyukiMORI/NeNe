@@ -100,7 +100,7 @@ SQL;
      * @param string             $name  Table name.
      * @param array<string,mixed> $table Table definition.
      */
-    private static function mysqlCreateTable(string $name, array $table): string
+    public static function mysqlCreateTable(string $name, array $table): string
     {
         $lines = [];
         foreach ($table['columns'] as $columnName => $column) {
@@ -133,7 +133,7 @@ SQL;
      * @param string             $name  Table name.
      * @param array<string,mixed> $table Table definition.
      */
-    private static function sqliteCreateTable(string $name, array $table): string
+    public static function sqliteCreateTable(string $name, array $table): string
     {
         $lines = [];
         foreach ($table['columns'] as $columnName => $column) {
@@ -155,7 +155,7 @@ SQL;
     /**
      * @param array<string,mixed> $column
      */
-    private static function mysqlColumn(string $name, array $column): string
+    public static function mysqlColumn(string $name, array $column): string
     {
         $type = (string)($column['type'] ?? '');
         return match (true) {
@@ -173,7 +173,7 @@ SQL;
     /**
      * @param array<string,mixed> $column
      */
-    private static function sqliteColumn(string $name, array $column): string
+    public static function sqliteColumn(string $name, array $column): string
     {
         $type = (string)($column['type'] ?? '');
         return match (true) {
