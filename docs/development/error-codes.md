@@ -69,6 +69,7 @@ This is the PHP analogue of the nene2-python FT75 LIFO-middleware trap. The trap
 ## Related
 
 - `config/error_codes.php` — runtime catalog.
+- `docs/development/error-rendering.md` — how each catalog code renders on the REST vs HTML side (404 / 500 / domain failure / CSRF / auth / 405).
 - `docs/api/openapi.yaml` — OpenAPI contract; references `ApiFailureEnvelope` for every failure response.
 - `docs/api/reference-client.md` — failure-mode table for external consumers.
 - ADR 0003 — rationale for the generic envelope shape.
