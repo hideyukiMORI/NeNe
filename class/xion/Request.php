@@ -121,15 +121,36 @@ class Request
 
     /**
      * Return the uploaded file at `$_FILES[$key]` as a typed
-     * {@see UploadedFile}, or `null` when the key is absent. Does not
-     * itself reject incomplete uploads — the controller calls
-     * `validate(...)` on the returned wrapper for that.
+     * {@see UploadedFile}, or `null` when no file was actually uploaded.
+     *
+     * Returns `null` in three shapes:
+     *
+     *   1. The form field does not exist (`$_FILES[$key]` unset).
+     *   2. The entry is malformed (not an array, or missing the canonical
+     *      five `$_FILES` keys).
+     *   3. The browser sent the form without a file selected
+     *      (`error === UPLOAD_ERR_NO_FILE`) — semantically "no file".
+     *
+     * Other upload errors (size, partial, no-tmp-dir) still produce an
+     * `UploadedFile` so the caller can surface the specific error code
+     * via {@see UploadedFile::validate()} (#408, eval report PR #401 § 4).
+     *
+     * @return UploadedFile|null
      */
     public function getFile(string $key): ?UploadedFile
     {
         if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
             return null;
         }
-        return new UploadedFile($_FILES[$key]);
+        $entry = $_FILES[$key];
+        foreach (['name', 'type', 'tmp_name', 'error', 'size'] as $required) {
+            if (!array_key_exists($required, $entry)) {
+                return null;
+            }
+        }
+        if ((int)$entry['error'] === UPLOAD_ERR_NO_FILE) {
+            return null;
+        }
+        return new UploadedFile($entry);
     }
 }
