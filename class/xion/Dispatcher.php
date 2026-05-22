@@ -44,6 +44,10 @@ class Dispatcher
         $action = $requestRoute['action'];
 
         $controllerInstance = $this->getControllerInstance($controller);
+        if ($controllerInstance === null) {
+            $this->logPreDispatchAccess($controller, $action, 404);
+            throw new HttpTermination($this->notFoundResponse());
+        }
 
         $route = $this->resolveActionRoute(
             $controllerInstance,
@@ -51,10 +55,13 @@ class Dispatcher
             $_SERVER['REQUEST_METHOD'] ?? 'GET'
         );
         if ($route['status'] === 404) {
+            $this->logPreDispatchAccess($controller, $action, 404);
             throw new HttpTermination($this->notFoundResponse());
         } elseif ($route['status'] === 405) {
+            $this->logPreDispatchAccess($controller, $action, 405);
             $this->outputJsonFailure('METHOD-NOT-ALLOWED', ['Allow' => implode(', ', $route['allowed'])]);
         } elseif ($route['status'] === 500) {
+            $this->logPreDispatchAccess($controller, $action, 500);
             Log::getInstance('error')->error('Route conflict detected.', [
                 'controller' => $controller,
                 'action' => $action,
@@ -63,6 +70,34 @@ class Dispatcher
         }
         RouteContext::getInstance()->set($controller, $action, $route['mode'], $route['method']);
         $controllerInstance->run();
+    }
+
+    /**
+     * Emit an ACCESS log entry for a request that fails before
+     * {@see ControllerBase::run()} runs (404 / 405 / ROUTE-CONFLICT).
+     *
+     * `run()` writes its own ACCESS entry for successful dispatch; this method
+     * covers the pre-dispatch holes that would otherwise leave the request
+     * invisible to production operators. The shape (`controller::action` from
+     * the URL) intentionally mirrors `run()`'s entry plus an extra HTTP-status
+     * field so operators can grep for 404 spam.
+     *
+     * @param string  $controller URL-derived controller segment.
+     * @param string  $action     URL-derived action segment.
+     * @param integer $status     HTTP status that will be emitted.
+     *
+     * @return void
+     */
+    private function logPreDispatchAccess(string $controller, string $action, int $status): void
+    {
+        Log::getInstance('access')->info(
+            'ACCESS : ' . $controller . '::' . $action,
+            [
+                'status' => $status,
+                'userAgent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+                'referer' => $_SERVER['HTTP_REFERER'] ?? '',
+            ]
+        );
     }
 
     /**
@@ -190,22 +225,23 @@ class Dispatcher
     }
 
     /**
-     * Determine the class file name from the controller name passed as an argument,
-     * generate an instance, and return.
+     * Determine the controller class name from the URL segment, instantiate
+     * it, and return the instance — or `null` when the class does not exist
+     * so the caller can decide how to surface the 404 (log + emit, not just
+     * throw).
      *
      * @param string $controller Controller name.
      *
-     * @return ControllerBase Controller alias specified by argument.
+     * @return ControllerBase|null Controller instance, or null when missing.
      */
-    private function getControllerInstance(string $controller): ControllerBase
+    private function getControllerInstance(string $controller): ?ControllerBase
     {
         $className = ucfirst(strtolower($controller)) . 'Controller';
         $className = '\\Nene\\Controller\\' . $className;
         if (!class_exists($className)) {
-            throw new HttpTermination($this->notFoundResponse());
+            return null;
         }
-        $controllerInstance = new $className();
-        return $controllerInstance;
+        return new $className();
     }
 
     /**
