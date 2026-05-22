@@ -36,7 +36,7 @@ class Todo extends DataModelBase
         'user_id'      => parent::INTEGER,
         'title'        => parent::STRING,
         'is_completed' => parent::BOOLEAN,
-        'is_deleted'   => parent::BOOLEAN
+        'is_deleted'   => parent::BOOLEAN,
     ];
 
     /**
@@ -48,6 +48,6 @@ class Todo extends DataModelBase
         'user_id'      => ['required' => true],
         'title'        => ['required' => true, 'maxlength' => 255],
         'is_completed' => ['required' => true, 'bool' => true],
-        'is_deleted'   => ['required' => true, 'bool' => true]
+        'is_deleted'   => ['required' => true, 'bool' => true],
     ];
 }

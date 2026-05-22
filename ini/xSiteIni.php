@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * AYANE : ayane.co.jp
  * powered by NENE.

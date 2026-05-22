@@ -29,7 +29,7 @@ final class BearerAuthTest extends TestCase
 
     public function testAcceptsMultipleWhitespaceBetweenSchemeAndToken(): void
     {
-        self::assertSame('abc-123', BearerAuth::extractToken("Bearer  abc-123"));
+        self::assertSame('abc-123', BearerAuth::extractToken('Bearer  abc-123'));
         self::assertSame('abc-123', BearerAuth::extractToken("Bearer\tabc-123"));
     }
 

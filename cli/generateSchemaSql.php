@@ -63,13 +63,13 @@ $body = $header . $ddl . ($seeds !== '' ? $seeds : ($seedMarker . PHP_EOL));
 
 if (isset($options['check'])) {
     if ($existing === $body) {
-        echo "OK: docker/mysql/init/001_schema.sql matches generated output." . PHP_EOL;
+        echo 'OK: docker/mysql/init/001_schema.sql matches generated output.' . PHP_EOL;
         exit(0);
     }
-    echo "DRIFT: docker/mysql/init/001_schema.sql does not match generated output." . PHP_EOL;
-    echo "Run `composer schema:generate` to refresh." . PHP_EOL;
+    echo 'DRIFT: docker/mysql/init/001_schema.sql does not match generated output.' . PHP_EOL;
+    echo 'Run `composer schema:generate` to refresh.' . PHP_EOL;
     exit(1);
 }
 
 file_put_contents($schemaPath, $body);
-echo "Wrote " . $schemaPath . PHP_EOL;
+echo 'Wrote ' . $schemaPath . PHP_EOL;

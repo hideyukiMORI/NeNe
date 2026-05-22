@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Nene\Tests\Unit\Xion;
 
-use Nene\Xion\MailMessage;
 use Nene\Xion\Mailer;
+use Nene\Xion\MailMessage;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Mailer as SymfonyMailer;
