@@ -129,9 +129,14 @@ abstract class ControllerBase
     private CsrfProtectionPolicy $csrfProtectionPolicy;
 
     /**
-     * Rest post
+     * Decoded JSON request body (REST POST / PUT / PATCH / DELETE only).
      *
-     * @var array
+     * Populated by `JsonResponder::inputJsonToArray()` for state-changing
+     * REST requests; an empty array otherwise. Parameterizing the type
+     * lets Phan / IDE follow value types through controller code
+     * (#405, eval report PR #401 § 2).
+     *
+     * @var array<string,mixed>
      */
     protected array $REQUEST_JSON = [];
 
