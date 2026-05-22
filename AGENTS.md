@@ -24,6 +24,9 @@ This file is the first document for AI agents and automation working on NeNe.
 - Current TODO: `docs/todo/current.md`
 - ADR index: `docs/adr/README.md`
 - Field trial methodology: `docs/field-trials/README.md`
+- Field trial candidates (durable backlog): `docs/field-trials/candidates.md` — read first when the maintainer asks "next trial を提案して"
+- PR body templates: `.github/PULL_REQUEST_TEMPLATE/` (`feat.md` / `docs.md` / `trial-report.md` / `chore.md` / `followup.md`) — copy the matching shape when writing PR descriptions
+- Developer tooling: `tools/README.md` (composer scripts, helper scripts, shared composer cache)
 - MCP bridge (external package): [nene-mcp](https://github.com/hideyukiMORI/nene-mcp) — NeNe integration at `docs/integration/nene.md` in that repo; not part of NeNe core
 
 ## Operating Rules
