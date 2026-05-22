@@ -30,6 +30,7 @@ Every failure response uses the same envelope, documented in OpenAPI as `ApiFail
 | `CSRF-TOKEN-INVALID` | 403 | Invalid CSRF token. | Returned when a state-changing request from a logged-in client is missing or has a wrong `X-CSRF-Token` header. |
 | `METHOD-NOT-ALLOWED` | 405 | The HTTP method is not allowed for this endpoint. | Returned with the `Allow` response header listing valid methods. |
 | `NOT-FOUND` | 404 | The requested resource was not found. | Emitted by the dispatcher when the route resolves to no controller or no action **and** the request's `Accept` header prefers `application/json`. HTML callers still receive the static `404.html` page. |
+| `INTERNAL-ERROR` | 500 | An unexpected internal error occurred. | Emitted by `htdocs/index.php` when an unhandled `\Throwable` reaches the top-level catch on a REST request. HTML callers receive the static `500.html` page instead. |
 | `ROUTE-CONFLICT` | 500 | Route configuration conflict. | Internal — surfaces when controller dispatch is ambiguous. |
 | `TODO-ID-REQUIRED` | 400 | TODO id is required. | `/todo/item/id_X` with missing or non-numeric `id`. |
 | `TODO-NOT-FOUND` | 404 | TODO item was not found. | `/todo/item/id_X` where no row matches the signed-in user. |

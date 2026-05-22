@@ -23,6 +23,10 @@ return [
         'message' => 'The requested resource was not found.',
         'httpStatus' => 404,
     ],
+    'INTERNAL-ERROR' => [
+        'message' => 'An unexpected internal error occurred.',
+        'httpStatus' => 500,
+    ],
     'ROUTE-CONFLICT' => [
         'message' => 'Route configuration conflict.',
         'httpStatus' => 500,
