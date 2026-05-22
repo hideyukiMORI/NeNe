@@ -7,6 +7,7 @@ Single-purpose scripts that make NeNe's day-to-day workflow less typing-heavy. E
 | Command | What it does | When to use |
 | --- | --- | --- |
 | `tools/nene-ft-new.sh <topic>` | Bootstrap a new field trial clone (next FT number auto-detected, port offset, `.env`, `.claude/settings.local.json`). | Starting a new FT. |
+| `tools/ft-report-new.sh <FT-N> <topic>` | Copy `docs/templates/field-trial-report.md` to `docs/field-trials/YYYY-MM-field-trial-N.md` with date / FT number / topic substituted. | When the trial reaches the report-writing step. Refuses to overwrite. |
 | `tools/wait-healthy.sh [port] [timeout]` | Block until `/health` returns 200, with a timeout. | After `docker compose up -d app`, before running curl probes. |
 | `tools/trial-status.sh <FT-N>` | List every Issue + PR mentioning a trial number, open and closed. | Closing-out check: "is every spawned Issue closed?" |
 | `php tools/error-code-add.php CODE "Message" <http-status> ["notes"]` | Insert a new error code into both `config/error_codes.php` and `docs/development/error-codes.md` atomically. | Adding an error code without the manual two-file dance. |
