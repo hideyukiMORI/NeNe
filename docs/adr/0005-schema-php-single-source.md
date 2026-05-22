@@ -57,7 +57,7 @@ Positive:
 Negative / accepted trade-offs:
 
 - `SchemaCompiler` now owns the full DDL contract. Adding a column type (e.g. `decimal`, `enum`) is one PR that updates `SchemaDefinition`'s type vocabulary, the `mysqlColumn` / `sqliteColumn` match arms, and the regenerated `001_schema.sql`. The price is paid once per new type, not once per new entity.
-- Migrations (`ALTER TABLE`) are still out of scope. The current `CREATE TABLE IF NOT EXISTS` flow assumes destructive recreation in dev and operator-managed migrations in prod. A future ADR may extend `SchemaDefinition` toward declarative migrations — explicitly not part of this one.
+- Migrations (`ALTER TABLE`) are out of scope for *this* ADR. The current `CREATE TABLE IF NOT EXISTS` flow assumes destructive recreation in dev and operator-managed migrations in prod. **The migration story is addressed by ADR-0009** (`docs/adr/0009-schema-migration-story.md`, derived from `REPORT_commercial_feasibility.md` / Issue #409): a future `cli/schemaDiff.php` reads the same `SchemaDefinition` source and emits operator-applied `ALTER TABLE` statements. ADR-0005's single source is preserved by ADR-0009.
 - A few PHP edge cases (column-level `COMMENT`, table-level partitioning, MySQL-specific options like `ROW_FORMAT=DYNAMIC`) are not supported and would need vocabulary extensions if a future bundled table requires them. None of the current schema needs them.
 
 Neutral:
