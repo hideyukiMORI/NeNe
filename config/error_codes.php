@@ -43,4 +43,16 @@ return [
         'message' => 'TODO title is required.',
         'httpStatus' => 400,
     ],
+    'UPLOAD-FILE-REQUIRED' => [
+        'message' => 'Upload file is required.',
+        'httpStatus' => 400,
+    ],
+    'UPLOAD-TOO-LARGE' => [
+        'message' => 'Upload exceeds size limit.',
+        'httpStatus' => 413,
+    ],
+    'UPLOAD-MIME-REJECTED' => [
+        'message' => 'Upload mime type is not allowed.',
+        'httpStatus' => 415,
+    ],
 ];

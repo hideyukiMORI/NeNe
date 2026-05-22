@@ -35,6 +35,9 @@ Every failure response uses the same envelope, documented in OpenAPI as `ApiFail
 | `TODO-ID-REQUIRED` | 400 | TODO id is required. | `/todo/item/id_X` with missing or non-numeric `id`. |
 | `TODO-NOT-FOUND` | 404 | TODO item was not found. | `/todo/item/id_X` where no row matches the signed-in user. |
 | `TODO-TITLE-REQUIRED` | 400 | TODO title is required. | `POST /todo/index` or `PUT /todo/item/id_X` with empty `title`. |
+| `UPLOAD-FILE-REQUIRED` | 400 | Upload file is required. | Thrown by `UploadedFile::validate()` when the upload is missing or `is_uploaded_file()` returns false. |
+| `UPLOAD-TOO-LARGE` | 413 | Upload exceeds size limit. | Thrown by `UploadedFile::validate(['maxBytes' => N])` when `size() > N`. |
+| `UPLOAD-MIME-REJECTED` | 415 | Upload mime type is not allowed. | Thrown by `UploadedFile::validate(['allowedMime' => [...]])` when `finfo` mime is not on the allowlist. |
 
 ## Adding a new error code
 
