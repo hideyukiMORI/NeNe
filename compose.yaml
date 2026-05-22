@@ -41,6 +41,15 @@ services:
     volumes:
       - .:/var/www/html
       - vendor:/var/www/html/vendor
+      # Composer's package archive cache is shared across every NeNe
+      # checkout / trial clone via the external `nene_composer_cache`
+      # named volume. A clone's vendor/ stays per-project (composer.lock
+      # may differ), but the downloaded `.zip` for each package is
+      # cached once and reused by every clone. Reduces a fresh
+      # `composer install` from ~30-45s to ~5s after the first run.
+      # The volume is created by `tools/nene-ft-new.sh` (or by hand:
+      # `docker volume create nene_composer_cache`).
+      - composer-cache:/root/.composer/cache
     command: >
       sh -lc "composer install --no-interaction --prefer-dist
       && ./init.sh
@@ -88,3 +97,9 @@ services:
 volumes:
   mysql-data:
   vendor:
+  # External so every NeNe checkout / trial clone references the same
+  # underlying Docker volume. See the comment on the `app` service for
+  # rationale.
+  composer-cache:
+    external: true
+    name: nene_composer_cache

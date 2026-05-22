@@ -105,6 +105,15 @@ PORT_APP=$((8080 + N))
 PORT_MYSQL=$((3307 + N))
 HEAD_SHA="$(git -C "$FRAMEWORK_ROOT" rev-parse --short HEAD)"
 
+echo "==> Ensuring shared composer cache volume"
+# `compose.yaml` references `nene_composer_cache` as an external volume so
+# every NeNe checkout / trial clone reuses the same composer package cache.
+# Create it lazily so the bootstrap script does not require an out-of-band
+# `docker volume create` step.
+if ! docker volume inspect nene_composer_cache >/dev/null 2>&1; then
+    docker volume create nene_composer_cache >/dev/null
+fi
+
 echo "==> Cloning framework ($HEAD_SHA) into $CLONE_DIR"
 git clone --quiet "$FRAMEWORK_ROOT" "$CLONE_DIR"
 

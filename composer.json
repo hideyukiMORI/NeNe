@@ -63,6 +63,12 @@
             "@test",
             "@test:http",
             "@analyze"
+        ],
+        "ci": [
+            "@test",
+            "@test:http",
+            "@analyze",
+            "@format:check"
         ]
     }
 }
