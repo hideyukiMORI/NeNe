@@ -57,7 +57,57 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 $options = getopt('', ['dsn:', 'user:', 'pass:', 'help']) ?: [];
 
 if (isset($options['help'])) {
-    fwrite(STDOUT, file_get_contents(__FILE__) ? "See the docblock at the top of cli/schemaDiff.php for full usage.\n" : '');
+    fwrite(STDOUT, <<<HELP
+
+NeNe schema-diff — operator-applied migration tool (ADR-0009).
+
+USAGE
+    php cli/schemaDiff.php --dsn=<pdo-dsn> [--user=<u>] [--pass=<p>]
+
+    Or via composer:
+    composer schema:diff -- --dsn=<pdo-dsn> [--user=<u>] [--pass=<p>]
+
+OPTIONS
+    --dsn=…       PDO DSN (required). MySQL or SQLite only.
+    --user=…      Username (MySQL).
+    --pass=…      Password (MySQL).
+    --help        Show this help.
+
+EXAMPLES
+    # MySQL
+    php cli/schemaDiff.php \\
+        --dsn='mysql:host=127.0.0.1;port=3306;dbname=nene' \\
+        --user=nene --pass=nene
+
+    # SQLite
+    php cli/schemaDiff.php --dsn='sqlite:/var/www/html/data/nene.sqlite'
+
+    # Redirect for review-before-apply (recommended)
+    composer schema:diff -- --dsn='mysql:...' --user=u --pass=p \\
+        > migrations/\$(date +%F)-change.sql
+
+OUTPUT
+    stdout  the SQL to apply (review-then-pipe-to-mysql)
+    stderr  annotations and warnings (not part of redirected SQL)
+
+EXIT CODES
+    0  schema is in sync OR diff emitted successfully
+    1  CLI usage error (missing --dsn, unsupported driver)
+    2  database connection / introspection error
+
+NOT EMITTED (review-before-apply rule)
+    The CLI never emits destructive SQL. Drops, column renames, type
+    changes, constraint changes, and default-value-only changes are
+    reported as stderr warnings only. Operators hand-write those.
+
+SEE ALSO
+    docs/development/schema-migrations.md
+    docs/adr/0009-schema-migration-story.md
+    composer schema:generate  (regenerate docker entrypoint snapshot)
+    composer schema:check     (drift check vs snapshot)
+
+
+HELP);
     exit(0);
 }
 
