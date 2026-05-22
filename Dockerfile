@@ -5,8 +5,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git unzip libsqlite3-dev \
-    && docker-php-ext-install pdo_mysql pdo_sqlite \
+    && apt-get install -y --no-install-recommends git unzip libsqlite3-dev libicu-dev \
+    && docker-php-ext-install pdo_mysql pdo_sqlite intl \
     && a2enmod rewrite headers \
     && echo "ServerName localhost" > /etc/apache2/conf-available/servername.conf \
     && a2enconf servername \
