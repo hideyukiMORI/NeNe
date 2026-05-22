@@ -14,6 +14,11 @@ RUN apt-get update \
     && sed -ri 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.conf \
     && rm -rf /var/lib/apt/lists/*
 
+# PHP ini drop-ins (NeNe production-mode overrides — currently: expose_php Off
+# to suppress X-Powered-By in HTTP responses). Loaded last in conf.d/ so it
+# wins over any earlier ini.
+COPY docker/php/conf.d/zz-nene.ini /usr/local/etc/php/conf.d/zz-nene.ini
+
 WORKDIR /var/www/html
 
 # Mark the host bind-mounted working tree as safe so git invocations inside
