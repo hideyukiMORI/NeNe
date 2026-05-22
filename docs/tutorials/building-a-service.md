@@ -338,6 +338,50 @@ GET  /article/item/id_1 -> ArticleController::itemGetRest()
 
 State-changing REST requests such as `POST`, `PUT`, `PATCH`, and `DELETE` require a valid login session and `X-CSRF-Token` when the user is logged in. `/session/login` returns the token as `Data.csrfToken`.
 
+### Normalize the row before returning
+
+Mappers return raw `PDOStatement::fetch(PDO::FETCH_ASSOC)` rows. Every value is a `string` (or `null`) — PDO does not type-cast columns by default. Returning a raw row to JSON ships `"id": "1"`, `"is_completed": "0"`, and other loose types.
+
+Define a small per-controller `normalizeRow()` helper that casts each column to its intended PHP type, and use it on every row the controller returns:
+
+```php
+class ArticleController extends ControllerBase
+{
+    public function itemGetRest(): array
+    {
+        // ... resolve $id, fetch the row ...
+        return $this->API_RESPONSE->success([
+            'article' => $this->normalizeRow($article),
+        ]);
+    }
+
+    public function indexGetRest(): array
+    {
+        $mapper = new Database\ArticleMapper();
+        return $this->API_RESPONSE->success([
+            'articles' => array_map([$this, 'normalizeRow'], $mapper->findPublishedRows()),
+        ]);
+    }
+
+    private function normalizeRow(array $row): array
+    {
+        return [
+            'id' => (int)$row['id'],
+            'title' => (string)$row['title'],
+            'is_published' => (bool)$row['is_published'],
+            'created_at' => (string)$row['created_at'],
+        ];
+    }
+}
+```
+
+The helper is intentionally per-entity — each table has its own column list and cast intent. `TodoController::normalizeRow()` in the bundled sample app is the canonical example (`is_completed` cast to `bool`, IDs to `int`).
+
+Two reasons to do this even on a one-off endpoint:
+
+- JSON consumers (browsers, JS clients, the contract test) rely on declared types. `"is_published": "0"` evaluates truthy in JavaScript.
+- The OpenAPI schema you author (`type: integer`, `type: boolean`) does not reshape the response — it only describes the intended shape. The contract test asserts the wire data conforms.
+
 ## Keep Controllers Thin
 
 Small read-only or single-write endpoints may call a mapper directly from the controller. Move logic into a service/use-case class when a controller method starts to coordinate business decisions, multiple mappers, multiple SQL statements, or a transaction.
