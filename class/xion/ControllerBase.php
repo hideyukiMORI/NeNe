@@ -516,4 +516,33 @@ abstract class ControllerBase
     {
         throw new Xion\HttpTermination(Xion\HttpResponse::html((string)file_get_contents(DIR_ROOT . '/404.html'), 404));
     }
+
+    /**
+     * Send a binary file response and terminate dispatch.
+     *
+     * `*Rest` and `*Action` handlers normally return arrays or `void`;
+     * `ControllerBase::run()` then JSON-encodes or Smarty-renders the
+     * response. To serve a binary file (PDF, image, generated CSV)
+     * inline from a REST handler, call `$this->sendFile($path, $mime)`
+     * — it throws {@see Xion\HttpTermination} carrying a
+     * {@see Xion\HttpResponse::file()} that the top-level catch in
+     * `htdocs/index.php` emits unchanged.
+     *
+     * The file must exist and be readable. Pass `$downloadName` to add
+     * `Content-Disposition: attachment; filename=...`; omit it for inline
+     * rendering (browser previews PDFs / images instead of saving).
+     *
+     * See FT12 F-2 / ADR-N/A. Option (c) of the trial report.
+     *
+     * @return never
+     */
+    final protected function sendFile(string $path, string $mime, ?string $downloadName = null): never
+    {
+        if (!is_file($path) || !is_readable($path)) {
+            $this->notFound();
+        }
+        throw new Xion\HttpTermination(
+            Xion\HttpResponse::file((string)file_get_contents($path), $mime, $downloadName)
+        );
+    }
 }
