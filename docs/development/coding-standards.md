@@ -82,6 +82,24 @@ REST endpoints should make accepted HTTP methods explicit.
 - Define error code messages and HTTP status values in the server-side catalog at `config/error_codes.php`; controllers should reference codes, not inline messages or direct HTTP status headers.
 - Treat browser-visible error-code assets as exports or compatibility files, not the source of truth.
 
+## Action Method Precedence
+
+When resolving a URL, the dispatcher (`class/xion/Dispatcher.php::resolveActionRoute`) looks for handler methods on the controller in the following order:
+
+1. `{action}{Verb}Rest` — e.g. `itemGetRest`, `itemPostRest` (method-specific REST)
+2. `{action}Rest` — legacy verb-agnostic REST handler
+3. `{action}Action` — server-rendered HTML handler
+
+The first match wins. **There is no `Accept`-header content negotiation.** A request to `/foo/bar` with `GET` resolves to `barGetRest()` if it exists, regardless of whether the client asked for `text/html` or `application/json`.
+
+A consequence worth flagging:
+
+- **Do not define `{action}{Verb}Rest` and `{action}Action` for the same `action` on the same controller.** The HTML caller will receive JSON because the REST handler wins. If a single URL needs both shapes, split them — for example, `/notes/index` (HTML) and `/notes/list` (JSON) — or branch on `$this->method` inside `actionAction()` and emit JSON manually only for explicit API verbs.
+- The `*Rest` and `*Action` *can* coexist on the same controller for **different** actions (most controllers do this). The restriction is only per `action` name + verb.
+- Surveyed and confirmed in FT7 (`docs/field-trials/2026-05-field-trial-7.md` F-4): trying to mix shapes silently breaks the FT5 unauthenticated-HTML redirect because the REST handler is preferred and returns a JSON 401 envelope instead.
+
+The HTML controller review checklist (`docs/review/html-controller.md`) already encodes the recommendation; this section explains the underlying dispatcher rule so reviewers know what they are enforcing.
+
 ## URL Parameter Format
 
 NeNe encodes URL parameters as `key_value` path segments after the controller and action, separated by underscores. This is a legacy-preserved convention — NeNe intentionally keeps the older PHP framework shape rather than adopting modern REST `{id}` templates.
