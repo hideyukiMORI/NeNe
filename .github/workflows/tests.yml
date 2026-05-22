@@ -64,6 +64,13 @@ jobs:
       - name: Prepare environment
         run: cp .env.example .env
 
+      - name: Ensure shared composer cache volume exists
+        # compose.yaml references `nene_composer_cache` as an external
+        # named volume so every NeNe checkout / FT clone shares it. On
+        # a fresh CI runner the volume does not exist yet — create it
+        # idempotently. (Local devs get this via tools/nene-ft-new.sh.)
+        run: docker volume create nene_composer_cache
+
       - name: Build app image with layer cache
         uses: docker/build-push-action@v6
         with:
