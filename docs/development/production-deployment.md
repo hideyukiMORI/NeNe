@@ -43,6 +43,8 @@ The full list of env vars NeNe reads at boot lives in `ini/xSystemIni.php`. The 
 | `NENE_SECURITY_REFERRER_POLICY` | unset              | `strict-origin-when-cross-origin` | Referrer-Policy. |
 | `NENE_SECURITY_HSTS`     | unset                     | `max-age=31536000; includeSubDomains` | Strict-Transport-Security. **Only** set after HTTPS termination is verified — HSTS over plain HTTP traps browsers in a broken state. |
 | `NENE_SECURITY_PERMISSIONS_POLICY` | unset           | `geolocation=(), microphone=(), camera=()` | Permissions-Policy. Deny by default; expand as features require. |
+| `NENE_REQUEST_ID_HEADER` | `X-Request-ID` (compose default) | `X-Request-ID` or the proxy's existing name | Response header that carries the per-request id (#393). Empty string disables emission (logs still tag). See `docs/development/observability.md`. |
+| `NENE_REQUEST_ID_TRUST_INBOUND` | `1` (compose default)   | `1` behind a trusted proxy; `0` when the app is the public boundary | Whether to honor an inbound request-id. Generates fresh when `0`. |
 
 **Important**: setting `NENE_APP_ENV=production` *alone* flips the safe defaults of `NENE_APP_DEBUG` (`0`) and `NENE_SESSION_SECURE` (`1`). If you set `NENE_APP_DEBUG=1` and forget `NENE_APP_ENV`, your "production" deploy will not have `Secure` cookies. The overlay `compose.prod.yaml` sets all three explicitly so this footgun is closed for the bundled deploy.
 
