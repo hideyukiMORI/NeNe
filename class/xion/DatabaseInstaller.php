@@ -116,102 +116,39 @@ final class DatabaseInstaller
     }
 
     /**
-     * Create MySQL tables aligned with Docker initialization.
+     * Create MySQL tables from the PHP `SchemaDefinition` (ADR-0005).
      */
     private static function createMySQLTables(PDO $pdo): void
     {
-        $pdo->exec(<<<'SQL'
-CREATE TABLE IF NOT EXISTS users (
-    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    user_id VARCHAR(64) NOT NULL,
-    user_pass VARCHAR(255) NOT NULL,
-    user_name VARCHAR(255) NOT NULL,
-    e_mail VARCHAR(255) NOT NULL,
-    is_deleted TINYINT(1) NOT NULL DEFAULT 0,
-    PRIMARY KEY (id),
-    UNIQUE KEY users_user_id_unique (user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-SQL);
-
-        $pdo->exec(<<<'SQL'
-CREATE TABLE IF NOT EXISTS todos (
-    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    user_id BIGINT UNSIGNED NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    is_completed TINYINT(1) NOT NULL DEFAULT 0,
-    is_deleted TINYINT(1) NOT NULL DEFAULT 0,
-    PRIMARY KEY (id),
-    KEY todos_user_id_index (user_id),
-    CONSTRAINT todos_user_id_foreign
-        FOREIGN KEY (user_id) REFERENCES users (id)
-        ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-SQL);
+        foreach (SchemaCompiler::mysqlStatements() as $statement) {
+            $pdo->exec($statement);
+        }
     }
 
     /**
-     * Create SQLite tables aligned with the MySQL sample layout.
+     * Create SQLite tables (and their indexes) from the PHP
+     * `SchemaDefinition` (ADR-0005).
      */
     private static function createSQLiteTables(PDO $pdo): void
     {
-        $pdo->exec(<<<'SQL'
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id TEXT NOT NULL,
-    user_pass TEXT NOT NULL,
-    user_name TEXT NOT NULL,
-    e_mail TEXT NOT NULL,
-    is_deleted INTEGER NOT NULL DEFAULT 0,
-    UNIQUE (user_id)
-)
-SQL);
-
-        $pdo->exec(<<<'SQL'
-CREATE TABLE IF NOT EXISTS todos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id INTEGER NOT NULL,
-    title TEXT NOT NULL,
-    is_completed INTEGER NOT NULL DEFAULT 0,
-    is_deleted INTEGER NOT NULL DEFAULT 0,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-)
-SQL);
-
-        $pdo->exec('CREATE INDEX IF NOT EXISTS todos_user_id_index ON todos (user_id)');
+        foreach (SchemaCompiler::sqliteStatements() as $statement) {
+            $pdo->exec($statement);
+        }
+        foreach (SchemaCompiler::sqliteIndexStatements() as $statement) {
+            $pdo->exec($statement);
+        }
     }
 
     /**
-     * Keep SQLite updated_at close to MySQL's ON UPDATE CURRENT_TIMESTAMP.
+     * Apply SQLite triggers that simulate MySQL's
+     * `ON UPDATE CURRENT_TIMESTAMP` on every `datetime-touch` column
+     * (ADR-0005).
      */
     private static function createSQLiteTimestampTriggers(PDO $pdo): void
     {
-        $pdo->exec(<<<'SQL'
-CREATE TRIGGER IF NOT EXISTS users_updated_at_trigger
-AFTER UPDATE ON users
-FOR EACH ROW
-WHEN NEW.updated_at = OLD.updated_at
-BEGIN
-    UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
-END
-SQL);
-
-        $pdo->exec(<<<'SQL'
-CREATE TRIGGER IF NOT EXISTS todos_updated_at_trigger
-AFTER UPDATE ON todos
-FOR EACH ROW
-WHEN NEW.updated_at = OLD.updated_at
-BEGIN
-    UPDATE todos SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
-END
-SQL);
+        foreach (SchemaCompiler::sqliteTriggerStatements() as $statement) {
+            $pdo->exec($statement);
+        }
     }
 
     /**

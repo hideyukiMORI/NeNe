@@ -46,6 +46,8 @@
     },
     "scripts": {
         "setup": "@php cli/setupDatabase.php --env=.env --yes",
+        "schema:generate": "@php cli/generateSchemaSql.php",
+        "schema:check": "@php cli/generateSchemaSql.php --check",
         "test": "phpunit --testsuite unit",
         "test:http": [
             "@php tools/test-http-preflight.php",
