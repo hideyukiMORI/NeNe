@@ -118,19 +118,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/BasicSuccessEnvelope"
         "403":
-          description: CSRF token was missing or invalid (`CSRF-TOKEN-INVALID`).
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiFailureEnvelope"
-              examples:
-                csrfTokenInvalid:
-                  value:
-                    Result: true
-                    Data:
-                      status: failure
-                      errorCode: CSRF-TOKEN-INVALID
-                      errorMessage: Invalid CSRF token.
+          $ref: "#/components/responses/CsrfTokenInvalid"
   /todo/index:
     get:
       tags:
@@ -147,19 +135,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/TodoListSuccessEnvelope"
         "401":
-          description: Session is missing or expired (`SESSION-CLOSED`).
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiFailureEnvelope"
-              examples:
-                sessionClosed:
-                  value:
-                    Result: true
-                    Data:
-                      status: failure
-                      errorCode: SESSION-CLOSED
-                      errorMessage: Session timeout. Please log in again.
+          $ref: "#/components/responses/SessionClosed"
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
     post:
@@ -188,19 +164,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/TodoSuccessEnvelope"
         "401":
-          description: Session is missing or expired (`SESSION-CLOSED`).
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiFailureEnvelope"
-              examples:
-                sessionClosed:
-                  value:
-                    Result: true
-                    Data:
-                      status: failure
-                      errorCode: SESSION-CLOSED
-                      errorMessage: Session timeout. Please log in again.
+          $ref: "#/components/responses/SessionClosed"
         "400":
           description: TODO title was missing (`TODO-TITLE-REQUIRED`).
           content:
@@ -216,19 +180,7 @@ paths:
                       errorCode: TODO-TITLE-REQUIRED
                       errorMessage: TODO title is required.
         "403":
-          description: CSRF token was missing or invalid (`CSRF-TOKEN-INVALID`).
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiFailureEnvelope"
-              examples:
-                csrfTokenInvalid:
-                  value:
-                    Result: true
-                    Data:
-                      status: failure
-                      errorCode: CSRF-TOKEN-INVALID
-                      errorMessage: Invalid CSRF token.
+          $ref: "#/components/responses/CsrfTokenInvalid"
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
   /todo/item/id_{id}:
@@ -263,19 +215,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/TodoSuccessEnvelope"
         "401":
-          description: Session is missing or expired (`SESSION-CLOSED`).
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiFailureEnvelope"
-              examples:
-                sessionClosed:
-                  value:
-                    Result: true
-                    Data:
-                      status: failure
-                      errorCode: SESSION-CLOSED
-                      errorMessage: Session timeout. Please log in again.
+          $ref: "#/components/responses/SessionClosed"
         "400":
           description: TODO id or title was invalid (`TODO-ID-REQUIRED` / `TODO-TITLE-REQUIRED`).
           content:
@@ -300,19 +240,7 @@ paths:
         "404":
           $ref: "#/components/responses/TodoNotFound"
         "403":
-          description: CSRF token was missing or invalid (`CSRF-TOKEN-INVALID`).
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiFailureEnvelope"
-              examples:
-                csrfTokenInvalid:
-                  value:
-                    Result: true
-                    Data:
-                      status: failure
-                      errorCode: CSRF-TOKEN-INVALID
-                      errorMessage: Invalid CSRF token.
+          $ref: "#/components/responses/CsrfTokenInvalid"
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
     delete:
@@ -333,19 +261,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/TodoDeleteSuccessEnvelope"
         "401":
-          description: Session is missing or expired (`SESSION-CLOSED`).
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiFailureEnvelope"
-              examples:
-                sessionClosed:
-                  value:
-                    Result: true
-                    Data:
-                      status: failure
-                      errorCode: SESSION-CLOSED
-                      errorMessage: Session timeout. Please log in again.
+          $ref: "#/components/responses/SessionClosed"
         "400":
           description: TODO id was missing or invalid (`TODO-ID-REQUIRED`).
           content:
@@ -363,19 +279,7 @@ paths:
         "404":
           $ref: "#/components/responses/TodoNotFound"
         "403":
-          description: CSRF token was missing or invalid (`CSRF-TOKEN-INVALID`).
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiFailureEnvelope"
-              examples:
-                csrfTokenInvalid:
-                  value:
-                    Result: true
-                    Data:
-                      status: failure
-                      errorCode: CSRF-TOKEN-INVALID
-                      errorMessage: Invalid CSRF token.
+          $ref: "#/components/responses/CsrfTokenInvalid"
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
 components:
@@ -400,6 +304,34 @@ components:
         type: integer
         minimum: 1
   responses:
+    SessionClosed:
+      description: Session is missing or expired (`SESSION-CLOSED`).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiFailureEnvelope"
+          examples:
+            sessionClosed:
+              value:
+                Result: true
+                Data:
+                  status: failure
+                  errorCode: SESSION-CLOSED
+                  errorMessage: Session timeout. Please log in again.
+    CsrfTokenInvalid:
+      description: CSRF token was missing or invalid (`CSRF-TOKEN-INVALID`).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiFailureEnvelope"
+          examples:
+            csrfTokenInvalid:
+              value:
+                Result: true
+                Data:
+                  status: failure
+                  errorCode: CSRF-TOKEN-INVALID
+                  errorMessage: Invalid CSRF token.
     TodoNotFound:
       description: TODO item was not found for the signed-in user (`TODO-NOT-FOUND`).
       content:
