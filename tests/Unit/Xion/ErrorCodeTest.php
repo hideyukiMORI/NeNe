@@ -46,4 +46,31 @@ final class ErrorCodeTest extends TestCase
     {
         self::assertSame(500, ErrorCode::getInstance()->getHttpStatus('UNKNOWN-CODE'));
     }
+
+    /**
+     * The runtime catalog (`config/error_codes.php`) and the operator-facing
+     * markdown table (`docs/development/error-codes.md`) must stay in sync.
+     * FT10 surfaced that there is no CI check catching drift between the two:
+     * a new code only added to the PHP file silently ships undocumented.
+     */
+    public function testEveryRuntimeCodeAppearsInDocsMarkdownTable(): void
+    {
+        $catalog = require dirname(__DIR__, 3) . '/config/error_codes.php';
+        $markdown = (string)file_get_contents(dirname(__DIR__, 3) . '/docs/development/error-codes.md');
+
+        $missing = [];
+        foreach (array_keys($catalog) as $code) {
+            // The markdown row uses backtick-quoted code at the start of the cell.
+            if (!str_contains($markdown, '`' . $code . '`')) {
+                $missing[] = $code;
+            }
+        }
+
+        self::assertSame(
+            [],
+            $missing,
+            'These config/error_codes.php codes are not documented in docs/development/error-codes.md: '
+                . implode(', ', $missing)
+        );
+    }
 }
