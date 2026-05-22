@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 $baseUrl = getenv('NENE_HTTP_BASE_URL');
 $errorBaseUrl = getenv('NENE_HTTP_ERROR_BASE_URL');
+$bearerToken = getenv('NENE_HTTP_BEARER_TOKEN');
 
 $line = static function (string $text): void {
     fwrite(STDERR, $text . PHP_EOL);
@@ -39,6 +40,11 @@ if ($baseUrl === false || $baseUrl === '') {
         $line('  NENE_HTTP_ERROR_BASE_URL is not set (the error-exposure test will be skipped).');
     } else {
         $line('  NENE_HTTP_ERROR_BASE_URL = ' . $errorBaseUrl);
+    }
+    if ($bearerToken === false || $bearerToken === '') {
+        $line('  NENE_HTTP_BEARER_TOKEN is not set (the Bearer-auth tests will be skipped).');
+    } else {
+        $line('  NENE_HTTP_BEARER_TOKEN is set (Bearer-auth tests will run).');
     }
 }
 
