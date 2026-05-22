@@ -15,8 +15,7 @@ namespace Nene\Xion;
  * - Adds emitted as SQL:
  *   - new tables (full `CREATE TABLE` via {@see SchemaCompiler})
  *   - new columns (`ALTER TABLE … ADD COLUMN …`)
- *   - new SQLite indexes (deferred to follow-up — current scope is
- *     MySQL-first; SQLite index re-creation is operator-side)
+ *   - new indexes (`CREATE INDEX … ON … (…)`) — MySQL + SQLite (#421)
  * - Drops, renames, type changes, constraint changes: **warning only**.
  *   The operator hand-writes those — destructive ops should never be
  *   produced by an automated tool without data semantics.
@@ -36,8 +35,11 @@ final class SchemaDiffer
      * `$liveTables` shape:
      *
      *     [
-     *       'users' => ['columns' => ['id' => [...], ...]],
-     *       'todos' => ['columns' => [...]],
+     *       'users' => [
+     *           'columns' => ['id' => [...], ...],
+     *           'indexes' => ['users_user_id_unique' => ['user_id']],
+     *       ],
+     *       'todos' => ['columns' => [...], 'indexes' => [...]],
      *     ]
      *
      * `$definitionTables` shape: `SchemaDefinition::tables()` output.
@@ -49,6 +51,7 @@ final class SchemaDiffer
      * @return array{
      *     newTables: array<string,string>,
      *     newColumns: array<int,array{table:string,column:string,sql:string}>,
+     *     newIndexes: array<int,array{table:string,index:string,sql:string}>,
      *     warnings: array<int,string>,
      *     inSync: bool
      * }
@@ -57,6 +60,7 @@ final class SchemaDiffer
     {
         $newTables  = [];
         $newColumns = [];
+        $newIndexes = [];
         $warnings   = [];
 
         foreach ($definitionTables as $tableName => $tableSpec) {
@@ -84,6 +88,26 @@ final class SchemaDiffer
                     );
                 }
             }
+            $liveIndexes = $liveTables[$tableName]['indexes'] ?? [];
+            $defIndexes  = $tableSpec['indexes'] ?? [];
+            foreach ($defIndexes as $indexName => $indexCols) {
+                if (!isset($liveIndexes[$indexName])) {
+                    $newIndexes[] = [
+                        'table' => $tableName,
+                        'index' => $indexName,
+                        'sql'   => self::createIndexSql($tableName, $indexName, $indexCols),
+                    ];
+                }
+            }
+            foreach (array_keys($liveIndexes) as $liveIndex) {
+                if (!isset($defIndexes[$liveIndex])) {
+                    $warnings[] = sprintf(
+                        'index `%s` on `%s` exists in the live database but not in SchemaDefinition — drop SQL must be hand-written (ADR-0009 destructive-op rule).',
+                        $liveIndex,
+                        $tableName
+                    );
+                }
+            }
         }
         foreach (array_keys($liveTables) as $liveTable) {
             if (!isset($definitionTables[$liveTable])) {
@@ -97,8 +121,9 @@ final class SchemaDiffer
         return [
             'newTables'  => $newTables,
             'newColumns' => $newColumns,
+            'newIndexes' => $newIndexes,
             'warnings'   => $warnings,
-            'inSync'     => $newTables === [] && $newColumns === [],
+            'inSync'     => $newTables === [] && $newColumns === [] && $newIndexes === [],
         ];
     }
 
@@ -122,5 +147,20 @@ final class SchemaDiffer
             ? SchemaCompiler::sqliteColumn($column, $colSpec)
             : SchemaCompiler::mysqlColumn($column, $colSpec);
         return 'ALTER TABLE ' . $table . ' ADD COLUMN ' . $columnDdl . ';';
+    }
+
+    /**
+     * `CREATE INDEX` syntax is shared verbatim between MySQL and SQLite,
+     * so the same emitter works for both drivers. Unique-constraint
+     * indexes from the `unique` key of {@see SchemaDefinition::tables()}
+     * are part of the original `CREATE TABLE` and are not re-emitted
+     * here — only entries from the `indexes` key are subject to the
+     * diff path.
+     *
+     * @param array<int,string> $columns
+     */
+    private static function createIndexSql(string $table, string $index, array $columns): string
+    {
+        return 'CREATE INDEX ' . $index . ' ON ' . $table . ' (' . implode(', ', $columns) . ');';
     }
 }

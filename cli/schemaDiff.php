@@ -168,6 +168,10 @@ foreach ($diff['newColumns'] as $entry) {
     fwrite(STDOUT, "\n-- new column: {$entry['table']}.{$entry['column']}\n");
     fwrite(STDOUT, $entry['sql'] . "\n");
 }
+foreach ($diff['newIndexes'] as $entry) {
+    fwrite(STDOUT, "\n-- new index: {$entry['index']} on {$entry['table']}\n");
+    fwrite(STDOUT, $entry['sql'] . "\n");
+}
 
 exit(0);
 
@@ -204,6 +208,20 @@ function introspectMysql(PDO $pdo): array
         'SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS '
         . 'WHERE TABLE_SCHEMA = :schema AND TABLE_NAME = :table'
     );
+    // STATISTICS lists every non-PK index. PRIMARY is excluded so the
+    // diff does not chase a phantom "missing index" for the PK that
+    // `CREATE TABLE` already declared. UNIQUE indexes (NON_UNIQUE=0)
+    // are likewise excluded — they belong to `unique` constraints in
+    // `SchemaDefinition` and live alongside the table definition,
+    // not in the `indexes` map the diff path watches. ADR-0009 keeps
+    // constraint changes in the warning-only path.
+    $indexStmt = $pdo->prepare(
+        'SELECT INDEX_NAME, COLUMN_NAME, SEQ_IN_INDEX '
+        . 'FROM INFORMATION_SCHEMA.STATISTICS '
+        . 'WHERE TABLE_SCHEMA = :schema AND TABLE_NAME = :table '
+        . 'AND INDEX_NAME != "PRIMARY" AND NON_UNIQUE = 1 '
+        . 'ORDER BY INDEX_NAME, SEQ_IN_INDEX'
+    );
 
     $result = [];
     foreach ($tables as $table) {
@@ -213,7 +231,14 @@ function introspectMysql(PDO $pdo): array
             $name = (string)$row['COLUMN_NAME'];
             $columns[$name] = ['data_type' => (string)$row['DATA_TYPE']];
         }
-        $result[$table] = ['columns' => $columns];
+        $indexStmt->execute([':schema' => $database, ':table' => $table]);
+        $indexes = [];
+        foreach ($indexStmt->fetchAll() as $row) {
+            $idxName = (string)$row['INDEX_NAME'];
+            $indexes[$idxName] = $indexes[$idxName] ?? [];
+            $indexes[$idxName][] = (string)$row['COLUMN_NAME'];
+        }
+        $result[$table] = ['columns' => $columns, 'indexes' => $indexes];
     }
     return $result;
 }
@@ -235,7 +260,31 @@ function introspectSqlite(PDO $pdo): array
             $name = (string)$row['name'];
             $columns[$name] = ['data_type' => (string)$row['type']];
         }
-        $result[$table] = ['columns' => $columns];
+        // `PRAGMA index_list` returns user-defined indexes plus those
+        // SQLite synthesizes for UNIQUE / PRIMARY KEY constraints.
+        // The synthesized ones are prefixed `sqlite_autoindex_`.
+        // UNIQUE-named indexes (PRAGMA's `unique` column = 1) belong
+        // to constraint declarations and are tracked by `unique` in
+        // SchemaDefinition, not by `indexes` — so they are excluded
+        // from the diff path. ADR-0009 keeps constraint changes in
+        // the warning-only path.
+        $indexListStmt = $pdo->query('PRAGMA index_list(' . $table . ')');
+        $indexes = [];
+        foreach ($indexListStmt->fetchAll() as $indexRow) {
+            $idxName = (string)$indexRow['name'];
+            if (str_starts_with($idxName, 'sqlite_autoindex_')) {
+                continue;
+            }
+            if ((int)$indexRow['unique'] === 1) {
+                continue;
+            }
+            $infoStmt = $pdo->query('PRAGMA index_info(' . $idxName . ')');
+            $indexes[$idxName] = [];
+            foreach ($infoStmt->fetchAll() as $infoRow) {
+                $indexes[$idxName][] = (string)$infoRow['name'];
+            }
+        }
+        $result[$table] = ['columns' => $columns, 'indexes' => $indexes];
     }
     return $result;
 }

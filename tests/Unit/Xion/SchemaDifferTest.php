@@ -199,4 +199,104 @@ final class SchemaDifferTest extends TestCase
         $diff = SchemaDiffer::diff($live, $tables, SchemaDiffer::DRIVER_MYSQL);
         self::assertFalse($diff['inSync']);
     }
+
+    public function testNewIndexEmitsCreateIndex(): void
+    {
+        // The table itself is in sync — the only change is a new
+        // secondary index added to SchemaDefinition (#421).
+        $tables = [
+            'todos' => [
+                'columns' => ['id' => ['type' => 'pk-bigint'], 'user_id' => ['type' => 'bigint']],
+                'indexes' => ['todos_user_id_index' => ['user_id']],
+            ],
+        ];
+        $live = [
+            'todos' => [
+                'columns' => ['id' => ['data_type' => 'bigint'], 'user_id' => ['data_type' => 'bigint']],
+                'indexes' => [],
+            ],
+        ];
+        $diff = SchemaDiffer::diff($live, $tables, SchemaDiffer::DRIVER_MYSQL);
+
+        self::assertFalse($diff['inSync']);
+        self::assertCount(1, $diff['newIndexes']);
+        self::assertSame('todos', $diff['newIndexes'][0]['table']);
+        self::assertSame('todos_user_id_index', $diff['newIndexes'][0]['index']);
+        self::assertSame(
+            'CREATE INDEX todos_user_id_index ON todos (user_id);',
+            $diff['newIndexes'][0]['sql']
+        );
+    }
+
+    public function testCompositeIndexEmitsBothColumns(): void
+    {
+        $tables = [
+            'todos' => [
+                'columns' => [
+                    'id' => ['type' => 'pk-bigint'],
+                    'user_id' => ['type' => 'bigint'],
+                    'is_completed' => ['type' => 'bool', 'default' => 0],
+                ],
+                'indexes' => ['todos_user_completed' => ['user_id', 'is_completed']],
+            ],
+        ];
+        $live = [
+            'todos' => [
+                'columns' => [
+                    'id' => ['data_type' => 'bigint'],
+                    'user_id' => ['data_type' => 'bigint'],
+                    'is_completed' => ['data_type' => 'tinyint'],
+                ],
+                'indexes' => [],
+            ],
+        ];
+        $diff = SchemaDiffer::diff($live, $tables, SchemaDiffer::DRIVER_MYSQL);
+
+        self::assertSame(
+            'CREATE INDEX todos_user_completed ON todos (user_id, is_completed);',
+            $diff['newIndexes'][0]['sql']
+        );
+    }
+
+    public function testExtraLiveIndexEmitsWarningNotSql(): void
+    {
+        $tables = [
+            'todos' => [
+                'columns' => ['id' => ['type' => 'pk-bigint']],
+                'indexes' => [],
+            ],
+        ];
+        $live = [
+            'todos' => [
+                'columns' => ['id' => ['data_type' => 'bigint']],
+                'indexes' => ['orphan_index' => ['id']],
+            ],
+        ];
+        $diff = SchemaDiffer::diff($live, $tables, SchemaDiffer::DRIVER_MYSQL);
+
+        self::assertTrue($diff['inSync']);
+        self::assertSame([], $diff['newIndexes']);
+        self::assertCount(1, $diff['warnings']);
+        self::assertStringContainsString('index `orphan_index` on `todos`', $diff['warnings'][0]);
+    }
+
+    public function testIndexInSyncDoesNotEmitDuplicate(): void
+    {
+        $tables = [
+            'todos' => [
+                'columns' => ['id' => ['type' => 'pk-bigint'], 'user_id' => ['type' => 'bigint']],
+                'indexes' => ['todos_user_id_index' => ['user_id']],
+            ],
+        ];
+        $live = [
+            'todos' => [
+                'columns' => ['id' => ['data_type' => 'bigint'], 'user_id' => ['data_type' => 'bigint']],
+                'indexes' => ['todos_user_id_index' => ['user_id']],
+            ],
+        ];
+        $diff = SchemaDiffer::diff($live, $tables, SchemaDiffer::DRIVER_MYSQL);
+
+        self::assertTrue($diff['inSync']);
+        self::assertSame([], $diff['newIndexes']);
+    }
 }
