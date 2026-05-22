@@ -494,7 +494,15 @@ abstract class ControllerBase
     /**
      * Move URL.
      *
-     * Moves to the specified URL.
+     * Redirects to the specified URL. The default mode (`$flag = true`)
+     * builds an in-service path under `URI_ROOT`. The opt-out mode
+     * (`$flag = false`) emits the URI verbatim — an open redirect
+     * surface unless the destination host is allow-listed via
+     * `NENE_ALLOWED_EXTERNAL_REDIRECTS` (#408, eval report PR #401 § 4).
+     *
+     * When the env is unset, external redirects are denied by default
+     * (the safer choice — explicit opt-in by the operator). The denial
+     * raises an `HttpTermination(403)`.
      *
      * @param string  $uri  URI.
      * @param boolean $flag In service or not (true = inside service | false = outside).
@@ -505,6 +513,8 @@ abstract class ControllerBase
     {
         if ($flag) {
             $uri = rtrim(URI_ROOT, '/') . '/' . ltrim($uri, '/');
+        } else {
+            Xion\RedirectGuard::ensureExternalAllowed($uri);
         }
         throw new Xion\HttpTermination(Xion\HttpResponse::redirect($uri));
     }

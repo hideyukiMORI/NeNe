@@ -47,6 +47,7 @@ The full list of env vars NeNe reads at boot lives in `ini/xSystemIni.php`. The 
 | `NENE_REQUEST_ID_TRUST_INBOUND` | `1` (compose default)   | `1` behind a trusted proxy; `0` when the app is the public boundary | Whether to honor an inbound request-id. Generates fresh when `0`. |
 | `NENE_AGENT_BEARER_TOKEN` | empty (feature off) | a long random secret (e.g. `openssl rand -hex 32`) | Optional `Authorization: Bearer` for stateless agent / MCP clients (#399, ADR-0008). Empty disables the feature. See `docs/development/agent-bearer-auth.md`. |
 | `NENE_AGENT_BEARER_USER` | `admin` (compose default) | the `user_id` the Bearer maps to | Identity the token authenticates as. Must exist in the `users` table. |
+| `NENE_ALLOWED_EXTERNAL_REDIRECTS` | empty (deny external) | comma-separated host allowlist, e.g. `example.com,partner.example.org` | Allowlist for `ControllerBase::location($uri, false)` open-redirect guard (#408). Empty / unset = every external redirect is rejected with HTTP 403 (fail-closed). |
 
 **Important**: setting `NENE_APP_ENV=production` *alone* flips the safe defaults of `NENE_APP_DEBUG` (`0`) and `NENE_SESSION_SECURE` (`1`). If you set `NENE_APP_DEBUG=1` and forget `NENE_APP_ENV`, your "production" deploy will not have `Secure` cookies. The overlay `compose.prod.yaml` sets all three explicitly so this footgun is closed for the bundled deploy.
 
