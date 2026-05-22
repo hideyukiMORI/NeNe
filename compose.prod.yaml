@@ -1,0 +1,32 @@
+# Production overlay for compose.yaml.
+#
+# Usage:
+#   docker compose -f compose.yaml -f compose.prod.yaml up -d --build
+#
+# What this overlay does:
+#   - Flips the env-var defaults to production-safe values.
+#   - Adds `--no-dev` to the runtime composer install so phpunit / phan /
+#     php-cs-fixer (and their transitive deps) do not get installed inside
+#     the running container.
+#   - Adds `NENE_NO_DEV=1` as a build arg so the same flag is baked into the
+#     image's first composer install layer for operators who run the image
+#     directly (without `docker compose up`).
+#
+# The base `compose.yaml` keeps dev-friendly defaults so `composer test` and
+# `composer test:http` still work in CI and local development without
+# additional flags.
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        NENE_NO_DEV: "1"
+    environment:
+      NENE_APP_ENV: "${NENE_APP_ENV:-production}"
+      NENE_APP_DEBUG: "${NENE_APP_DEBUG:-0}"
+      NENE_SESSION_SECURE: "${NENE_SESSION_SECURE:-1}"
+    command: >
+      sh -lc "composer install --no-interaction --prefer-dist --no-dev
+      && ./init.sh
+      && apache2-foreground"
