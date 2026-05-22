@@ -46,10 +46,18 @@ try {
     );
 } catch (\Throwable $throwable) {
     Xion\Log::getInstance('error')->error('Unhandled application error.', ['exception' => $throwable]);
-    Xion\HttpEmitter::emit(Xion\HttpResponse::text(
-        APP_DEBUG ? $throwable->getMessage() : 'Internal Server Error',
-        500
-    ));
+    if (Xion\RouteContext::getInstance()->isRest()) {
+        $apiResponse = new Xion\ApiResponse();
+        Xion\HttpEmitter::emit(
+            Xion\JsonResponder::responseArray($apiResponse->failure('INTERNAL-ERROR'))
+        );
+    } else {
+        $body = file_get_contents(DIR_ROOT . '/500.html');
+        Xion\HttpEmitter::emit(Xion\HttpResponse::html(
+            is_string($body) ? $body : 'Internal Server Error',
+            500
+        ));
+    }
 }
 
 /**
