@@ -29,6 +29,14 @@ phpMyAdmin is also available for the local MySQL development database:
 http://localhost:8081/
 ```
 
+The bundled `mailpit` service catches every outgoing email so that development never accidentally hits a real SMTP relay. Open its web UI to inspect headers and body:
+
+```text
+http://localhost:8025/
+```
+
+See `docs/development/email-sending.md` for how `Nene\Xion\Mailer` sends through it and how to point production at a real SMTP relay via `NENE_MAIL_DSN`.
+
 phpMyAdmin does not have a separate NeNe-specific account. Log in with a MySQL user from the development database container:
 
 ```text
