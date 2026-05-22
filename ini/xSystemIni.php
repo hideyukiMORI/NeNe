@@ -156,6 +156,21 @@ define('DB_HOST', $getEnv('NENE_DB_HOST', 'localhost'));
 define('DB_PORT', $getEnv('NENE_DB_PORT', '3306'));
 define('DB_NAME', $getEnv('NENE_DB_NAME', 'nene-php'));
 
+/*
+ * Logs.
+ *
+ * `NENE_LOG_PATH` lets a production deploy point logs at a directory outside
+ * the project tree (for example a Docker named volume or `/var/log/<app>/`).
+ * The default keeps logs inside the project tree, matching pre-PR-336 behavior.
+ * The Docker init script creates this directory and grants write permissions
+ * for the web server user. If logs fail in local development, check directory
+ * ownership.
+ */
+define('LOG_PATH', rtrim($getEnv('NENE_LOG_PATH', DIR_ROOT . 'log'), '/') . '/');
+define('APP_LOG_PATH', LOG_PATH . 'debug.log');
+define('ACCESS_LOG_PATH', LOG_PATH . 'access.log');
+define('ERROR_LOG_PATH', LOG_PATH . 'error.log');
+
 unset($getEnv);
 
 /*
@@ -186,18 +201,6 @@ const DB_IS_PHYSICAL_DELETE = true;
  */
 const JSON_OUTPUT = true;
 const ERROR_CODE_PATH = DIR_ROOT . 'config/error_codes.php';
-
-/*
- * Logs.
- *
- * The Docker init script creates this directory and grants write permissions
- * for the web server user. If logs fail in local development, check directory
- * ownership before changing these constants.
- */
-const LOG_PATH = DIR_ROOT . 'log/';
-const APP_LOG_PATH = LOG_PATH . 'debug.log';
-const ACCESS_LOG_PATH = LOG_PATH . 'access.log';
-const ERROR_LOG_PATH = LOG_PATH . 'error.log';
 
 /*
  * Smarty view paths.
