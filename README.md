@@ -67,6 +67,7 @@ URL parameters are passed in the `key_value` segment form (for example `/todo/it
 
 - The Docker development target is PHP 8.4.
 - Composer is required for dependency installation and autoloading.
+- **`ext-intl`** is required for bare-metal PHP installs. Dev dependencies (Symfony String, PHP-CS-Fixer, and related tooling) fail at bootstrap without it. The Docker image installs `intl`; on WSL or host PHP, enable the extension before `composer install` (for example `apt install php8.4-intl` on Debian/Ubuntu).
 
 ## Recommended Install Path
 

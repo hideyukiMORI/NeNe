@@ -9,6 +9,8 @@ NeNe can run locally with Docker Compose.
 
 The application container uses PHP 8.4 as the Docker development target.
 
+The image installs `pdo_mysql`, `pdo_sqlite`, and **`intl`**. The `intl` extension matches the bare-metal requirement documented in the root README—dev dependencies such as Symfony String expect it during Composer bootstrap.
+
 ## Start
 
 ```sh
