@@ -35,7 +35,7 @@ class TodoController extends ControllerBase
         $userId = $this->getLoginUserId();
         $todoMapper = new Database\TodoMapper();
         return $this->API_RESPONSE->success([
-            'todos' => $this->normalizeRows($todoMapper->findRowsByUserId($userId))
+            'todos' => $this->normalizeRows($todoMapper->findRowsByUserId($userId)),
         ]);
     }
 
@@ -53,7 +53,7 @@ class TodoController extends ControllerBase
         }
         $todoMapper = new Database\TodoMapper();
         return $this->API_RESPONSE->success([
-            'todo' => $this->normalizeRow($todoMapper->createForUser($userId, $title))
+            'todo' => $this->normalizeRow($todoMapper->createForUser($userId, $title)),
         ]);
     }
 
@@ -75,7 +75,7 @@ class TodoController extends ControllerBase
             return $this->API_RESPONSE->failure('TODO-NOT-FOUND');
         }
         return $this->API_RESPONSE->success([
-            'todo' => $this->normalizeRow($todo)
+            'todo' => $this->normalizeRow($todo),
         ]);
     }
 
@@ -106,7 +106,7 @@ class TodoController extends ControllerBase
             return $this->API_RESPONSE->failure('TODO-NOT-FOUND');
         }
         return $this->API_RESPONSE->success([
-            'todo' => $this->normalizeRow($todo)
+            'todo' => $this->normalizeRow($todo),
         ]);
     }
 
@@ -127,7 +127,7 @@ class TodoController extends ControllerBase
             return $this->API_RESPONSE->failure('TODO-NOT-FOUND');
         }
         return $this->API_RESPONSE->success([
-            'id' => $id
+            'id' => $id,
         ]);
     }
 
@@ -172,7 +172,7 @@ class TodoController extends ControllerBase
             'title' => (string)$row['title'],
             'is_completed' => (bool)$row['is_completed'],
             'created_at' => (string)$row['created_at'],
-            'updated_at' => (string)$row['updated_at']
+            'updated_at' => (string)$row['updated_at'],
         ];
     }
 }

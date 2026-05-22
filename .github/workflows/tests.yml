@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -19,6 +19,14 @@ jobs:
           php-version: "8.4"
           tools: composer:v2
           coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
@@ -32,18 +40,43 @@ jobs:
       - name: Confirm HTTP tests skip without runtime
         run: composer test:http
 
+      # Static analysis + formatting check were defined in composer.json
+      # (`composer check`) but historically never wired into CI; #403 plugged
+      # the gap so baseline regressions surface on every PR.
+      - name: Run static analysis (Phan)
+        run: composer analyze
+
+      - name: Check code formatting
+        run: composer format:check
+
   runtime-smoke:
     name: HTTP runtime smoke (Docker)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
+
+      # buildx + gha cache so the second-and-later runs reuse the composer
+      # install / apt layers instead of rebuilding from scratch (#403).
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Prepare environment
         run: cp .env.example .env
 
-      - name: Build app image
-        run: docker compose build app
+      - name: Build app image with layer cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: nene-app:ci
+          cache-from: type=gha,scope=app
+          cache-to: type=gha,mode=max,scope=app
+
+      - name: Tag image for docker compose
+        # `docker compose build` would otherwise rebuild — pre-tag the buildx
+        # output so the running container reuses the cached image.
+        run: docker tag nene-app:ci nene-app
 
       - name: Start app
         run: docker compose up -d app

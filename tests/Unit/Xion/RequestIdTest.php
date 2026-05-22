@@ -110,7 +110,7 @@ final class RequestIdTest extends TestCase
     {
         self::assertFalse(RequestId::isValid("abc\ndef"));
         self::assertFalse(RequestId::isValid("abc\tdef"));
-        self::assertFalse(RequestId::isValid("abc def"));
+        self::assertFalse(RequestId::isValid('abc def'));
     }
 
     public function testIsValidAcceptsAllowedCharset(): void
