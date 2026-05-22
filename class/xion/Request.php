@@ -118,4 +118,18 @@ class Request
         }
         return $this->param->get($key);
     }
+
+    /**
+     * Return the uploaded file at `$_FILES[$key]` as a typed
+     * {@see UploadedFile}, or `null` when the key is absent. Does not
+     * itself reject incomplete uploads — the controller calls
+     * `validate(...)` on the returned wrapper for that.
+     */
+    public function getFile(string $key): ?UploadedFile
+    {
+        if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
+            return null;
+        }
+        return new UploadedFile($_FILES[$key]);
+    }
 }
