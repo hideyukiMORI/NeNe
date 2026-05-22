@@ -124,16 +124,6 @@ class TodoController extends ControllerBase
     }
 
     /**
-     * Get the current login user's primary key.
-     *
-     * @return int User primary key.
-     */
-    private function getLoginUserId(): int
-    {
-        return (int)$this->AUTH_SESSION->userId();
-    }
-
-    /**
      * Normalize TODO rows for JSON output.
      *
      * @param array<int,array<string,mixed>> $rows TODO rows.
