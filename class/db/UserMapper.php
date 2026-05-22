@@ -92,4 +92,23 @@ class UserMapper extends DataMapperBase
         unset($row['user_pass']);
         return $row;
     }
+
+    /**
+     * Look up an active user by `user_id` and return the row without the
+     * password hash. Public callers (e.g. {@see \Nene\Xion\BearerAuth})
+     * should never see the credential bytes; this wrapper preserves
+     * `findActiveUserByUserId()`'s private scope while exposing the
+     * authentication-result shape for non-credential code paths.
+     *
+     * @return array<string,mixed>|null
+     */
+    final public function findRowByUserIdentifier(string $user_id): ?array
+    {
+        $row = $this->findActiveUserByUserId($user_id);
+        if ($row === null) {
+            return null;
+        }
+        unset($row['user_pass']);
+        return $row;
+    }
 }

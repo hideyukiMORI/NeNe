@@ -30,6 +30,16 @@ class AuthSession
     private static ?self $instance = null;
 
     /**
+     * In-memory user record set by {@see bindBearer()}. Lives **only** for
+     * the current request — it is never persisted to `$_SESSION` and the
+     * PHP session cookie is left untouched, because Bearer authentication
+     * is by definition stateless on the server side (FT16 / ADR-0008).
+     *
+     * @var array<string,mixed>|null
+     */
+    private ?array $bearerUser = null;
+
+    /**
      * CONSTRUCTOR.
      */
     final private function __construct()
@@ -120,22 +130,59 @@ class AuthSession
     }
 
     /**
-     * Check whether the current session is logged in.
+     * Bind a user to the current request without touching the PHP session
+     * cookie or `$_SESSION`. Used by {@see BearerAuth::resolve()} for
+     * stateless agent / MCP clients (FT16 / ADR-0008). The bound user
+     * lasts exactly one request — subsequent requests must re-authenticate.
+     *
+     * @param array<string,mixed> $user User row (normalized by `BearerAuth`).
+     */
+    final public function bindBearer(array $user): void
+    {
+        $this->bearerUser = [
+            'id'        => (int)$user['id'],
+            'user_id'   => (string)($user['user_id'] ?? ''),
+            'user_name' => (string)($user['user_name'] ?? ''),
+            'e_mail'    => (string)($user['e_mail'] ?? ''),
+        ];
+    }
+
+    /**
+     * Whether the current request was authenticated via Bearer token
+     * (rather than the browser session cookie). Used by the CSRF
+     * protection policy to skip the cookie+CSRF requirement.
+     */
+    final public function isBearerAuthenticated(): bool
+    {
+        return $this->bearerUser !== null;
+    }
+
+    /**
+     * Check whether the current session is logged in. Bearer-bound users
+     * count as logged-in for the duration of their request.
      *
      * @return boolean Login state.
      */
     final public function isLoggedIn(): bool
     {
+        if ($this->bearerUser !== null) {
+            return true;
+        }
         return ($_SESSION['xion']['login_mode'] ?? '') === 'login' && $this->user() !== null;
     }
 
     /**
-     * Get current login user information.
+     * Get current login user information. The Bearer-bound user takes
+     * precedence over `$_SESSION` so an agent request never sees a
+     * stale browser cookie even when both happen to be present.
      *
      * @return array<string,mixed>|null Current user information.
      */
     final public function user(): ?array
     {
+        if ($this->bearerUser !== null) {
+            return $this->bearerUser;
+        }
         $user = $_SESSION['xion']['user'] ?? null;
         return is_array($user) ? $user : null;
     }

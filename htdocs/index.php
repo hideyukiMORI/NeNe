@@ -34,6 +34,11 @@ session_cache_expire(180);
 date_default_timezone_set('Asia/Tokyo');
 session_start();
 
+// Optional Bearer auth for agent / MCP clients (FT16 / ADR-0008).
+// No-op when `NENE_AGENT_BEARER_TOKEN` is unset, so the browser
+// cookie+CSRF path is unchanged.
+Xion\BearerAuth::resolve();
+
 $dispatcher = new Xion\Dispatcher();
 try {
     $dispatcher->dispatch();

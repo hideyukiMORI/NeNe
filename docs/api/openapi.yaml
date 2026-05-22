@@ -127,6 +127,7 @@ paths:
       operationId: listTodos
       security:
         - sessionCookie: []
+        - bearerAuth: []
       responses:
         "200":
           description: TODO list.
@@ -146,6 +147,7 @@ paths:
       security:
         - sessionCookie: []
           csrfToken: []
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -184,6 +186,43 @@ paths:
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
   /todo/item/id_{id}:
+    get:
+      tags:
+        - TODO
+      summary: Read a TODO item for the signed-in user
+      operationId: getTodo
+      security:
+        - sessionCookie: []
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TodoId"
+      responses:
+        "200":
+          description: TODO item.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoSuccessEnvelope"
+        "400":
+          description: TODO id was missing or non-numeric (`TODO-ID-REQUIRED`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiFailureEnvelope"
+              examples:
+                idRequired:
+                  value:
+                    Result: true
+                    Data:
+                      status: failure
+                      errorCode: TODO-ID-REQUIRED
+                      errorMessage: TODO id is required.
+        "401":
+          $ref: "#/components/responses/SessionClosed"
+        "404":
+          $ref: "#/components/responses/TodoNotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
     put:
       tags:
         - TODO
@@ -192,6 +231,7 @@ paths:
       security:
         - sessionCookie: []
           csrfToken: []
+        - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/TodoId"
       requestBody:
@@ -251,6 +291,7 @@ paths:
       security:
         - sessionCookie: []
           csrfToken: []
+        - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/TodoId"
       responses:
@@ -294,6 +335,16 @@ components:
       in: header
       name: X-CSRF-Token
       description: CSRF token returned by `/session/login` as `Data.csrfToken`.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Optional Bearer authentication for agent / MCP clients (ADR-0008,
+        FT16). The token must match `NENE_AGENT_BEARER_TOKEN`. A valid
+        Bearer maps to the user configured by `NENE_AGENT_BEARER_USER`
+        (default `admin`) and skips the cookie+CSRF requirement for the
+        same request. Browser flows continue to use `sessionCookie` +
+        `csrfToken` unchanged.
   parameters:
     TodoId:
       name: id
