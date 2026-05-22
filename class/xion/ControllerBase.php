@@ -182,17 +182,15 @@ abstract class ControllerBase
     {
         $controller = $this->ROUTE_CONTEXT->controller();
         $action = $this->ROUTE_CONTEXT->action();
-        if ($controller != 'debug') {
-            $_SESSION['global']['referer']['controller']    = $controller;
-            $_SESSION['global']['referer']['action']        = $action;
-            $this->ACCESS_LOGGER->info(
-                'ACCESS : ' . $controller . '::' . $action,
-                [
-                    $_SERVER['HTTP_USER_AGENT'] ?? '',
-                    $_SERVER['HTTP_REFERER'] ?? '',
-                ]
-            );
-        }
+        $_SESSION['global']['referer']['controller']    = $controller;
+        $_SESSION['global']['referer']['action']        = $action;
+        $this->ACCESS_LOGGER->info(
+            'ACCESS : ' . $controller . '::' . $action,
+            [
+                $_SERVER['HTTP_USER_AGENT'] ?? '',
+                $_SERVER['HTTP_REFERER'] ?? '',
+            ]
+        );
         if ($this->ROUTE_CONTEXT->isRest() && in_array($this->method, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
             $this->REQUEST_JSON = Xion\JsonResponder::inputJsonToArray();
         } elseif ($this->ROUTE_CONTEXT->isAction()) {
