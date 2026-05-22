@@ -394,6 +394,20 @@ abstract class ControllerBase
     }
 
     /**
+     * Return the current login user's primary key.
+     *
+     * Convenience for controllers that read or write rows scoped to the
+     * authenticated user. Equivalent to `(int)$this->AUTH_SESSION->userId()`
+     * but shorter and centrally typed.
+     *
+     * @return int User primary key.
+     */
+    final protected function getLoginUserId(): int
+    {
+        return (int)$this->AUTH_SESSION->userId();
+    }
+
+    /**
      * Return the current session's CSRF token for embedding in an HTML form.
      *
      * Use this in an HTML action to pass the token to the template:
