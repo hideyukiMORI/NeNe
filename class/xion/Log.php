@@ -73,6 +73,18 @@ class Log
         } else {
             $this->informationLog->pushHandler(new RotatingFileHandler(APP_LOG_PATH, 100, Level::Info));
         }
+
+        // Tag every log record with the per-request request_id so that
+        // operators can grep all entries belonging to one request
+        // (FT15). The processor reads `RequestId::current()` lazily so
+        // it picks up the value resolved on the first call within the
+        // request's lifecycle.
+        $requestIdProcessor = static function (\Monolog\LogRecord $record): \Monolog\LogRecord {
+            return $record->with(extra: array_merge($record->extra, ['request_id' => RequestId::current()]));
+        };
+        $this->accessLog->pushProcessor($requestIdProcessor);
+        $this->informationLog->pushProcessor($requestIdProcessor);
+        $this->errorLog->pushProcessor($requestIdProcessor);
     }
 
     /**

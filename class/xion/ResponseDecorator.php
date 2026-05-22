@@ -45,9 +45,31 @@ final class ResponseDecorator
      * Headers this decorator will attempt to add. Existing response
      * headers always win (controllers can override per-response).
      *
+     * Static env-driven headers are cached for the process; the
+     * per-request request-id header is added fresh on every call so
+     * that `RequestId::current()` resolves once per request and
+     * propagates here automatically (FT15 / ADR-0007 second use case).
+     *
      * @return array<string,string>
      */
     public static function headers(): array
+    {
+        $headers = self::staticHeaders();
+        $requestIdHeader = RequestId::headerName();
+        if ($requestIdHeader !== '') {
+            $headers[$requestIdHeader] = RequestId::current();
+        }
+        return $headers;
+    }
+
+    /**
+     * Process-cached headers driven by `NENE_SECURITY_*` env vars plus
+     * the always-on defaults. Does **not** include the per-request
+     * request-id header — that is added by {@see headers()}.
+     *
+     * @return array<string,string>
+     */
+    private static function staticHeaders(): array
     {
         if (self::$cached === null) {
             $headers = self::ALWAYS_ON;
