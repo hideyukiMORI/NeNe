@@ -9,6 +9,7 @@ This file is the first document for AI agents and automation working on NeNe.
 - Workflow: `docs/workflow.md`
 - Coding standards: `docs/development/coding-standards.md`
 - Error codes & response decoration: `docs/development/error-codes.md` (envelope + the "error-path early-exit trap" — relevant whenever framework-wide response headers are added)
+- Error rendering (REST vs HTML): `docs/development/error-rendering.md` (404 / 500 / domain failure / CSRF / auth / 405 — what the caller actually sees on each side)
 - AI self-review: `docs/ai/README.md`
 - Commit conventions: `docs/development/commit-conventions.md`
 - Roadmap: `docs/roadmap.md`
