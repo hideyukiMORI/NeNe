@@ -100,6 +100,7 @@ If you implement a server-rendered login form rather than calling REST `/session
 | `401` `LOGIN-FAILED` | `/session/login` credentials rejected | Check `user_id` / `user_pass`. |
 | `403` `CSRF-TOKEN-INVALID` | Missing or wrong `X-CSRF-Token` on a state-changing request | Re-read `Data.csrfToken` from the most recent login response and resend. |
 | `405` `METHOD-NOT-ALLOWED` | Wrong HTTP method for the endpoint | Check `Allow` response header. |
+| `404` `NOT-FOUND` | Route resolves to no controller or no action | Returned with `application/json` only when the request `Accept` header prefers JSON; HTML callers still receive the static `404.html` page. |
 
 For the full error catalog, see `config/error_codes.php`.
 

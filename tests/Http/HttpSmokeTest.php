@@ -124,6 +124,29 @@ final class HttpSmokeTest extends HttpRuntimeTestCase
         self::assertStringContainsString('expires=', strtolower($logoutCookie));
     }
 
+    public function testMissingRouteReturnsHtml404ByDefault(): void
+    {
+        $response = $this->client->request('GET', '/no-such-controller/foo');
+
+        self::assertSame(404, $response->statusCode());
+        self::assertStringContainsString('text/html', $response->headerLine('Content-Type'));
+        self::assertStringContainsString('Not Found', $response->body());
+    }
+
+    public function testMissingRouteReturnsJsonEnvelopeWhenAcceptIsJson(): void
+    {
+        $response = $this->client->request('GET', '/no-such-controller/foo', null, [
+            'Accept' => 'application/json',
+        ]);
+        $payload = $response->json();
+
+        self::assertSame(404, $response->statusCode());
+        self::assertStringContainsString('application/json', $response->headerLine('Content-Type'));
+        self::assertSame(true, $payload['Result']);
+        self::assertSame('failure', $payload['Data']['status']);
+        self::assertSame('NOT-FOUND', $payload['Data']['errorCode']);
+    }
+
     public function testLoginRestEndpointRejectsUnsupportedMethod(): void
     {
         $response = $this->client->request('GET', '/session/login');

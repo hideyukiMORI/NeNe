@@ -19,6 +19,10 @@ return [
         'message' => 'The HTTP method is not allowed for this endpoint.',
         'httpStatus' => 405,
     ],
+    'NOT-FOUND' => [
+        'message' => 'The requested resource was not found.',
+        'httpStatus' => 404,
+    ],
     'ROUTE-CONFLICT' => [
         'message' => 'Route configuration conflict.',
         'httpStatus' => 500,

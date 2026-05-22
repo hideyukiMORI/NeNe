@@ -433,6 +433,24 @@ components:
                   status: failure
                   errorCode: METHOD-NOT-ALLOWED
                   errorMessage: The HTTP method is not allowed for this endpoint.
+    NotFound:
+      description: |
+        Route resolves to no controller or no action. The framework returns
+        this JSON envelope only when the request's `Accept` header prefers
+        `application/json`; otherwise the static `404.html` page is returned
+        (`NOT-FOUND`).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiFailureEnvelope"
+          examples:
+            notFound:
+              value:
+                Result: true
+                Data:
+                  status: failure
+                  errorCode: NOT-FOUND
+                  errorMessage: The requested resource was not found.
   schemas:
     JsonEnvelope:
       type: object
