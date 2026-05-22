@@ -67,7 +67,7 @@ NeNe currently emits no framework-level decoration on top of the envelope (no se
 
 **Place cross-cutting response decoration in `Nene\Xion\HttpEmitter` (or wrap `HttpEmitter::emit()`) — not in `ControllerBase::run()`'s tail.** Decoration added at `run()`'s tail will not reach 401 / 403 / 404 / 405 / 500 responses, even though it reaches every 2xx.
 
-This is the PHP analogue of the nene2-python FT75 LIFO-middleware trap. The trap is currently silent (there is nothing to skip), but it must be respected the moment any framework-wide response header is added. Surveyed and confirmed in FT7 (`docs/field-trials/2026-05-field-trial-7.md` F-6).
+This is the PHP analogue of the nene2-python FT75 LIFO-middleware trap. Surveyed in FT7 (`docs/field-trials/2026-05-field-trial-7.md` F-6); FT8 F-4 (#331) addressed the access-log corner of it; **FT14 / ADR-0007** (`docs/adr/0007-response-decoration-boundary.md`) introduced `Nene\Xion\ResponseDecorator` as the canonical boundary class. New cross-cutting concerns now plug into `ResponseDecorator::headers()` (via env) or `ResponseDecorator::decorate()` / `sendHeaders()` (via code) — see `docs/development/security-headers.md`. The "trap" wording is preserved here for historical context; the resolution is `ResponseDecorator`.
 
 ## Related
 

@@ -38,6 +38,11 @@ The full list of env vars NeNe reads at boot lives in `ini/xSystemIni.php`. The 
 | `NENE_POST_MAX_SIZE`     | unset → PHP default `8M`  | must be ≥ `NENE_UPLOAD_MAX_FILESIZE` (e.g. `12M`) | Drives PHP's `post_max_size`. PHP rejects multipart POSTs larger than this before any controller code runs. |
 | `NENE_MAIL_DSN`          | unset → `null://null` (framework code); `smtp://mailpit:1025` (compose dev) | `smtp://user:pass@relay.example.com:587?encryption=tls` or `sendmail://default` | Symfony Mailer DSN consumed by `Nene\Xion\Mailer` (#379, ADR-0006). The mailpit catcher is dev-only — production must point at a real SMTP relay. |
 | `NENE_MAIL_FROM`         | `noreply@nene.local` (compose); `noreply@localhost` (framework code) | Verified sender for the deploy's domain (DKIM/SPF-aligned) | Default `From:` address for `MailMessage` instances that do not set one explicitly. |
+| `NENE_SECURITY_CSP`      | unset                     | `default-src 'self'; img-src 'self' data: https:; ...` | Content-Security-Policy emitted by `ResponseDecorator` (#387, ADR-0007). See `docs/development/security-headers.md` for a starting cookbook. |
+| `NENE_SECURITY_FRAME_OPTIONS` | unset                | `DENY` (or `SAMEORIGIN`) | X-Frame-Options. Browsers honor CSP `frame-ancestors` when both are set. |
+| `NENE_SECURITY_REFERRER_POLICY` | unset              | `strict-origin-when-cross-origin` | Referrer-Policy. |
+| `NENE_SECURITY_HSTS`     | unset                     | `max-age=31536000; includeSubDomains` | Strict-Transport-Security. **Only** set after HTTPS termination is verified — HSTS over plain HTTP traps browsers in a broken state. |
+| `NENE_SECURITY_PERMISSIONS_POLICY` | unset           | `geolocation=(), microphone=(), camera=()` | Permissions-Policy. Deny by default; expand as features require. |
 
 **Important**: setting `NENE_APP_ENV=production` *alone* flips the safe defaults of `NENE_APP_DEBUG` (`0`) and `NENE_SESSION_SECURE` (`1`). If you set `NENE_APP_DEBUG=1` and forget `NENE_APP_ENV`, your "production" deploy will not have `Secure` cookies. The overlay `compose.prod.yaml` sets all three explicitly so this footgun is closed for the bundled deploy.
 
