@@ -21,6 +21,7 @@ services:
       NENE_DB_PASS: "${NENE_DB_PASS:-nene}"
       NENE_SAMPLE_ADMIN_PASSWORD: "${NENE_SAMPLE_ADMIN_PASSWORD:-admin}"
       NENE_LOGOUT_URI: "${NENE_LOGOUT_URI:-/}"
+      NENE_LOG_PATH: "${NENE_LOG_PATH:-}"
     ports:
       - "${NENE_PORT:-8080}:80"
     volumes:
