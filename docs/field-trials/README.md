@@ -117,6 +117,22 @@ After a trial:
 
 The trial is finished when its Issues are merged or closed with a recorded rationale. A trial does not need to "succeed" — recording friction is the success condition.
 
+### Cross-repo Issue reuse
+
+When a sister project (NENE2, nene-mcp, nene2-python) opens an Issue against NeNe with concrete acceptance criteria — e.g. "with `NENE_*` set, this curl should return 200 — and the sister will run a confirmation FT once it merges" — **use that Issue directly as the trial Issue**. Do not open a new one.
+
+Rationale:
+
+- The cross-repo trace stays clean: the sister's FT report links to the same Issue NeNe's PR closes, so reviewers in either project see one timeline.
+- The acceptance criteria are already authoritative; restating them in a new Issue invites drift between the two versions.
+- The sister's confirmation FT is gated on that exact Issue closing, so referencing it in the trial report's "Trial Issue" field is unambiguous.
+
+Examples in this repo's history:
+
+- FT16 (`docs/field-trials/2026-05-field-trial-16.md`) reused Issue #380 (cross-repo handoff from nene-mcp FT204 / FT215 / FT225–FT419). The PR body's `Closes #380` triggered nene-mcp's confirmation FT.
+
+When the trial closes, comment on the original Issue with a short status update so the sister-side reader sees the outcome without having to dig into PR descriptions.
+
 ## Templates and Tools
 
 - Report skeleton: `docs/templates/field-trial-report.md`
