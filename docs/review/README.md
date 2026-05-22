@@ -15,6 +15,7 @@ The format is borrowed from the sibling project NENE2's `docs/review/` and adapt
 | [`docs-and-adr.md`](docs-and-adr.md) | Policy doc edits, ADR additions, roadmap / milestones / TODO changes. |
 | [`release-ci.md`](release-ci.md) | `.github/workflows/`, branch protection, auto-merge config, dependency upgrades. |
 | [`field-trial-report.md`](field-trial-report.md) | A new `docs/field-trials/YYYY-MM-field-trial-N.md` or its follow-up Issues. |
+| [`file-upload.md`](file-upload.md) | Endpoints that accept `multipart/form-data` uploads (`Request::getFile()` / `UploadedFile::validate()`). |
 
 A single PR may invoke more than one checklist (a REST endpoint usually triggers `rest-controller.md` + `openapi-contract.md` + `database.md`). Reference the checklist(s) you used in the PR body.
 
@@ -35,6 +36,7 @@ The checklists link back to the canonical policy docs:
 - `docs/development/testing.md` — unit + HTTP runtime smoke tests
 - `docs/development/docker.md` — local environment + env vars
 - `docs/development/error-codes.md` — error catalog (post ADR-0003)
+- `docs/development/file-uploads.md` — upload helpers + storage convention + security notes (FT12)
 - `docs/api/README.md` — OpenAPI policy
 - `docs/api/reference-client.md` — external consumer mechanics
 - `docs/tutorials/building-a-service.md` — full tutorial flow
