@@ -41,6 +41,20 @@ Every failure response uses the same envelope, documented in OpenAPI as `ApiFail
 3. If the code is referenced from a new OpenAPI endpoint, the endpoint's failure response references the shared `ApiFailureEnvelope` — no per-code schema is added. The endpoint MAY include an `example` showing the specific `errorCode` value it produces.
 4. The contract test (`tests/Http/OpenApiRuntimeContractTest`) automatically discovers new endpoints and asserts that observed statuses appear in the documented status list. No test changes are needed for a new error code on an existing endpoint.
 
+## Response decoration and the error-path early-exit trap
+
+NeNe currently emits no framework-level decoration on top of the envelope (no security headers, no request IDs). If a future change adds such decoration, the *placement* matters because several error paths exit before `ControllerBase::run()` returns:
+
+- `ControllerBase::sessionCheck()` emits the `SESSION-CLOSED` 401 envelope (or the `unauthorizedRedirect()` 302) and terminates.
+- `ControllerBase::run()`'s CSRF check emits the `CSRF-TOKEN-INVALID` 403 envelope and terminates.
+- `Dispatcher::outputJsonFailure()` emits the `METHOD-NOT-ALLOWED` 405 envelope and terminates before `ControllerBase::run()` is ever called.
+- `Dispatcher::notFoundResponse()` emits the 404 response before `ControllerBase::run()` is ever called.
+- The top-level `\Throwable` catch in `htdocs/index.php` runs *after* `run()` returned (or threw), but skips `run()`'s tail entirely.
+
+**Place cross-cutting response decoration in `Nene\Xion\HttpEmitter` (or wrap `HttpEmitter::emit()`) — not in `ControllerBase::run()`'s tail.** Decoration added at `run()`'s tail will not reach 401 / 403 / 404 / 405 / 500 responses, even though it reaches every 2xx.
+
+This is the PHP analogue of the nene2-python FT75 LIFO-middleware trap. The trap is currently silent (there is nothing to skip), but it must be respected the moment any framework-wide response header is added. Surveyed and confirmed in FT7 (`docs/field-trials/2026-05-field-trial-7.md` F-6).
+
 ## Related
 
 - `config/error_codes.php` — runtime catalog.
