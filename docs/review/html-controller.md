@@ -15,7 +15,7 @@ Source policies:
 - [ ] Side-effect actions (`createAction`, `deleteAction`, `logoutAction`, ...) guard with `$this->method !== 'POST'` before performing any write; GET on a side-effect URL must not trigger the side effect.
 - [ ] Form POST handlers read input via `$this->request->getPost($key)`, not `$_POST` directly.
 - [ ] Validation failure re-renders the same form using `$this->VIEW->setTemplate('xxx/yyy.tpl')` (the auto-template would be the list, not the form).
-- [ ] Authenticated state-changing forms use the CSRF helpers: controller sets `t_csrf_token` via `$this->csrfToken()`, template emits `<input type="hidden" name="csrf_token" value="{$t_csrf_token}">`, handler calls `$this->verifyCsrfFromPost()` before the write.
+- [ ] Authenticated state-changing forms use the CSRF helpers: controller sets `t_csrf_token` via `$this->csrfToken()`, template emits `<input type="hidden" name="csrf_token" value="{$t_csrf_token}">`, handler calls `$this->requireCsrfFromPost()` before the write. Reach for the lower-level `$this->verifyCsrfFromPost()` (returns `bool`) only when the handler must recover from a CSRF failure rather than terminate with a flat 403.
 - [ ] Post-write redirects use `$this->location('/path')` (the post/redirect/get pattern); URI normalization is handled by `location()` (no leading-slash double-up — see PR #269).
 - [ ] `SESSION_CHECK = false` is set in `preAction()` only for public pages (`/auth/login` etc.). Protected pages keep the default.
 - [ ] Per-controller redirect targets (e.g. admin pages → `/admin/login`) use the `unauthorizedRedirect()` hook (ADR-0004), not by editing `LOGOUT_URI` or re-implementing `sessionCheck()`.

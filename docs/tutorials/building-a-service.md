@@ -210,7 +210,7 @@ When a server-rendered form submits state-changing data behind a login (creating
 | Helper | Use in | What it does |
 | --- | --- | --- |
 | `$this->csrfToken()` | controller (GET form action) | returns the session's CSRF token to embed in a hidden field |
-| `$this->verifyCsrfFromPost()` | controller (POST handler) | reads `csrf_token` from `$_POST` and verifies it against the session token |
+| `$this->requireCsrfFromPost()` | controller (POST handler) | reads `csrf_token` from `$_POST`, verifies it, and on failure terminates the dispatch with a 403 — REST callers get the `CSRF-TOKEN-INVALID` JSON envelope, HTML callers get the `csrf.html` page |
 
 Skeleton:
 
@@ -226,13 +226,7 @@ class PrivateNoteController extends ControllerBase
     public function indexAction(): void
     {
         if ($this->method === 'POST') {
-            if (!$this->verifyCsrfFromPost()) {
-                http_response_code(403);
-                $this->VIEW
-                    ->setString('t_detail', 'CSRF token check failed. Reload the form and try again.')
-                    ->setTemplate('error/forbidden.tpl');
-                return;
-            }
+            $this->requireCsrfFromPost();
             // ... do the protected write, then redirect ...
             return;
         }
@@ -253,11 +247,12 @@ Form template emits the hidden field:
 </form>
 ```
 
-The default field name is `csrf_token`. To use a different name, pass it to both sides: `$this->verifyCsrfFromPost('my_token')` and `<input type="hidden" name="my_token" value="...">`.
+The default field name is `csrf_token`. To use a different name, pass it to both sides: `$this->requireCsrfFromPost('my_token')` and `<input type="hidden" name="my_token" value="...">`.
 
-Two notes:
+Three notes:
 
-- The session token comes from `AuthSession::csrfToken()`. It is created at login and remains stable for the lifetime of the session, so the same `csrfToken()` value works across all forms in the same login. After logout (or session expiry) the token is regenerated on the next login and old hidden fields stop validating — surface that as a `403` and let the user reload.
+- The session token comes from `AuthSession::csrfToken()`. It is created at login and remains stable for the lifetime of the session, so the same `csrfToken()` value works across all forms in the same login. After logout (or session expiry) the token is regenerated on the next login and old hidden fields stop validating — `requireCsrfFromPost()` surfaces that as a `403` automatically.
+- `requireCsrfFromPost()` is the recommended shape. There is also a low-level `verifyCsrfFromPost(): bool` that returns the verification result without terminating; reach for it only when the handler needs to recover (for example, re-render the form with field-level errors) instead of returning a flat 403 page.
 - The helpers do not change REST behavior. REST handlers (`indexPostRest` etc.) still go through the automatic framework gate that validates the `X-CSRF-Token` header.
 
 ## Add a REST Endpoint
@@ -654,13 +649,7 @@ class AuthController extends ControllerBase
             $this->location('/auth/login');
             return;
         }
-        if (!$this->verifyCsrfFromPost()) {
-            http_response_code(403);
-            $this->VIEW
-                ->setString('t_detail', 'CSRF token check failed. Reload the page and try again.')
-                ->setTemplate('error/forbidden.tpl');
-            return;
-        }
+        $this->requireCsrfFromPost();
         $this->AUTH_SESSION->logout(true);
         $this->location('/auth/login');
     }
