@@ -36,6 +36,8 @@ Set values in `compose.prod.yaml` (or the equivalent overlay), one env var per h
 
 That covers every PHP-generated response. The FT7 F-6 / FT8 F-4 trap (decoration added at `ControllerBase::run()`'s tail silently skips error paths) is closed: the decoration is at the lower boundary, not the controller layer.
 
+**Other cross-cutting concerns**: the same `ResponseDecorator` hosts non-security headers. The first non-security use case is `X-Request-ID` (per-request correlation id, FT15) — see `docs/development/observability.md` for the recipe and how future concerns (Server-Timing, OpenTelemetry, audit fingerprint) plug in the same way.
+
 ## Controller-set headers win
 
 When a controller writes its own header before responding, the decorator does **not** overwrite it. Match is case-insensitive — `'x-frame-options'` from the controller still beats `'X-Frame-Options'` from the decorator. Use this when one endpoint needs a different value than the deploy-wide default (e.g., an admin iframe page that needs `X-Frame-Options: SAMEORIGIN` while the rest of the app uses `DENY`).

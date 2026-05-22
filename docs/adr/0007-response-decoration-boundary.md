@@ -64,3 +64,16 @@ Neutral:
 
 - The framework ships **no** opinionated CSP / HSTS values. The doc surfaces a starting cookbook; operators tune.
 - Pre-existing reverse proxy / load balancer headers (e.g., `X-Forwarded-For`) are unaffected. The decorator only adds; it never removes.
+
+## Addendum: Second use case landed (FT15)
+
+Field Trial 15 (`docs/field-trials/2026-05-field-trial-15.md`) added **request-id / correlation-id** as the first non-security concern via this decorator. The change was scoped to `ResponseDecorator` internals (splitting `headers()` into a cached `staticHeaders()` plus per-call augmentation that queries `RequestId::current()`). **`HttpEmitter::emit()` and `View::execute()` did not need to change** — the boundary held under a fresh use case.
+
+The recipe future concerns follow:
+
+1. Add a static helper (in the FT15 case `Nene\Xion\RequestId`) that resolves the per-request value once.
+2. Extend `ResponseDecorator::headers()` to fold the value in under the configured header name.
+3. Optionally extend `Log::__construct()` to push a Monolog processor that injects the value into `record->extra`.
+4. Add env-var rows to `compose.yaml`, `docs/development/production-deployment.md`, and the relevant `docs/development/*.md` doc.
+
+See `docs/development/observability.md` for the full request-id walkthrough.

@@ -228,6 +228,19 @@ The error code must already exist in `config/error_codes.php`. Throwing an unkno
 
 For purely pre-flight input validation (no DB writes), prefer returning `$this->API_RESPONSE->failure($code)` directly from the controller before opening the transaction. `DomainException` is for cases where the validation must run alongside the writes, for example a row-existence check whose target may change between the validation and the write.
 
+## Environment-variable defaults
+
+When reading `NENE_*` env vars, do **not** use the `getenv('X') ?: 'default'` short-circuit. PHP's `?:` coerces both `'0'` and `''` to falsy, so an operator who explicitly sets `NENE_FOO=0` (turn off) or `NENE_FOO=` (empty = explicit "no value") silently gets the default instead.
+
+Use the explicit `=== false` check instead:
+
+```php
+$raw = getenv('NENE_FOO');
+$value = $raw === false ? 'default' : (string)$raw;
+```
+
+The footgun bit `RequestId::trustsInbound()` (FT15 F-1) — `NENE_REQUEST_ID_TRUST_INBOUND=0` was silently being treated as "trust = on". Existing helpers that use the `?:` idiom for env vars where `'0'` is not a meaningful value (`Mailer` DSN, `Log` file path, etc.) are dormant, but new helpers should follow the explicit pattern.
+
 ## Testing and Static Analysis
 
 - At minimum, run PHP syntax checks for changed PHP files.

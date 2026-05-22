@@ -15,6 +15,7 @@ This file is the first document for AI agents and automation working on NeNe.
 - File uploads: `docs/development/file-uploads.md` (`Request::getFile` / `UploadedFile::validate` / `ControllerBase::sendFile` + storage convention + security summary)
 - Email sending: `docs/development/email-sending.md` (`Nene\Xion\Mailer` + `MailMessage` + `NENE_MAIL_DSN` env + mailpit dev catcher; ADR-0006)
 - Security headers / cross-cutting decoration: `docs/development/security-headers.md` (`Nene\Xion\ResponseDecorator` + `NENE_SECURITY_*` env; ADR-0007 — resolves the FT7 F-6 / FT8 F-4 decoration trap)
+- Observability (request-id + future cross-cutting concerns): `docs/development/observability.md` (`Nene\Xion\RequestId` + `X-Request-ID` header + Monolog `extra.request_id` + recipe for future per-request decorations)
 - AI self-review: `docs/ai/README.md`
 - Commit conventions: `docs/development/commit-conventions.md`
 - Roadmap: `docs/roadmap.md`
