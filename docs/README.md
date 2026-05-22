@@ -26,6 +26,13 @@ This directory contains project documentation for humans and AI agents.
 - `field-trials/README.md`: Field trial methodology and clone-based trial layout under `../NeNe-FT/`.
 - `templates/field-trial-report.md`: Report skeleton copied for each new trial.
 
+## Related Packages
+
+NeNe keeps MCP out of framework core. For local stdio MCP over documented HTTP APIs, use the sibling Composer package **[nene-mcp](https://github.com/hideyukiMORI/nene-mcp)**:
+
+- NeNe integration: [nene-mcp/docs/integration/nene.md](https://github.com/hideyukiMORI/nene-mcp/blob/main/docs/integration/nene.md)
+- Project overview: [nene-mcp/docs/project.md](https://github.com/hideyukiMORI/nene-mcp/blob/main/docs/project.md)
+
 ## Source of Truth
 
 GitHub Issues and PRs are the source of truth for active work.
