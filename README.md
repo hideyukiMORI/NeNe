@@ -126,10 +126,11 @@ NeNe does **not** embed MCP in framework core. Use the sibling package **[nene-m
 composer require hideyukimori/nene-mcp
 ```
 
-Add a NENE2-compatible tool catalog (convention: `docs/mcp/tools.json`) aligned with `docs/api/openapi.yaml`, then point your MCP client at `vendor/bin/nene-mcp`. Integration details live in the nene-mcp repository:
+Add a NENE2-compatible tool catalog (convention: `docs/mcp/tools.json`) aligned with `docs/api/openapi.yaml`, then point your MCP client at `vendor/bin/nene-mcp`. Integration details:
 
-- [NeNe integration guide](https://github.com/hideyukiMORI/nene-mcp/blob/main/docs/integration/nene.md)
-- [Sample health catalog](https://github.com/hideyukiMORI/nene-mcp/blob/main/docs/example-ne-health-catalog.md)
+- **[nene-mcp documentation site](https://hideyukimori.github.io/nene-mcp/howto/integrate-nene)** — bootstrap NeNe + MCP (integrator-facing)
+- [NeNe integration guide (repo)](https://github.com/hideyukiMORI/nene-mcp/blob/main/docs/integration/nene.md)
+- [Health catalog example (docs site)](https://hideyukimori.github.io/nene-mcp/howto/health-catalog-example)
 
 MCP stdio handling stays in `vendor/`; do not add MCP code under `class/xion/`.
 
