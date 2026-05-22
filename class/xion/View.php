@@ -70,7 +70,51 @@ class View
         $this->smarty->setTemplateDir(DIR_SMARTY_TEMPLATE);     // TEMPLATE DIR
         $this->smarty->setCompileDir(DIR_SMARTY_COMPILE);       // TEMPLATE COMPILE DIR
         $this->smarty->setConfigDir(DIR_SMARTY_CONFIG);         // CONFIG DIR
+        $this->registerProjectPlugins(DIR_SMARTY_PLUGINS);
         $this->smarty->setEscapeHtml(true);
+    }
+
+    /**
+     * Register project-specific Smarty plugins from a directory.
+     *
+     * Scans the directory for files matching Smarty 5's conventional plugin
+     * filename layout (`modifier.{name}.php`, `function.{name}.php`,
+     * `block.{name}.php`), requires each one once, and calls
+     * `Smarty::registerPlugin()` so the plugin becomes available in
+     * templates. Skips silently when the directory is missing.
+     *
+     * Using `registerPlugin` instead of the legacy `addPluginsDir` follows
+     * Smarty 5's deprecation guidance (the old API still works but emits a
+     * deprecation notice, which break HTTP responses while `display_errors`
+     * is on).
+     *
+     * @param string $dir Plugin directory absolute path.
+     *
+     * @return void
+     */
+    private function registerProjectPlugins(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+        $kinds = [
+            'modifier' => Smarty::PLUGIN_MODIFIER,
+            'function' => Smarty::PLUGIN_FUNCTION,
+            'block' => Smarty::PLUGIN_BLOCK,
+        ];
+        foreach (scandir($dir) ?: [] as $entry) {
+            if (!preg_match('/^(modifier|function|block)\.([A-Za-z0-9_]+)\.php$/', $entry, $matches)) {
+                continue;
+            }
+            $kind = $matches[1];
+            $name = $matches[2];
+            $callback = 'smarty_' . $kind . '_' . $name;
+            require_once $dir . DIRECTORY_SEPARATOR . $entry;
+            if (!function_exists($callback)) {
+                continue;
+            }
+            $this->smarty->registerPlugin($kinds[$kind], $name, $callback);
+        }
     }
 
     /**
