@@ -832,6 +832,35 @@ For endpoints that accept a `multipart/form-data` request body, use:
 
 The runtime contract test (`OpenApiRuntimeContractTest`) only reads JSON examples; it probes multipart operations with an **empty body**. Make sure the documented `responses:` list includes whatever status your controller returns for the "missing file" case — for the framework's `UploadedFile::validate()` helper that's `400` `UPLOAD-FILE-REQUIRED`. If the operation cannot tolerate the empty-body probe (destructive write etc.), add `x-nene-runtime-probe: skip`.
 
+## Send an email
+
+`Nene\Xion\Mailer` (ADR-0006) wraps Symfony Mailer. Send a message from inside any controller:
+
+```php
+use Nene\Xion\MailMessage;
+use Nene\Xion\Mailer;
+
+class AuthController extends ControllerBase
+{
+    public function passwordResetPostRest(): array
+    {
+        // ... resolve $email, generate $token ...
+
+        Mailer::getInstance()->send(new MailMessage(
+            to: $email,
+            subject: 'Reset your password',
+            body: "Open the link to reset:\n\nhttps://example.com/auth/reset?token={$token}\n",
+        ));
+
+        return $this->API_RESPONSE->success(['queued' => true]);
+    }
+}
+```
+
+Pass `contentType: 'text/html'` for HTML mail and `from:` to override the default sender. The transport reads from `NENE_MAIL_DSN`; the dev stack catches everything in mailpit at `http://localhost:8025/` so you never accidentally email a real user.
+
+See `docs/development/email-sending.md` for the full guide (env matrix, production SMTP, test injection, what is intentionally out of scope).
+
 ## Add Tests
 
 Add the smallest useful test for the behavior.
