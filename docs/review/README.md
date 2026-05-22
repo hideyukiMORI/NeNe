@@ -16,6 +16,7 @@ The format is borrowed from the sibling project NENE2's `docs/review/` and adapt
 | [`release-ci.md`](release-ci.md) | `.github/workflows/`, branch protection, auto-merge config, dependency upgrades. |
 | [`field-trial-report.md`](field-trial-report.md) | A new `docs/field-trials/YYYY-MM-field-trial-N.md` or its follow-up Issues. |
 | [`file-upload.md`](file-upload.md) | Endpoints that accept `multipart/form-data` uploads (`Request::getFile()` / `UploadedFile::validate()`). |
+| [`security-headers.md`](security-headers.md) | Changes to `ResponseDecorator`, `HttpEmitter`, `View::execute`, controllers that set their own security headers, or `NENE_SECURITY_*` env. |
 
 A single PR may invoke more than one checklist (a REST endpoint usually triggers `rest-controller.md` + `openapi-contract.md` + `database.md`). Reference the checklist(s) you used in the PR body.
 
@@ -37,6 +38,7 @@ The checklists link back to the canonical policy docs:
 - `docs/development/docker.md` — local environment + env vars
 - `docs/development/error-codes.md` — error catalog (post ADR-0003)
 - `docs/development/file-uploads.md` — upload helpers + storage convention + security notes (FT12)
+- `docs/development/security-headers.md` — cross-cutting response decoration (FT14, ADR-0007)
 - `docs/api/README.md` — OpenAPI policy
 - `docs/api/reference-client.md` — external consumer mechanics
 - `docs/tutorials/building-a-service.md` — full tutorial flow
