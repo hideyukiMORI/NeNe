@@ -1,0 +1,113 @@
+# Production Deployment
+
+How to run NeNe outside the development bundle: env vars, the production Docker overlay, log surface, and the gotchas surfaced by FT8.
+
+Audience: anyone preparing to deploy NeNe, anyone reviewing a deployment PR. Trial source: `docs/field-trials/2026-05-field-trial-8.md`.
+
+## TL;DR
+
+```bash
+# development (the default — composer test / composer test:http run here)
+docker compose up -d
+
+# production
+docker compose -f compose.yaml -f compose.prod.yaml up -d --build
+```
+
+The base `compose.yaml` stays dev-friendly. `compose.prod.yaml` is a production overlay that:
+
+- flips `NENE_APP_ENV` / `NENE_APP_DEBUG` / `NENE_SESSION_SECURE` defaults to production-safe values,
+- passes `--no-dev` to both build-time and runtime `composer install`,
+- requires `--build` on first run so the image picks up the build arg.
+
+## Environment variable matrix
+
+The full list of env vars NeNe reads at boot lives in `ini/xSystemIni.php`. The ones that *flip behavior between dev and prod* are:
+
+| Variable                 | Default           | Production-safe value | What it controls |
+| ------------------------ | ----------------- | --------------------- | --- |
+| `NENE_APP_ENV`           | `development`     | `production`          | Surfaces in `/health` as `environment`; **flips the defaults of `NENE_APP_DEBUG` and `NENE_SESSION_SECURE`** when set to `production`. |
+| `NENE_APP_DEBUG`         | `1` (or `0` when `APP_ENV=production`) | `0` | Whether `display_errors` / `display_startup_errors` are on; whether `PdoConnection` / `DataMapperBase` surface raw exception messages in their text-response fallbacks. Note: the FT7 envelope/template fixes (#312–#314) emit catalog messages regardless, so this no longer leaks via the standard error path. |
+| `NENE_SESSION_SECURE`    | `0` (or `1` when `APP_ENV=production`) | `1` | Whether `Set-Cookie` carries the `Secure` attribute. **Required behind HTTPS.** Browsers will not send a `Secure` cookie back over plain HTTP. |
+| `NENE_SESSION_HTTPONLY`  | `1`               | `1` (same)            | `Set-Cookie` `HttpOnly` attribute. |
+| `NENE_SESSION_SAMESITE`  | `Lax`             | `Lax` / `Strict`      | `Set-Cookie` `SameSite` attribute. |
+| `NENE_SESSION_LIFETIME`  | `0`               | tune as needed        | Session cookie lifetime in seconds (0 = session). |
+| `NENE_LOGOUT_URI`        | `/`               | deploy-specific       | Redirect target for `ControllerBase::sessionCheck()` when HTML auth fails (#284). |
+| `NENE_LOG_PATH`          | unset → `DIR_ROOT . 'log/'` | mounted volume or `/var/log/<app>/` | Where Monolog writes `access-*.log` / `error-*.log` / `debug.log`. Trailing slash is normalized (#336). |
+
+**Important**: setting `NENE_APP_ENV=production` *alone* flips the safe defaults of `NENE_APP_DEBUG` (`0`) and `NENE_SESSION_SECURE` (`1`). If you set `NENE_APP_DEBUG=1` and forget `NENE_APP_ENV`, your "production" deploy will not have `Secure` cookies. The overlay `compose.prod.yaml` sets all three explicitly so this footgun is closed for the bundled deploy.
+
+## Docker image surface
+
+`compose.prod.yaml` builds with `NENE_NO_DEV=1` as a build arg. This:
+
+- Runs `composer install --no-dev` at image build time (Dockerfile `ARG NENE_NO_DEV`).
+- Runs `composer install --no-dev` again at container start (the overlay's `command:`).
+
+The result: a running production container does not contain phpunit / phan / php-cs-fixer or their transitive deps. The image still contains `tests/` / `docs/` / `tools/` as static files; they are not web-reachable (Apache serves only `/var/www/html/htdocs/`), but you can strip them with a custom `.dockerignore` if image size matters.
+
+The image hardening drop-ins are always active (dev and prod), since they affect HTTP responses only:
+
+- `docker/php/conf.d/zz-nene.ini` (#329) — `expose_php = Off` (no `X-Powered-By` header).
+- `docker/apache/conf-available/zz-nene-hardening.conf` (#330) — `ServerTokens Prod` + `ServerSignature Off` (Server header is just `Apache`).
+
+## opcache
+
+The bundled image leaves PHP's opcache defaults (`opcache.validate_timestamps = On`), which stats every included file on every request. For a busy production deploy, set `opcache.validate_timestamps = 0` (or a longer `revalidate_freq`) and run `opcache_reset()` (or restart the container) on each deploy. Drop the value into `docker/php/conf.d/zz-nene.ini` or override via a deploy-time conf.d drop-in.
+
+The framework does not ship this override itself because it makes the image less friendly for local development (template changes would not pick up without a container restart).
+
+## Log surface
+
+By default, Monolog writes three rotating log files under `DIR_ROOT . 'log/'`:
+
+- `access-YYYY-MM-DD.log` — every `ControllerBase::run()` entry plus every pre-dispatch 404 / 405 / ROUTE-CONFLICT (#337). 60-day retention.
+- `error-YYYY-MM-DD.log` — every unhandled `\Throwable` caught at the top level, with full exception detail. 60-day retention.
+- `debug.log` (rotated as `debug-YYYY-MM-DD.log`) — application-level info. 100-day retention.
+
+Rotation is *daily*. There is no in-day size cap.
+
+Override the path with `NENE_LOG_PATH` (#336) — for example a Docker named volume:
+
+```yaml
+# compose.prod.yaml (sketch — adapt to your deploy)
+services:
+  app:
+    environment:
+      NENE_LOG_PATH: /var/log/nene
+    volumes:
+      - nene-logs:/var/log/nene
+volumes:
+  nene-logs:
+```
+
+The operator must ensure the target directory exists and is writable by the container's web-server user (`www-data` in the bundled image). The Docker `init.sh` only chowns the default `./log` directory; an override path is the operator's responsibility.
+
+### What is *not* logged
+
+`Xion\DomainException` is intentionally not written to `error-*.log` — domain failures (`TODO-NOT-FOUND` etc.) are expected outcomes of business rules, not server errors. Track them in `access-*.log` (every request shows up there) and in the response body's `errorCode`. If you need a server-side trail of business failures, add an explicit `Xion\Log::getInstance('debug')->info(...)` from the failing controller; do not move all `DomainException`s to `error-*.log` — operators would lose the high-signal-to-noise property of that file.
+
+## Secure cookies over plain HTTP
+
+Running the production-overlay container behind plain HTTP (port 8080 without a TLS terminator) will *not* break session login *on curl*, because curl ignores the `Secure` attribute on outbound cookies. It *will* break sessions in a real browser, because browsers refuse to send a `Secure` cookie over HTTP. Always deploy NeNe behind an HTTPS reverse proxy, or set `NENE_SESSION_SECURE=0` if you intentionally want to test the production bundle over HTTP.
+
+## Deployment checklist
+
+Before flipping the production switch on a real host:
+
+- [ ] `docker compose -f compose.yaml -f compose.prod.yaml up -d --build` runs cleanly.
+- [ ] `GET /health` reports `"environment":"production"` and `"healthStatus":"ok"`.
+- [ ] `Set-Cookie` response header carries `secure`, `HttpOnly`, and a sensible `SameSite`.
+- [ ] No `X-Powered-By` header.
+- [ ] `Server` header is `Apache` only (no version, no OS).
+- [ ] `docker compose exec app composer show -i | grep -iE 'phpunit|phan|cs-fixer'` is empty.
+- [ ] `NENE_LOG_PATH` points at a writable mounted volume (or you accept that logs live in the project tree).
+- [ ] A reverse proxy with TLS termination is in front of the container.
+- [ ] `cli/setupDatabase.php` (or your migration tooling) has been run against the production database.
+
+## Related
+
+- `docs/development/error-codes.md` — envelope catalog + the error-path early-exit (decoration) trap (#320). Read before adding framework-wide response decoration in prod.
+- `docs/development/error-rendering.md` — REST × HTML rendering on each error class (#325).
+- `docs/development/cli.md` — `cli/setupDatabase.php` deploy-time database setup.
+- `docs/field-trials/2026-05-field-trial-8.md` — the trial that surfaced every behavior above.
