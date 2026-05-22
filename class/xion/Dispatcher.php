@@ -225,11 +225,64 @@ class Dispatcher
     /**
      * Build the shared 404 response.
      *
+     * Returns the ADR-0003 `NOT-FOUND` JSON envelope when the request's
+     * `Accept` header prefers `application/json`; otherwise returns the
+     * static `404.html` page. The header is read from the current request
+     * so this method is environment-aware without needing it injected.
+     *
      * @return HttpResponse 404 response.
      */
     private function notFoundResponse(): HttpResponse
     {
+        if ($this->wantsJson($_SERVER['HTTP_ACCEPT'] ?? '')) {
+            $response = JsonResponder::responseArray((new ApiResponse())->failure('NOT-FOUND'));
+            return $response;
+        }
         $body = file_get_contents(DIR_ROOT . '/404.html');
         return HttpResponse::html(is_string($body) ? $body : '404 Not Found', 404);
+    }
+
+    /**
+     * Decide whether the request's `Accept` header prefers a JSON response.
+     *
+     * A header is treated as JSON-preferring when `application/json` (or a
+     * compatible wildcard like `application/...`) appears with a `q` value at
+     * least as high as any `text/html` entry. Requests with no `Accept`
+     * header, or a generic catch-all wildcard, are treated as HTML callers
+     * (real browsers send `text/html` explicitly; only curl-style clients
+     * default to `*` of `*`).
+     *
+     * @param string $acceptHeader Raw `Accept` request header.
+     *
+     * @return boolean Whether to prefer a JSON-shaped response.
+     */
+    public function wantsJson(string $acceptHeader): bool
+    {
+        if ($acceptHeader === '') {
+            return false;
+        }
+        $jsonQuality = -1.0;
+        $htmlQuality = -1.0;
+        foreach (explode(',', $acceptHeader) as $entry) {
+            $parts = explode(';', trim($entry));
+            $mediaType = strtolower(trim($parts[0] ?? ''));
+            if ($mediaType === '') {
+                continue;
+            }
+            $quality = 1.0;
+            for ($i = 1; $i < count($parts); $i++) {
+                $param = trim($parts[$i]);
+                if (str_starts_with($param, 'q=')) {
+                    $quality = (float)substr($param, 2);
+                    break;
+                }
+            }
+            if ($mediaType === 'application/json' || $mediaType === 'application/*') {
+                $jsonQuality = max($jsonQuality, $quality);
+            } elseif ($mediaType === 'text/html' || $mediaType === 'text/*') {
+                $htmlQuality = max($htmlQuality, $quality);
+            }
+        }
+        return $jsonQuality > 0 && $jsonQuality >= $htmlQuality;
     }
 }

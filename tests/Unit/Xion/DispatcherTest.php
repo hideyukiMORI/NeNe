@@ -108,4 +108,31 @@ final class DispatcherTest extends TestCase
 
         self::assertSame(500, $route['status']);
     }
+
+    public function testWantsJsonReturnsFalseForEmptyAcceptHeader(): void
+    {
+        self::assertFalse((new Dispatcher())->wantsJson(''));
+    }
+
+    public function testWantsJsonReturnsFalseForBrowserDefaultAcceptHeader(): void
+    {
+        $browserAccept = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8';
+
+        self::assertFalse((new Dispatcher())->wantsJson($browserAccept));
+    }
+
+    public function testWantsJsonReturnsTrueForApplicationJson(): void
+    {
+        self::assertTrue((new Dispatcher())->wantsJson('application/json'));
+    }
+
+    public function testWantsJsonReturnsTrueWhenJsonOutranksHtml(): void
+    {
+        self::assertTrue((new Dispatcher())->wantsJson('text/html;q=0.5, application/json;q=1.0'));
+    }
+
+    public function testWantsJsonReturnsFalseForWildcardStar(): void
+    {
+        self::assertFalse((new Dispatcher())->wantsJson('*/*'));
+    }
 }
