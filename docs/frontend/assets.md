@@ -172,7 +172,7 @@ Two safe patterns:
 
 Option 2 keeps the template trivial and the auto-escape contract intact, at the cost of one CSS rule. Prefer it unless you specifically need HTML output from a modifier (e.g. `{$markdown_html|nofilter}` for already-sanitized markup).
 
-When you write a custom Smarty plugin or chain another markup-emitting modifier (`replace` with HTML, `html_*` series, etc.), reach for `nofilter` in the same way and treat any HTML the plugin produces as already trusted.
+When you write a custom Smarty plugin or chain another markup-emitting modifier (`replace` with HTML, `html_*` series, etc.), reach for `nofilter` in the same way and treat any HTML the plugin produces as already trusted. The authoring conventions for those custom plugins are in `docs/development/smarty-plugins.md`.
 
 ## Recommended Shape
 
