@@ -778,6 +778,60 @@ Swagger UI is available locally at:
 http://localhost:8080/api-docs/
 ```
 
+### File upload (multipart) operations
+
+For endpoints that accept a `multipart/form-data` request body, use:
+
+```yaml
+/attachment/index:
+  post:
+    tags: [Attachment]
+    summary: Upload an attachment for the signed-in user
+    operationId: createAttachment
+    security:
+      - sessionCookie: []
+        csrfToken: []
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required: [file]
+            properties:
+              file:
+                type: string
+                format: binary
+    responses:
+      "200":
+        description: Upload accepted.
+        # ... your success envelope ...
+      "400":
+        description: Upload file is missing (`UPLOAD-FILE-REQUIRED`).
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiFailureEnvelope"
+            examples:
+              uploadRequired:
+                value:
+                  Result: true
+                  Data:
+                    status: failure
+                    errorCode: UPLOAD-FILE-REQUIRED
+                    errorMessage: Upload file is required.
+      "401":
+        $ref: "#/components/responses/SessionClosed"
+      "403":
+        $ref: "#/components/responses/CsrfTokenInvalid"
+      "413":
+        description: Upload exceeds size limit (`UPLOAD-TOO-LARGE`).
+      "415":
+        description: Upload mime type is not allowed (`UPLOAD-MIME-REJECTED`).
+```
+
+The runtime contract test (`OpenApiRuntimeContractTest`) only reads JSON examples; it probes multipart operations with an **empty body**. Make sure the documented `responses:` list includes whatever status your controller returns for the "missing file" case — for the framework's `UploadedFile::validate()` helper that's `400` `UPLOAD-FILE-REQUIRED`. If the operation cannot tolerate the empty-body probe (destructive write etc.), add `x-nene-runtime-probe: skip`.
+
 ## Add Tests
 
 Add the smallest useful test for the behavior.
