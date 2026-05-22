@@ -14,6 +14,13 @@ RUN apt-get update \
     && sed -ri 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.conf \
     && rm -rf /var/lib/apt/lists/*
 
+# Apache hardening drop-in: ServerTokens Prod + ServerSignature Off to keep
+# the production-mode Server header minimal (no version, no OS). The `zz-`
+# prefix forces alphabetical load order after Debian's `security.conf`,
+# which otherwise sets `ServerTokens OS` and `ServerSignature On`.
+COPY docker/apache/conf-available/zz-nene-hardening.conf /etc/apache2/conf-available/zz-nene-hardening.conf
+RUN a2enconf zz-nene-hardening
+
 # PHP ini drop-ins (NeNe production-mode overrides — currently: expose_php Off
 # to suppress X-Powered-By in HTTP responses). Loaded last in conf.d/ so it
 # wins over any earlier ini.
