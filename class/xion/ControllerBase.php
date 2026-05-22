@@ -402,7 +402,7 @@ abstract class ControllerBase
      *
      * In REST controllers, the token is automatically verified against the
      * `X-CSRF-Token` header by the framework dispatcher; HTML actions must
-     * embed it in a hidden field and call {@see verifyCsrfFromPost()}.
+     * embed it in a hidden field and call {@see requireCsrfFromPost()}.
      *
      * @return string Session CSRF token.
      */
@@ -414,15 +414,10 @@ abstract class ControllerBase
     /**
      * Verify the CSRF token submitted via a POST form field.
      *
-     * Pairs with {@see csrfToken()}: the template emits the token as a hidden
-     * input, and the handler calls this method before performing any
-     * state-changing work.
-     *
-     *     if (!$this->verifyCsrfFromPost()) {
-     *         http_response_code(403);
-     *         // render an error template
-     *         return;
-     *     }
+     * Low-level helper: returns a boolean. Prefer {@see requireCsrfFromPost()}
+     * in new code — it cannot be silently ignored if the caller forgets to
+     * branch on the return value. Reach for this method only when the handler
+     * needs to recover from a CSRF failure rather than terminate.
      *
      * @param string $field POST field name carrying the token (default `csrf_token`).
      *
@@ -432,6 +427,50 @@ abstract class ControllerBase
     {
         $token = (string)($this->request->getPost($field) ?? '');
         return $this->AUTH_SESSION->verifyCsrfToken($token);
+    }
+
+    /**
+     * Verify the CSRF token from POST and terminate the request on failure.
+     *
+     * Pairs with {@see csrfToken()}: the template emits the token as a hidden
+     * input, and the handler calls this method before performing any
+     * state-changing work:
+     *
+     *     public function deleteAction(): void
+     *     {
+     *         if ($this->method !== 'POST') {
+     *             return;
+     *         }
+     *         $this->requireCsrfFromPost();
+     *         // ... safe to perform the destructive write
+     *     }
+     *
+     * On failure the response is emitted directly and the dispatch is
+     * terminated via `HttpTermination`:
+     *
+     * - REST callers receive a 403 `CSRF-TOKEN-INVALID` JSON envelope (matching
+     *   the automatic check in {@see run()} for `*Rest` handlers).
+     * - HTML callers receive a 403 page from `csrf.html` at the project root.
+     *
+     * Use {@see verifyCsrfFromPost()} directly only when the handler needs to
+     * react to the failure (e.g. re-render the form with field-level errors)
+     * instead of terminating.
+     *
+     * @param string $field POST field name carrying the token (default `csrf_token`).
+     *
+     * @return void
+     */
+    final protected function requireCsrfFromPost(string $field = 'csrf_token'): void
+    {
+        if ($this->verifyCsrfFromPost($field)) {
+            return;
+        }
+        if ($this->ROUTE_CONTEXT->isRest()) {
+            Xion\JsonResponder::outputArray($this->API_RESPONSE->failure('CSRF-TOKEN-INVALID'));
+        }
+        throw new Xion\HttpTermination(
+            Xion\HttpResponse::html((string)file_get_contents(DIR_ROOT . '/csrf.html'), 403)
+        );
     }
 
     /**
