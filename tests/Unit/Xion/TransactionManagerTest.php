@@ -71,6 +71,75 @@ final class TransactionManagerTest extends TestCase
         self::assertSame([], $this->pdo->committedWrites());
         self::assertFalse($this->pdo->inTransaction());
     }
+
+    public function testNestedRunCommitsOuterTransactionOnlyOnce(): void
+    {
+        // Outer run() opens a transaction; inner run() detects the
+        // existing transaction and only forwards the callback. Outer's
+        // commit is the single boundary.
+        $manager = new TransactionManager($this->pdo);
+
+        $result = $manager->run(function () use ($manager): string {
+            $this->pdo->recordWrite('outer-step');
+            $inner = $manager->run(function (): string {
+                $this->pdo->recordWrite('inner-step');
+                return 'inner-result';
+            });
+            return $inner . '+committed';
+        });
+
+        self::assertSame('inner-result+committed', $result);
+        self::assertSame(['outer-step', 'inner-step'], $this->pdo->committedWrites());
+        self::assertSame(1, $this->pdo->beginCount);
+        self::assertSame(1, $this->pdo->commitCount);
+        self::assertSame(0, $this->pdo->rollbackCount);
+    }
+
+    public function testNestedRunInnerExceptionRollsBackOuter(): void
+    {
+        // When the inner run() throws, the exception propagates up to
+        // the outer run() which is the one with the actual transaction
+        // boundary. The outer catch triggers rollback exactly once and
+        // re-throws. Inner does not double-handle the boundary.
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('inner failure');
+
+        $manager = new TransactionManager($this->pdo);
+        try {
+            $manager->run(function () use ($manager): void {
+                $this->pdo->recordWrite('outer-step');
+                $manager->run(function (): void {
+                    $this->pdo->recordWrite('inner-step');
+                    throw new RuntimeException('inner failure');
+                });
+            });
+        } finally {
+            self::assertSame([], $this->pdo->committedWrites());
+            self::assertSame(1, $this->pdo->beginCount);
+            self::assertSame(0, $this->pdo->commitCount);
+            self::assertSame(1, $this->pdo->rollbackCount);
+            self::assertFalse($this->pdo->inTransaction());
+        }
+    }
+
+    public function testRollbackSkipsWhenTransactionAlreadyEnded(): void
+    {
+        // If the callback itself commits or rolls back the PDO
+        // transaction (e.g. an inner library does so), the manager's
+        // catch must not double-rollback when the callback then throws.
+        $this->expectException(RuntimeException::class);
+
+        try {
+            (new TransactionManager($this->pdo))->run(function (): void {
+                $this->pdo->commit(); // ends transaction prematurely
+                throw new RuntimeException('post-commit failure');
+            });
+        } finally {
+            self::assertSame(1, $this->pdo->beginCount);
+            self::assertSame(1, $this->pdo->commitCount);
+            self::assertSame(0, $this->pdo->rollbackCount); // no double rollback
+        }
+    }
 }
 
 final class TransactionRecordingPdo extends PDO
