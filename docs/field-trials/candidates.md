@@ -71,10 +71,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 #### ~~static-analysis-baseline cleanup~~ → **complete** (2026-05-27, PR #440)
 
-#### DataMapperBase test补強 (#407 deferred chunk)
-**Why**: FT-407 deferred the PDO-dependent unit test work. Coverage on `DataMapperBase::execute()` / `decorate()` / KEY_SID rules is thin.
-**Trigger**: Whenever before a planned `DataMapperBase` refactor.
-**Size**: medium (needs PDO test double design).
+#### ~~DataMapperBase test補強 (#407 deferred chunk)~~ → **FT21 complete** (2026-05-27)
 
 ---
 
@@ -82,6 +79,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT21 — DataMapperBase test補強** (2026-05-27): 20 unit tests for `execute()` / `executeQuery()` / `decorate()` / `assoc()` / `KEY_SID` / `getTableColumn()` / `getSearchARRAY()`. Mock PDO/PDOStatement; no real DB. PR #444.
 - **ADR-0012 — PHP version policy** (2026-05-27): \`"php": ">=8.4"\` declared; upgrade cadence documented. PR #442.
 - **static-analysis-baseline cleanup** (2026-05-27): all 6 Phan baseline entries resolved. PR #440. Baseline now empty.
 - **ADR-0011 — Smarty selection** (2026-05-27): retrospective ADR. PR #438. Records why Smarty over Twig/Blade + revisit triggers.
