@@ -18,6 +18,7 @@ This file is the first document for AI agents and automation working on NeNe.
 - Observability (request-id + future cross-cutting concerns): `docs/development/observability.md` (`Nene\Xion\RequestId` + `X-Request-ID` header + Monolog `extra.request_id` + recipe for future per-request decorations)
 - Agent / MCP Bearer auth: `docs/development/agent-bearer-auth.md` (`Nene\Xion\BearerAuth` + `NENE_AGENT_BEARER_TOKEN` env + mod_php Authorization quirk; ADR-0008 — cross-repo handoff from nene-mcp)
 - Schema migrations: `docs/development/schema-migrations.md` (`composer schema:diff` operator-applied workflow; ADR-0009 — closes commercial-feasibility "biggest practical concern")
+- Session storage: `docs/development/session-storage.md` (`Nene\Xion\SessionHandlerFactory` + `RedisSessionHandler` + `NENE_SESSION_DSN` env + redis:7-alpine compose service; ADR-0010 — enables load-balanced / multi-instance deployments)
 - AI self-review: `docs/ai/README.md`
 - Commit conventions: `docs/development/commit-conventions.md`
 - Roadmap: `docs/roadmap.md`
