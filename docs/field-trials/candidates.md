@@ -51,10 +51,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 **Trigger**: 8.5 ships, or earlier if a `composer require` warns about minimum-php.
 **Size**: ADR-only, small.
 
-#### Smarty selection ADR
-**Why**: ADR-0001 onwards never recorded why Smarty (vs Twig / Blade). Historical context will fade.
-**Trigger**: A new contributor asks "なぜ Smarty?" or migration discussion starts.
-**Size**: ADR-only, retrospective. Low urgency.
+#### ~~Smarty selection ADR~~ → **ADR-0011 complete** (2026-05-27)
 
 #### Constraint-changes ADR (unique / FK additions)
 **Why**: ADR-0009 explicitly left constraint changes in the "warning-only" path. If real deploys hit this pattern often, escalate to ADR.
@@ -91,6 +88,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **ADR-0011 — Smarty selection** (2026-05-27): retrospective ADR. PR #438. Records why Smarty over Twig/Blade + revisit triggers.
 - **FT20 — server-timing** (2026-05-27): `ServerTiming` + `NENE_SERVER_TIMING_ENABLED` env. PR #435 (feat) + #436 (docs). `Server-Timing: app;dur=X.X`; ADR-0007 future concern resolved.
 - **FT19 — structured-logs** (2026-05-27): `LogFormatterFactory` + `NENE_LOG_FORMAT=json` env. PR #432 (feat) + #433 (docs). Monolog JsonFormatter; log aggregator ready.
 - **FT18 — session-storage-backend** (2026-05-26): ADR-0010. `RedisSessionHandler` + `SessionHandlerFactory` + `predis/predis`. PR #429 (feat) + #430 (docs). Resolves commercial-feasibility concern #3.
