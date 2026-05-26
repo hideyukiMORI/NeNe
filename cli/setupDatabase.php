@@ -48,7 +48,7 @@ echo 'Welcome NeNe-PHP database setup!' . PHP_EOL . PHP_EOL;
 echo 'Environment file: ' . ($loadedEnv === [] ? 'not loaded' : $envPath) . PHP_EOL;
 echo 'Database type: ' . DB_TYPE . PHP_EOL;
 echo 'Database target: ' . (DB_TYPE === 'MySQL' ? DB_HOST . ':' . DB_PORT . '/' . DB_NAME : DB_DIR . DB_FILE) . PHP_EOL;
-echo 'This command creates users/todos tables and inserts the sample admin data when missing.' . PHP_EOL . PHP_EOL;
+echo 'This command creates schema tables and inserts the sample admin data when missing.' . PHP_EOL . PHP_EOL;
 
 if (!isset($options['yes'])) {
     echo 'Do you want to continue? (Y/N)' . PHP_EOL;

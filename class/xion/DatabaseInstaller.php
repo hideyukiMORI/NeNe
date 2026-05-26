@@ -29,7 +29,7 @@ final class DatabaseInstaller
         return [
             'databaseType' => DB_TYPE,
             'databaseName' => DB_TYPE === 'MySQL' ? DB_NAME : DB_FILE,
-            'tables' => ['users', 'todos'],
+            'tables' => array_keys(SchemaDefinition::tables()),
             'sampleUser' => 'admin',
         ];
     }
@@ -59,8 +59,9 @@ final class DatabaseInstaller
         }
 
         try {
-            self::assertTableExists($pdo, 'users');
-            self::assertTableExists($pdo, 'todos');
+            foreach (array_keys(SchemaDefinition::tables()) as $table) {
+                self::assertTableExists($pdo, $table);
+            }
             $result['schema'] = true;
             $result['healthStatus'] = 'ok';
         } catch (\Throwable $throwable) {
@@ -198,10 +199,6 @@ SQL);
      */
     private static function assertTableExists(PDO $pdo, string $table): void
     {
-        if (!in_array($table, ['users', 'todos'], true)) {
-            throw new \InvalidArgumentException('Unexpected table check: ' . $table);
-        }
-
         $pdo->query('SELECT COUNT(*) FROM ' . $table);
     }
 
