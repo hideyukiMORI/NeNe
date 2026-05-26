@@ -40,11 +40,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ### Structural / governance (FT11 / FT14 系譜)
 
-#### CLI command framework
-**Why**: `cli/setupDatabase.php` / `initSQLite.php` / `generateSchemaSql.php` / `schemaDiff.php` each reinvent `getopt`. A common `Nene\Xion\Command` base would normalize `--help` / `--yes` / error reporting.
-**Trigger**: 5th CLI script is added (currently 4). Or before next major CLI surface (`cli/migration:up`?).
-**Open design questions**: hand-rolled vs symfony/console.
-**Size**: medium.
+#### ~~CLI command framework~~ → **FT24 complete** (2026-05-27)
 
 #### ~~PHP version policy ADR~~ → **ADR-0012 complete** (2026-05-27)
 
@@ -76,6 +72,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT24 — CLI command framework** (2026-05-27): `Nene\Xion\Command` abstract base class; 4 CLI scripts refactored to thin shells; `initSQLite.php` fixed to use SchemaCompiler (removed hardcoded DDL); 16 unit tests. PR #457.
 - **FT23 — NENE2 pattern survey** (2026-05-27): systematic review of NENE2 FT80–99; 1 code fix (`JSON_UNESCAPED_UNICODE`), 19 new docs, 1 enhanced doc. PR #455.
 - **FT22 — ai-agent-journey** (2026-05-27): clean subagent built `bookmarks` REST service end-to-end using only docs. 5 doc gaps found (F-1/F-5 fixed immediately, F-2/F-3/F-4 deferred as Issues #446-#450). PR #451.
 - **FT21 — DataMapperBase test補強** (2026-05-27): 20 unit tests for `execute()` / `executeQuery()` / `decorate()` / `assoc()` / `KEY_SID` / `getTableColumn()` / `getSearchARRAY()`. Mock PDO/PDOStatement; no real DB. PR #444.

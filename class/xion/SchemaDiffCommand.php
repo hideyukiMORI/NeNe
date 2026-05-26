@@ -1,0 +1,273 @@
+<?php
+
+/**
+ * AYANE : ayane.co.jp
+ * powered by NENE.
+ *
+ * PHP Version >= 8.4
+ *
+ * @package   AYANE
+ * @author    hideyukiMORI <info@ayane.co.jp>
+ * @copyright 2021 AYANE
+ * @license   https://opensource.org/licenses/MIT MIT License
+ * @link      https://ayane.co.jp/
+ */
+
+declare(strict_types=1);
+
+namespace Nene\Xion;
+
+/**
+ * CLI command: compare a running database's schema against SchemaDefinition
+ * and emit the SQL that would converge the live DB to the definition.
+ *
+ * Invoked by `cli/schemaDiff.php` (also aliased as `composer schema:diff`).
+ *
+ * The CLI never applies SQL. The operator pipes the output to a file,
+ * reviews it, and runs mysql / sqlite3 themselves. This is the deliberate
+ * design from ADR-0009 (Option C).
+ *
+ * Exit codes:
+ *   0  schema is in sync, OR diff was emitted successfully
+ *   1  CLI usage error (missing --dsn, unsupported driver)
+ *   2  database connection / introspection error
+ */
+class SchemaDiffCommand extends Command
+{
+    /**
+     * @return array<string, 'none'|'optional'|'required'>
+     */
+    protected function optionDefinitions(): array
+    {
+        return [
+            'dsn'  => 'required',
+            'user' => 'optional',
+            'pass' => 'optional',
+        ];
+    }
+
+    protected function helpText(): string
+    {
+        return <<<'HELP'
+
+NeNe schema-diff — operator-applied migration tool (ADR-0009).
+
+USAGE
+    php cli/schemaDiff.php --dsn=<pdo-dsn> [--user=<u>] [--pass=<p>]
+
+    Or via composer:
+    composer schema:diff -- --dsn=<pdo-dsn> [--user=<u>] [--pass=<p>]
+
+OPTIONS
+    --dsn=…       PDO DSN (required). MySQL or SQLite only.
+    --user=…      Username (MySQL).
+    --pass=…      Password (MySQL).
+    --help        Show this help.
+
+EXAMPLES
+    # MySQL
+    php cli/schemaDiff.php \
+        --dsn='mysql:host=127.0.0.1;port=3306;dbname=nene' \
+        --user=nene --pass=nene
+
+    # SQLite
+    php cli/schemaDiff.php --dsn='sqlite:/var/www/html/data/nene.sqlite'
+
+    # Redirect for review-before-apply (recommended)
+    composer schema:diff -- --dsn='mysql:...' --user=u --pass=p \
+        > migrations/$(date +%F)-change.sql
+
+OUTPUT
+    stdout  the SQL to apply (review-then-pipe-to-mysql)
+    stderr  annotations and warnings (not part of redirected SQL)
+
+EXIT CODES
+    0  schema is in sync OR diff emitted successfully
+    1  CLI usage error (missing --dsn, unsupported driver)
+    2  database connection / introspection error
+
+NOT EMITTED (review-before-apply rule)
+    The CLI never emits destructive SQL. Drops, column renames, type
+    changes, constraint changes, and default-value-only changes are
+    reported as stderr warnings only. Operators hand-write those.
+
+SEE ALSO
+    docs/development/schema-migrations.md
+    docs/adr/0009-schema-migration-story.md
+    composer schema:generate  (regenerate docker entrypoint snapshot)
+    composer schema:check     (drift check vs snapshot)
+
+HELP;
+    }
+
+    /**
+     * @param array<string, string|false> $options
+     */
+    protected function handle(array $options): int
+    {
+        $dsn = isset($options['dsn']) ? (string)$options['dsn'] : '';
+        if ($dsn === '') {
+            $this->error('error: --dsn=… is required. Run `php cli/schemaDiff.php --help` for usage.');
+            return 1;
+        }
+
+        $user = isset($options['user']) ? (string)$options['user'] : null;
+        $pass = isset($options['pass']) ? (string)$options['pass'] : null;
+
+        try {
+            $pdo = new \PDO($dsn, $user, $pass, [
+                \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
+                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+            ]);
+        } catch (\PDOException $exception) {
+            $this->error('error: database connection failed: ' . $exception->getMessage());
+            return 2;
+        }
+
+        $driver = (string)$pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+        if ($driver !== SchemaDiffer::DRIVER_MYSQL && $driver !== SchemaDiffer::DRIVER_SQLITE) {
+            $this->error("error: unsupported driver `$driver`. Supported: mysql, sqlite.");
+            return 1;
+        }
+
+        try {
+            $live = $this->introspect($pdo, $driver);
+        } catch (\PDOException $exception) {
+            $this->error('error: schema introspection failed: ' . $exception->getMessage());
+            return 2;
+        }
+
+        $diff = SchemaDiffer::diff($live, SchemaDefinition::tables(), $driver);
+
+        if ($diff['inSync']) {
+            $this->error("-- schema is in sync with SchemaDefinition (driver=$driver)");
+            foreach ($diff['warnings'] as $warning) {
+                $this->error("-- warning: $warning");
+            }
+            return 0;
+        }
+
+        $this->error("-- schema diff for driver=$driver (review before applying)");
+        foreach ($diff['warnings'] as $warning) {
+            $this->error("-- warning: $warning");
+        }
+        $this->write("-- generated by cli/schemaDiff.php (ADR-0009)\n");
+        $this->write("-- driver: $driver\n");
+        $this->write("-- review every statement before applying; this tool only emits add-only changes.\n");
+        foreach ($diff['newTables'] as $tableName => $sql) {
+            $this->write("\n-- new table: $tableName\n");
+            $this->write($sql . "\n");
+        }
+        foreach ($diff['newColumns'] as $entry) {
+            $this->write("\n-- new column: {$entry['table']}.{$entry['column']}\n");
+            $this->write($entry['sql'] . "\n");
+        }
+        foreach ($diff['newIndexes'] as $entry) {
+            $this->write("\n-- new index: {$entry['index']} on {$entry['table']}\n");
+            $this->write($entry['sql'] . "\n");
+        }
+
+        return 0;
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    private function introspect(\PDO $pdo, string $driver): array
+    {
+        if ($driver === SchemaDiffer::DRIVER_SQLITE) {
+            return $this->introspectSqlite($pdo);
+        }
+        return $this->introspectMysql($pdo);
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    private function introspectMysql(\PDO $pdo): array
+    {
+        $database = (string)$pdo->query('SELECT DATABASE()')->fetchColumn();
+        if ($database === '') {
+            throw new \RuntimeException('MySQL DSN did not specify a database (no DATABASE() in session).');
+        }
+
+        $tableStmt = $pdo->prepare(
+            'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES '
+            . 'WHERE TABLE_SCHEMA = :schema AND TABLE_TYPE = "BASE TABLE"'
+        );
+        $tableStmt->execute([':schema' => $database]);
+        /** @var array<int, string> $tables */
+        $tables = $tableStmt->fetchAll(\PDO::FETCH_COLUMN);
+
+        $columnStmt = $pdo->prepare(
+            'SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS '
+            . 'WHERE TABLE_SCHEMA = :schema AND TABLE_NAME = :table'
+        );
+        $indexStmt = $pdo->prepare(
+            'SELECT INDEX_NAME, COLUMN_NAME, SEQ_IN_INDEX '
+            . 'FROM INFORMATION_SCHEMA.STATISTICS '
+            . 'WHERE TABLE_SCHEMA = :schema AND TABLE_NAME = :table '
+            . 'AND INDEX_NAME != "PRIMARY" AND NON_UNIQUE = 1 '
+            . 'ORDER BY INDEX_NAME, SEQ_IN_INDEX'
+        );
+
+        $result = [];
+        foreach ($tables as $table) {
+            $columnStmt->execute([':schema' => $database, ':table' => $table]);
+            $columns = [];
+            foreach ($columnStmt->fetchAll() as $row) {
+                $name            = (string)$row['COLUMN_NAME'];
+                $columns[$name]  = ['data_type' => (string)$row['DATA_TYPE']];
+            }
+            $indexStmt->execute([':schema' => $database, ':table' => $table]);
+            $indexes = [];
+            foreach ($indexStmt->fetchAll() as $row) {
+                $idxName           = (string)$row['INDEX_NAME'];
+                $indexes[$idxName] = $indexes[$idxName] ?? [];
+                $indexes[$idxName][] = (string)$row['COLUMN_NAME'];
+            }
+            $result[$table] = ['columns' => $columns, 'indexes' => $indexes];
+        }
+        return $result;
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    private function introspectSqlite(\PDO $pdo): array
+    {
+        $tableStmt = $pdo->query(
+            'SELECT name FROM sqlite_master WHERE type = "table" AND name NOT LIKE "sqlite_%"'
+        );
+        /** @var array<int, string> $tables */
+        $tables = $tableStmt->fetchAll(\PDO::FETCH_COLUMN);
+
+        $result = [];
+        foreach ($tables as $table) {
+            $columnStmt = $pdo->query('PRAGMA table_info(' . $table . ')');
+            $columns    = [];
+            foreach ($columnStmt->fetchAll() as $row) {
+                $name           = (string)$row['name'];
+                $columns[$name] = ['data_type' => (string)$row['type']];
+            }
+            $indexListStmt = $pdo->query('PRAGMA index_list(' . $table . ')');
+            $indexes       = [];
+            foreach ($indexListStmt->fetchAll() as $indexRow) {
+                $idxName = (string)$indexRow['name'];
+                if (str_starts_with($idxName, 'sqlite_autoindex_')) {
+                    continue;
+                }
+                if ((int)$indexRow['unique'] === 1) {
+                    continue;
+                }
+                $infoStmt        = $pdo->query('PRAGMA index_info(' . $idxName . ')');
+                $indexes[$idxName] = [];
+                foreach ($infoStmt->fetchAll() as $infoRow) {
+                    $indexes[$idxName][] = (string)$infoRow['name'];
+                }
+            }
+            $result[$table] = ['columns' => $columns, 'indexes' => $indexes];
+        }
+        return $result;
+    }
+}
