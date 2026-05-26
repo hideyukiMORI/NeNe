@@ -72,10 +72,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ### Quality / maintenance
 
-#### static-analysis-baseline cleanup
-**Why**: Phan baseline has 6 entries (5 DataModelBase magic + 1 PdoConnection const). Small inventory trial to either close or document why each persists.
-**Trigger**: Whenever a session wants a palate cleanser (1-2 hours).
-**Size**: small.
+#### ~~static-analysis-baseline cleanup~~ → **complete** (2026-05-27, PR #440)
 
 #### DataMapperBase test补強 (#407 deferred chunk)
 **Why**: FT-407 deferred the PDO-dependent unit test work. Coverage on `DataMapperBase::execute()` / `decorate()` / KEY_SID rules is thin.
@@ -88,6 +85,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **static-analysis-baseline cleanup** (2026-05-27): all 6 Phan baseline entries resolved. PR #440. Baseline now empty.
 - **ADR-0011 — Smarty selection** (2026-05-27): retrospective ADR. PR #438. Records why Smarty over Twig/Blade + revisit triggers.
 - **FT20 — server-timing** (2026-05-27): `ServerTiming` + `NENE_SERVER_TIMING_ENABLED` env. PR #435 (feat) + #436 (docs). `Server-Timing: app;dur=X.X`; ADR-0007 future concern resolved.
 - **FT19 — structured-logs** (2026-05-27): `LogFormatterFactory` + `NENE_LOG_FORMAT=json` env. PR #432 (feat) + #433 (docs). Monolog JsonFormatter; log aggregator ready.
