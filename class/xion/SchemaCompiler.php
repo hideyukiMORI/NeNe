@@ -157,15 +157,17 @@ SQL;
      */
     public static function mysqlColumn(string $name, array $column): string
     {
-        $type = (string)($column['type'] ?? '');
+        $type     = (string)($column['type'] ?? '');
+        $nullable = (bool)($column['nullable'] ?? false);
+        $nn       = $nullable ? '' : ' NOT NULL';
         return match (true) {
             $type === 'pk-bigint'       => $name . ' BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
-            $type === 'bigint'          => $name . ' BIGINT UNSIGNED NOT NULL',
-            $type === 'text'            => $name . ' TEXT NOT NULL',
+            $type === 'bigint'          => $name . ' BIGINT UNSIGNED' . $nn,
+            $type === 'text'            => $name . ' TEXT' . $nn,
             $type === 'bool'            => $name . ' TINYINT(1) NOT NULL DEFAULT ' . (int)($column['default'] ?? 0),
             $type === 'datetime-now'    => $name . ' DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP',
             $type === 'datetime-touch'  => $name . ' DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
-            str_starts_with($type, 'varchar:') => $name . ' VARCHAR(' . (int)substr($type, strlen('varchar:')) . ') NOT NULL',
+            str_starts_with($type, 'varchar:') => $name . ' VARCHAR(' . (int)substr($type, strlen('varchar:')) . ')' . $nn,
             default => throw new InvalidArgumentException('Unknown column type for ' . $name . ': ' . $type),
         };
     }
@@ -175,15 +177,17 @@ SQL;
      */
     public static function sqliteColumn(string $name, array $column): string
     {
-        $type = (string)($column['type'] ?? '');
+        $type     = (string)($column['type'] ?? '');
+        $nullable = (bool)($column['nullable'] ?? false);
+        $nn       = $nullable ? '' : ' NOT NULL';
         return match (true) {
             $type === 'pk-bigint'       => $name . ' INTEGER PRIMARY KEY AUTOINCREMENT',
-            $type === 'bigint'          => $name . ' INTEGER NOT NULL',
-            $type === 'text'            => $name . ' TEXT NOT NULL',
+            $type === 'bigint'          => $name . ' INTEGER' . $nn,
+            $type === 'text'            => $name . ' TEXT' . $nn,
             $type === 'bool'            => $name . ' INTEGER NOT NULL DEFAULT ' . (int)($column['default'] ?? 0),
             $type === 'datetime-now'    => $name . ' TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
             $type === 'datetime-touch'  => $name . ' TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
-            str_starts_with($type, 'varchar:') => $name . ' TEXT NOT NULL',
+            str_starts_with($type, 'varchar:') => $name . ' TEXT' . $nn,
             default => throw new InvalidArgumentException('Unknown column type for ' . $name . ': ' . $type),
         };
     }

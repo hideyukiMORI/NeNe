@@ -645,7 +645,14 @@ Name your own mapper methods to avoid collisions. For soft-delete (setting `is_d
 
 ### Column nullability
 
-`SchemaDefinition` / `SchemaCompiler` does not yet have a nullable column variant — every column compiles to `NOT NULL`. For truly optional data, use an empty string as the sentinel (`''`) and bind with `PDO::PARAM_STR` in the mapper. Do not try to insert `NULL` into a column defined via `SchemaDefinition`.
+To allow a column to store `NULL`, add `'nullable' => true` to its definition in `SchemaDefinition::tables()`:
+
+```php
+'note' => ['type' => 'text', 'nullable' => true],
+'parent_id' => ['type' => 'bigint', 'nullable' => true],
+```
+
+Without `nullable`, every column compiles to `NOT NULL`. The `nullable` option applies to `text`, `varchar:*`, and `bigint` columns. `pk-bigint`, `bool`, and `datetime-*` columns are always `NOT NULL` and ignore the option.
 
 ## Add Authentication Requirements
 
