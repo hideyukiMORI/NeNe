@@ -55,17 +55,25 @@ final class ResponseDecorator
     public static function headers(): array
     {
         $headers = self::staticHeaders();
+
+        // Per-request request-id (FT15 / ADR-0007)
         $requestIdHeader = RequestId::headerName();
         if ($requestIdHeader !== '') {
             $headers[$requestIdHeader] = RequestId::current();
         }
+
+        // Per-request Server-Timing (FT20 / ADR-0007 future concern)
+        if (ServerTiming::isEnabled()) {
+            $headers['Server-Timing'] = ServerTiming::headerValue();
+        }
+
         return $headers;
     }
 
     /**
      * Process-cached headers driven by `NENE_SECURITY_*` env vars plus
-     * the always-on defaults. Does **not** include the per-request
-     * request-id header — that is added by {@see headers()}.
+     * the always-on defaults. Does **not** include per-request headers
+     * (request-id, Server-Timing) — those are added by {@see headers()}.
      *
      * @return array<string,string>
      */

@@ -25,6 +25,12 @@ error_reporting(E_ALL);
  */
 require_once '../vendor/autoload.php';
 
+// Record PHP start time as early as possible so Server-Timing measures
+// the full application processing time (FT20 / ADR-0007). No-op when
+// NENE_SERVER_TIMING_ENABLED is unset — isEnabled() is read later by
+// ResponseDecorator::headers().
+Xion\ServerTiming::start();
+
 Xion\EnvLoader::loadIfExists(dirname(__DIR__) . '/.env');
 Xion\Initialize::init();
 
