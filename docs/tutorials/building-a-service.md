@@ -522,6 +522,8 @@ return [
 
 The public JSON envelope wraps that data under `Data`.
 
+> **Also update `docs/development/error-codes.md`.** A unit test (`ErrorCodeTest::testEveryRuntimeCodeAppearsInDocsMarkdownTable`) verifies that every entry in `config/error_codes.php` appears in the markdown catalog table. Adding to the PHP file without updating the markdown causes unit tests to fail. Add a row for each new code in the table in `docs/development/error-codes.md`.
+
 ## Add Database Code
 
 Use a data model for schema metadata and validation, and a mapper for SQL.
@@ -634,6 +636,16 @@ When you add a new table, keep MySQL and SQLite setup aligned:
 docker/mysql/init/001_schema.sql
 cli/initSQLite.php
 ```
+
+### Reserved method names in DataMapperBase
+
+`DataMapperBase` already declares `insert()`, `update()`, `delete()`, `find()`, `findALL()`, `countById()`, `countAll()` as public methods. Overriding any of these with an incompatible signature causes a PHP fatal error.
+
+Name your own mapper methods to avoid collisions. For soft-delete (setting `is_deleted = 1`) the conventional choice is `softDelete(int $id): bool`.
+
+### Column nullability
+
+`SchemaDefinition` / `SchemaCompiler` does not yet have a nullable column variant — every column compiles to `NOT NULL`. For truly optional data, use an empty string as the sentinel (`''`) and bind with `PDO::PARAM_STR` in the mapper. Do not try to insert `NULL` into a column defined via `SchemaDefinition`.
 
 ## Add Authentication Requirements
 

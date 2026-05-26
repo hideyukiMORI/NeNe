@@ -57,10 +57,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ### Meta / evaluation (Phase 6 系譜)
 
-#### ai-agent-journey
-**Why**: Phase 6 thesis self-verification. Bootstrap a fresh clone with a clean AI agent and have it build a small service end-to-end using only the docs. Surface what's still confusing.
-**Trigger**: After a significant docs investment (now, after FT13-17 + journal added, would be a reasonable time).
-**Size**: long (4-8 hours), unique findings.
+#### ~~ai-agent-journey~~ → **FT22 complete** (2026-05-27)
 
 #### docs-journey-newcomer
 **Why**: Similar to ai-agent-journey but human-centered. Trial with a developer who has never seen NeNe.
@@ -79,6 +76,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT22 — ai-agent-journey** (2026-05-27): clean subagent built `bookmarks` REST service end-to-end using only docs. 5 doc gaps found (F-1/F-5 fixed immediately, F-2/F-3/F-4 deferred as Issues #446-#450). PR #451.
 - **FT21 — DataMapperBase test補強** (2026-05-27): 20 unit tests for `execute()` / `executeQuery()` / `decorate()` / `assoc()` / `KEY_SID` / `getTableColumn()` / `getSearchARRAY()`. Mock PDO/PDOStatement; no real DB. PR #444.
 - **ADR-0012 — PHP version policy** (2026-05-27): \`"php": ">=8.4"\` declared; upgrade cadence documented. PR #442.
 - **static-analysis-baseline cleanup** (2026-05-27): all 6 Phan baseline entries resolved. PR #440. Baseline now empty.
