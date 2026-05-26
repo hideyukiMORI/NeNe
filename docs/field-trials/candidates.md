@@ -31,10 +31,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 #### ~~structured-logs (JSON formatter swap)~~ → **FT19 complete** (2026-05-27)
 
-#### Server-Timing header
-**Why**: ADR-0007 listed it as a future cross-cutting use case. Per-request timing data for browser devtools / aggregators.
-**Trigger**: Real performance debugging surfaces the need.
-**Size**: small.
+#### ~~Server-Timing header~~ → **FT20 complete** (2026-05-27)
 
 #### OpenTelemetry traceparent / tracestate
 **Why**: Industry-standard distributed tracing. Currently `X-Request-ID` (NeNe-flavored) only.
@@ -94,6 +91,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT20 — server-timing** (2026-05-27): `ServerTiming` + `NENE_SERVER_TIMING_ENABLED` env. PR #435 (feat) + #436 (docs). `Server-Timing: app;dur=X.X`; ADR-0007 future concern resolved.
 - **FT19 — structured-logs** (2026-05-27): `LogFormatterFactory` + `NENE_LOG_FORMAT=json` env. PR #432 (feat) + #433 (docs). Monolog JsonFormatter; log aggregator ready.
 - **FT18 — session-storage-backend** (2026-05-26): ADR-0010. `RedisSessionHandler` + `SessionHandlerFactory` + `predis/predis`. PR #429 (feat) + #430 (docs). Resolves commercial-feasibility concern #3.
 - **FT17 — schema-diff CLI** (2026-05-23): ADR-0009 implementation. Closed all 4 PRs same day.

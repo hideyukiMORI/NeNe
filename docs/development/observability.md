@@ -2,7 +2,7 @@
 
 How NeNe tags every request with a stable identifier, propagates it into logs and response headers, selects a log output format, and how future observability concerns (server-timing, OpenTelemetry, audit fingerprints) plug into the same boundary.
 
-Audience: anyone debugging across multiple log lines that should belong to the same request, anyone configuring NeNe behind a reverse proxy / load balancer, anyone adding a new cross-cutting concern. Trial sources: FT15 (request-id), FT19 (structured-logs). Boundary: ADR-0007.
+Audience: anyone debugging across multiple log lines that should belong to the same request, anyone configuring NeNe behind a reverse proxy / load balancer, anyone adding a new cross-cutting concern. Trial sources: FT15 (request-id), FT19 (structured-logs), FT20 (server-timing). Boundary: ADR-0007.
 
 ## Request-id (correlation id)
 
@@ -117,15 +117,39 @@ public static function headers(): array {
 
 The split between cached (`staticHeaders()`) and per-call (`headers()`) is intentional: env-driven security headers do not change within a process, but the request-id does change per request. Splitting keeps both costs at the right level.
 
+## Server-Timing header
+
+**FT20.** `NENE_SERVER_TIMING_ENABLED` opts the application into emitting a `Server-Timing` response header (default off):
+
+```sh
+# Enable (e.g. for staging / production behind trusted proxy)
+NENE_SERVER_TIMING_ENABLED=1
+
+# Default: off
+NENE_SERVER_TIMING_ENABLED=0
+```
+
+Sample header:
+
+```
+Server-Timing: app;dur=26.9
+```
+
+`app` is the PHP application layer metric. `dur` is elapsed milliseconds (one decimal place) from bootstrap to header serialisation.
+
+**Security note**: The header exposes internal latency. Enable only behind a trusted reverse proxy, not directly at the public edge — timing data can assist side-channel analysis on auth or rate-limited paths.
+
+**Implementation**: `Nene\Xion\ServerTiming::start()` is called immediately after `require_once 'vendor/autoload.php'` in `htdocs/index.php`. `ResponseDecorator::headers()` adds the header when `ServerTiming::isEnabled()`. The controller-wins precedence from ADR-0007 is preserved — a controller that sets `Server-Timing` itself takes priority.
+
 ## Future cross-cutting concerns
 
-ADR-0007 introduced the decoration boundary; FT15 validated it by adding the first non-security concern. Future concerns follow the same recipe:
+ADR-0007 introduced the decoration boundary; FT15–FT20 validated it with four use cases. Future concerns follow the same recipe:
 
 | Concern | Likely env var(s) | Likely shape |
 | --- | --- | --- |
-| `Server-Timing` | `NENE_SERVER_TIMING_ENABLED` | Per-request, computed from `microtime()` checkpoints. Add to `headers()` via a `ServerTiming::current()` analogue. |
 | OpenTelemetry `traceparent` / `tracestate` | `NENE_OTEL_*` | Parse inbound `traceparent`, generate fresh when absent (same resolution shape as request-id). Plug into `headers()` and Monolog. |
 | Audit fingerprint / actor hash | `NENE_AUDIT_*` | Per-request hash of `(user_id, ip, user-agent)`. Plug into Monolog processor for tamper-evident audit logs. |
+| Multi-metric Server-Timing (`db;dur=X`) | extend `ServerTiming` | Add `ServerTiming::addMetric(string $name, float $dur)` once a DB-layer hook surfaces the need. |
 
 Each follows the FT15 recipe: a static helper resolves the per-request value, `ResponseDecorator::headers()` appends it, `Log` processor injects it into `extra`. No changes to `HttpEmitter::emit()` or `View::execute()` should be needed.
 
@@ -162,5 +186,7 @@ When the app is the boundary, the inbound header is untrusted. Either:
 - `docs/development/coding-standards.md` § "Environment-variable defaults" — the `getenv() ?:` falsy-trap note (FT15 F-1).
 - `docs/field-trials/2026-05-field-trial-15.md` — FT15 (request-id).
 - `docs/field-trials/2026-05-field-trial-19.md` — FT19 (structured-logs).
+- `docs/field-trials/2026-05-field-trial-20.md` — FT20 (server-timing).
 - `class/xion/RequestId.php` — request-id implementation.
 - `class/xion/LogFormatterFactory.php` — formatter selection implementation.
+- `class/xion/ServerTiming.php` — Server-Timing implementation.
