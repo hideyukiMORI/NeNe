@@ -26,6 +26,16 @@ namespace Nene\Xion;
  *                            ON UPDATE CURRENT_TIMESTAMP (MySQL);
  *                            SQLite simulates via a trigger.
  *
+ * Column options (added alongside `type`):
+ *
+ * - `nullable: true`      → omit NOT NULL from the generated DDL; the column
+ *                            accepts NULL values. Applies to `bigint`, `text`,
+ *                            and `varchar:*`. Not applicable to `pk-bigint`,
+ *                            `bool`, or `datetime-*` columns, which are always
+ *                            NOT NULL.
+ * - `default: <scalar>`   → column default value (currently only used for
+ *                            `bool` columns; e.g. `'default' => 0`).
+ *
  * See ADR-0005 for the consolidation rationale.
  */
 final class SchemaDefinition

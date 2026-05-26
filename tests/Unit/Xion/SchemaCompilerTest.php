@@ -83,6 +83,64 @@ final class SchemaCompilerTest extends TestCase
         }
     }
 
+    // ------------------------------------------------------------------
+    // nullable column option (#448)
+    // ------------------------------------------------------------------
+
+    public function testMysqlNullableTextOmitsNotNull(): void
+    {
+        $ddl = SchemaCompiler::mysqlColumn('note', ['type' => 'text', 'nullable' => true]);
+        self::assertSame('note TEXT', $ddl);
+        self::assertStringNotContainsString('NOT NULL', $ddl);
+    }
+
+    public function testMysqlNullableVarcharOmitsNotNull(): void
+    {
+        $ddl = SchemaCompiler::mysqlColumn('slug', ['type' => 'varchar:128', 'nullable' => true]);
+        self::assertSame('slug VARCHAR(128)', $ddl);
+        self::assertStringNotContainsString('NOT NULL', $ddl);
+    }
+
+    public function testMysqlNullableBigintOmitsNotNull(): void
+    {
+        $ddl = SchemaCompiler::mysqlColumn('parent_id', ['type' => 'bigint', 'nullable' => true]);
+        self::assertSame('parent_id BIGINT UNSIGNED', $ddl);
+        self::assertStringNotContainsString('NOT NULL', $ddl);
+    }
+
+    public function testMysqlNonNullableTextRetainsNotNull(): void
+    {
+        $ddl = SchemaCompiler::mysqlColumn('body', ['type' => 'text']);
+        self::assertSame('body TEXT NOT NULL', $ddl);
+    }
+
+    public function testSqliteNullableTextOmitsNotNull(): void
+    {
+        $ddl = SchemaCompiler::sqliteColumn('note', ['type' => 'text', 'nullable' => true]);
+        self::assertSame('note TEXT', $ddl);
+        self::assertStringNotContainsString('NOT NULL', $ddl);
+    }
+
+    public function testSqliteNullableVarcharOmitsNotNull(): void
+    {
+        $ddl = SchemaCompiler::sqliteColumn('slug', ['type' => 'varchar:128', 'nullable' => true]);
+        self::assertSame('slug TEXT', $ddl);
+        self::assertStringNotContainsString('NOT NULL', $ddl);
+    }
+
+    public function testSqliteNullableBigintOmitsNotNull(): void
+    {
+        $ddl = SchemaCompiler::sqliteColumn('parent_id', ['type' => 'bigint', 'nullable' => true]);
+        self::assertSame('parent_id INTEGER', $ddl);
+        self::assertStringNotContainsString('NOT NULL', $ddl);
+    }
+
+    public function testSqliteNonNullableTextRetainsNotNull(): void
+    {
+        $ddl = SchemaCompiler::sqliteColumn('body', ['type' => 'text']);
+        self::assertSame('body TEXT NOT NULL', $ddl);
+    }
+
     /**
      * Drift gate for ADR-0005: the committed `docker/mysql/init/001_schema.sql`
      * DDL section must equal the compiler's MySQL output. The hand-written
