@@ -46,10 +46,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 **Open design questions**: hand-rolled vs symfony/console.
 **Size**: medium.
 
-#### PHP version policy ADR
-**Why**: framework pins 8.4. PHP 8.5 ships late 2026 / early 2027. No documented stance on (a) auto-accepting minor releases, (b) major version migration cadence, (c) what triggers a deprecation policy.
-**Trigger**: 8.5 ships, or earlier if a `composer require` warns about minimum-php.
-**Size**: ADR-only, small.
+#### ~~PHP version policy ADR~~ → **ADR-0012 complete** (2026-05-27)
 
 #### ~~Smarty selection ADR~~ → **ADR-0011 complete** (2026-05-27)
 
@@ -85,6 +82,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **ADR-0012 — PHP version policy** (2026-05-27): \`"php": ">=8.4"\` declared; upgrade cadence documented. PR #442.
 - **static-analysis-baseline cleanup** (2026-05-27): all 6 Phan baseline entries resolved. PR #440. Baseline now empty.
 - **ADR-0011 — Smarty selection** (2026-05-27): retrospective ADR. PR #438. Records why Smarty over Twig/Blade + revisit triggers.
 - **FT20 — server-timing** (2026-05-27): `ServerTiming` + `NENE_SERVER_TIMING_ENABLED` env. PR #435 (feat) + #436 (docs). `Server-Timing: app;dur=X.X`; ADR-0007 future concern resolved.
