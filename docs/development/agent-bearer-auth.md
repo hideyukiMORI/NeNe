@@ -102,12 +102,60 @@ A future trial may pick this up when:
 - Token rotation needs an overlap window (old + new valid simultaneously).
 - Per-route or per-scope authorization is needed beyond "is this the admin?".
 
+## JWT-based Bearer auth (custom implementation)
+
+NeNe's built-in Bearer auth uses a pre-shared static token (`NENE_AGENT_BEARER_TOKEN`) validated with `hash_equals`. If you build a custom JWT-based auth system (e.g., for user-facing API tokens), these edge cases must be handled:
+
+### Security edge cases (FT94 findings from NENE2)
+
+| Scenario | Required behaviour |
+|---|---|
+| Missing `Authorization` header | 401 + `WWW-Authenticate: Bearer` response header |
+| Non-Bearer scheme (`Basic ...`) | 401 |
+| `Authorization: Bearer` with no token | 401 |
+| Expired token (`exp` claim in the past) | 401 — always validate `exp` |
+| Not-yet-valid token (`nbf` in the future) | 401 — validate `nbf` if you issue it |
+| Signature with wrong secret | 401 — `hash_equals` (constant-time) |
+| Tampered payload (header.different_payload.original_sig) | 401 — signature mismatch |
+| `alg: none` attack (unsigned token) | 401 — reject any algorithm other than your declared one (e.g. HS256) |
+| Correct token, but accessing another user's resource | 404 — see IDOR prevention |
+
+**Always declare and enforce the algorithm.** A JWT library that does not explicitly verify `alg === 'HS256'` (or your chosen algorithm) may accept `alg: none` tokens — unsigned tokens that bypass signature verification entirely. Specify the expected algorithm in the verifier constructor, not from the token header.
+
+**Always set `exp` on issued tokens.** A token without `exp` is valid forever. If `exp` is missing and your verifier does not reject it, a stolen token can never be revoked.
+
+**Use `hash_equals` for all secret comparisons.** String comparison with `===` has timing side-channels. `hash_equals` takes constant time regardless of where the strings diverge.
+
+```php
+// Correct constant-time comparison
+if (!hash_equals($expectedToken, $incomingToken)) {
+    throw new \RuntimeException('Invalid token');
+}
+```
+
+### IDOR via JWT claims
+
+When the JWT `sub` (subject) claim identifies the user, all database queries for owned resources must use the claim value as the owner filter — not the id from the URL:
+
+```php
+// WRONG — user in URL can mismatch the authenticated user
+$userId = (int)$this->request->getParam('userId');
+$entries = $mapper->findByUserId($userId);
+
+// RIGHT — always use the identity from the token
+$userId = (int)($jwtClaims['sub'] ?? 0);
+$entries = $mapper->findByUserId($userId);
+```
+
+This is the same ownership-in-SQL pattern as `docs/development/idor-prevention.md`.
+
 ## Related
 
 - `docs/adr/0008-optional-bearer-for-agent-routes.md` — design rationale.
 - `docs/api/openapi.yaml` — `bearerAuth` security scheme + TODO operations.
 - `docs/api/reference-client.md` — non-browser caller flows (Bearer pattern).
 - `docs/development/production-deployment.md` — env matrix, including `NENE_AGENT_BEARER_TOKEN` and `NENE_AGENT_BEARER_USER`.
+- `docs/development/idor-prevention.md` — ownership isolation patterns.
 - `docs/field-trials/2026-05-field-trial-16.md` — the trial that built this.
 - `class/xion/BearerAuth.php` — implementation.
 - nene-mcp project (`https://github.com/hideyukiMORI/nene-mcp`) — the sister MCP server that originated this requirement.
