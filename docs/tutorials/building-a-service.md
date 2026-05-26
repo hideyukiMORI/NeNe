@@ -898,6 +898,16 @@ Good HTTP test targets:
 - Unsupported methods return `405` and `Allow`.
 - OpenAPI documents observed runtime statuses.
 
+### Per-entity CRUD test pattern
+
+`tests/Http/TodoTest.php` is the canonical per-entity CRUD test example. Study it before writing your first HTTP test. The key conventions:
+
+- **Prefix test data** with `self::TEST_TODO_PREFIX` (inherited from `HttpRuntimeTestCase`). The base `setUp()` deletes any leftover rows with that prefix before each test, preventing cross-test contamination.
+- **Track created rows** by calling `$this->createTodo()` (or your own helper that appends to `$this->cleanupTodoIds`). The base `tearDown()` deletes all tracked rows even when an assertion fails mid-test.
+- **Get an authenticated client** with `$this->loginAsAdmin()`. The `HttpClient` automatically stores the session cookie and CSRF token after the login response, so subsequent `POST`/`PUT`/`DELETE` calls send `X-CSRF-Token` without any extra setup.
+- **Test unauthenticated access** by calling `$this->newClient()` — it returns a fresh client with no session, simulating an anonymous browser.
+- One behaviour per test method; keep assertions tight (status code + error code is enough for error cases).
+
 ## Implementation Checklist
 
 Before opening a PR:
