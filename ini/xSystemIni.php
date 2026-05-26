@@ -174,6 +174,10 @@ define('LOG_PATH', rtrim($getEnv('NENE_LOG_PATH', DIR_ROOT . 'log'), '/') . '/')
 define('APP_LOG_PATH', LOG_PATH . 'debug.log');
 define('ACCESS_LOG_PATH', LOG_PATH . 'access.log');
 define('ERROR_LOG_PATH', LOG_PATH . 'error.log');
+// Log output format. Accepts 'json' or 'text' (default).
+// Set NENE_LOG_FORMAT=json to emit machine-readable JSON lines
+// that production log aggregators (Datadog / Loki / Elasticsearch) can ingest.
+define('LOG_FORMAT', strtolower($getEnv('NENE_LOG_FORMAT', 'text')));
 
 unset($getEnv);
 

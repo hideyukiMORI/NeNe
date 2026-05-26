@@ -63,16 +63,24 @@ class Log
      */
     final private function __construct()
     {
+        $formatter = LogFormatterFactory::fromConstant();
+
+        $accessHandler = new RotatingFileHandler(ACCESS_LOG_PATH, 60, Level::Info);
+        $accessHandler->setFormatter($formatter);
         $this->accessLog = new Logger('Nene');
-        $this->accessLog->pushHandler(new RotatingFileHandler(ACCESS_LOG_PATH, 60, Level::Info));
+        $this->accessLog->pushHandler($accessHandler);
+
         $this->informationLog = new Logger('Nene');
         $this->errorLog = new Logger('Nene');
-        $this->errorLog->pushHandler(new RotatingFileHandler(ERROR_LOG_PATH, 60, Level::Error));
-        if (LOG_LEVEL == 'EMERGENCY') {
-            $this->informationLog->pushHandler(new RotatingFileHandler(APP_LOG_PATH, 100, Level::Emergency));
-        } else {
-            $this->informationLog->pushHandler(new RotatingFileHandler(APP_LOG_PATH, 100, Level::Info));
-        }
+
+        $errorHandler = new RotatingFileHandler(ERROR_LOG_PATH, 60, Level::Error);
+        $errorHandler->setFormatter($formatter);
+        $this->errorLog->pushHandler($errorHandler);
+
+        $infoLevel = LOG_LEVEL == 'EMERGENCY' ? Level::Emergency : Level::Info;
+        $infoHandler = new RotatingFileHandler(APP_LOG_PATH, 100, $infoLevel);
+        $infoHandler->setFormatter($formatter);
+        $this->informationLog->pushHandler($infoHandler);
 
         // Tag every log record with the per-request request_id so that
         // operators can grep all entries belonging to one request
