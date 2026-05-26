@@ -45,7 +45,7 @@ class User extends DataModelBase
      *
      * @var array
      */
-    protected static $validation = [
+    protected static array $validation = [
         'created_at' => ['required' => true],
         'updated_at' => ['required' => true],
         'user_id'    => ['required' => true, 'maxlength' => 64],

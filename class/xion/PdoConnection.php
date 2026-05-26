@@ -64,6 +64,10 @@ class PdoConnection
                         DB_PASS
                     );
                     $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    // @phan-suppress-next-line PhanUndeclaredConstantOfClass
+                    // PDO::MYSQL_ATTR_USE_BUFFERED_QUERY is a MySQL-driver constant.
+                    // It is available at runtime when the MySQL PDO driver is loaded,
+                    // but Phan cannot resolve driver-specific constants statically.
                     $this->connection->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
                     break;
                 case 'SQLite3':

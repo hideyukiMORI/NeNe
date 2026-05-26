@@ -57,6 +57,19 @@ abstract class DataModelBase
     protected static array $schema = [];
 
     /**
+     * Validation rules.
+     *
+     * Subclasses declare this as a protected static property with their
+     * field-level rules. The base class declares the property with an empty
+     * default so Phan can infer the array shape (resolves the Phan baseline
+     * entries for DataModelBase::validate — PhanTypeArraySuspicious,
+     * PhanTypeMismatchArgumentInternal, PhanTypeMismatchForeach).
+     *
+     * @var array<string, array<string, mixed>>
+     */
+    protected static array $validation = [];
+
+    /**
      * Logger
      *
      * @var Logger
@@ -193,12 +206,16 @@ abstract class DataModelBase
      * Setter.
      * The value is set in the parameter according to the type set in the schema.
      *
+     * PHP ignores the return value of __set (it is a void magic method).
+     * Do not add a return statement — use {@see set()} or {@see setParam()}
+     * if you need the result.
+     *
      * @param string $prop Parameter key.
      * @param mixed  $val  Parameter value.
      *
-     * @return mixed
+     * @return void
      */
-    public function __set(string $prop, mixed $val)
+    public function __set(string $prop, mixed $val): void
     {
         if (!isset(static::$schema[$prop])) {
             throw new \InvalidArgumentException('SET ' . $prop . ' IS DISABLE.');
@@ -208,19 +225,24 @@ abstract class DataModelBase
         $type = gettype($val);
         if ($type === $schema) {
             $this->data[$prop] = $val;
-            return true;
+            return;
         }
 
+        // PHP ignores the return value of __set; assignments are the side-effect.
         switch ($schema) {
             case self::BOOLEAN:
-                return $this->data[$prop] = (bool) $val;
+                $this->data[$prop] = (bool) $val;
+                break;
             case self::INTEGER:
-                return $this->data[$prop] = (int) $val;
+                $this->data[$prop] = (int) $val;
+                break;
             case self::DOUBLE:
-                return $this->data[$prop] = (float) $val;
+                $this->data[$prop] = (float) $val;
+                break;
             case self::STRING:
             default:
-                return $this->data[$prop] = (string) $val;
+                $this->data[$prop] = (string) $val;
+                break;
         }
     }
 
@@ -272,13 +294,13 @@ abstract class DataModelBase
     public function validate(string $prop = '', string $value = ''): mixed
     {
         if ($prop == '') {
-            foreach ($this->validation as $key => $val) {
+            foreach (static::$validation as $key => $val) {
                 if (!$this->doValid($this->$key, $val)) {
                     return ($key);
                 }
             }
-        } elseif (in_array($prop, $this->validation, true)) {
-            if (!$this->doValid($value, $this->validation[$prop])) {
+        } elseif (array_key_exists($prop, static::$validation)) {
+            if (!$this->doValid($value, static::$validation[$prop])) {
                 return (false);
             }
         }
@@ -360,7 +382,8 @@ abstract class DataModelBase
      */
     public function setNow(): void
     {
-        if (strlen($this->created_at) <= 1) {
+        // Cast to string: __get returns mixed; strlen requires string.
+        if (strlen((string)$this->created_at) <= 1) {
             $this->created_at = date('YmdHi');
         }
         $this->updated_at = date('YmdHi');
