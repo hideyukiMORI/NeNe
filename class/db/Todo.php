@@ -44,7 +44,7 @@ class Todo extends DataModelBase
      *
      * @var array
      */
-    protected static $validation = [
+    protected static array $validation = [
         'user_id'      => ['required' => true],
         'title'        => ['required' => true, 'maxlength' => 255],
         'is_completed' => ['required' => true, 'bool' => true],
