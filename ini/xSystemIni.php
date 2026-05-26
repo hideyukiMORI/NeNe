@@ -111,6 +111,10 @@ define('SESSION_COOKIE_HTTPONLY', in_array(strtolower($getEnv('NENE_SESSION_HTTP
 ], true));
 define('SESSION_COOKIE_SAMESITE', $getEnv('NENE_SESSION_SAMESITE', 'Lax'));
 define('SESSION_COOKIE_LIFETIME', (int)$getEnv('NENE_SESSION_LIFETIME', '0'));
+// Session storage backend DSN. Empty string = PHP default file sessions.
+// redis://host:port[/db] = Redis-backed sessions via RedisSessionHandler.
+// Register the handler in htdocs/index.php before session_start().
+define('SESSION_DSN', $getEnv('NENE_SESSION_DSN', ''));
 
 /*
  * Routing.
