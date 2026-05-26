@@ -105,6 +105,40 @@ final class ResponseDecoratorTest extends TestCase
         self::assertSame('<html>missing</html>', $decorated->body());
     }
 
+    // ------------------------------------------------------------------ //
+    // Server-Timing integration (FT20)
+    // ------------------------------------------------------------------ //
+
+    public function testServerTimingHeaderAbsentWhenDisabled(): void
+    {
+        putenv('NENE_SERVER_TIMING_ENABLED=0');
+        $headers = ResponseDecorator::headers();
+
+        self::assertArrayNotHasKey('Server-Timing', $headers);
+    }
+
+    public function testServerTimingHeaderPresentWhenEnabled(): void
+    {
+        putenv('NENE_SERVER_TIMING_ENABLED=1');
+        \Nene\Xion\ServerTiming::start();
+        $headers = ResponseDecorator::headers();
+
+        self::assertArrayHasKey('Server-Timing', $headers);
+        self::assertStringStartsWith('app;dur=', $headers['Server-Timing']);
+    }
+
+    public function testServerTimingHeaderNotOverriddenByController(): void
+    {
+        // Controller sets its own Server-Timing; decorator must not overwrite it.
+        putenv('NENE_SERVER_TIMING_ENABLED=1');
+        \Nene\Xion\ServerTiming::start();
+
+        $response = new HttpResponse(200, ['Server-Timing' => 'db;dur=5'], '');
+        $decorated = ResponseDecorator::decorate($response);
+
+        self::assertSame('db;dur=5', $decorated->headers()['Server-Timing']);
+    }
+
     private function clearEnv(): void
     {
         foreach ([
@@ -113,8 +147,10 @@ final class ResponseDecoratorTest extends TestCase
             'NENE_SECURITY_REFERRER_POLICY',
             'NENE_SECURITY_HSTS',
             'NENE_SECURITY_PERMISSIONS_POLICY',
+            'NENE_SERVER_TIMING_ENABLED',
         ] as $name) {
             putenv($name);
         }
+        \Nene\Xion\ServerTiming::reset();
     }
 }
