@@ -26,6 +26,7 @@ services:
       NENE_MAIL_DSN: "${NENE_MAIL_DSN:-smtp://mailpit:1025}"
       NENE_MAIL_FROM: "${NENE_MAIL_FROM:-noreply@nene.local}"
       NENE_LOG_PATH: "${NENE_LOG_PATH:-}"
+      NENE_LOG_FORMAT: "${NENE_LOG_FORMAT:-text}"
       NENE_UPLOAD_MAX_FILESIZE: "${NENE_UPLOAD_MAX_FILESIZE:-}"
       NENE_POST_MAX_SIZE: "${NENE_POST_MAX_SIZE:-}"
       NENE_SECURITY_CSP: "${NENE_SECURITY_CSP:-}"

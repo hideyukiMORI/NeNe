@@ -14,11 +14,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ### Real-app surface (FT12 / FT13 / FT16 系譜)
 
-#### Multi-instance session backend (Redis / DB-backed)
-**Why**: Stock NeNe uses PHP file sessions, which break under a load-balancer with multiple app instances. Listed as the third concern in `REPORT_commercial_feasibility.md`. ADR-class.
-**Trigger**: A real-deploy report of a multi-instance setup → forces the issue. Or proactive: next time mailpit-pattern (FT13) is fresh in memory.
-**Likely shape**: `Nene\Xion\SessionStorage` interface + `RedisStorage` / `FileStorage` impls + `NENE_SESSION_DSN` env + compose Redis service. Mailpit-pattern reuse.
-**Size**: medium-large.
+#### ~~Multi-instance session backend (Redis / DB-backed)~~ → **FT18 complete** (2026-05-26)
 
 #### Background jobs / async work
 **Why**: Mail sending, file processing, periodic cleanup all block requests today. Real-app gap. Commercial feasibility report flagged.
@@ -33,11 +29,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ### Observability lane (FT15 系譜)
 
-#### structured-logs (JSON formatter swap)
-**Why**: Monolog supports JSON formatter natively. Production log aggregators (Datadog / Loki / Elasticsearch) want JSON. Currently text-only.
-**Trigger**: First real deploy that wants to ship logs to an aggregator. Or pre-emptively as a small trial.
-**Likely shape**: `NENE_LOG_FORMAT=json` env swap, default text. No ADR needed — pure formatter selection.
-**Size**: small (~half a session).
+#### ~~structured-logs (JSON formatter swap)~~ → **FT19 complete** (2026-05-27)
 
 #### Server-Timing header
 **Why**: ADR-0007 listed it as a future cross-cutting use case. Per-request timing data for browser devtools / aggregators.
@@ -102,6 +94,8 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT19 — structured-logs** (2026-05-27): `LogFormatterFactory` + `NENE_LOG_FORMAT=json` env. PR #432 (feat) + #433 (docs). Monolog JsonFormatter; log aggregator ready.
+- **FT18 — session-storage-backend** (2026-05-26): ADR-0010. `RedisSessionHandler` + `SessionHandlerFactory` + `predis/predis`. PR #429 (feat) + #430 (docs). Resolves commercial-feasibility concern #3.
 - **FT17 — schema-diff CLI** (2026-05-23): ADR-0009 implementation. Closed all 4 PRs same day.
 - **FT16 — agent-bearer-auth** (2026-05-22): cross-repo handoff from nene-mcp #380. ADR-0008.
 - **FT15 — request-id** (2026-05-22): ADR-0007 generality validation. Resulted in `RequestId` + Monolog processor.
