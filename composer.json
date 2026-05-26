@@ -37,7 +37,8 @@
     "require": {
         "monolog/monolog": "^3.10",
         "smarty/smarty" : "^5.8",
-        "symfony/mailer": "^6.4"
+        "symfony/mailer": "^6.4",
+        "predis/predis": "^2.2"
    },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.95",

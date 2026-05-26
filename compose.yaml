@@ -5,6 +5,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       NENE_APP_ENV: "${NENE_APP_ENV:-development}"
       NENE_APP_DEBUG: "${NENE_APP_DEBUG:-1}"
@@ -36,6 +38,7 @@ services:
       NENE_AGENT_BEARER_TOKEN: "${NENE_AGENT_BEARER_TOKEN:-}"
       NENE_AGENT_BEARER_USER: "${NENE_AGENT_BEARER_USER:-admin}"
       NENE_ALLOWED_EXTERNAL_REDIRECTS: "${NENE_ALLOWED_EXTERNAL_REDIRECTS:-}"
+      NENE_SESSION_DSN: "${NENE_SESSION_DSN:-redis://redis:6379}"
     ports:
       - "${NENE_PORT:-8080}:80"
     volumes:
@@ -84,6 +87,17 @@ services:
       PMA_PORT: 3306
     ports:
       - "${NENE_PHPMYADMIN_PORT:-8081}:80"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${NENE_REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   mailpit:
     image: axllent/mailpit:latest

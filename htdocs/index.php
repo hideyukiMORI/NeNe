@@ -30,6 +30,7 @@ Xion\Initialize::init();
 
 configurePublicErrorDisplay();
 configureSessionCookie();
+configureSessionHandler();
 session_cache_expire(180);
 date_default_timezone_set('Asia/Tokyo');
 session_start();
@@ -81,6 +82,25 @@ function configurePublicErrorDisplay(): void
 {
     ini_set('display_errors', APP_DEBUG ? '1' : '0');
     ini_set('display_startup_errors', APP_DEBUG ? '1' : '0');
+}
+
+/**
+ * Register a pluggable session storage handler when SESSION_DSN is set.
+ *
+ * Called before session_start() so the handler is active from the first
+ * request. When SESSION_DSN is empty, this is a no-op and PHP uses its
+ * default file-based session storage — no behaviour change for existing
+ * deployments.
+ *
+ * @see Nene\Xion\SessionHandlerFactory
+ * @see Nene\Xion\RedisSessionHandler
+ */
+function configureSessionHandler(): void
+{
+    $handler = Xion\SessionHandlerFactory::fromDsn(SESSION_DSN);
+    if ($handler !== null) {
+        session_set_save_handler($handler, true);
+    }
 }
 
 /**
