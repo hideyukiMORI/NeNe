@@ -11,6 +11,10 @@ return [
         'message' => 'Wrong user ID or user PASS',
         'httpStatus' => 401,
     ],
+    'FORBIDDEN' => [
+        'message' => 'You do not have permission to perform this action.',
+        'httpStatus' => 403,
+    ],
     'CSRF-TOKEN-INVALID' => [
         'message' => 'Invalid CSRF token.',
         'httpStatus' => 403,

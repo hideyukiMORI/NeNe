@@ -27,6 +27,7 @@ Every failure response uses the same envelope, documented in OpenAPI as `ApiFail
 | --- | --- | --- | --- |
 | `SESSION-CLOSED` | 401 | Session timeout. Please log in again. | Returned when an authenticated endpoint is called without a valid `PHPSESSID` cookie. |
 | `LOGIN-FAILED` | 401 | Wrong user ID or user PASS | Returned by `POST /session/login` for rejected credentials. |
+| `FORBIDDEN` | 403 | You do not have permission to perform this action. | Returned by `RoleGuard::require()` / `requireAny()` when the JWT `role` claim does not satisfy the endpoint's role requirement. |
 | `CSRF-TOKEN-INVALID` | 403 | Invalid CSRF token. | Returned when a state-changing request from a logged-in client is missing or has a wrong `X-CSRF-Token` header. |
 | `METHOD-NOT-ALLOWED` | 405 | The HTTP method is not allowed for this endpoint. | Returned with the `Allow` response header listing valid methods. |
 | `NOT-FOUND` | 404 | The requested resource was not found. | Emitted by the dispatcher when the route resolves to no controller or no action **and** the request's `Accept` header prefers `application/json`. HTML callers still receive the static `404.html` page. |
