@@ -2,205 +2,211 @@
 
 declare(strict_types=1);
 
-namespace Nene\Tests\Unit\Xion;
+namespace Tests\Unit\Xion;
 
 use Nene\Xion\UserSession;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Unit tests for UserSession.
- */
 final class UserSessionTest extends TestCase
 {
-    private PDO $db;
+    private PDO $pdo;
+    private UserSession $us;
 
     protected function setUp(): void
     {
-        $this->db = new PDO('sqlite::memory:');
-        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->db->exec('
+        $this->pdo = new PDO('sqlite::memory:');
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->pdo->exec('
             CREATE TABLE user_sessions (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id     VARCHAR(255) NOT NULL,
                 token_hash  VARCHAR(64)  NOT NULL UNIQUE,
-                payload     TEXT         NOT NULL DEFAULT \'{}\',
-                expires_at  DATETIME     NOT NULL,
+                device_info TEXT         NULL,
+                ip_address  VARCHAR(45)  NULL,
+                status      VARCHAR(20)  NOT NULL DEFAULT \'active\',
                 last_active DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                expires_at  DATETIME     NOT NULL,
                 created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         ');
-    }
-
-    private function us(int $ttl = 3600): UserSession
-    {
-        return new UserSession($this->db, $ttl);
-    }
-
-    // ── constructor ───────────────────────────────────────────────────────────
-
-    public function testConstructorThrowsOnNonPositiveTtl(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        // @phan-suppress-next-line PhanNoopNew
-        new UserSession($this->db, 0);
+        $this->us = new UserSession($this->pdo);
     }
 
     // ── create ────────────────────────────────────────────────────────────────
 
-    public function testCreateReturns64CharHexToken(): void
+    public function testCreateReturnsIdAndToken(): void
     {
-        $token = $this->us()->create('user-1');
-        $this->assertSame(64, strlen($token));
-        $this->assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $token);
+        $result = $this->us->create('user-1');
+        $this->assertArrayHasKey('id', $result);
+        $this->assertArrayHasKey('token', $result);
+        $this->assertGreaterThan(0, $result['id']);
+        $this->assertNotEmpty($result['token']);
     }
 
-    public function testCreateTokensAreUnique(): void
+    public function testCreateStoresHashedToken(): void
     {
-        $us = $this->us();
-        $t1 = $us->create('user-1');
-        $t2 = $us->create('user-1');
-        $this->assertNotSame($t1, $t2);
+        $result = $this->us->create('user-1');
+        $row    = $this->us->get($result['id']);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertNotSame($result['token'], $row['token_hash']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(hash('sha256', $result['token']), $row['token_hash']);
+    }
+
+    public function testCreateStoresDeviceInfo(): void
+    {
+        $result = $this->us->create('user-1', 'Mozilla/5.0', '1.2.3.4');
+        $row    = $this->us->get($result['id']);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('Mozilla/5.0', $row['device_info']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('1.2.3.4', $row['ip_address']);
     }
 
     public function testCreateThrowsOnEmptyUserId(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->us()->create('');
+        $this->us->create('');
     }
 
-    public function testCreateStoresPayload(): void
+    public function testCreateThrowsOnInvalidTtl(): void
     {
-        $us    = $this->us();
-        $token = $us->create('user-1', ['ip' => '1.2.3.4']);
-        $info  = $us->validate($token);
-        $this->assertNotNull($info);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->us->create('user-1', null, null, 0);
+    }
+
+    // ── findByToken ───────────────────────────────────────────────────────────
+
+    public function testFindByTokenReturnsRow(): void
+    {
+        $result  = $this->us->create('user-1', null, null, 3600);
+        $session = $this->us->findByToken($result['token']);
+        $this->assertNotNull($session);
         // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame(['ip' => '1.2.3.4'], $info['payload']);
+        $this->assertSame('user-1', $session['user_id']);
     }
 
-    // ── validate ──────────────────────────────────────────────────────────────
-
-    public function testValidateReturnsInfoForActiveSession(): void
+    public function testFindByTokenReturnsNullForUnknownToken(): void
     {
-        $us    = $this->us();
-        $token = $us->create('user-1');
-        $info  = $us->validate($token);
-        $this->assertNotNull($info);
+        $this->assertNull($this->us->findByToken('invalid-token'));
+    }
+
+    public function testFindByTokenReturnsNullForInvalidatedSession(): void
+    {
+        $result = $this->us->create('user-1', null, null, 3600);
+        $this->us->invalidate($result['id']);
+        $this->assertNull($this->us->findByToken($result['token']));
+    }
+
+    public function testFindByTokenReturnsNullForExpiredSession(): void
+    {
+        $result = $this->us->create('user-1', null, null, 1);
+        // Manually expire the session
+        $this->pdo->exec("UPDATE user_sessions SET expires_at = '2000-01-01 00:00:00' WHERE id = " . $result['id']);
+        $this->assertNull($this->us->findByToken($result['token']));
+    }
+
+    public function testFindByTokenMarksExpiredSessions(): void
+    {
+        $result = $this->us->create('user-1', null, null, 3600);
+        $this->pdo->exec("UPDATE user_sessions SET expires_at = '2000-01-01 00:00:00' WHERE id = " . $result['id']);
+        $this->us->findByToken($result['token']);
+        $row = $this->us->get($result['id']);
+        $this->assertNotNull($row);
         // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('user-1', $info['user_id']);
+        $this->assertSame(UserSession::STATUS_EXPIRED, $row['status']);
     }
 
-    public function testValidateReturnsNullForInvalidToken(): void
+    // ── touch ─────────────────────────────────────────────────────────────────
+
+    public function testTouchReturnsTrueForActiveSession(): void
     {
-        $this->assertNull($this->us()->validate(str_repeat('0', 64)));
+        $result = $this->us->create('user-1', null, null, 3600);
+        $this->assertTrue($this->us->touch($result['id']));
     }
 
-    public function testValidateReturnsNullForExpiredSession(): void
+    public function testTouchReturnsFalseForInvalidatedSession(): void
     {
-        $us    = $this->us(ttl: 3600);
-        $token = $us->create('user-1');
-        // Age the session past expiry
-        $this->db->exec("UPDATE user_sessions SET expires_at = datetime('now', '-1 second')");
-        $this->assertNull($us->validate($token));
+        $result = $this->us->create('user-1', null, null, 3600);
+        $this->us->invalidate($result['id']);
+        $this->assertFalse($this->us->touch($result['id']));
     }
 
-    public function testValidateRefreshesTtl(): void
+    // ── invalidate ────────────────────────────────────────────────────────────
+
+    public function testInvalidateChangesStatus(): void
     {
-        $us    = $this->us(ttl: 3600);
-        $token = $us->create('user-1');
-        // Get original expiry
-        $before = $this->db->query('SELECT expires_at FROM user_sessions LIMIT 1')->fetchColumn();
-        sleep(1);
-        $us->validate($token);
-        $after = $this->db->query('SELECT expires_at FROM user_sessions LIMIT 1')->fetchColumn();
-        $this->assertGreaterThanOrEqual($before, $after);
+        $result = $this->us->create('user-1', null, null, 3600);
+        $this->assertTrue($this->us->invalidate($result['id']));
+        $row = $this->us->get($result['id']);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(UserSession::STATUS_INVALIDATED, $row['status']);
     }
 
-    // ── isValid ───────────────────────────────────────────────────────────────
-
-    public function testIsValidTrueForActiveSession(): void
+    public function testInvalidateReturnsFalseForMissingId(): void
     {
-        $us    = $this->us();
-        $token = $us->create('user-1');
-        $this->assertTrue($us->isValid($token));
+        $this->assertFalse($this->us->invalidate(9999));
     }
 
-    public function testIsValidFalseForExpiredSession(): void
+    // ── invalidateAll ─────────────────────────────────────────────────────────
+
+    public function testInvalidateAllReturnsCount(): void
     {
-        $us    = $this->us();
-        $token = $us->create('user-1');
-        $this->db->exec("UPDATE user_sessions SET expires_at = datetime('now', '-1 second')");
-        $this->assertFalse($us->isValid($token));
+        $this->us->create('user-1', null, null, 3600);
+        $this->us->create('user-1', null, null, 3600);
+        $this->us->create('user-2', null, null, 3600);
+        $this->assertSame(2, $this->us->invalidateAll('user-1'));
     }
 
-    // ── revoke ────────────────────────────────────────────────────────────────
-
-    public function testRevokeDeletesSession(): void
+    public function testInvalidateAllOnlyAffectsActiveSessions(): void
     {
-        $us    = $this->us();
-        $token = $us->create('user-1');
-        $this->assertTrue($us->revoke($token));
-        $this->assertFalse($us->isValid($token));
+        $r1 = $this->us->create('user-1', null, null, 3600);
+        $r2 = $this->us->create('user-1', null, null, 3600);
+        $this->us->invalidate($r1['id']);
+        $this->assertSame(1, $this->us->invalidateAll('user-1'));
+        $row = $this->us->get($r2['id']);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(UserSession::STATUS_INVALIDATED, $row['status']);
     }
 
-    public function testRevokeReturnsFalseForUnknownToken(): void
+    // ── activeSessions ────────────────────────────────────────────────────────
+
+    public function testActiveSessionsReturnsOnlyActive(): void
     {
-        $this->assertFalse($this->us()->revoke(str_repeat('0', 64)));
+        $r1 = $this->us->create('user-1', null, null, 3600);
+        $this->us->create('user-1', null, null, 3600);
+        $this->us->invalidate($r1['id']);
+        $active = $this->us->activeSessions('user-1');
+        $this->assertCount(1, $active);
     }
 
-    // ── revokeAll ─────────────────────────────────────────────────────────────
-
-    public function testRevokeAllDeletesAllUserSessions(): void
+    public function testActiveSessionsReturnsEmptyWhenNone(): void
     {
-        $us = $this->us();
-        $us->create('user-1');
-        $us->create('user-1');
-        $this->assertSame(2, $us->revokeAll('user-1'));
-        $this->assertSame(0, $us->countForUser('user-1'));
-    }
-
-    public function testRevokeAllDoesNotAffectOtherUsers(): void
-    {
-        $us = $this->us();
-        $us->create('user-1');
-        $us->create('user-2');
-        $us->revokeAll('user-1');
-        $this->assertSame(1, $us->countForUser('user-2'));
-    }
-
-    // ── listForUser ───────────────────────────────────────────────────────────
-
-    public function testListForUserReturnsActiveSessions(): void
-    {
-        $us = $this->us();
-        $us->create('user-1');
-        $us->create('user-1');
-        $this->assertCount(2, $us->listForUser('user-1'));
-    }
-
-    public function testListForUserExcludesExpiredSessions(): void
-    {
-        $us = $this->us();
-        $us->create('user-1');
-        $this->db->exec("UPDATE user_sessions SET expires_at = datetime('now', '-1 second')");
-        $this->assertCount(0, $us->listForUser('user-1'));
+        $this->assertSame([], $this->us->activeSessions('user-1'));
     }
 
     // ── purgeExpired ──────────────────────────────────────────────────────────
 
-    public function testPurgeExpiredDeletesExpiredSessions(): void
+    public function testPurgeExpiredDeletesOldRows(): void
     {
-        $us = $this->us();
-        $us->create('user-1');
-        $this->db->exec("UPDATE user_sessions SET expires_at = datetime('now', '-1 second')");
-        $this->assertSame(1, $us->purgeExpired());
+        $result = $this->us->create('user-1', null, null, 3600);
+        $this->us->invalidate($result['id']);
+        // Set created_at in the past
+        $this->pdo->exec("UPDATE user_sessions SET created_at = '2020-01-01 00:00:00' WHERE id = " . $result['id']);
+        $deleted = $this->us->purgeExpired('2025-01-01 00:00:00');
+        $this->assertSame(1, $deleted);
     }
 
-    public function testPurgeExpiredPreservesActiveSessions(): void
+    public function testPurgeExpiredLeavesActiveSessions(): void
     {
-        $us = $this->us();
-        $us->create('user-1');
-        $this->assertSame(0, $us->purgeExpired());
+        $result = $this->us->create('user-1', null, null, 3600);
+        $this->pdo->exec("UPDATE user_sessions SET created_at = '2020-01-01 00:00:00' WHERE id = " . $result['id']);
+        $deleted = $this->us->purgeExpired('2025-01-01 00:00:00');
+        $this->assertSame(0, $deleted);
     }
 }
