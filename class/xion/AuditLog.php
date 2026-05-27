@@ -7,50 +7,58 @@ namespace Nene\Xion;
 use PDO;
 
 /**
- * AuditLog — append-only record of significant actions for compliance and forensics.
+ * AuditLog — compliance-grade record of who changed what on any entity.
  *
- * Records who did what to which resource, from where, and when.
- * All entries are immutable once written. Supports structured context payloads
- * stored as JSON for flexible metadata.
+ * Records every mutating operation (create/update/delete) with the actor ID,
+ * entity reference, action type, and optional before/after JSON snapshots.
+ * The log is append-only — no update or delete methods are provided for the
+ * log entries themselves. Purging by age is available for TTL-based retention.
+ *
+ * Distinct from:
+ * - `EventLog` — domain events (business events, not CRUD audits)
+ * - `ChangeLog` — human-readable diff notes
+ * - `IntegrationLog` — external API call log
  *
  * ## Usage
  *
  * ```php
  * $al = new AuditLog($pdo);
  *
- * // Record an action
- * $al->record('user.login', 'user-1', 'user', 'user-1', ['ip' => '1.2.3.4']);
- * $al->record('post.delete', 'admin-1', 'post', '42');
+ * // Record mutations
+ * $al->record('user', '42', 'update', 'actor-7', ['email' => 'old@x.com'], ['email' => 'new@x.com']);
+ * $al->record('user', '42', 'delete', 'actor-7');
  *
- * // Query recent activity
- * $al->recent(20);
+ * // Query
+ * $history = $al->forEntity('user', '42');
+ * $actions = $al->byActor('actor-7');
+ * $recent  = $al->ofAction('delete', 50, 0);
  *
- * // Filter by actor
- * $al->forActor('admin-1');
- *
- * // Filter by resource
- * $al->forResource('post', '42');
- *
- * // Purge old records
- * $al->purgeOlderThan(90);
+ * // Retention
+ * $al->purgeOlderThan(new \DateTimeImmutable('-90 days'));
  * ```
  *
  * ## Schema (SQLite / MySQL compatible)
  *
  * ```sql
- * CREATE TABLE audit_log (
- *     id            INTEGER PRIMARY KEY AUTOINCREMENT,
- *     action        VARCHAR(100) NOT NULL,
- *     actor_id      VARCHAR(255) NOT NULL DEFAULT '',
- *     resource_type VARCHAR(100) NOT NULL DEFAULT '',
- *     resource_id   VARCHAR(255) NOT NULL DEFAULT '',
- *     context       TEXT         NOT NULL DEFAULT '{}',
- *     created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+ * CREATE TABLE audit_logs (
+ *     id           INTEGER PRIMARY KEY AUTOINCREMENT,
+ *     entity_type  VARCHAR(100) NOT NULL,
+ *     entity_id    VARCHAR(255) NOT NULL,
+ *     action       VARCHAR(50)  NOT NULL,
+ *     actor_id     VARCHAR(255) NOT NULL,
+ *     before_data  TEXT         NULL,
+ *     after_data   TEXT         NULL,
+ *     ip_address   VARCHAR(45)  NULL,
+ *     created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
  * );
  * ```
  */
 final class AuditLog
 {
+    public const ACTION_CREATE = 'create';
+    public const ACTION_UPDATE = 'update';
+    public const ACTION_DELETE = 'delete';
+
     public function __construct(private readonly ?PDO $db = null)
     {
     }
@@ -58,156 +66,156 @@ final class AuditLog
     // ── public API ────────────────────────────────────────────────────────────
 
     /**
-     * Record an audit event.
+     * Append an audit record.
      *
-     * @param  string              $action       Dot-namespaced action string (e.g. 'user.login').
-     * @param  string              $actorId      Who performed the action.
-     * @param  string              $resourceType Type of the affected resource (e.g. 'post').
-     * @param  string              $resourceId   ID of the affected resource.
-     * @param  array<string,mixed> $context      Optional key-value metadata (stored as JSON).
-     * @return int  The new log entry ID.
-     * @throws \InvalidArgumentException if action is empty.
+     * @param string               $entityType  E.g. 'user', 'order'.
+     * @param string               $entityId    Entity primary key.
+     * @param string               $action      Action name (create/update/delete/custom).
+     * @param string               $actorId     Who performed the action.
+     * @param array<mixed>|null    $beforeData  State before the change (array → JSON).
+     * @param array<mixed>|null    $afterData   State after the change (array → JSON).
+     * @param string|null          $ipAddress   Optional remote IP.
+     * @return int Row ID of the new audit entry.
+     * @throws \InvalidArgumentException on empty required fields.
      */
     public function record(
+        string $entityType,
+        string $entityId,
         string $action,
-        string $actorId = '',
-        string $resourceType = '',
-        string $resourceId = '',
-        array $context = []
+        string $actorId,
+        ?array $beforeData = null,
+        ?array $afterData = null,
+        ?string $ipAddress = null,
     ): int {
-        $action = trim($action);
+        $entityType = trim($entityType);
+        $entityId   = trim($entityId);
+        $action     = trim($action);
+        $actorId    = trim($actorId);
+
+        if ($entityType === '') {
+            throw new \InvalidArgumentException('entity_type must not be empty.');
+        }
+        if ($entityId === '') {
+            throw new \InvalidArgumentException('entity_id must not be empty.');
+        }
         if ($action === '') {
             throw new \InvalidArgumentException('action must not be empty.');
         }
+        if ($actorId === '') {
+            throw new \InvalidArgumentException('actor_id must not be empty.');
+        }
 
-        $contextJson = empty($context) ? '{}' : json_encode($context, JSON_UNESCAPED_UNICODE);
-
-        $this->db()->prepare(
-            'INSERT INTO audit_log (action, actor_id, resource_type, resource_id, context)
-             VALUES (:action, :actor, :rtype, :rid, :ctx)'
-        )->execute([
+        $stmt = $this->db()->prepare(
+            'INSERT INTO audit_logs (entity_type, entity_id, action, actor_id, before_data, after_data, ip_address)
+             VALUES (:etype, :eid, :action, :actor, :before, :after, :ip)'
+        );
+        $stmt->execute([
+            ':etype'  => $entityType,
+            ':eid'    => $entityId,
             ':action' => $action,
             ':actor'  => $actorId,
-            ':rtype'  => $resourceType,
-            ':rid'    => $resourceId,
-            ':ctx'    => $contextJson,
+            ':before' => $beforeData !== null ? json_encode($beforeData) : null,
+            ':after'  => $afterData  !== null ? json_encode($afterData) : null,
+            ':ip'     => $ipAddress,
         ]);
-
         return (int)$this->db()->lastInsertId();
     }
 
     /**
-     * Get the most recent log entries.
+     * Find a single audit entry by ID.
      *
-     * @return list<array<string,mixed>>
+     * @return array<string,mixed>|null
      */
-    public function recent(int $limit = 50): array
+    public function find(int $id): ?array
     {
-        $limit = max(1, $limit);
-        $stmt  = $this->db()->prepare(
-            "SELECT id, action, actor_id, resource_type, resource_id, context, created_at
-             FROM audit_log
-             ORDER BY id DESC
-             LIMIT {$limit}"
-        );
-        $stmt->execute();
-        return $this->decode($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        $stmt = $this->db()->prepare('SELECT * FROM audit_logs WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row !== false ? $row : null;
     }
 
     /**
-     * Get log entries for a specific actor.
+     * List all audit entries for an entity (newest first).
      *
      * @return list<array<string,mixed>>
      */
-    public function forActor(string $actorId, int $limit = 50): array
+    public function forEntity(string $entityType, string $entityId, int $limit = 100, int $offset = 0): array
     {
-        $limit = max(1, $limit);
-        $stmt  = $this->db()->prepare(
-            "SELECT id, action, actor_id, resource_type, resource_id, context, created_at
-             FROM audit_log
+        $stmt = $this->db()->prepare(
+            'SELECT * FROM audit_logs
+             WHERE entity_type = :etype AND entity_id = :eid
+             ORDER BY id DESC
+             LIMIT :lim OFFSET :off'
+        );
+        $stmt->bindValue(':etype', trim($entityType));
+        $stmt->bindValue(':eid', trim($entityId));
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * List audit entries by actor (newest first).
+     *
+     * @return list<array<string,mixed>>
+     */
+    public function byActor(string $actorId, int $limit = 100, int $offset = 0): array
+    {
+        $stmt = $this->db()->prepare(
+            'SELECT * FROM audit_logs
              WHERE actor_id = :actor
              ORDER BY id DESC
-             LIMIT {$limit}"
+             LIMIT :lim OFFSET :off'
         );
-        $stmt->execute([':actor' => $actorId]);
-        return $this->decode($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        $stmt->bindValue(':actor', trim($actorId));
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
-     * Get log entries for a specific resource.
+     * List entries of a specific action type (newest first).
      *
      * @return list<array<string,mixed>>
      */
-    public function forResource(string $resourceType, string $resourceId, int $limit = 50): array
+    public function ofAction(string $action, int $limit = 100, int $offset = 0): array
     {
-        $limit = max(1, $limit);
-        $stmt  = $this->db()->prepare(
-            "SELECT id, action, actor_id, resource_type, resource_id, context, created_at
-             FROM audit_log
-             WHERE resource_type = :rtype AND resource_id = :rid
-             ORDER BY id DESC
-             LIMIT {$limit}"
-        );
-        $stmt->execute([':rtype' => $resourceType, ':rid' => $resourceId]);
-        return $this->decode($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
-    }
-
-    /**
-     * Get log entries matching a specific action.
-     *
-     * @return list<array<string,mixed>>
-     */
-    public function forAction(string $action, int $limit = 50): array
-    {
-        $limit = max(1, $limit);
-        $stmt  = $this->db()->prepare(
-            "SELECT id, action, actor_id, resource_type, resource_id, context, created_at
-             FROM audit_log
+        $stmt = $this->db()->prepare(
+            'SELECT * FROM audit_logs
              WHERE action = :action
              ORDER BY id DESC
-             LIMIT {$limit}"
+             LIMIT :lim OFFSET :off'
         );
-        $stmt->execute([':action' => $action]);
-        return $this->decode($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        $stmt->bindValue(':action', trim($action));
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
-     * Count log entries (optionally filtered by actor or action).
+     * Count audit entries for an entity.
      */
-    public function count(?string $actorId = null, ?string $action = null): int
+    public function countForEntity(string $entityType, string $entityId): int
     {
-        if ($actorId !== null && $action !== null) {
-            $stmt = $this->db()->prepare(
-                'SELECT COUNT(*) FROM audit_log WHERE actor_id = :actor AND action = :action'
-            );
-            $stmt->execute([':actor' => $actorId, ':action' => $action]);
-        } elseif ($actorId !== null) {
-            $stmt = $this->db()->prepare(
-                'SELECT COUNT(*) FROM audit_log WHERE actor_id = :actor'
-            );
-            $stmt->execute([':actor' => $actorId]);
-        } elseif ($action !== null) {
-            $stmt = $this->db()->prepare(
-                'SELECT COUNT(*) FROM audit_log WHERE action = :action'
-            );
-            $stmt->execute([':action' => $action]);
-        } else {
-            $stmt = $this->db()->prepare('SELECT COUNT(*) FROM audit_log');
-            $stmt->execute();
-        }
+        $stmt = $this->db()->prepare(
+            'SELECT COUNT(*) FROM audit_logs WHERE entity_type = :etype AND entity_id = :eid'
+        );
+        $stmt->execute([':etype' => trim($entityType), ':eid' => trim($entityId)]);
         return (int)$stmt->fetchColumn();
     }
 
     /**
-     * Purge entries older than N days.
+     * Delete all audit entries older than the given cutoff (TTL retention).
      *
      * @return int Number of rows deleted.
      */
-    public function purgeOlderThan(int $days): int
+    public function purgeOlderThan(\DateTimeImmutable $cutoff): int
     {
-        $cutoff = (new \DateTimeImmutable())->modify("-{$days} days")->format('Y-m-d H:i:s');
-        $stmt   = $this->db()->prepare('DELETE FROM audit_log WHERE created_at < :cutoff');
-        $stmt->execute([':cutoff' => $cutoff]);
+        $stmt = $this->db()->prepare('DELETE FROM audit_logs WHERE created_at < :cutoff');
+        $stmt->execute([':cutoff' => $cutoff->format('Y-m-d H:i:s')]);
         return $stmt->rowCount();
     }
 
@@ -216,20 +224,5 @@ final class AuditLog
     private function db(): PDO
     {
         return $this->db ?? PdoConnection::getInstance();
-    }
-
-    /**
-     * Decode the JSON context field in each row.
-     *
-     * @param  list<array<string,mixed>> $rows
-     * @return list<array<string,mixed>>
-     */
-    private function decode(array $rows): array
-    {
-        foreach ($rows as &$row) {
-            $decoded = json_decode((string)($row['context'] ?? '{}'), true);
-            $row['context'] = is_array($decoded) ? $decoded : [];
-        }
-        return $rows;
     }
 }

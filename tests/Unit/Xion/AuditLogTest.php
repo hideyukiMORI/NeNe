@@ -2,180 +2,209 @@
 
 declare(strict_types=1);
 
-namespace Nene\Tests\Unit\Xion;
+namespace Tests\Unit\Xion;
 
 use Nene\Xion\AuditLog;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Unit tests for AuditLog.
- */
 final class AuditLogTest extends TestCase
 {
-    private PDO $db;
+    private PDO $pdo;
     private AuditLog $al;
 
     protected function setUp(): void
     {
-        $this->db = new PDO('sqlite::memory:');
-        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->db->exec('
-            CREATE TABLE audit_log (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                action        VARCHAR(100) NOT NULL,
-                actor_id      VARCHAR(255) NOT NULL DEFAULT \'\',
-                resource_type VARCHAR(100) NOT NULL DEFAULT \'\',
-                resource_id   VARCHAR(255) NOT NULL DEFAULT \'\',
-                context       TEXT         NOT NULL DEFAULT \'{}\',
-                created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+        $this->pdo = new PDO('sqlite::memory:');
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->pdo->exec('
+            CREATE TABLE audit_logs (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                entity_type  VARCHAR(100) NOT NULL,
+                entity_id    VARCHAR(255) NOT NULL,
+                action       VARCHAR(50)  NOT NULL,
+                actor_id     VARCHAR(255) NOT NULL,
+                before_data  TEXT         NULL,
+                after_data   TEXT         NULL,
+                ip_address   VARCHAR(45)  NULL,
+                created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         ');
-        $this->al = new AuditLog($this->db);
+        $this->al = new AuditLog($this->pdo);
     }
 
     // ── record ────────────────────────────────────────────────────────────────
 
     public function testRecordReturnsId(): void
     {
-        $id = $this->al->record('user.login', 'user-1');
+        $id = $this->al->record('user', '42', AuditLog::ACTION_UPDATE, 'actor-1');
         $this->assertGreaterThan(0, $id);
     }
 
     public function testRecordStoresAllFields(): void
     {
-        $this->al->record('post.delete', 'admin-1', 'post', '42', ['reason' => 'spam']);
-        $entries = $this->al->forActor('admin-1');
-        $this->assertCount(1, $entries);
-        $this->assertSame('post.delete', $entries[0]['action']);
-        $this->assertSame('post', $entries[0]['resource_type']);
-        $this->assertSame('42', $entries[0]['resource_id']);
-        $this->assertSame(['reason' => 'spam'], $entries[0]['context']);
+        $id  = $this->al->record(
+            'user',
+            '42',
+            AuditLog::ACTION_UPDATE,
+            'actor-1',
+            ['email' => 'old@x.com'],
+            ['email' => 'new@x.com'],
+            '127.0.0.1'
+        );
+        $row = $this->al->find($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('user', $row['entity_type']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('42', $row['entity_id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(AuditLog::ACTION_UPDATE, $row['action']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('actor-1', $row['actor_id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('{"email":"old@x.com"}', $row['before_data']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('{"email":"new@x.com"}', $row['after_data']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('127.0.0.1', $row['ip_address']);
+    }
+
+    public function testRecordNullBeforeAfterData(): void
+    {
+        $id  = $this->al->record('user', '42', AuditLog::ACTION_DELETE, 'actor-1');
+        $row = $this->al->find($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertNull($row['before_data']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertNull($row['after_data']);
+    }
+
+    public function testRecordThrowsOnEmptyEntityType(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->al->record('', '1', 'update', 'actor');
+    }
+
+    public function testRecordThrowsOnEmptyEntityId(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->al->record('user', '', 'update', 'actor');
     }
 
     public function testRecordThrowsOnEmptyAction(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->al->record('');
+        $this->al->record('user', '1', '', 'actor');
     }
 
-    public function testRecordWithEmptyContextStoresEmptyArray(): void
+    public function testRecordThrowsOnEmptyActorId(): void
     {
-        $this->al->record('user.login', 'user-1');
-        $entries = $this->al->recent(1);
-        $this->assertSame([], $entries[0]['context']);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->al->record('user', '1', 'update', '');
     }
 
-    // ── recent ────────────────────────────────────────────────────────────────
+    // ── find ──────────────────────────────────────────────────────────────────
 
-    public function testRecentReturnsNewestFirst(): void
+    public function testFindReturnsNullForMissingId(): void
     {
-        $this->al->record('a.1', 'user-1');
-        $this->al->record('a.2', 'user-1');
-        $entries = $this->al->recent(10);
-        $this->assertSame('a.2', $entries[0]['action']);
-        $this->assertSame('a.1', $entries[1]['action']);
+        $this->assertNull($this->al->find(9999));
     }
 
-    public function testRecentRespectsLimit(): void
+    // ── forEntity ─────────────────────────────────────────────────────────────
+
+    public function testForEntityReturnsNewestFirst(): void
     {
-        $this->al->record('a.1', 'u');
-        $this->al->record('a.2', 'u');
-        $this->al->record('a.3', 'u');
-        $this->assertCount(2, $this->al->recent(2));
+        $id1 = $this->al->record('user', '1', 'create', 'actor');
+        $id2 = $this->al->record('user', '1', 'update', 'actor');
+        $list = $this->al->forEntity('user', '1');
+        $this->assertCount(2, $list);
+        $this->assertSame($id2, (int)$list[0]['id']);
+        $this->assertSame($id1, (int)$list[1]['id']);
     }
 
-    public function testRecentReturnsEmptyWhenNoEntries(): void
+    public function testForEntityIsIsolatedByEntity(): void
     {
-        $this->assertSame([], $this->al->recent());
+        $this->al->record('user', '1', 'create', 'actor');
+        $this->al->record('user', '2', 'create', 'actor');
+        $this->assertCount(1, $this->al->forEntity('user', '1'));
+        $this->assertCount(1, $this->al->forEntity('user', '2'));
     }
 
-    // ── forActor ──────────────────────────────────────────────────────────────
-
-    public function testForActorFiltersCorrectly(): void
+    public function testForEntityReturnsEmptyWhenNone(): void
     {
-        $this->al->record('a.1', 'user-1');
-        $this->al->record('a.2', 'user-2');
-        $this->assertCount(1, $this->al->forActor('user-1'));
+        $this->assertSame([], $this->al->forEntity('user', '99'));
     }
 
-    public function testForActorReturnsEmptyForUnknownActor(): void
+    public function testForEntityRespectsLimitOffset(): void
     {
-        $this->assertSame([], $this->al->forActor('nobody'));
+        for ($i = 0; $i < 5; $i++) {
+            $this->al->record('user', '1', 'update', 'actor');
+        }
+        $page1 = $this->al->forEntity('user', '1', 3, 0);
+        $page2 = $this->al->forEntity('user', '1', 3, 3);
+        $this->assertCount(3, $page1);
+        $this->assertCount(2, $page2);
     }
 
-    // ── forResource ───────────────────────────────────────────────────────────
+    // ── byActor ───────────────────────────────────────────────────────────────
 
-    public function testForResourceFiltersCorrectly(): void
+    public function testByActorReturnsAllActionsForActor(): void
     {
-        $this->al->record('post.view', 'u', 'post', '1');
-        $this->al->record('post.view', 'u', 'post', '2');
-        $this->al->record('post.edit', 'u', 'post', '1');
-        $this->assertCount(2, $this->al->forResource('post', '1'));
+        $this->al->record('user', '1', 'update', 'actor-1');
+        $this->al->record('order', '5', 'delete', 'actor-1');
+        $this->al->record('user', '2', 'create', 'actor-2');
+
+        $this->assertCount(2, $this->al->byActor('actor-1'));
+        $this->assertCount(1, $this->al->byActor('actor-2'));
     }
 
-    public function testForResourceReturnsEmptyForUnknownResource(): void
+    public function testByActorReturnsEmptyWhenNone(): void
     {
-        $this->assertSame([], $this->al->forResource('post', '999'));
+        $this->assertSame([], $this->al->byActor('nobody'));
     }
 
-    // ── forAction ─────────────────────────────────────────────────────────────
+    // ── ofAction ──────────────────────────────────────────────────────────────
 
-    public function testForActionFiltersCorrectly(): void
+    public function testOfActionReturnsMatchingActions(): void
     {
-        $this->al->record('user.login', 'user-1');
-        $this->al->record('user.login', 'user-2');
-        $this->al->record('user.logout', 'user-1');
-        $this->assertCount(2, $this->al->forAction('user.login'));
+        $this->al->record('user', '1', 'create', 'actor');
+        $this->al->record('user', '2', 'update', 'actor');
+        $this->al->record('user', '3', 'delete', 'actor');
+
+        $this->assertCount(1, $this->al->ofAction('create'));
+        $this->assertCount(1, $this->al->ofAction('delete'));
+        $this->assertSame([], $this->al->ofAction('purge'));
     }
 
-    // ── count ─────────────────────────────────────────────────────────────────
+    // ── countForEntity ────────────────────────────────────────────────────────
 
-    public function testCountAllEntries(): void
+    public function testCountForEntity(): void
     {
-        $this->al->record('a.1', 'u');
-        $this->al->record('a.2', 'u');
-        $this->assertSame(2, $this->al->count());
-    }
-
-    public function testCountByActor(): void
-    {
-        $this->al->record('a.1', 'user-1');
-        $this->al->record('a.2', 'user-2');
-        $this->assertSame(1, $this->al->count('user-1'));
-    }
-
-    public function testCountByAction(): void
-    {
-        $this->al->record('user.login', 'u1');
-        $this->al->record('user.login', 'u2');
-        $this->al->record('user.logout', 'u1');
-        $this->assertSame(2, $this->al->count(null, 'user.login'));
-    }
-
-    public function testCountByActorAndAction(): void
-    {
-        $this->al->record('user.login', 'user-1');
-        $this->al->record('user.login', 'user-2');
-        $this->al->record('user.logout', 'user-1');
-        $this->assertSame(1, $this->al->count('user-1', 'user.login'));
+        $this->al->record('user', '1', 'create', 'actor');
+        $this->al->record('user', '1', 'update', 'actor');
+        $this->al->record('user', '2', 'create', 'actor');
+        $this->assertSame(2, $this->al->countForEntity('user', '1'));
+        $this->assertSame(1, $this->al->countForEntity('user', '2'));
     }
 
     // ── purgeOlderThan ────────────────────────────────────────────────────────
 
-    public function testPurgeOlderThanDeletesOldEntries(): void
+    public function testPurgeOlderThan(): void
     {
-        $this->al->record('a.1', 'u');
-        $this->db->exec(
-            "UPDATE audit_log SET created_at = datetime('now', '-91 days')"
-        );
-        $this->assertSame(1, $this->al->purgeOlderThan(90));
-        $this->assertSame(0, $this->al->count());
+        $this->pdo->exec("INSERT INTO audit_logs (entity_type, entity_id, action, actor_id, created_at) VALUES ('user', '1', 'create', 'actor', '2020-01-01 00:00:00')");
+        $this->al->record('user', '2', 'create', 'actor');
+
+        $cutoff = new \DateTimeImmutable('2021-01-01 00:00:00');
+        $count  = $this->al->purgeOlderThan($cutoff);
+        $this->assertSame(1, $count);
+        $this->assertCount(1, $this->al->forEntity('user', '2'));
     }
 
-    public function testPurgeOlderThanPreservesRecentEntries(): void
+    public function testPurgeOlderThanReturnsZeroWhenNone(): void
     {
-        $this->al->record('a.1', 'u');
-        $this->assertSame(0, $this->al->purgeOlderThan(90));
+        $cutoff = new \DateTimeImmutable('2000-01-01 00:00:00');
+        $this->assertSame(0, $this->al->purgeOlderThan($cutoff));
     }
 }
