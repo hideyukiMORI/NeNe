@@ -66,7 +66,9 @@ final class ChatMessageTest extends TestCase
         $id  = $this->chat->send('room-1', 'user-1', 'Hi');
         $msg = $this->chat->find($id);
         $this->assertNotNull($msg);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Hi', $msg['body']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('user-1', $msg['sender_id']);
     }
 
@@ -83,7 +85,9 @@ final class ChatMessageTest extends TestCase
         $this->assertTrue($this->chat->delete($id, 'user-1'));
         $msg = $this->chat->find($id);
         $this->assertNotNull($msg);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('', $msg['body']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertNotNull($msg['deleted_at']);
     }
 
@@ -92,6 +96,7 @@ final class ChatMessageTest extends TestCase
         $id = $this->chat->send('room-1', 'user-1', 'Hello!');
         $this->assertFalse($this->chat->delete($id, 'user-2'));
         $msg = $this->chat->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Hello!', $msg['body']);
     }
 
