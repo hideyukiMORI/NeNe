@@ -7,186 +7,186 @@ namespace Nene\Xion;
 use PDO;
 
 /**
- * User preference key-value store with default-value fallback and type casting.
+ * UserPreference — key-value preference store per user with typed defaults.
  *
- * Preferences are stored as strings; type casting methods convert on retrieval.
- * Setting a key to null removes the preference, causing the default to be returned.
- *
- * ## Schema
- *
- * ```sql
- * CREATE TABLE user_preferences (
- *     user_id    VARCHAR(255) NOT NULL,
- *     pref_key   VARCHAR(255) NOT NULL,
- *     pref_value TEXT         NOT NULL,
- *     updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
- *     PRIMARY KEY (user_id, pref_key)
- * );
- * ```
+ * Stores arbitrary string key-value pairs per user. Supports scalar and JSON
+ * values. Returns a caller-supplied default when no preference is stored.
  *
  * ## Usage
  *
  * ```php
- * $prefs = new UserPreference($pdo);
+ * $up = new UserPreference($pdo);
  *
- * // Set
- * $prefs->set('user:1', 'theme', 'dark');
- * $prefs->set('user:1', 'items_per_page', '20');
+ * // Store a preference
+ * $up->set('user-1', 'theme', 'dark');
+ * $up->set('user-1', 'locale', 'ja');
  *
- * // Get with default fallback
- * $prefs->get('user:1', 'theme', 'light');          // 'dark'
- * $prefs->get('user:1', 'language', 'ja');          // 'ja' (default)
- *
- * // Type casting
- * $prefs->getInt('user:1', 'items_per_page', 10);   // 20 (int)
- * $prefs->getBool('user:1', 'notifications', true); // true (default)
- *
- * // Delete (revert to default)
- * $prefs->delete('user:1', 'theme');
+ * // Retrieve (with default)
+ * $up->get('user-1', 'theme', 'light');   // 'dark'
+ * $up->get('user-1', 'font_size', '14');  // '14' (default)
  *
  * // All preferences for a user
- * $prefs->all('user:1');
+ * $up->all('user-1');
+ *
+ * // Delete a key or all preferences
+ * $up->delete('user-1', 'theme');
+ * $up->deleteAll('user-1');
+ * ```
+ *
+ * ## Schema (SQLite / MySQL compatible)
+ *
+ * ```sql
+ * CREATE TABLE user_preferences (
+ *     user_id    VARCHAR(255) NOT NULL,
+ *     pref_key   VARCHAR(100) NOT NULL,
+ *     pref_value TEXT         NOT NULL DEFAULT '',
+ *     updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ *     PRIMARY KEY (user_id, pref_key)
+ * );
  * ```
  */
 final class UserPreference
 {
-    private const TABLE = 'user_preferences';
-
-    public function __construct(
-        private readonly ?PDO $db = null,
-        private readonly string $table = self::TABLE,
-    ) {
-    }
-
-    /**
-     * Get a preference value.
-     *
-     * Returns the stored string value, or $default if the key is not set.
-     *
-     * @param string      $userId  Application-level user identifier.
-     * @param string      $key     Preference key.
-     * @param string|null $default Default value when key is not set.
-     */
-    public function get(string $userId, string $key, ?string $default = null): ?string
+    public function __construct(private readonly ?PDO $db = null)
     {
-        $db   = $this->db ?? PdoConnection::getInstance();
-        $stmt = $db->prepare(
-            'SELECT pref_value FROM ' . $this->table .
-            ' WHERE user_id = :u AND pref_key = :k LIMIT 1'
-        );
-        $stmt->bindValue(':u', $userId, PDO::PARAM_STR);
-        $stmt->bindValue(':k', $key, PDO::PARAM_STR);
-        $stmt->execute();
-
-        $value = $stmt->fetchColumn();
-        return $value !== false ? (string)$value : $default;
     }
 
-    /**
-     * Get a preference as an integer.
-     *
-     * @param string $userId  Application-level user identifier.
-     * @param string $key     Preference key.
-     * @param int    $default Default value when key is not set.
-     */
-    public function getInt(string $userId, string $key, int $default = 0): int
-    {
-        $value = $this->get($userId, $key);
-        return $value !== null ? (int)$value : $default;
-    }
+    // ── public API ────────────────────────────────────────────────────────────
 
     /**
-     * Get a preference as a boolean.
+     * Set a preference value for a user (upsert).
      *
-     * Stored as '1'/'0', 'true'/'false', 'yes'/'no' (case-insensitive).
-     *
-     * @param string $userId  Application-level user identifier.
-     * @param string $key     Preference key.
-     * @param bool   $default Default value when key is not set.
-     */
-    public function getBool(string $userId, string $key, bool $default = false): bool
-    {
-        $value = $this->get($userId, $key);
-        if ($value === null) {
-            return $default;
-        }
-        return in_array(strtolower($value), ['1', 'true', 'yes'], true);
-    }
-
-    /**
-     * Set a preference value. Creates or overwrites the existing value.
-     *
-     * @param string $userId Application-level user identifier.
-     * @param string $key    Preference key.
-     * @param string $value  Value to store.
+     * @throws \InvalidArgumentException if user_id or pref_key is empty.
      */
     public function set(string $userId, string $key, string $value): void
     {
-        $db     = $this->db ?? PdoConnection::getInstance();
-        $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
+        [$userId, $key] = $this->normalise($userId, $key);
+        $db             = $this->db();
+        $driver         = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
 
         if ($driver === 'sqlite') {
-            $sql = 'INSERT OR REPLACE INTO ' . $this->table .
-                   ' (user_id, pref_key, pref_value, updated_at)' .
-                   ' VALUES (:u, :k, :v, :t)';
+            $db->prepare(
+                'INSERT INTO user_preferences (user_id, pref_key, pref_value)
+                 VALUES (:uid, :key, :val)
+                 ON CONFLICT (user_id, pref_key)
+                 DO UPDATE SET pref_value = excluded.pref_value, updated_at = CURRENT_TIMESTAMP'
+            )->execute([':uid' => $userId, ':key' => $key, ':val' => $value]);
         } else {
-            $sql = 'INSERT INTO ' . $this->table .
-                   ' (user_id, pref_key, pref_value, updated_at)' .
-                   ' VALUES (:u, :k, :v, :t)' .
-                   ' ON DUPLICATE KEY UPDATE pref_value = VALUES(pref_value), updated_at = VALUES(updated_at)';
+            $db->prepare(
+                'INSERT INTO user_preferences (user_id, pref_key, pref_value)
+                 VALUES (:uid, :key, :val)
+                 ON DUPLICATE KEY UPDATE pref_value = VALUES(pref_value), updated_at = CURRENT_TIMESTAMP'
+            )->execute([':uid' => $userId, ':key' => $key, ':val' => $value]);
         }
-
-        $updatedAt = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s');
-        $stmt      = $db->prepare($sql);
-        $stmt->bindValue(':u', $userId, PDO::PARAM_STR);
-        $stmt->bindValue(':k', $key, PDO::PARAM_STR);
-        $stmt->bindValue(':v', $value, PDO::PARAM_STR);
-        $stmt->bindValue(':t', $updatedAt, PDO::PARAM_STR);
-        $stmt->execute();
     }
 
     /**
-     * Delete a preference. After deletion, get() returns the default.
+     * Get a preference value, falling back to $default if not set.
      *
-     * Returns true if a row was deleted, false if the key did not exist.
+     * @throws \InvalidArgumentException if user_id or pref_key is empty.
+     */
+    public function get(string $userId, string $key, string $default = ''): string
+    {
+        [$userId, $key] = $this->normalise($userId, $key);
+        $stmt           = $this->db()->prepare(
+            'SELECT pref_value FROM user_preferences WHERE user_id = :uid AND pref_key = :key LIMIT 1'
+        );
+        $stmt->execute([':uid' => $userId, ':key' => $key]);
+        $val = $stmt->fetchColumn();
+        return $val !== false ? (string)$val : $default;
+    }
+
+    /**
+     * Check whether a preference key has been explicitly set for a user.
+     */
+    public function has(string $userId, string $key): bool
+    {
+        [$userId, $key] = $this->normalise($userId, $key);
+        $stmt           = $this->db()->prepare(
+            'SELECT COUNT(*) FROM user_preferences WHERE user_id = :uid AND pref_key = :key'
+        );
+        $stmt->execute([':uid' => $userId, ':key' => $key]);
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Get all preferences for a user as key-value map.
      *
-     * @param string $userId Application-level user identifier.
-     * @param string $key    Preference key to remove.
+     * @return array<string,string>
+     */
+    public function all(string $userId): array
+    {
+        $userId = trim($userId);
+        $stmt   = $this->db()->prepare(
+            'SELECT pref_key, pref_value FROM user_preferences WHERE user_id = :uid ORDER BY pref_key ASC'
+        );
+        $stmt->execute([':uid' => $userId]);
+        $result = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $result[(string)$row['pref_key']] = (string)$row['pref_value'];
+        }
+        return $result;
+    }
+
+    /**
+     * Delete a single preference key.
+     *
+     * @return bool True if a row was deleted.
      */
     public function delete(string $userId, string $key): bool
     {
-        $db   = $this->db ?? PdoConnection::getInstance();
-        $stmt = $db->prepare(
-            'DELETE FROM ' . $this->table .
-            ' WHERE user_id = :u AND pref_key = :k'
+        [$userId, $key] = $this->normalise($userId, $key);
+        $stmt           = $this->db()->prepare(
+            'DELETE FROM user_preferences WHERE user_id = :uid AND pref_key = :key'
         );
-        $stmt->bindValue(':u', $userId, PDO::PARAM_STR);
-        $stmt->bindValue(':k', $key, PDO::PARAM_STR);
-        $stmt->execute();
-
+        $stmt->execute([':uid' => $userId, ':key' => $key]);
         return $stmt->rowCount() > 0;
     }
 
     /**
-     * Get all preferences for a user as a key→value map.
+     * Delete all preferences for a user.
      *
-     * @param  string $userId Application-level user identifier.
-     * @return array<string, string>
+     * @return int Number of rows deleted.
      */
-    public function all(string $userId): array
+    public function deleteAll(string $userId): int
     {
-        $db   = $this->db ?? PdoConnection::getInstance();
-        $stmt = $db->prepare(
-            'SELECT pref_key, pref_value FROM ' . $this->table .
-            ' WHERE user_id = :u ORDER BY pref_key ASC'
-        );
-        $stmt->bindValue(':u', $userId, PDO::PARAM_STR);
-        $stmt->execute();
-        $rows   = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $result = [];
-        foreach ($rows as $row) {
-            $result[(string)$row['pref_key']] = (string)$row['pref_value'];
+        $userId = trim($userId);
+        $stmt   = $this->db()->prepare('DELETE FROM user_preferences WHERE user_id = :uid');
+        $stmt->execute([':uid' => $userId]);
+        return $stmt->rowCount();
+    }
+
+    /**
+     * Count stored preferences for a user.
+     */
+    public function count(string $userId): int
+    {
+        $userId = trim($userId);
+        $stmt   = $this->db()->prepare('SELECT COUNT(*) FROM user_preferences WHERE user_id = :uid');
+        $stmt->execute([':uid' => $userId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    // ── internal helpers ─────────────────────────────────────────────────────
+
+    private function db(): PDO
+    {
+        return $this->db ?? PdoConnection::getInstance();
+    }
+
+    /**
+     * @return array{string, string}
+     */
+    private function normalise(string $userId, string $key): array
+    {
+        $userId = trim($userId);
+        $key    = trim($key);
+        if ($userId === '') {
+            throw new \InvalidArgumentException('user_id must not be empty.');
         }
-        return $result;
+        if ($key === '') {
+            throw new \InvalidArgumentException('pref_key must not be empty.');
+        }
+        return [$userId, $key];
     }
 }

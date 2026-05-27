@@ -9,159 +9,172 @@ use PDO;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Unit tests for UserPreference using an in-memory SQLite database.
+ * Unit tests for UserPreference.
  */
 final class UserPreferenceTest extends TestCase
 {
     private PDO $db;
-    private UserPreference $prefs;
+    private UserPreference $up;
 
     protected function setUp(): void
     {
         $this->db = new PDO('sqlite::memory:');
         $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->db->exec(
-            'CREATE TABLE user_preferences (
+        $this->db->exec('
+            CREATE TABLE user_preferences (
                 user_id    VARCHAR(255) NOT NULL,
-                pref_key   VARCHAR(255) NOT NULL,
-                pref_value TEXT         NOT NULL,
+                pref_key   VARCHAR(100) NOT NULL,
+                pref_value TEXT         NOT NULL DEFAULT \'\',
                 updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (user_id, pref_key)
-            )'
-        );
-        $this->prefs = new UserPreference($this->db);
+            )
+        ');
+        $this->up = new UserPreference($this->db);
     }
 
-    // ── get ───────────────────────────────────────────────────────────────────
+    // ── set + get ─────────────────────────────────────────────────────────────
 
-    public function testGetReturnsStoredValue(): void
+    public function testSetAndGet(): void
     {
-        $this->prefs->set('user:1', 'theme', 'dark');
-        $this->assertSame('dark', $this->prefs->get('user:1', 'theme'));
+        $this->up->set('user-1', 'theme', 'dark');
+        $this->assertSame('dark', $this->up->get('user-1', 'theme'));
     }
 
-    public function testGetReturnsNullDefaultWhenKeyNotSet(): void
+    public function testGetReturnsDefaultWhenNotSet(): void
     {
-        $this->assertNull($this->prefs->get('user:1', 'theme'));
+        $this->assertSame('light', $this->up->get('user-1', 'theme', 'light'));
     }
 
-    public function testGetReturnsCustomDefaultWhenKeyNotSet(): void
+    public function testGetReturnsEmptyStringDefaultByDefault(): void
     {
-        $this->assertSame('light', $this->prefs->get('user:1', 'theme', 'light'));
+        $this->assertSame('', $this->up->get('user-1', 'missing'));
     }
 
-    public function testGetIsUserIsolated(): void
+    public function testSetIsUpsert(): void
     {
-        $this->prefs->set('user:1', 'theme', 'dark');
-        $this->assertNull($this->prefs->get('user:2', 'theme'));
+        $this->up->set('user-1', 'theme', 'dark');
+        $this->up->set('user-1', 'theme', 'light');
+        $this->assertSame('light', $this->up->get('user-1', 'theme'));
     }
 
-    // ── set ───────────────────────────────────────────────────────────────────
-
-    public function testSetOverwritesExistingValue(): void
+    public function testPreferencesAreScopedToUser(): void
     {
-        $this->prefs->set('user:1', 'theme', 'dark');
-        $this->prefs->set('user:1', 'theme', 'light');
-        $this->assertSame('light', $this->prefs->get('user:1', 'theme'));
+        $this->up->set('user-1', 'theme', 'dark');
+        $this->assertSame('light', $this->up->get('user-2', 'theme', 'light'));
     }
 
-    public function testSetMultipleKeys(): void
+    public function testPreferencesAreScopedToKey(): void
     {
-        $this->prefs->set('user:1', 'theme', 'dark');
-        $this->prefs->set('user:1', 'lang', 'ja');
-        $this->assertSame('dark', $this->prefs->get('user:1', 'theme'));
-        $this->assertSame('ja', $this->prefs->get('user:1', 'lang'));
+        $this->up->set('user-1', 'theme', 'dark');
+        $this->assertSame('', $this->up->get('user-1', 'locale'));
     }
 
-    // ── getInt ────────────────────────────────────────────────────────────────
+    // ── has ───────────────────────────────────────────────────────────────────
 
-    public function testGetIntReturnsStoredValueAsInt(): void
+    public function testHasReturnsTrueWhenSet(): void
     {
-        $this->prefs->set('user:1', 'per_page', '20');
-        $this->assertSame(20, $this->prefs->getInt('user:1', 'per_page'));
+        $this->up->set('user-1', 'theme', 'dark');
+        $this->assertTrue($this->up->has('user-1', 'theme'));
     }
 
-    public function testGetIntReturnsDefaultWhenKeyNotSet(): void
+    public function testHasReturnsFalseWhenNotSet(): void
     {
-        $this->assertSame(10, $this->prefs->getInt('user:1', 'per_page', 10));
-    }
-
-    public function testGetIntDefaultIsZeroWhenNotSpecified(): void
-    {
-        $this->assertSame(0, $this->prefs->getInt('user:1', 'per_page'));
-    }
-
-    // ── getBool ───────────────────────────────────────────────────────────────
-
-    public function testGetBoolReturnsTrueFor1(): void
-    {
-        $this->prefs->set('user:1', 'notif', '1');
-        $this->assertTrue($this->prefs->getBool('user:1', 'notif'));
-    }
-
-    public function testGetBoolReturnsTrueForTrue(): void
-    {
-        $this->prefs->set('user:1', 'notif', 'true');
-        $this->assertTrue($this->prefs->getBool('user:1', 'notif'));
-    }
-
-    public function testGetBoolReturnsTrueForYes(): void
-    {
-        $this->prefs->set('user:1', 'notif', 'yes');
-        $this->assertTrue($this->prefs->getBool('user:1', 'notif'));
-    }
-
-    public function testGetBoolReturnsFalseFor0(): void
-    {
-        $this->prefs->set('user:1', 'notif', '0');
-        $this->assertFalse($this->prefs->getBool('user:1', 'notif'));
-    }
-
-    public function testGetBoolReturnsDefaultWhenKeyNotSet(): void
-    {
-        $this->assertTrue($this->prefs->getBool('user:1', 'notif', true));
-        $this->assertFalse($this->prefs->getBool('user:1', 'notif', false));
-    }
-
-    // ── delete ────────────────────────────────────────────────────────────────
-
-    public function testDeleteReturnsTrueWhenKeyExists(): void
-    {
-        $this->prefs->set('user:1', 'theme', 'dark');
-        $this->assertTrue($this->prefs->delete('user:1', 'theme'));
-    }
-
-    public function testDeleteReturnsFalseWhenKeyNotSet(): void
-    {
-        $this->assertFalse($this->prefs->delete('user:1', 'theme'));
-    }
-
-    public function testDeleteRevertsToDefault(): void
-    {
-        $this->prefs->set('user:1', 'theme', 'dark');
-        $this->prefs->delete('user:1', 'theme');
-        $this->assertSame('light', $this->prefs->get('user:1', 'theme', 'light'));
+        $this->assertFalse($this->up->has('user-1', 'missing'));
     }
 
     // ── all ───────────────────────────────────────────────────────────────────
 
-    public function testAllReturnsKeyValueMap(): void
+    public function testAllReturnsAllPreferences(): void
     {
-        $this->prefs->set('user:1', 'theme', 'dark');
-        $this->prefs->set('user:1', 'lang', 'ja');
-        $all = $this->prefs->all('user:1');
-        $this->assertSame('dark', $all['theme']);
-        $this->assertSame('ja', $all['lang']);
+        $this->up->set('user-1', 'theme', 'dark');
+        $this->up->set('user-1', 'locale', 'ja');
+        $all = $this->up->all('user-1');
+        $this->assertSame(['locale' => 'ja', 'theme' => 'dark'], $all);
     }
 
-    public function testAllReturnsEmptyMapWhenNoPrefs(): void
+    public function testAllReturnsEmptyForUserWithNoPreferences(): void
     {
-        $this->assertSame([], $this->prefs->all('user:1'));
+        $this->assertSame([], $this->up->all('nobody'));
     }
 
-    public function testAllIsUserIsolated(): void
+    public function testAllIsUserScoped(): void
     {
-        $this->prefs->set('user:1', 'theme', 'dark');
-        $this->assertSame([], $this->prefs->all('user:2'));
+        $this->up->set('user-1', 'theme', 'dark');
+        $this->up->set('user-2', 'theme', 'light');
+        $this->assertCount(1, $this->up->all('user-1'));
+    }
+
+    // ── delete ────────────────────────────────────────────────────────────────
+
+    public function testDeleteRemovesKey(): void
+    {
+        $this->up->set('user-1', 'theme', 'dark');
+        $this->assertTrue($this->up->delete('user-1', 'theme'));
+        $this->assertFalse($this->up->has('user-1', 'theme'));
+    }
+
+    public function testDeleteReturnsFalseIfNotPresent(): void
+    {
+        $this->assertFalse($this->up->delete('user-1', 'missing'));
+    }
+
+    public function testDeleteDoesNotAffectOtherKeys(): void
+    {
+        $this->up->set('user-1', 'theme', 'dark');
+        $this->up->set('user-1', 'locale', 'ja');
+        $this->up->delete('user-1', 'theme');
+        $this->assertTrue($this->up->has('user-1', 'locale'));
+    }
+
+    // ── deleteAll ─────────────────────────────────────────────────────────────
+
+    public function testDeleteAllRemovesAllKeys(): void
+    {
+        $this->up->set('user-1', 'theme', 'dark');
+        $this->up->set('user-1', 'locale', 'ja');
+        $this->assertSame(2, $this->up->deleteAll('user-1'));
+        $this->assertSame([], $this->up->all('user-1'));
+    }
+
+    public function testDeleteAllDoesNotAffectOtherUsers(): void
+    {
+        $this->up->set('user-1', 'theme', 'dark');
+        $this->up->set('user-2', 'theme', 'light');
+        $this->up->deleteAll('user-1');
+        $this->assertTrue($this->up->has('user-2', 'theme'));
+    }
+
+    // ── count ─────────────────────────────────────────────────────────────────
+
+    public function testCountReturnsZeroInitially(): void
+    {
+        $this->assertSame(0, $this->up->count('user-1'));
+    }
+
+    public function testCountReturnsNumberOfStoredPreferences(): void
+    {
+        $this->up->set('user-1', 'theme', 'dark');
+        $this->up->set('user-1', 'locale', 'ja');
+        $this->assertSame(2, $this->up->count('user-1'));
+    }
+
+    // ── validation ────────────────────────────────────────────────────────────
+
+    public function testSetThrowsOnEmptyUserId(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->up->set('', 'theme', 'dark');
+    }
+
+    public function testSetThrowsOnEmptyKey(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->up->set('user-1', '', 'dark');
+    }
+
+    public function testGetThrowsOnEmptyUserId(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->up->get('', 'theme');
     }
 }
