@@ -164,6 +164,7 @@ final class RateLimiterTest extends TestCase
             ->onlyMethods(['__call'])
             ->getMock();
 
+        /** @var list<array{method: string, args: list<mixed>}> $callLog */
         $callLog = [];
         $redis->method('__call')
             ->willReturnCallback(function (string $method, array $args) use (&$callLog) {
