@@ -102,7 +102,7 @@ final class ApiWebhookTest extends TestCase
         $r         = $this->aw->subscribe('order.created', 'https://example.com/hook');
         $newSecret = $this->aw->rotateSecret($r['id']);
         $this->assertNotNull($newSecret);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeMismatchArgumentNullableInternal
         $this->assertSame(64, strlen($newSecret));
         $this->assertNotSame($r['secret'], $newSecret);
     }
