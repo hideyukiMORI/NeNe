@@ -43,6 +43,7 @@ final class NewsletterSubscriptionTest extends TestCase
     {
         $token = $this->nl->subscribe('user@example.com', 'weekly');
         $this->assertIsString($token);
+        // @phan-suppress-next-line PhanTypeMismatchArgumentNullableInternal
         $this->assertSame(64, strlen($token)); // 32 bytes = 64 hex chars
     }
 
