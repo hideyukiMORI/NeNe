@@ -51,6 +51,7 @@ final class WebhookDeliveryTest extends TestCase
     {
         $id = $this->wd->schedule('ep-1', 'order.placed', ['amount' => 99]);
         $d  = $this->wd->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(['amount' => 99], $d['payload']);
     }
 
@@ -58,6 +59,7 @@ final class WebhookDeliveryTest extends TestCase
     {
         $id = $this->wd->schedule('ep-1', 'ping');
         $d  = $this->wd->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('pending', $d['status']);
     }
 
@@ -86,6 +88,7 @@ final class WebhookDeliveryTest extends TestCase
         $this->wd->schedule('ep-1', 'ping');
         $d = $this->wd->claimNext();
         $this->assertNotNull($d);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('sending', $d['status']);
     }
 
@@ -93,6 +96,7 @@ final class WebhookDeliveryTest extends TestCase
     {
         $this->wd->schedule('ep-1', 'ping');
         $d = $this->wd->claimNext();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(1, (int)$d['attempts']);
     }
 
@@ -106,6 +110,7 @@ final class WebhookDeliveryTest extends TestCase
         $id1 = $this->wd->schedule('ep-1', 'first');
         $id2 = $this->wd->schedule('ep-1', 'second');
         $d   = $this->wd->claimNext();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame($id1, (int)$d['id']);
     }
 
@@ -115,9 +120,13 @@ final class WebhookDeliveryTest extends TestCase
     {
         $this->wd->schedule('ep-1', 'ping');
         $d = $this->wd->claimNext();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertTrue($this->wd->succeed((int)$d['id'], 200, 'ok'));
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $updated = $this->wd->find((int)$d['id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('delivered', $updated['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(200, (int)$updated['http_status']);
     }
 
@@ -134,9 +143,13 @@ final class WebhookDeliveryTest extends TestCase
         $wd = new WebhookDelivery($this->db, 3);
         $wd->schedule('ep-1', 'ping');
         $d = $wd->claimNext();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $wd->fail((int)$d['id'], 500, 'error');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $updated = $wd->find((int)$d['id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('pending', $updated['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('error', $updated['response_body']);
     }
 
@@ -145,8 +158,11 @@ final class WebhookDeliveryTest extends TestCase
         $wd = new WebhookDelivery($this->db, 1);
         $wd->schedule('ep-1', 'ping');
         $d = $wd->claimNext();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $wd->fail((int)$d['id'], 0, 'timeout');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $updated = $wd->find((int)$d['id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('failed', $updated['status']);
     }
 
@@ -194,6 +210,7 @@ final class WebhookDeliveryTest extends TestCase
     {
         $this->wd->schedule('ep-1', 'a');
         $d = $this->wd->claimNext();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->wd->succeed((int)$d['id'], 200);
         $this->wd->schedule('ep-1', 'b');
         $this->assertSame(1, $this->wd->count('pending'));
@@ -206,6 +223,7 @@ final class WebhookDeliveryTest extends TestCase
     {
         $id = $this->wd->schedule('ep-1', 'ping');
         $d  = $this->wd->claimNext();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->wd->succeed((int)$d['id'], 200);
         $this->db->exec("UPDATE webhook_deliveries SET created_at = '2000-01-01 00:00:00' WHERE id = {$id}");
         $deleted = $this->wd->purge(1);
@@ -216,6 +234,7 @@ final class WebhookDeliveryTest extends TestCase
     {
         $id = $this->wd->schedule('ep-1', 'ping');
         $d  = $this->wd->claimNext();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->wd->succeed((int)$d['id'], 200);
         $this->assertSame(0, $this->wd->purge(30));
     }
