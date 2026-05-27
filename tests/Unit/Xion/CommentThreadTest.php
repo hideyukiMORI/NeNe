@@ -48,6 +48,7 @@ final class CommentThreadTest extends TestCase
     {
         $id  = $this->ct->add('post', '1', 'user-1', 'Great post!');
         $row = $this->ct->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Great post!', $row['body']);
     }
 
@@ -56,6 +57,7 @@ final class CommentThreadTest extends TestCase
         $id    = $this->ct->add('post', '1', 'user-1', 'Parent');
         $reply = $this->ct->add('post', '1', 'user-2', 'Reply', $id);
         $row   = $this->ct->find($reply);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame($id, (int)$row['parent_id']);
     }
 
@@ -83,6 +85,7 @@ final class CommentThreadTest extends TestCase
     {
         $id = $this->ct->add('post', '1', 'user-1', 'Original');
         $this->assertTrue($this->ct->edit($id, 'user-1', 'Updated'));
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Updated', $this->ct->find($id)['body']);
     }
 
@@ -106,7 +109,9 @@ final class CommentThreadTest extends TestCase
         $id = $this->ct->add('post', '1', 'user-1', 'Hello');
         $this->assertTrue($this->ct->delete($id, 'user-1'));
         $row = $this->ct->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('', $row['body']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertNotNull($row['deleted_at']);
     }
 
