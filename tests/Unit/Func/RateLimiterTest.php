@@ -164,7 +164,6 @@ final class RateLimiterTest extends TestCase
             ->onlyMethods(['__call'])
             ->getMock();
 
-        /** @var list<array{method: string, args: list<mixed>}> $callLog */
         $callLog = [];
         $redis->method('__call')
             ->willReturnCallback(function (string $method, array $args) use (&$callLog) {
@@ -182,8 +181,11 @@ final class RateLimiterTest extends TestCase
         $result  = $storage->increment('rate:key', 60);
 
         self::assertSame(1, $result);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNull, PhanTypeInvalidDimOffset
         self::assertSame('incr', $callLog[0]['method']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNull, PhanTypeInvalidDimOffset
         self::assertSame('expire', $callLog[1]['method']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNull, PhanTypeInvalidDimOffset
         self::assertSame(['rate:key', 60], $callLog[1]['args']);
     }
 
