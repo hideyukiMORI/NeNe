@@ -50,6 +50,7 @@ final class GeoFenceTest extends TestCase
         $id1 = $this->gf->define('tokyo', self::TOKYO_LAT, self::TOKYO_LNG, 500);
         $id2 = $this->gf->define('tokyo', self::TOKYO_LAT, self::TOKYO_LNG, 1000);
         $this->assertSame($id1, $id2);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(1000, $this->gf->find('tokyo')['radius_m']);
     }
 
@@ -83,8 +84,11 @@ final class GeoFenceTest extends TestCase
     {
         $this->gf->define('tokyo', self::TOKYO_LAT, self::TOKYO_LNG, 500);
         $fence = $this->gf->find('tokyo');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('tokyo', $fence['name']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertEqualsWithDelta(self::TOKYO_LAT, $fence['lat'], 0.0001);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(500, $fence['radius_m']);
     }
 
