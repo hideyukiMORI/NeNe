@@ -4,11 +4,43 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Active
 
-- #178: Prepare the Qiita hands-on implementation tutorial article.
+No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously through 2026-05-21. As of that day's close: zero non-promotion Issues remain open, six trials (FT1–FT6) are complete, and four ADRs are in place (0001–0004). The framework is ready for the publication / outreach push (#178 → #179 → #180) which is the only currently active line of work.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT50 are complete (FT36 deferred as ADR-class); ADR-0001–0013 are in place. Next work is FT51+ — see **Field Trials** and **Backlog Candidates** below.
 
 ## Recently Completed
+
+### 2026-05-27 — FT25–FT50: NENE2 parity wave + extended patterns (26 trials)
+
+Single-day wave of 26 field trials covering NENE2-equivalent patterns plus additional production-readiness helpers. All PRs #458–#482 (pending merge).
+
+**FT25 — Cursor pagination**: `Cursor` + `CursorPage`; base64url token; keyset SQL (created_at, id). PR #458.
+**FT26 — Soft delete**: `DataMapperBase::SOFT_DELETE`; softDelete/restore/findTrashed/purge; deleted_at auto-filter. PR #459.
+**FT27 — Optimistic locking / ETag**: `OptimisticLock`; parseIfMatch/requireVersion/conflict; 412/428. PR #460.
+**FT28 — Rate limiting**: `RateLimiter` + Redis storage; fixed-window INCR+EXPIRE; X-RateLimit-* headers; 429. PR #461.
+**FT29 — State machine**: `WorkflowDefinition`; code-driven transition map; assertTransition → 409. PR #462.
+**FT30 — JWT HS256**: `JwtCodec`; pure PHP HMAC-SHA256; issue/decode/require; alg:none defence. PR #463.
+**FT31 — RBAC**: `RoleGuard`; JWT claims-based require/requireAny/has; 401 vs 403. PR #464.
+**FT32 — Password reset**: `PasswordResetToken`; random_bytes + SHA-256; isExpired/expiresAt. PR #465.
+**FT33 — Audit log**: `AuditLogger`; append-only audit_log; PDO injection; silent on PDOException. PR #466.
+**FT34 — Webhook signing**: `WebhookSigner`; Stripe-style t=ts,v1=hmac; hash_equals; generateSecret(). PR #467.
+**FT35 — Feature flags**: `FeatureFlagService`; DB-backed; user override → global → rollout%; crc32 bucket. PR #468.
+**FT37 — Idempotency keys**: `IdempotencyStore`; INSERT IGNORE/OR IGNORE; X-Idempotency-Key / X-Idempotent-Replayed. PR #469.
+**FT38 — Full-text search**: `SearchQuery`; escapeLike/likePattern/sanitizeFts/normalize; FTS5 doc. PR #470.
+**FT39 — API versioning / deprecation**: `ApiDeprecation`; RFC 8594 Deprecation/Sunset/Link; ADR-0013. PR #471.
+**FT40 — Batch operations**: `BatchResult`; addSuccess/addFailure/httpStatus; 200/207/422 partial-success. PR #472.
+**FT41 — Account lockout**: `LoginAttemptTracker`; DB-backed failure counter; locks at threshold; ACCOUNT-LOCKED 423. PR #473.
+**FT42 — Signed URL**: `SignedUrl`; HMAC-SHA256 sign/verify/requireValid; expiry; SIGNED-URL-EXPIRED 410. PR #474.
+**FT43 — Circuit breaker**: `CircuitBreaker`; CLOSED/OPEN/HALF-OPEN state machine; DB-backed; CIRCUIT-OPEN 503. PR #475.
+**FT44 — HTTP cache headers**: `HttpCache`; sendCacheControl/sendLastModified/isNotModified/send304; conditional GET. PR #476.
+**FT45 — CORS**: `Cors`; sendHeaders/handlePreflight/isAllowed; wildcard vs explicit origins. PR #477.
+**FT46 — File upload**: `FileUpload`; require/load/validateSize/validateMime/moveTo; finfo MIME detection. PR #479.
+**FT47 — Tree helper**: `TreeHelper`; build/ancestors/descendants/depth/flatten for adjacency-list trees. PR #478.
+**FT48 — Offset pagination**: `OffsetPage` + `PaginationHelper`; page envelope; window() UI helper. PR #480.
+**FT49 — Money value object**: `Money`; immutable integer-based; add/subtract/multiply/round/format (JPY/USD/EUR). PR #482.
+**FT50 — Input validation**: `Validator`; required/maxLength/minLength/email/url/integer/in/regex; VALIDATION-FAILED 422. PR #483.
+
+FT36 (background jobs) deferred as ADR-class — trigger: real "POST takes 8s" friction event.
 
 ### 2026-05-21 — FT3 / FT4 / FT5 / FT6 + infra + checklists
 
@@ -116,8 +148,7 @@ Single-day wave of trial-driven improvements across the framework, documentation
 
 ## Next
 
-- #179: Prepare the DEV Community English introduction article.
-- #180: Decide on Reddit/Hacker News only after the first article feedback.
+Pick the next field trial or implementation improvement from the **Backlog Candidates** section below.
 
 The two earlier "AI-readable reference implementation" Issues (#145, #165) were closed on 2026-05-21 — the goals they encoded are now delivered through FT3–FT6 plus the tutorial and `docs/review/` checklists. New reference-implementation needs should be spawned as new field trials.
 
