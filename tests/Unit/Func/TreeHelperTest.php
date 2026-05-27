@@ -51,7 +51,7 @@ final class TreeHelperTest extends TestCase
             }
         }
         self::assertNotNull($electronics);
-        /** @var array<string,mixed> $electronics */
+        \assert(is_array($electronics));
         self::assertArrayHasKey('children', $electronics);
         self::assertCount(2, $electronics['children']);
         $childNames = array_column($electronics['children'], 'name');
@@ -70,7 +70,7 @@ final class TreeHelperTest extends TestCase
             }
         }
         self::assertNotNull($electronics);
-        /** @var array<string,mixed> $electronics */
+        \assert(is_array($electronics));
         $laptops = null;
         foreach ($electronics['children'] as $child) {
             if ($child['name'] === 'Laptops') {
@@ -79,7 +79,7 @@ final class TreeHelperTest extends TestCase
             }
         }
         self::assertNotNull($laptops);
-        /** @var array<string,mixed> $laptops */
+        \assert(is_array($laptops));
         self::assertCount(1, $laptops['children']);
         self::assertSame('Gaming', $laptops['children'][0]['name']);
     }
@@ -95,7 +95,7 @@ final class TreeHelperTest extends TestCase
             }
         }
         self::assertNotNull($electronics);
-        /** @var array<string,mixed> $electronics */
+        \assert(is_array($electronics));
         $laptops = null;
         foreach ($electronics['children'] as $child) {
             if ($child['name'] === 'Laptops') {
@@ -104,7 +104,7 @@ final class TreeHelperTest extends TestCase
             }
         }
         self::assertNotNull($laptops);
-        /** @var array<string,mixed> $laptops */
+        \assert(is_array($laptops));
         $gaming = $laptops['children'][0];
         self::assertSame('Gaming', $gaming['name']);
         self::assertSame([], $gaming['children']);
