@@ -147,6 +147,7 @@ final class ResourceLockTest extends TestCase
     {
         $id = $this->rl->acquire('doc', '1', 'user-1', 60);
         $this->assertNotNull($id);
+        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
         $this->assertTrue($this->rl->forceRelease($id));
         $this->assertNull($this->rl->current('doc', '1'));
     }
@@ -162,6 +163,7 @@ final class ResourceLockTest extends TestCase
     {
         $id = $this->rl->acquire('doc', '1', 'user-1', 60);
         $this->assertNotNull($id);
+        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
         $this->assertTrue($this->rl->extend($id, 'user-1', 3600));
         $lock = $this->rl->current('doc', '1');
         $this->assertNotNull($lock);
@@ -171,6 +173,7 @@ final class ResourceLockTest extends TestCase
     {
         $id = $this->rl->acquire('doc', '1', 'user-1', 60);
         $this->assertNotNull($id);
+        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
         $this->assertFalse($this->rl->extend($id, 'user-2', 3600));
     }
 
