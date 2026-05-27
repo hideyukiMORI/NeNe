@@ -2,175 +2,213 @@
 
 declare(strict_types=1);
 
-namespace Nene\Tests\Unit\Xion;
+namespace Tests\Unit\Xion;
 
 use Nene\Xion\DeviceToken;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Unit tests for DeviceToken.
- */
 final class DeviceTokenTest extends TestCase
 {
-    private PDO $db;
+    private PDO $pdo;
     private DeviceToken $dt;
 
     protected function setUp(): void
     {
-        $this->db = new PDO('sqlite::memory:');
-        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->db->exec('
+        $this->pdo = new PDO('sqlite::memory:');
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->pdo->exec('
             CREATE TABLE device_tokens (
-                id           INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id      VARCHAR(255) NOT NULL,
-                token_hash   VARCHAR(64)  NOT NULL UNIQUE,
-                label        VARCHAR(255) NOT NULL DEFAULT \'\',
-                expires_at   DATETIME     NOT NULL,
-                last_used_at DATETIME     DEFAULT NULL,
-                created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id     VARCHAR(255) NOT NULL,
+                token       TEXT         NOT NULL,
+                platform    VARCHAR(20)  NOT NULL DEFAULT \'unknown\',
+                is_active   TINYINT(1)   NOT NULL DEFAULT 1,
+                created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         ');
-        $this->dt = new DeviceToken($this->db);
+        $this->dt = new DeviceToken($this->pdo);
     }
 
-    // ── issue ─────────────────────────────────────────────────────────────────
+    // ── register ──────────────────────────────────────────────────────────────
 
-    public function testIssueReturnsRawToken(): void
+    public function testRegisterReturnsId(): void
     {
-        $raw = $this->dt->issue('user-1');
-        $this->assertIsString($raw);
-        $this->assertSame(64, strlen($raw)); // 32 bytes = 64 hex chars
+        $id = $this->dt->register('user-1', 'tok-abc', DeviceToken::PLATFORM_ANDROID);
+        $this->assertGreaterThan(0, $id);
     }
 
-    public function testIssueStoresHashNotRaw(): void
+    public function testRegisterStoresCorrectly(): void
     {
-        $raw  = $this->dt->issue('user-1');
-        $hash = hash('sha256', $raw);
-        $stmt = $this->db->prepare('SELECT token_hash FROM device_tokens WHERE token_hash = ?');
-        $stmt->execute([$hash]);
-        $this->assertNotFalse($stmt->fetchColumn());
-    }
-
-    public function testIssueStoresLabel(): void
-    {
-        $this->dt->issue('user-1', label: 'My Phone');
-        $list = $this->dt->list('user-1');
-        $this->assertSame('My Phone', $list[0]['label']);
-    }
-
-    public function testIssueMultipleTokensForSameUser(): void
-    {
-        $this->dt->issue('user-1');
-        $this->dt->issue('user-1');
-        $this->assertCount(2, $this->dt->list('user-1'));
-    }
-
-    // ── validate ──────────────────────────────────────────────────────────────
-
-    public function testValidateReturnsRowForValidToken(): void
-    {
-        $raw    = $this->dt->issue('user-1');
-        $result = $this->dt->validate($raw);
-        $this->assertNotNull($result);
+        $id  = $this->dt->register('user-1', 'tok-abc', DeviceToken::PLATFORM_IOS);
+        $row = $this->dt->find($id);
+        $this->assertNotNull($row);
         // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('user-1', $result['user_id']);
+        $this->assertSame('user-1', $row['user_id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('tok-abc', $row['token']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(DeviceToken::PLATFORM_IOS, $row['platform']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(1, (int)$row['is_active']);
     }
 
-    public function testValidateReturnsNullForUnknownToken(): void
+    public function testRegisterReactivatesExistingToken(): void
     {
-        $this->assertNull($this->dt->validate(str_repeat('0', 64)));
+        $id1 = $this->dt->register('user-1', 'tok-abc', DeviceToken::PLATFORM_ANDROID);
+        $this->dt->deactivate($id1);
+
+        $id2 = $this->dt->register('user-1', 'tok-abc', DeviceToken::PLATFORM_ANDROID);
+        $this->assertSame($id1, $id2);
+
+        $row = $this->dt->find($id1);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(1, (int)$row['is_active']);
     }
 
-    public function testValidateReturnsNullForExpiredToken(): void
+    public function testRegisterSameTokenDifferentUsersCreatesNewRow(): void
     {
-        // Issue a token that's already expired
-        $raw  = bin2hex(random_bytes(32));
-        $hash = hash('sha256', $raw);
-        $this->db->prepare(
-            'INSERT INTO device_tokens (user_id, token_hash, expires_at)
-             VALUES (\'user-1\', :hash, \'2000-01-01 00:00:00\')'
-        )->execute([':hash' => $hash]);
-
-        $this->assertNull($this->dt->validate($raw));
+        $id1 = $this->dt->register('user-1', 'tok-abc');
+        $id2 = $this->dt->register('user-2', 'tok-abc');
+        $this->assertNotSame($id1, $id2);
     }
 
-    public function testValidateUpdatesLastUsedAt(): void
+    public function testRegisterThrowsOnEmptyUserId(): void
     {
-        $raw = $this->dt->issue('user-1');
-        $this->dt->validate($raw);
-        $list = $this->dt->list('user-1');
-        $this->assertNotNull($list[0]['last_used_at']);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->dt->register('', 'tok-abc');
     }
 
-    // ── revoke ────────────────────────────────────────────────────────────────
-
-    public function testRevokeRemovesToken(): void
+    public function testRegisterThrowsOnEmptyToken(): void
     {
-        $raw = $this->dt->issue('user-1');
-        $this->assertTrue($this->dt->revoke($raw));
-        $this->assertNull($this->dt->validate($raw));
+        $this->expectException(\InvalidArgumentException::class);
+        $this->dt->register('user-1', '');
     }
 
-    public function testRevokeReturnsFalseForUnknownToken(): void
+    // ── find / findByToken ────────────────────────────────────────────────────
+
+    public function testFindReturnsNullForMissingId(): void
     {
-        $this->assertFalse($this->dt->revoke(str_repeat('0', 64)));
+        $this->assertNull($this->dt->find(9999));
     }
 
-    // ── revokeAll ─────────────────────────────────────────────────────────────
-
-    public function testRevokeAllRemovesAllUserTokens(): void
+    public function testFindByTokenReturnsRow(): void
     {
-        $this->dt->issue('user-1');
-        $this->dt->issue('user-1');
-        $this->assertSame(2, $this->dt->revokeAll('user-1'));
-        $this->assertSame([], $this->dt->list('user-1'));
+        $this->dt->register('user-1', 'tok-xyz', DeviceToken::PLATFORM_WEB);
+        $row = $this->dt->findByToken('tok-xyz');
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('user-1', $row['user_id']);
     }
 
-    public function testRevokeAllDoesNotAffectOtherUsers(): void
+    public function testFindByTokenReturnsNullWhenNotFound(): void
     {
-        $this->dt->issue('user-1');
-        $this->dt->issue('user-2');
-        $this->dt->revokeAll('user-1');
-        $this->assertCount(1, $this->dt->list('user-2'));
+        $this->assertNull($this->dt->findByToken('no-such-token'));
     }
 
-    // ── list ──────────────────────────────────────────────────────────────────
+    // ── deactivate ────────────────────────────────────────────────────────────
 
-    public function testListReturnsEmptyForUnknownUser(): void
+    public function testDeactivateSetsInactive(): void
     {
-        $this->assertSame([], $this->dt->list('nobody'));
+        $id     = $this->dt->register('user-1', 'tok-abc');
+        $result = $this->dt->deactivate($id);
+        $this->assertTrue($result);
+
+        $row = $this->dt->find($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(0, (int)$row['is_active']);
     }
 
-    public function testListExcludesExpiredTokens(): void
+    public function testDeactivateReturnsFalseForMissingId(): void
     {
-        $this->dt->issue('user-1'); // valid
-        // Insert expired token manually
-        $this->db->exec(
-            "INSERT INTO device_tokens (user_id, token_hash, expires_at)
-             VALUES ('user-1', 'aaaa', '2000-01-01 00:00:00')"
-        );
-        $this->assertCount(1, $this->dt->list('user-1'));
+        $this->assertFalse($this->dt->deactivate(9999));
     }
 
-    public function testListDoesNotIncludeTokenHash(): void
+    // ── delete ────────────────────────────────────────────────────────────────
+
+    public function testDeleteRemovesRow(): void
     {
-        $this->dt->issue('user-1');
-        $list = $this->dt->list('user-1');
-        $this->assertArrayNotHasKey('token_hash', $list[0]);
+        $id = $this->dt->register('user-1', 'tok-abc');
+        $this->assertTrue($this->dt->delete($id));
+        $this->assertNull($this->dt->find($id));
     }
 
-    // ── purgeExpired ──────────────────────────────────────────────────────────
-
-    public function testPurgeExpiredRemovesExpiredTokens(): void
+    public function testDeleteReturnsFalseForMissingId(): void
     {
-        $this->dt->issue('user-1'); // valid
-        $this->db->exec(
-            "INSERT INTO device_tokens (user_id, token_hash, expires_at)
-             VALUES ('user-1', 'bbbb', '2000-01-01 00:00:00')"
-        );
-        $purged = $this->dt->purgeExpired('user-1');
-        $this->assertSame(1, $purged);
-        $this->assertCount(1, $this->dt->list('user-1'));
+        $this->assertFalse($this->dt->delete(9999));
+    }
+
+    // ── activeFor ─────────────────────────────────────────────────────────────
+
+    public function testActiveForReturnsOnlyActiveTokens(): void
+    {
+        $id1 = $this->dt->register('user-1', 'tok-a');
+        $id2 = $this->dt->register('user-1', 'tok-b');
+        $this->dt->deactivate($id2);
+
+        $active = $this->dt->activeFor('user-1');
+        $this->assertCount(1, $active);
+        $this->assertSame($id1, (int)$active[0]['id']);
+    }
+
+    public function testActiveForReturnsEmptyWhenNone(): void
+    {
+        $this->assertSame([], $this->dt->activeFor('nobody'));
+    }
+
+    public function testActiveForIsolatedByUser(): void
+    {
+        $this->dt->register('user-1', 'tok-a');
+        $this->dt->register('user-2', 'tok-b');
+        $this->assertCount(1, $this->dt->activeFor('user-1'));
+        $this->assertCount(1, $this->dt->activeFor('user-2'));
+    }
+
+    // ── forUser ───────────────────────────────────────────────────────────────
+
+    public function testForUserReturnsAllTokens(): void
+    {
+        $id1 = $this->dt->register('user-1', 'tok-a');
+        $id2 = $this->dt->register('user-1', 'tok-b');
+        $this->dt->deactivate($id1);
+        $this->assertCount(2, $this->dt->forUser('user-1'));
+    }
+
+    // ── deleteInactive ────────────────────────────────────────────────────────
+
+    public function testDeleteInactiveRemovesInactiveTokens(): void
+    {
+        $id1 = $this->dt->register('user-1', 'tok-a');
+        $id2 = $this->dt->register('user-1', 'tok-b');
+        $this->dt->deactivate($id1);
+
+        $count = $this->dt->deleteInactive('user-1');
+        $this->assertSame(1, $count);
+        $this->assertNull($this->dt->find($id1));
+        $this->assertNotNull($this->dt->find($id2));
+    }
+
+    public function testDeleteInactiveReturnsZeroWhenNone(): void
+    {
+        $this->dt->register('user-1', 'tok-a');
+        $this->assertSame(0, $this->dt->deleteInactive('user-1'));
+    }
+
+    // ── countActive ───────────────────────────────────────────────────────────
+
+    public function testCountActive(): void
+    {
+        $this->dt->register('user-1', 'tok-a');
+        $id2 = $this->dt->register('user-1', 'tok-b');
+        $this->dt->deactivate($id2);
+        $this->assertSame(1, $this->dt->countActive('user-1'));
+    }
+
+    public function testCountActiveReturnsZeroWhenNone(): void
+    {
+        $this->assertSame(0, $this->dt->countActive('nobody'));
     }
 }
