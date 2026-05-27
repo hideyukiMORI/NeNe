@@ -2,206 +2,181 @@
 
 declare(strict_types=1);
 
-namespace Nene\Tests\Unit\Xion;
+namespace Tests\Unit\Xion;
 
 use Nene\Xion\EventLog;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Unit tests for EventLog.
- */
 final class EventLogTest extends TestCase
 {
-    private PDO $db;
+    private PDO $pdo;
     private EventLog $el;
 
     protected function setUp(): void
     {
-        $this->db = new PDO('sqlite::memory:');
-        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->db->exec('
+        $this->pdo = new PDO('sqlite::memory:');
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->pdo->exec('
             CREATE TABLE event_log (
                 id             INTEGER PRIMARY KEY AUTOINCREMENT,
                 event_type     VARCHAR(100) NOT NULL,
                 aggregate_type VARCHAR(100) NOT NULL DEFAULT \'\',
                 aggregate_id   VARCHAR(255) NOT NULL DEFAULT \'\',
-                data           TEXT         NOT NULL DEFAULT \'{}\',
+                actor_id       VARCHAR(255) NOT NULL DEFAULT \'\',
+                payload        TEXT         NOT NULL DEFAULT \'{}\',
                 occurred_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         ');
-        $this->el = new EventLog($this->db);
+        $this->el = new EventLog($this->pdo);
     }
 
-    // ── record ────────────────────────────────────────────────────────────────
+    // ── append ────────────────────────────────────────────────────────────────
 
-    public function testRecordReturnsId(): void
+    public function testAppendReturnsId(): void
     {
-        $id = $this->el->record('user_registered');
+        $id = $this->el->append('OrderPlaced', 'order', '99');
         $this->assertGreaterThan(0, $id);
     }
 
-    public function testRecordStoresEventType(): void
+    public function testAppendStoresAllFields(): void
     {
-        $id   = $this->el->record('order_placed', 'order', 'o-1', ['total' => 99]);
-        $rows = $this->el->forAggregate('order', 'o-1');
-        $this->assertSame('order_placed', $rows[0]['event_type']);
+        $id  = $this->el->append('OrderPlaced', 'order', '99', 'user-1', ['total' => 9900]);
+        $row = $this->el->find($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('OrderPlaced', $row['event_type']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('order', $row['aggregate_type']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('99', $row['aggregate_id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('user-1', $row['actor_id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertStringContainsString('9900', $row['payload']);
     }
 
-    public function testRecordStoresData(): void
-    {
-        $id   = $this->el->record('payment_failed', 'payment', 'p-1', ['reason' => 'declined']);
-        $rows = $this->el->forAggregate('payment', 'p-1');
-        $this->assertSame(['reason' => 'declined'], $rows[0]['data']);
-    }
-
-    public function testRecordThrowsOnEmptyEventType(): void
+    public function testAppendThrowsOnEmptyEventType(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->el->record('');
+        $this->el->append('');
+    }
+
+    public function testAppendWithMinimalArgs(): void
+    {
+        $id  = $this->el->append('SystemStarted');
+        $row = $this->el->find($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('[]', $row['payload']);
+    }
+
+    // ── find ──────────────────────────────────────────────────────────────────
+
+    public function testFindReturnsNullForMissingId(): void
+    {
+        $this->assertNull($this->el->find(9999));
     }
 
     // ── forAggregate ──────────────────────────────────────────────────────────
 
     public function testForAggregateReturnsEventsInOrder(): void
     {
-        $this->el->record('created', 'user', 'u-1');
-        $this->el->record('updated', 'user', 'u-1');
-        $this->el->record('deleted', 'user', 'u-1');
+        $id1 = $this->el->append('Created', 'order', '1');
+        $id2 = $this->el->append('Updated', 'order', '1');
+        $this->el->append('Created', 'order', '2');
 
-        $rows = $this->el->forAggregate('user', 'u-1');
-        $this->assertCount(3, $rows);
-        $this->assertSame('created', $rows[0]['event_type']);
-        $this->assertSame('updated', $rows[1]['event_type']);
-        $this->assertSame('deleted', $rows[2]['event_type']);
+        $events = $this->el->forAggregate('order', '1');
+        $this->assertCount(2, $events);
+        $this->assertSame($id1, (int)$events[0]['id']);
+        $this->assertSame($id2, (int)$events[1]['id']);
     }
 
-    public function testForAggregateReturnsEmptyForUnknown(): void
+    public function testForAggregateReturnsEmptyWhenNone(): void
     {
-        $this->assertSame([], $this->el->forAggregate('user', 'nobody'));
+        $this->assertSame([], $this->el->forAggregate('order', '99'));
     }
 
-    public function testForAggregateIsScopedToAggregate(): void
+    // ── ofType ────────────────────────────────────────────────────────────────
+
+    public function testOfTypeReturnsMatchingEvents(): void
     {
-        $this->el->record('event', 'user', 'u-1');
-        $this->el->record('event', 'user', 'u-2');
-        $rows = $this->el->forAggregate('user', 'u-1');
-        $this->assertCount(1, $rows);
+        $this->el->append('OrderPlaced', 'order', '1');
+        $this->el->append('OrderPlaced', 'order', '2');
+        $this->el->append('OrderShipped', 'order', '1');
+
+        $events = $this->el->ofType('OrderPlaced');
+        $this->assertCount(2, $events);
     }
 
-    // ── forEvent ──────────────────────────────────────────────────────────────
-
-    public function testForEventReturnsMatchingEvents(): void
+    public function testOfTypeReturnsNewestFirst(): void
     {
-        $this->el->record('login', 'user', 'u-1');
-        $this->el->record('login', 'user', 'u-2');
-        $this->el->record('logout', 'user', 'u-1');
+        $id1 = $this->el->append('OrderPlaced', 'order', '1');
+        $id2 = $this->el->append('OrderPlaced', 'order', '2');
 
-        $rows = $this->el->forEvent('login');
-        $this->assertCount(2, $rows);
+        $events = $this->el->ofType('OrderPlaced');
+        $this->assertSame($id2, (int)$events[0]['id']);
+        $this->assertSame($id1, (int)$events[1]['id']);
     }
 
-    public function testForEventReturnsInDescendingOrder(): void
+    // ── byActor ───────────────────────────────────────────────────────────────
+
+    public function testByActorReturnsActorEvents(): void
     {
-        $this->el->record('ping', 'svc', 's-1');
-        $this->el->record('ping', 'svc', 's-2');
-        $rows = $this->el->forEvent('ping', 10);
-        $this->assertGreaterThan((int)$rows[1]['id'], (int)$rows[0]['id']);
+        $this->el->append('OrderPlaced', 'order', '1', 'user-1');
+        $this->el->append('OrderPlaced', 'order', '2', 'user-1');
+        $this->el->append('OrderPlaced', 'order', '3', 'user-2');
+
+        $events = $this->el->byActor('user-1');
+        $this->assertCount(2, $events);
     }
 
-    public function testForEventThrowsOnEmptyType(): void
+    public function testByActorThrowsOnEmptyActorId(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->el->forEvent('');
-    }
-
-    // ── since ─────────────────────────────────────────────────────────────────
-
-    public function testSinceReturnsEventsAfterCursor(): void
-    {
-        $id1 = $this->el->record('a');
-        $id2 = $this->el->record('b');
-        $id3 = $this->el->record('c');
-
-        $rows = $this->el->since($id1, 100);
-        $this->assertCount(2, $rows);
-        $this->assertSame($id2, (int)$rows[0]['id']);
-        $this->assertSame($id3, (int)$rows[1]['id']);
-    }
-
-    public function testSinceReturnsEmptyFromLatestId(): void
-    {
-        $id = $this->el->record('last');
-        $this->assertSame([], $this->el->since($id, 100));
+        $this->el->byActor('');
     }
 
     // ── recent ────────────────────────────────────────────────────────────────
 
-    public function testRecentReturnsLatestFirst(): void
+    public function testRecentReturnsNewestFirst(): void
     {
-        $this->el->record('first');
-        $this->el->record('second');
-        $this->el->record('third');
-        $rows = $this->el->recent(2);
-        $this->assertCount(2, $rows);
-        $this->assertSame('third', $rows[0]['event_type']);
-    }
+        $id1 = $this->el->append('A', 'x', '1');
+        $id2 = $this->el->append('B', 'x', '1');
 
-    // ── count ─────────────────────────────────────────────────────────────────
-
-    public function testCountReturnsTotal(): void
-    {
-        $this->el->record('a');
-        $this->el->record('b');
-        $this->el->record('a');
-        $this->assertSame(3, $this->el->count());
-    }
-
-    public function testCountByEventType(): void
-    {
-        $this->el->record('login');
-        $this->el->record('login');
-        $this->el->record('logout');
-        $this->assertSame(2, $this->el->count('login'));
-        $this->assertSame(1, $this->el->count('logout'));
-    }
-
-    public function testCountReturnsZeroForUnknownType(): void
-    {
-        $this->assertSame(0, $this->el->count('no_such_event'));
+        $events = $this->el->recent(10);
+        $this->assertSame($id2, (int)$events[0]['id']);
+        $this->assertSame($id1, (int)$events[1]['id']);
     }
 
     // ── countByType ───────────────────────────────────────────────────────────
 
-    public function testCountByTypeReturnsMap(): void
+    public function testCountByTypeGroupsCorrectly(): void
     {
-        $this->el->record('login');
-        $this->el->record('login');
-        $this->el->record('logout');
-        $map = $this->el->countByType();
-        $this->assertSame(2, $map['login']);
-        $this->assertSame(1, $map['logout']);
-    }
+        $this->el->append('A');
+        $this->el->append('A');
+        $this->el->append('B');
 
-    public function testCountByTypeReturnsEmptyForNoEvents(): void
-    {
-        $this->assertSame([], $this->el->countByType());
+        $counts = $this->el->countByType();
+        $this->assertSame(2, $counts['A']);
+        $this->assertSame(1, $counts['B']);
     }
 
     // ── purgeOlderThan ────────────────────────────────────────────────────────
 
-    public function testPurgeOlderThanDeletesOldEvents(): void
+    public function testPurgeOlderThanDeletesOldRows(): void
     {
-        $id = $this->el->record('old_event');
-        $this->db->exec("UPDATE event_log SET occurred_at = '2000-01-01 00:00:00' WHERE id = {$id}");
-        $deleted = $this->el->purgeOlderThan(1);
-        $this->assertSame(1, $deleted);
-        $this->assertSame(0, $this->el->count());
-    }
+        // Insert an event with an old occurred_at
+        $this->pdo->exec(
+            "INSERT INTO event_log (event_type, occurred_at) VALUES ('OldEvent', '2000-01-01 00:00:00')"
+        );
+        $this->el->append('NewEvent');
 
-    public function testPurgeOlderThanLeavesRecentEvents(): void
-    {
-        $this->el->record('recent');
-        $this->assertSame(0, $this->el->purgeOlderThan(30));
+        $n = $this->el->purgeOlderThan(1);
+        $this->assertSame(1, $n);
+
+        $remaining = $this->el->ofType('OldEvent');
+        $this->assertSame([], $remaining);
+        $this->assertCount(1, $this->el->ofType('NewEvent'));
     }
 }

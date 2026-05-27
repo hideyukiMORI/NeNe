@@ -7,30 +7,29 @@ namespace Nene\Xion;
 use PDO;
 
 /**
- * EventLog — append-only domain event store.
+ * EventLog — append-only domain event log for event sourcing–lite patterns.
  *
- * Records business events (user_registered, order_placed, payment_failed, …)
- * with a subject, optional aggregate context, and arbitrary JSON data.
- * All entries are immutable once written.
+ * Records structured domain events (e.g. OrderPlaced, UserRegistered,
+ * PaymentFailed) against aggregates. Each event has a type, aggregate
+ * type and ID, an optional actor, and a JSON payload. The log is
+ * append-only: events are never updated or deleted in normal operation.
  *
- * Intended for event sourcing lite, audit trails, and analytics pipelines.
+ * This is lighter than full event sourcing — it does not replay events
+ * to reconstruct state, but provides a durable, queryable event history.
  *
  * ## Usage
  *
  * ```php
  * $el = new EventLog($pdo);
  *
- * // Record an event
- * $el->record('user_registered', 'user', 'u-1', ['email' => 'a@b.com']);
+ * // Append events
+ * $el->append('OrderPlaced',  'order', '99', 'user-1', ['total' => 9900]);
+ * $el->append('PaymentFailed', 'order', '99', 'system', ['reason' => 'card_declined']);
  *
- * // Replay events for an aggregate
- * $el->forAggregate('user', 'u-1');
- *
- * // Recent events of a type
- * $el->forEvent('user_registered', 10);
- *
- * // Cursor-based paging (for large replays)
- * $el->since($lastSeenId, 100);
+ * // Query
+ * $history = $el->forAggregate('order', '99');
+ * $recent  = $el->ofType('OrderPlaced', 20);
+ * $byActor = $el->byActor('user-1', 50);
  * ```
  *
  * ## Schema (SQLite / MySQL compatible)
@@ -41,7 +40,8 @@ use PDO;
  *     event_type     VARCHAR(100) NOT NULL,
  *     aggregate_type VARCHAR(100) NOT NULL DEFAULT '',
  *     aggregate_id   VARCHAR(255) NOT NULL DEFAULT '',
- *     data           TEXT         NOT NULL DEFAULT '{}',
+ *     actor_id       VARCHAR(255) NOT NULL DEFAULT '',
+ *     payload        TEXT         NOT NULL DEFAULT '{}',
  *     occurred_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
  * );
  * ```
@@ -55,128 +55,134 @@ final class EventLog
     // ── public API ────────────────────────────────────────────────────────────
 
     /**
-     * Record a domain event.
+     * Append a domain event.
      *
-     * @param  array<string,mixed> $data Arbitrary event payload.
-     * @return int The new event ID.
-     * @throws \InvalidArgumentException if event_type is empty.
+     * @param  array<string,mixed> $payload  Arbitrary event data (will be JSON-encoded).
+     * @return int Row ID of the new event.
+     * @throws \InvalidArgumentException on empty event_type.
      */
-    public function record(
+    public function append(
         string $eventType,
         string $aggregateType = '',
         string $aggregateId = '',
-        array $data = []
+        string $actorId = '',
+        array $payload = []
     ): int {
-        $eventType = $this->validateEventType($eventType);
-        $db        = $this->db();
+        $eventType = trim($eventType);
+        if ($eventType === '') {
+            throw new \InvalidArgumentException('event_type must not be empty.');
+        }
 
-        $db->prepare(
-            'INSERT INTO event_log (event_type, aggregate_type, aggregate_id, data)
-             VALUES (:type, :agg_type, :agg_id, :data)'
-        )->execute([
-            ':type'     => $eventType,
-            ':agg_type' => $aggregateType,
-            ':agg_id'   => $aggregateId,
-            ':data'     => json_encode($data, JSON_THROW_ON_ERROR),
+        $stmt = $this->db()->prepare(
+            'INSERT INTO event_log (event_type, aggregate_type, aggregate_id, actor_id, payload)
+             VALUES (:etype, :atype, :aid, :actor, :payload)'
+        );
+        $stmt->execute([
+            ':etype'   => $eventType,
+            ':atype'   => trim($aggregateType),
+            ':aid'     => trim($aggregateId),
+            ':actor'   => trim($actorId),
+            ':payload' => json_encode($payload, JSON_UNESCAPED_UNICODE) ?: '{}',
         ]);
-        return (int)$db->lastInsertId();
+        return (int)$this->db()->lastInsertId();
     }
 
     /**
-     * Get all events for an aggregate (ordered by id ASC for replay).
+     * Find a single event by ID.
+     *
+     * @return array<string,mixed>|null
+     */
+    public function find(int $id): ?array
+    {
+        $stmt = $this->db()->prepare('SELECT * FROM event_log WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row !== false ? $row : null;
+    }
+
+    /**
+     * Return all events for a given aggregate (oldest first).
      *
      * @return list<array<string,mixed>>
      */
     public function forAggregate(string $aggregateType, string $aggregateId): array
     {
         $stmt = $this->db()->prepare(
-            'SELECT id, event_type, aggregate_type, aggregate_id, data, occurred_at
+            'SELECT id, event_type, aggregate_type, aggregate_id, actor_id, payload, occurred_at
              FROM event_log
-             WHERE aggregate_type = :agg_type AND aggregate_id = :agg_id
+             WHERE aggregate_type = :atype AND aggregate_id = :aid
              ORDER BY id ASC'
         );
-        $stmt->execute([':agg_type' => $aggregateType, ':agg_id' => $aggregateId]);
-        return $this->decodeAll($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        $stmt->execute([':atype' => trim($aggregateType), ':aid' => trim($aggregateId)]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
-     * Get recent events of a specific type.
+     * Return recent events of a given type (newest first).
      *
      * @return list<array<string,mixed>>
      */
-    public function forEvent(string $eventType, int $limit = 20): array
+    public function ofType(string $eventType, int $limit = 50): array
     {
-        $eventType = $this->validateEventType($eventType);
-        $limit     = max(1, $limit);
-        $stmt      = $this->db()->prepare(
-            "SELECT id, event_type, aggregate_type, aggregate_id, data, occurred_at
+        $stmt = $this->db()->prepare(
+            'SELECT id, event_type, aggregate_type, aggregate_id, actor_id, payload, occurred_at
              FROM event_log
-             WHERE event_type = :type
+             WHERE event_type = :etype
              ORDER BY id DESC
-             LIMIT {$limit}"
+             LIMIT :lim'
         );
-        $stmt->execute([':type' => $eventType]);
-        return $this->decodeAll($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
-    }
-
-    /**
-     * Get all events after a given ID (cursor-based paging for replays).
-     *
-     * @return list<array<string,mixed>>
-     */
-    public function since(int $afterId, int $limit = 100): array
-    {
-        $limit = max(1, $limit);
-        $stmt  = $this->db()->prepare(
-            "SELECT id, event_type, aggregate_type, aggregate_id, data, occurred_at
-             FROM event_log
-             WHERE id > :after
-             ORDER BY id ASC
-             LIMIT {$limit}"
-        );
-        $stmt->execute([':after' => $afterId]);
-        return $this->decodeAll($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
-    }
-
-    /**
-     * Get the most recent N events across all types.
-     *
-     * @return list<array<string,mixed>>
-     */
-    public function recent(int $limit = 20): array
-    {
-        $limit = max(1, $limit);
-        $stmt  = $this->db()->prepare(
-            "SELECT id, event_type, aggregate_type, aggregate_id, data, occurred_at
-             FROM event_log
-             ORDER BY id DESC
-             LIMIT {$limit}"
-        );
+        $stmt->bindValue(':etype', trim($eventType));
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
         $stmt->execute();
-        return $this->decodeAll($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
-     * Count all events, optionally filtered by event type.
-     */
-    public function count(?string $eventType = null): int
-    {
-        if ($eventType !== null) {
-            $stmt = $this->db()->prepare(
-                'SELECT COUNT(*) FROM event_log WHERE event_type = :type'
-            );
-            $stmt->execute([':type' => $eventType]);
-        } else {
-            $stmt = $this->db()->prepare('SELECT COUNT(*) FROM event_log');
-            $stmt->execute();
-        }
-        return (int)$stmt->fetchColumn();
-    }
-
-    /**
-     * Count events per type (event_type => count mapping).
+     * Return recent events by a given actor (newest first).
      *
-     * @return array<string,int>
+     * @return list<array<string,mixed>>
+     */
+    public function byActor(string $actorId, int $limit = 50): array
+    {
+        $actorId = trim($actorId);
+        if ($actorId === '') {
+            throw new \InvalidArgumentException('actor_id must not be empty.');
+        }
+        $stmt = $this->db()->prepare(
+            'SELECT id, event_type, aggregate_type, aggregate_id, actor_id, payload, occurred_at
+             FROM event_log
+             WHERE actor_id = :actor
+             ORDER BY id DESC
+             LIMIT :lim'
+        );
+        $stmt->bindValue(':actor', $actorId);
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Return the most recent events across all types (newest first).
+     *
+     * @return list<array<string,mixed>>
+     */
+    public function recent(int $limit = 50): array
+    {
+        $stmt = $this->db()->prepare(
+            'SELECT id, event_type, aggregate_type, aggregate_id, actor_id, payload, occurred_at
+             FROM event_log
+             ORDER BY id DESC
+             LIMIT :lim'
+        );
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Count events by type.
+     *
+     * @return array<string, int>
      */
     public function countByType(): array
     {
@@ -184,24 +190,23 @@ final class EventLog
             'SELECT event_type, COUNT(*) AS cnt FROM event_log GROUP BY event_type ORDER BY cnt DESC'
         );
         $stmt->execute();
+        $rows   = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $result = [];
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        foreach ($rows as $row) {
             $result[(string)$row['event_type']] = (int)$row['cnt'];
         }
         return $result;
     }
 
     /**
-     * Purge events older than N days.
+     * Delete events older than a given number of days (maintenance).
      *
      * @return int Number of rows deleted.
      */
     public function purgeOlderThan(int $days): int
     {
         $cutoff = (new \DateTimeImmutable())->modify("-{$days} days")->format('Y-m-d H:i:s');
-        $stmt   = $this->db()->prepare(
-            'DELETE FROM event_log WHERE occurred_at < :cutoff'
-        );
+        $stmt   = $this->db()->prepare('DELETE FROM event_log WHERE occurred_at < :cutoff');
         $stmt->execute([':cutoff' => $cutoff]);
         return $stmt->rowCount();
     }
@@ -211,29 +216,5 @@ final class EventLog
     private function db(): PDO
     {
         return $this->db ?? PdoConnection::getInstance();
-    }
-
-    private function validateEventType(string $eventType): string
-    {
-        $eventType = trim($eventType);
-        if ($eventType === '') {
-            throw new \InvalidArgumentException('event_type must not be empty.');
-        }
-        return $eventType;
-    }
-
-    /**
-     * @param  list<array<string,mixed>> $rows
-     * @return list<array<string,mixed>>
-     */
-    private function decodeAll(array $rows): array
-    {
-        return array_map(
-            static function (array $row): array {
-                $row['data'] = json_decode((string)$row['data'], true) ?? [];
-                return $row;
-            },
-            $rows
-        );
     }
 }
