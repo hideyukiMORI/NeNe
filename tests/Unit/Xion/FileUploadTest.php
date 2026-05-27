@@ -95,6 +95,7 @@ final class FileUploadTest extends TestCase
             self::fail('Expected HttpTermination');
         } catch (Throwable $e) {
             self::assertInstanceOf(HttpTermination::class, $e);
+            /** @var \Nene\Xion\HttpTermination $e */
             self::assertSame(400, $e->response()->statusCode());
         }
     }
@@ -120,6 +121,7 @@ final class FileUploadTest extends TestCase
             self::fail('Expected HttpTermination');
         } catch (Throwable $e) {
             self::assertInstanceOf(HttpTermination::class, $e);
+            /** @var \Nene\Xion\HttpTermination $e */
             self::assertSame(413, $e->response()->statusCode());
         }
     }
@@ -145,6 +147,7 @@ final class FileUploadTest extends TestCase
             self::fail('Expected HttpTermination');
         } catch (Throwable $e) {
             self::assertInstanceOf(HttpTermination::class, $e);
+            /** @var \Nene\Xion\HttpTermination $e */
             self::assertSame(415, $e->response()->statusCode());
         }
     }
