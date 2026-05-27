@@ -12,36 +12,42 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ---
 
-## Active candidates (FT51+)
+## Active candidates (FT63+)
 
-### FT51 — i18n / メッセージカタログ
+### FT63 — User Follow System
 
-**NENE2 対応**: FT155 (i18nlog)
-**Why**: エラーメッセージ・UI テキストの多言語化。`{name}` プレースホルダー構文でシンプルな翻訳カタログ。
-**Scope**: `Nene\Func\I18n` static helper、`load(locale, messages)`、`t(key, params, locale)`、デフォルトロケール設定、howto doc。
+**NENE2 対応**: FT134 (followlog)
+**Why**: ユーザー間フォロー関係（following/followers）。M:N 関係、自己フォロー防止、フォロー済みチェック。
+**Scope**: `Nene\Xion\FollowRelation` — follow/unfollow/isFollowing/followers/following、相互フォロー検出。
 **Size**: small.
 
-### FT52 — Event dispatcher (軽量 pub-sub)
+### FT64 — User Preferences / Settings
 
-**NENE2 対応**: FT148 (eventlog)
-**Why**: Service 間の密結合を緩和する in-process イベントバス。外部キューへの橋頭堡。
-**Scope**: `EventDispatcher`、`listen(event, handler)`、`emit(event, payload)`、テスト。
-**Trigger**: コントローラーで「A 完了後に B・C・D を呼ぶ」パターンが3件以上蓄積したとき。
+**NENE2 対応**: FT145 (preferencelog)
+**Why**: ユーザーごとの設定値の永続化。キー・バリュー形式、デフォルト値フォールバック。
+**Scope**: `Nene\Xion\UserPreference` — get/set/delete/all、デフォルト値、型キャスト。
+**Size**: small.
+
+### FT65 — Access Token Management (Personal Access Tokens)
+
+**NENE2 対応**: FT136 (tokenlog)
+**Why**: 永続的なアクセストークン（PAT）の管理。ApiKey (FT56) の高レベルラッパー的な位置付け。ユーザーがダッシュボードから発行・管理するシナリオ。
+**Scope**: `Nene\Xion\PersonalAccessToken` — create/authenticate/list/revoke、最終使用日時記録。
 **Size**: small–medium.
 
-### FT53 — Personal data export (GDPR Article 20)
+### FT66 — Coupon / Promo Code
 
-**NENE2 対応**: FT144 (gdprlog)
-**Why**: ユーザーデータポータビリティ。複数テーブルからのデータ収集・JSON 出力パターン。
-**Scope**: `PersonalDataExport` helper、複数プロバイダーの集約、JSON 出力。
-**Trigger**: ユーザー管理を持つサービスが実アプリに登場したとき。
-**Size**: small.
+**NENE2 対応**: FT150 (couponlog)
+**Why**: 割引クーポンコードの管理。使用回数制限、有効期限、ユーザー per-use 制限。
+**Scope**: `Nene\Xion\CouponCode` — create/redeem/isValid、使用回数チェック、ユーザー重複使用防止。
+**Size**: small–medium.
 
-### FT54 — リクエストボディ検証ミドルウェア (JSON Schema)
+### FT67 — Point / Loyalty System
 
-**Why**: OpenAPI スキーマをランタイムで検証することで「定義と実装の乖離」を即座に検出する。
-**Trigger**: 実アプリでリクエスト検証の漏れが問題になったとき。
-**Size**: medium / ADR.
+**NENE2 対応**: FT152 (pointlog)
+**Why**: ポイント付与・消費・残高管理。台帳パターン（append-only）でポイント履歴を保持。
+**Scope**: `Nene\Xion\PointLedger` — earn/spend/balance/history、負残高防止。
+**Size**: small–medium.
 
 ---
 
@@ -81,6 +87,18 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT62 — Invitation Token** (2026-05-27): `Nene\Xion\InvitationToken` — 256-bit token, pending→accepted/cancelled lifecycle, expiry-before-status check, owner-enforced cancel. PR #496.
+- **FT61 — Leaderboard** (2026-05-27): `Nene\Xion\Leaderboard` — best-score retention, rank via COUNT, tied-score sharing, limit clamping. PR #495.
+- **FT60 — Content Draft** (2026-05-27): `Nene\Xion\ContentDraft` — draft/publish/archive lifecycle, SQL transition guards, 404-not-403 for hidden content. PR #494.
+- **FT59 — Voting System** (2026-05-27): `Nene\Xion\VotingBooth` — upvote/downvote with toggle semantics, score, per-user state. PR #493.
+- **FT58 — Notification Inbox** (2026-05-27): `Nene\Xion\NotificationInbox` — read_at nullable pattern, idempotent mark-read, ORDER BY id DESC. PR #492.
+- **FT57 — JWT Refresh Token** (2026-05-27): `Nene\Xion\RefreshToken` — SHA-256 hash storage, rotation, replay detection via revokeAll(). PR #491.
+- **FT56 — API Key Management** (2026-05-27): `Nene\Xion\ApiKey` — nk_ prefix+SHA-256, admin⊃write⊃read scope hierarchy, create-first rotation. PR #490.
+- **FT55 — Distributed Lock** (2026-05-27): `Nene\Xion\DistributedLock` — DB-backed TTL lock, stale reclaim, owner-enforced release/renew. PR #489.
+- **FT54 — JSON Schema Validator** (2026-05-27): `Nene\Func\JsonSchemaValidator` — zero-dependency JSON Schema subset; type/nullable/required/properties/items/enum/min/max/pattern. PR #488.
+- **FT53 — Personal data export** (2026-05-27): `Nene\Func\PersonalDataExport` — GDPR Art.20 portability; provider registration; JSON export. PR #487.
+- **FT52 — Event dispatcher** (2026-05-27): `Nene\Func\EventDispatcher` — in-process pub-sub; listen/emit/removeListener. PR #486.
+- **FT51 — i18n** (2026-05-27): `Nene\Func\I18n` — static message catalog; {name} placeholders; locale fallback. PR #485.
 - **FT50 — Input validation rules** (2026-05-27): `Nene\Func\Validator` fluent validator — required/maxLength/minLength/email/url/integer/in/regex + VALIDATION-FAILED error code. PR #483.
 - **FT49 — Money value object** (2026-05-27): `Nene\Func\Money` immutable integer-based monetary value — add/subtract/multiply/round/format (JPY/USD/EUR). PR #482.
 - **FT48 — Offset pagination** (2026-05-27): `Nene\Xion\OffsetPage` + `Nene\Func\PaginationHelper` — page/total/hasPrev/hasNext envelope + window() UI helper. PR #480.

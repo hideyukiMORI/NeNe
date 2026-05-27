@@ -6,9 +6,26 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT50 are complete (FT36 deferred as ADR-class); ADR-0001–0013 are in place. Next work is FT51+ — see **Field Trials** and **Backlog Candidates** below.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT62 are complete (FT36 deferred as ADR-class); ADR-0001–0013 are in place. Next work is FT63+ — see **Field Trials** and **Backlog Candidates** below.
 
 ## Recently Completed
+
+### 2026-05-27 — FT51–FT62: Extended patterns wave (12 trials)
+
+Second wave of field trials covering security, social, and content management patterns.
+
+**FT51 — i18n**: `I18n` static message catalog; `{name}` placeholders; locale fallback. PR #485.
+**FT52 — Event Dispatcher**: `EventDispatcher` in-process pub-sub; listen/emit/removeListener. PR #486.
+**FT53 — Personal Data Export**: `PersonalDataExport` GDPR Art.20 portability; provider registration. PR #487.
+**FT54 — JSON Schema Validator**: `JsonSchemaValidator` zero-dependency JSON Schema subset validator. PR #488.
+**FT55 — Distributed Lock**: `DistributedLock` DB-backed TTL lock; stale reclaim; owner-enforced release. PR #489.
+**FT56 — API Key Management**: `ApiKey` prefix+SHA-256; admin⊃write⊃read scopes; rotation. PR #490.
+**FT57 — JWT Refresh Token**: `RefreshToken` rotation with replay attack detection via revokeAll(). PR #491.
+**FT58 — Notification Inbox**: `NotificationInbox` read_at nullable; idempotent mark-read. PR #492.
+**FT59 — Voting System**: `VotingBooth` upvote/downvote toggle; score. PR #493.
+**FT60 — Content Draft**: `ContentDraft` draft/publish/archive lifecycle; SQL transition guards. PR #494.
+**FT61 — Leaderboard**: `Leaderboard` best-score retention; rank via COUNT; limit clamping. PR #495.
+**FT62 — Invitation Token**: `InvitationToken` 256-bit token; expiry-before-status; owner cancel. PR #496.
 
 ### 2026-05-27 — FT25–FT50: NENE2 parity wave + extended patterns (26 trials)
 
