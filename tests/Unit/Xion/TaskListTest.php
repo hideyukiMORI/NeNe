@@ -48,6 +48,7 @@ final class TaskListTest extends TestCase
     {
         $id   = $this->tl->add('user-1', 'Task');
         $task = $this->tl->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('inbox', $task['list_name']);
     }
 
@@ -55,6 +56,7 @@ final class TaskListTest extends TestCase
     {
         $id   = $this->tl->add('user-1', 'Report', 'work');
         $task = $this->tl->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('work', $task['list_name']);
     }
 
@@ -63,6 +65,7 @@ final class TaskListTest extends TestCase
         $due  = new \DateTimeImmutable('+7 days');
         $id   = $this->tl->add('user-1', 'File taxes', 'inbox', $due);
         $task = $this->tl->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertNotNull($task['due_at']);
     }
 
@@ -85,6 +88,7 @@ final class TaskListTest extends TestCase
         $id = $this->tl->add('user-1', 'Task');
         $this->assertTrue($this->tl->complete($id, 'user-1'));
         $task = $this->tl->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(1, (int)$task['completed']);
     }
 
@@ -109,6 +113,7 @@ final class TaskListTest extends TestCase
         $this->tl->complete($id, 'user-1');
         $this->assertTrue($this->tl->reopen($id, 'user-1'));
         $task = $this->tl->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(0, (int)$task['completed']);
     }
 
@@ -124,6 +129,7 @@ final class TaskListTest extends TestCase
     {
         $id = $this->tl->add('user-1', 'Old title');
         $this->assertTrue($this->tl->rename($id, 'user-1', 'New title'));
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('New title', $this->tl->find($id)['title']);
     }
 
