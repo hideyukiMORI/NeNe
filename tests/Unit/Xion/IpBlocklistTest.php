@@ -46,6 +46,7 @@ final class IpBlocklistTest extends TestCase
         $this->bl->block('1.2.3.4', 'brute-force');
         $row = $this->bl->find('1.2.3.4');
         $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('brute-force', $row['reason']);
         $this->assertSame(1, $this->bl->count());
     }
@@ -115,7 +116,9 @@ final class IpBlocklistTest extends TestCase
         $this->bl->block('1.2.3.4', 'spam');
         $row = $this->bl->find('1.2.3.4');
         $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('1.2.3.4', $row['ip']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('spam', $row['reason']);
     }
 
