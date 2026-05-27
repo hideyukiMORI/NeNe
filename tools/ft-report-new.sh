@@ -1,26 +1,27 @@
 #!/usr/bin/env bash
 #
-# Bootstrap a Field Trial report file from the canonical template.
+# Bootstrap a Field Trial report file from a template.
 #
 # Usage:
-#   tools/ft-report-new.sh <FT-number> <topic-kebab>
+#   tools/ft-report-new.sh <FT-number> <topic-kebab> [--xion]
 #
 # Examples:
-#   tools/ft-report-new.sh 18 session-storage-backend
-#   tools/ft-report-new.sh 19 structured-logs
+#   tools/ft-report-new.sh 265 daily-streak --xion   # Xion class report (Format B, ~50 lines)
+#   tools/ft-report-new.sh 18  session-storage        # Full exploratory report (Format A)
+#
+# Templates:
+#   (default)  docs/templates/field-trial-report.md       — Format A, full exploratory
+#   --xion     docs/templates/field-trial-report-xion.md  — Format B, Xion helper class
 #
 # What it does:
-#   1. Copies `docs/templates/field-trial-report.md` to
+#   1. Copies the selected template to
 #      `docs/field-trials/YYYY-MM-field-trial-<N>.md`.
-#   2. Substitutes `{N}` → trial number and `{topic}` → topic name
-#      in the heading line.
-#   3. Fills the `YYYY-MM-DD` placeholder under `## Date` with today's date.
-#   4. Refuses to overwrite an existing file (so re-running on the same
-#      trial does not blow away in-progress notes).
+#   2. Substitutes `{N}` → trial number and `{topic}` → topic name.
+#   3. Fills `{YYYY-MM-DD}` with today's date.
+#   4. Refuses to overwrite an existing file.
 #
-# Why this exists:
-#   Every FT report uses the same skeleton, so writing each one from
-#   scratch wastes the first 5 minutes of the wrap-up step.
+# Every FT MUST have a report file — the archive trail entry in
+# candidates.md is an index pointer, not a substitute.
 #
 # Exit codes:
 #   0  report created
@@ -37,18 +38,26 @@ fi
 
 ft_num="$1"
 topic="$2"
+xion_mode=0
+if [[ "${3:-}" == "--xion" ]]; then
+    xion_mode=1
+fi
 
 if ! [[ "$ft_num" =~ ^[0-9]+$ ]]; then
     echo "error: FT number must be numeric (got: $ft_num)" >&2
     exit 1
 fi
-if ! [[ "$topic" =~ ^[a-z][a-z0-9-]*$ ]]; then
-    echo "error: topic must be kebab-case lowercase (got: $topic)" >&2
+if ! [[ "$topic" =~ ^[a-zA-Z][a-zA-Z0-9-]*$ ]]; then
+    echo "error: topic must be kebab-case or PascalCase (got: $topic)" >&2
     exit 1
 fi
 
 framework_root="$(cd "$(dirname "$0")/.." && pwd)"
-template="$framework_root/docs/templates/field-trial-report.md"
+if [[ $xion_mode -eq 1 ]]; then
+    template="$framework_root/docs/templates/field-trial-report-xion.md"
+else
+    template="$framework_root/docs/templates/field-trial-report.md"
+fi
 year_month="$(date +%Y-%m)"
 today="$(date +%Y-%m-%d)"
 target="$framework_root/docs/field-trials/${year_month}-field-trial-${ft_num}.md"
@@ -63,14 +72,19 @@ if [[ -e "$target" ]]; then
 fi
 
 # Substitute placeholders:
-#   {N}      → trial number
-#   {topic}  → topic (keep the topic line literal until the author fills it)
-#   The `YYYY-MM-DD` literal under `## Date` → today's date (first occurrence only)
-awk -v num="$ft_num" -v topic="$topic" -v today="$today" '
+#   {N}          → trial number
+#   {N-1}        → trial number minus one
+#   {topic}      → topic string
+#   {YYYY-MM-DD} → today's date (braced form used in xion template)
+#   YYYY-MM-DD   → today's date (bare form used in full-report template, first occurrence)
+prev_num=$(( ft_num - 1 ))
+awk -v num="$ft_num" -v prev="$prev_num" -v topic="$topic" -v today="$today" '
     BEGIN { date_replaced = 0 }
     {
         gsub(/\{N\}/, num)
+        gsub(/\{N-1\}/, prev)
         gsub(/\{topic\}/, topic)
+        gsub(/\{YYYY-MM-DD\}/, today)
         if (!date_replaced && $0 == "YYYY-MM-DD") {
             print today
             date_replaced = 1
@@ -82,7 +96,15 @@ awk -v num="$ft_num" -v topic="$topic" -v today="$today" '
 
 echo "✓ created $target"
 echo
-echo "Next:"
-echo "  - Fill in Baseline / Goal / Service Built / Steps Taken"
-echo "  - Replace remaining {placeholders} as the trial progresses"
-echo "  - Commit via:  git checkout -b docs/<issue>-field-trial-${ft_num}-${topic}"
+if [[ $xion_mode -eq 1 ]]; then
+    echo "Format: B (Xion class report)"
+    echo "Next:"
+    echo "  - Fill in {ClassName}, API table, test list, key design points"
+    echo "  - After PR merges: composer ft:done -- FT${ft_num} {ClassName} \"desc\" {PR}"
+else
+    echo "Format: A (full exploratory report)"
+    echo "Next:"
+    echo "  - Fill in Baseline / Goal / Service Built / Steps Taken"
+    echo "  - Replace remaining {placeholders} as the trial progresses"
+fi
+echo "  - Commit via:  git checkout -b docs/ft${ft_num}-report"
