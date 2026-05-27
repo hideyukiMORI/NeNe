@@ -99,11 +99,11 @@ final class AuditLogger
                 ' (actor_id, action, resource_type, resource_id, payload)' .
                 ' VALUES (:actor_id, :action, :resource_type, :resource_id, :payload)'
             );
-            $stmt->bindValue(':actor_id',      $actorId,                                                          PDO::PARAM_INT);
-            $stmt->bindValue(':action',        $action,                                                           PDO::PARAM_STR);
-            $stmt->bindValue(':resource_type', $resourceType,                                                     PDO::PARAM_STR);
-            $stmt->bindValue(':resource_id',   $resourceId,                                                       PDO::PARAM_INT);
-            $stmt->bindValue(':payload',       json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR), PDO::PARAM_STR);
+            $stmt->bindValue(':actor_id', $actorId, PDO::PARAM_INT);
+            $stmt->bindValue(':action', $action, PDO::PARAM_STR);
+            $stmt->bindValue(':resource_type', $resourceType, PDO::PARAM_STR);
+            $stmt->bindValue(':resource_id', $resourceId, PDO::PARAM_INT);
+            $stmt->bindValue(':payload', json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR), PDO::PARAM_STR);
             $stmt->execute();
         } catch (\PDOException $e) {
             // Audit failures must not break the primary operation.
