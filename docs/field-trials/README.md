@@ -55,16 +55,50 @@ When a trial uncovers framework or documentation changes, those changes are made
 - Clone directories are named `ft{N}-{topic}` (lowercase, hyphenated topic). `N` matches the report number.
 - Each trial gets exactly one report file. Follow-up work that traces back to a trial is tracked through GitHub Issues, not by editing the report after the fact.
 
-## What to Record
+## Report Requirement — Every FT Must Have a Report File
 
-A trial report should be readable cold by someone who was not present for the trial. The required sections live in `docs/templates/field-trial-report.md`. The important parts are:
+**Every completed FT must have a report file in `docs/field-trials/`.** The archive trail entry in `candidates.md` is a one-line index pointer, not a substitute for the report. An FT without a report file is not considered finished.
 
-- **Baseline**: which NeNe commit, tag, or release was cloned, PHP version, DB, and any other environmental facts that would change the result.
+Two formats are recognized. Choose based on trial type.
+
+### Format A — Full exploratory report
+
+Use when: the trial is open-ended, friction was encountered, an ADR was triggered, or the outcome was unexpected.
+
+Template: `docs/templates/field-trial-report.md`  
+Create with: `tools/ft-report-new.sh FT{N} {topic}`
+
+Required sections:
+
+- **Baseline**: NeNe commit/ref, PHP version, DB, environment facts that affect reproducibility.
 - **Goal**: one or two sentences on what this trial is verifying.
-- **Steps Taken**: the actual flow of work, with `Finding (F-N)` notes embedded where friction occurred. Friction notes are the most valuable part of the report.
-- **Friction Summary**: a single table with one row per `F-N`, including location, severity (high / medium / low), kind, and decision.
-- **Recommendations**: grouped as immediate (documentation fix only), suggested (small framework or template change), and trade-off (changes that require an ADR or stakeholder discussion).
-- **Overall Impression**: a short paragraph. Useful for orienting future readers; not a marketing summary.
+- **Steps Taken**: the actual flow of work with `Finding (F-N)` notes embedded where friction occurred.
+- **Friction Summary**: one row per `F-N` — location, severity, kind, decision.
+- **Recommendations**: immediate / suggested / trade-off.
+- **Overall Impression**: one short paragraph.
+
+### Format B — Xion class report (lightweight)
+
+Use when: the trial adds one Xion helper class with no unexpected friction, no ADR trigger, and no open follow-up Issues.
+
+Template: `docs/templates/field-trial-report-xion.md`  
+Create with: `tools/ft-report-new.sh FT{N} {ClassName}`
+
+Required sections:
+
+- **Date / Branch / Baseline** (header block, three lines).
+- **Goal**: one sentence.
+- **What was built**: class name, public API table (method → description), key design points, test list.
+- **Findings**: `F-1 — No finding (clean trial)` if clean; otherwise one row per finding with kind and decision.
+- **Decision**: one line — merge as-is, or list follow-up Issues.
+
+Minimum length: ~50 lines. A report shorter than that is missing something.
+
+### Historical note
+
+FT1–FT75 used Format A (full reports, 60–225 lines each).  
+FT76–FT264 were completed with archive trail entries only — **this was a process gap**, not an approved exception. Those 189 trials are documented only at the archive-trail level. Future trials must not repeat this pattern.  
+FT265 onward: Format B minimum, Format A when warranted.
 
 ### Friction Kinds
 

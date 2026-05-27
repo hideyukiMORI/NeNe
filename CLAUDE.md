@@ -31,12 +31,39 @@ composer make:xion -- ClassName
 ```
 
 Creates `class/xion/ClassName.php` + `tests/Unit/Xion/ClassNameTest.php` with
-the PDO injection skeleton. Then:
+the PDO injection skeleton, **and automatically adds the class to the
+Uncategorized section of `class/xion/INDEX.md`**. Then:
 
 1. Fill in the public API and table DDL
 2. Add the table to `class/xion/SchemaDefinition.php`
-3. Run `composer xion:index` to refresh the class index
+3. Move the Uncategorized entry in `class/xion/INDEX.md` to the right section
 4. Run `composer analyze:file -- class/xion/ClassName.php tests/Unit/Xion/ClassNameTest.php`
+
+---
+
+## Completing an FT
+
+**Every FT must have a report file.** The archive trail entry in `candidates.md` is a one-line index pointer, not a substitute. An FT without a report file is not finished.
+
+```bash
+# 1. Create the report file (before or after merging)
+bash tools/ft-report-new.sh 265 ClassName --xion   # Xion helper → Format B (~50 lines)
+bash tools/ft-report-new.sh 18  topic-name          # Exploratory trial → Format A
+
+# 2. After the PR merges, update three tracking docs
+composer ft:done -- FT265 ClassName "one-line description" 712
+```
+
+`composer ft:done` updates:
+
+| File | Change |
+|---|---|
+| `docs/todo/current.md` | Advances `FT1–FT264 are complete` → `FT1–FT265` + date |
+| `docs/field-trials/candidates.md` | Prepends archive entry |
+| `docs/roadmap.md` | Advances `FT1–FT264 complete as of …` → `FT1–FT265` + date |
+
+**FT76–FT264** had no report files — process gap, not an approved exception.  
+**FT265 onward**: report file required, no exceptions.
 
 ---
 
