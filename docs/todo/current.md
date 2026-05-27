@@ -37,8 +37,8 @@ Single-day wave of 26 field trials covering NENE2-equivalent patterns plus addit
 **FT46 — File upload**: `FileUpload`; require/load/validateSize/validateMime/moveTo; finfo MIME detection. PR #479.
 **FT47 — Tree helper**: `TreeHelper`; build/ancestors/descendants/depth/flatten for adjacency-list trees. PR #478.
 **FT48 — Offset pagination**: `OffsetPage` + `PaginationHelper`; page envelope; window() UI helper. PR #480.
-**FT49 — Money value object**: `Money`; immutable integer-based; add/subtract/multiply/round/format (JPY/USD/EUR). PR pending.
-**FT50 — Input validation**: `Validator`; required/maxLength/minLength/email/url/integer/in/regex; VALIDATION-FAILED 422. PR pending.
+**FT49 — Money value object**: `Money`; immutable integer-based; add/subtract/multiply/round/format (JPY/USD/EUR). PR #482.
+**FT50 — Input validation**: `Validator`; required/maxLength/minLength/email/url/integer/in/regex; VALIDATION-FAILED 422. PR #483.
 
 FT36 (background jobs) deferred as ADR-class — trigger: real "POST takes 8s" friction event.
 

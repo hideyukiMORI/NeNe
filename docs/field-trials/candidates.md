@@ -81,8 +81,8 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
-- **FT50 — Input validation rules** (2026-05-27): `Nene\Func\Validator` fluent validator — required/maxLength/minLength/email/url/integer/in/regex + VALIDATION-FAILED error code. PR #481 (pending).
-- **FT49 — Money value object** (2026-05-27): `Nene\Func\Money` immutable integer-based monetary value — add/subtract/multiply/round/format (JPY/USD/EUR). PR #482 (pending).
+- **FT50 — Input validation rules** (2026-05-27): `Nene\Func\Validator` fluent validator — required/maxLength/minLength/email/url/integer/in/regex + VALIDATION-FAILED error code. PR #483.
+- **FT49 — Money value object** (2026-05-27): `Nene\Func\Money` immutable integer-based monetary value — add/subtract/multiply/round/format (JPY/USD/EUR). PR #482.
 - **FT48 — Offset pagination** (2026-05-27): `Nene\Xion\OffsetPage` + `Nene\Func\PaginationHelper` — page/total/hasPrev/hasNext envelope + window() UI helper. PR #480.
 - **FT47 — Tree/Hierarchy helper** (2026-05-27): `Nene\Func\TreeHelper` — build/ancestors/descendants/depth/flatten for adjacency-list trees. PR #478.
 - **FT46 — File upload** (2026-05-27): `Nene\Xion\FileUpload` — require/load/validateSize/validateMime/moveTo fluent helper; uses finfo for MIME detection. PR #479.
