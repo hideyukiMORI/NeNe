@@ -46,7 +46,9 @@ final class CronLogTest extends TestCase
         $id  = $this->log->start('cleanup');
         $row = $this->log->find($id);
         $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('running', $row['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertNull($row['finished_at']);
     }
 
@@ -63,8 +65,11 @@ final class CronLogTest extends TestCase
         $id = $this->log->start('cleanup');
         $this->assertTrue($this->log->finish($id, 'Done.'));
         $row = $this->log->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('finished', $row['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Done.', $row['output']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertNotNull($row['finished_at']);
     }
 
@@ -82,7 +87,9 @@ final class CronLogTest extends TestCase
         $id = $this->log->start('sync');
         $this->assertTrue($this->log->fail($id, 'Timeout'));
         $row = $this->log->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('failed', $row['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Timeout', $row['output']);
     }
 
@@ -138,6 +145,7 @@ final class CronLogTest extends TestCase
         $this->log->finish($id, 'ok');
         $row = $this->log->lastSuccess('job-a');
         $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('finished', $row['status']);
     }
 
@@ -154,6 +162,7 @@ final class CronLogTest extends TestCase
         $this->log->fail($id, 'err');
         $row = $this->log->lastFailure('job-a');
         $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('failed', $row['status']);
     }
 
