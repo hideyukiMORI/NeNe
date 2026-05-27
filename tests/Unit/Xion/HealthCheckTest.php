@@ -2,172 +2,173 @@
 
 declare(strict_types=1);
 
-namespace Nene\Tests\Unit\Xion;
+namespace Tests\Unit\Xion;
 
 use Nene\Xion\HealthCheck;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Unit tests for HealthCheck.
- */
 final class HealthCheckTest extends TestCase
 {
-    private PDO $db;
+    private PDO $pdo;
     private HealthCheck $hc;
 
     protected function setUp(): void
     {
-        $this->db = new PDO('sqlite::memory:');
-        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->db->exec('
+        $this->pdo = new PDO('sqlite::memory:');
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->pdo->exec('
             CREATE TABLE health_checks (
-                id         INTEGER PRIMARY KEY AUTOINCREMENT,
-                service    VARCHAR(255) NOT NULL,
-                status     VARCHAR(20)  NOT NULL DEFAULT \'ok\',
-                message    TEXT         NOT NULL DEFAULT \'\',
-                checked_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                service       VARCHAR(100) NOT NULL,
+                status        VARCHAR(20)  NOT NULL,
+                response_time INTEGER      NOT NULL DEFAULT 0,
+                message       TEXT         NULL,
+                checked_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         ');
-        $this->db->exec('
-            CREATE TABLE health_check_current (
-                service    VARCHAR(255) NOT NULL PRIMARY KEY,
-                status     VARCHAR(20)  NOT NULL DEFAULT \'ok\',
-                message    TEXT         NOT NULL DEFAULT \'\',
-                checked_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-            )
-        ');
-        $this->hc = new HealthCheck($this->db);
+        $this->hc = new HealthCheck($this->pdo);
     }
 
-    // ── report ────────────────────────────────────────────────────────────────
+    // ── record ────────────────────────────────────────────────────────────────
 
-    public function testReportSetsCurrentStatus(): void
+    public function testRecordReturnsId(): void
     {
-        $this->hc->report('db', 'ok');
-        $this->assertSame('ok', $this->hc->status('db'));
+        $id = $this->hc->record('database', HealthCheck::STATUS_OK, 120);
+        $this->assertGreaterThan(0, $id);
     }
 
-    public function testReportAppendsHistory(): void
+    public function testRecordStoresFields(): void
     {
-        $this->hc->report('db', 'ok');
-        $this->hc->report('db', 'degraded', 'Slow');
-        $this->assertCount(2, $this->hc->history('db'));
+        $id   = $this->hc->record('database', HealthCheck::STATUS_DEGRADED, 850, 'High latency');
+        $rows = $this->hc->recent('database', 1);
+        $this->assertCount(1, $rows);
+        $this->assertSame('database', $rows[0]['service']);
+        $this->assertSame(HealthCheck::STATUS_DEGRADED, $rows[0]['status']);
+        $this->assertSame(850, (int)$rows[0]['response_time']);
+        $this->assertSame('High latency', $rows[0]['message']);
     }
 
-    public function testReportUpdatesCurrentStatus(): void
-    {
-        $this->hc->report('db', 'ok');
-        $this->hc->report('db', 'down', 'Connection refused');
-        $this->assertSame('down', $this->hc->status('db'));
-    }
-
-    public function testReportWithMessage(): void
-    {
-        $this->hc->report('svc', 'degraded', 'High latency');
-        $cur = $this->hc->current('svc');
-        $this->assertNotNull($cur);
-        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('High latency', $cur['message']);
-    }
-
-    public function testReportThrowsOnEmptyService(): void
+    public function testRecordThrowsOnEmptyService(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->hc->report('', 'ok');
+        $this->hc->record('', HealthCheck::STATUS_OK);
     }
 
-    public function testReportThrowsOnInvalidStatus(): void
+    public function testRecordThrowsOnInvalidStatus(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->hc->report('db', 'broken');
+        $this->hc->record('database', 'unknown');
     }
 
-    // ── status ────────────────────────────────────────────────────────────────
+    // ── latestStatus ──────────────────────────────────────────────────────────
 
-    public function testStatusReturnsNullForUnknownService(): void
+    public function testLatestStatusReturnsNewest(): void
     {
-        $this->assertNull($this->hc->status('nonexistent'));
+        $this->hc->record('database', HealthCheck::STATUS_OK, 100);
+        $this->hc->record('database', HealthCheck::STATUS_FAIL, 0);
+        $this->assertSame(HealthCheck::STATUS_FAIL, $this->hc->latestStatus('database'));
     }
 
-    public function testStatusReturnsDegraded(): void
+    public function testLatestStatusReturnsNullWhenNone(): void
     {
-        $this->hc->report('cache', 'degraded');
-        $this->assertSame('degraded', $this->hc->status('cache'));
+        $this->assertNull($this->hc->latestStatus('unknown'));
     }
 
-    // ── all ───────────────────────────────────────────────────────────────────
+    // ── latestAll ─────────────────────────────────────────────────────────────
 
-    public function testAllReturnsAllServices(): void
+    public function testLatestAllReturnsMapOfAllServices(): void
     {
-        $this->hc->report('db', 'ok');
-        $this->hc->report('cache', 'ok');
-        $this->hc->report('email', 'down');
-        $this->assertCount(3, $this->hc->all());
+        $this->hc->record('database', HealthCheck::STATUS_OK, 100);
+        $this->hc->record('cache', HealthCheck::STATUS_DEGRADED, 500);
+        $this->hc->record('queue', HealthCheck::STATUS_FAIL, 0);
+        $all = $this->hc->latestAll();
+        $this->assertArrayHasKey('database', $all);
+        $this->assertArrayHasKey('cache', $all);
+        $this->assertArrayHasKey('queue', $all);
+        $this->assertSame(HealthCheck::STATUS_OK, $all['database']);
+        $this->assertSame(HealthCheck::STATUS_FAIL, $all['queue']);
     }
 
-    public function testAllReturnsEmptyWhenNoReports(): void
+    public function testLatestAllReturnsLatestPerService(): void
     {
-        $this->assertSame([], $this->hc->all());
+        $this->hc->record('database', HealthCheck::STATUS_FAIL, 0);
+        $this->hc->record('database', HealthCheck::STATUS_OK, 100);
+        $all = $this->hc->latestAll();
+        $this->assertSame(HealthCheck::STATUS_OK, $all['database']);
     }
 
-    // ── isHealthy ─────────────────────────────────────────────────────────────
-
-    public function testIsHealthyTrueWhenAllOk(): void
+    public function testLatestAllReturnsEmptyWhenNone(): void
     {
-        $this->hc->report('db', 'ok');
-        $this->hc->report('cache', 'ok');
-        $this->assertTrue($this->hc->isHealthy());
+        $this->assertSame([], $this->hc->latestAll());
     }
 
-    public function testIsHealthyFalseWhenAnyNotOk(): void
+    // ── recent ────────────────────────────────────────────────────────────────
+
+    public function testRecentReturnsNewestFirst(): void
     {
-        $this->hc->report('db', 'ok');
-        $this->hc->report('cache', 'down');
-        $this->assertFalse($this->hc->isHealthy());
+        $this->hc->record('database', HealthCheck::STATUS_OK, 100);
+        $this->hc->record('database', HealthCheck::STATUS_FAIL, 0);
+        $rows = $this->hc->recent('database', 10);
+        $this->assertSame(HealthCheck::STATUS_FAIL, $rows[0]['status']);
     }
 
-    public function testIsHealthyTrueWhenNoServices(): void
-    {
-        $this->assertTrue($this->hc->isHealthy());
-    }
-
-    // ── history ───────────────────────────────────────────────────────────────
-
-    public function testHistoryReturnsNewestFirst(): void
-    {
-        $this->hc->report('db', 'ok');
-        $this->hc->report('db', 'degraded');
-        $history = $this->hc->history('db');
-        $this->assertSame('degraded', $history[0]['status']);
-        $this->assertSame('ok', $history[1]['status']);
-    }
-
-    public function testHistoryRespectsLimit(): void
+    public function testRecentRespectsLimit(): void
     {
         for ($i = 0; $i < 5; $i++) {
-            $this->hc->report('db', 'ok');
+            $this->hc->record('database', HealthCheck::STATUS_OK, 100);
         }
-        $this->assertCount(3, $this->hc->history('db', 3));
+        $this->assertCount(3, $this->hc->recent('database', 3));
     }
 
-    public function testHistoryReturnsEmptyForUnknownService(): void
+    // ── avgResponseTime ───────────────────────────────────────────────────────
+
+    public function testAvgResponseTimeCalculatesCorrectly(): void
     {
-        $this->assertSame([], $this->hc->history('nonexistent'));
+        $this->hc->record('database', HealthCheck::STATUS_OK, 100);
+        $this->hc->record('database', HealthCheck::STATUS_OK, 200);
+        $this->hc->record('database', HealthCheck::STATUS_OK, 300);
+        $avg = $this->hc->avgResponseTime('database', 3);
+        $this->assertEqualsWithDelta(200.0, $avg, 0.01);
+    }
+
+    public function testAvgResponseTimeReturnsZeroWhenNone(): void
+    {
+        $this->assertSame(0.0, $this->hc->avgResponseTime('unknown'));
+    }
+
+    // ── failureRate ───────────────────────────────────────────────────────────
+
+    public function testFailureRateCalculatesCorrectly(): void
+    {
+        $this->hc->record('queue', HealthCheck::STATUS_OK, 50);
+        $this->hc->record('queue', HealthCheck::STATUS_FAIL, 0);
+        $rate = $this->hc->failureRate('queue', 2);
+        $this->assertEqualsWithDelta(0.5, $rate, 0.001);
+    }
+
+    public function testFailureRateReturnsZeroWhenNone(): void
+    {
+        $this->assertSame(0.0, $this->hc->failureRate('unknown'));
+    }
+
+    public function testFailureRateIsOneForAllFails(): void
+    {
+        $this->hc->record('queue', HealthCheck::STATUS_FAIL, 0);
+        $this->hc->record('queue', HealthCheck::STATUS_FAIL, 0);
+        $rate = $this->hc->failureRate('queue', 2);
+        $this->assertEqualsWithDelta(1.0, $rate, 0.001);
     }
 
     // ── purgeOlderThan ────────────────────────────────────────────────────────
 
-    public function testPurgeOlderThanDeletesOldEntries(): void
+    public function testPurgeOlderThanDeletesOldRows(): void
     {
-        $this->hc->report('db', 'ok');
-        $this->db->exec("UPDATE health_checks SET checked_at = datetime('now', '-8 days')");
-        $this->assertSame(1, $this->hc->purgeOlderThan(7));
-    }
-
-    public function testPurgeOlderThanPreservesRecentEntries(): void
-    {
-        $this->hc->report('db', 'ok');
-        $this->assertSame(0, $this->hc->purgeOlderThan(7));
+        $this->pdo->exec("INSERT INTO health_checks (service, status, response_time, checked_at)
+                          VALUES ('database', 'ok', 100, '2020-01-01 00:00:00')");
+        $this->hc->record('database', HealthCheck::STATUS_OK, 100);
+        $deleted = $this->hc->purgeOlderThan('2025-01-01 00:00:00');
+        $this->assertSame(1, $deleted);
+        $this->assertCount(1, $this->hc->recent('database'));
     }
 }
