@@ -50,7 +50,9 @@ final class ExportJobTest extends TestCase
     {
         $id  = $this->ej->enqueue('user-1');
         $job = $this->ej->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('pending', $job['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('csv', $job['format']);
     }
 
@@ -67,7 +69,9 @@ final class ExportJobTest extends TestCase
         $id = $this->ej->enqueue('user-1');
         $this->assertTrue($this->ej->start($id));
         $job = $this->ej->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('processing', $job['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertNotNull($job['started_at']);
     }
 
@@ -86,9 +90,13 @@ final class ExportJobTest extends TestCase
         $this->ej->start($id);
         $this->assertTrue($this->ej->complete($id, 'exports/out.csv', 500));
         $job = $this->ej->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('done', $job['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('exports/out.csv', $job['filename']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(500, (int)$job['row_count']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertNotNull($job['finished_at']);
     }
 
@@ -106,7 +114,9 @@ final class ExportJobTest extends TestCase
         $this->ej->start($id);
         $this->assertTrue($this->ej->fail($id, 'DB timeout'));
         $job = $this->ej->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('failed', $job['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('DB timeout', $job['error']);
     }
 
