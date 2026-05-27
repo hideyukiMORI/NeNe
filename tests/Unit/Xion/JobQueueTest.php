@@ -51,6 +51,7 @@ final class JobQueueTest extends TestCase
         $id  = $this->jq->enqueue('process', ['key' => 'value']);
         $job = $this->jq->find($id);
         $this->assertNotNull($job);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(['key' => 'value'], $job['payload']);
     }
 
@@ -58,6 +59,7 @@ final class JobQueueTest extends TestCase
     {
         $id  = $this->jq->enqueue('ping');
         $job = $this->jq->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('pending', $job['status']);
     }
 
@@ -81,6 +83,7 @@ final class JobQueueTest extends TestCase
         $this->jq->enqueue('ping');
         $job = $this->jq->claim();
         $this->assertNotNull($job);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('running', $job['status']);
     }
 
@@ -88,6 +91,7 @@ final class JobQueueTest extends TestCase
     {
         $this->jq->enqueue('ping');
         $job = $this->jq->claim();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(1, (int)$job['attempts']);
     }
 
@@ -101,6 +105,7 @@ final class JobQueueTest extends TestCase
         $id1 = $this->jq->enqueue('first');
         $id2 = $this->jq->enqueue('second');
         $job = $this->jq->claim();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame($id1, (int)$job['id']);
     }
 
@@ -110,8 +115,11 @@ final class JobQueueTest extends TestCase
     {
         $this->jq->enqueue('task');
         $job = $this->jq->claim();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertTrue($this->jq->complete((int)$job['id']));
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $done = $this->jq->find((int)$job['id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('done', $done['status']);
     }
 
@@ -128,9 +136,13 @@ final class JobQueueTest extends TestCase
         $jq = new JobQueue($this->db, 3);
         $jq->enqueue('task');
         $job = $jq->claim(); // attempts = 1, max = 3
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $jq->fail((int)$job['id'], 'timeout');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $updated = $jq->find((int)$job['id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('pending', $updated['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('timeout', $updated['error']);
     }
 
@@ -139,8 +151,11 @@ final class JobQueueTest extends TestCase
         $jq = new JobQueue($this->db, 1);
         $jq->enqueue('task');
         $job = $jq->claim(); // attempts = 1, max = 1
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $jq->fail((int)$job['id'], 'fatal');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $updated = $jq->find((int)$job['id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('failed', $updated['status']);
     }
 
@@ -156,8 +171,11 @@ final class JobQueueTest extends TestCase
     {
         $this->jq->enqueue('task');
         $job = $this->jq->claim();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertTrue($this->jq->release((int)$job['id']));
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $updated = $this->jq->find((int)$job['id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('pending', $updated['status']);
     }
 
@@ -237,6 +255,7 @@ final class JobQueueTest extends TestCase
     {
         $this->jq->enqueue('task');
         $job = $this->jq->claim();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->jq->complete((int)$job['id']);
         $deleted = $this->jq->purgeCompleted(30);
         $this->assertSame(0, $deleted);
