@@ -47,7 +47,40 @@ A state machine formalizes multi-step business processes: order approval, conten
 ],
 ```
 
-## WorkflowDefinition
+## Framework class: `WorkflowDefinition`
+
+`Nene\Func\WorkflowDefinition` ships with NeNe. Add custom workflows by editing
+`DEFINITIONS` in that class.
+
+| Method | Description |
+|--------|-------------|
+| `WorkflowDefinition::isValidWorkflow(string)` | Whether the workflow is registered |
+| `WorkflowDefinition::initialState(string)` | First state of a workflow |
+| `WorkflowDefinition::allowedNext(string, string)` | Valid next states from current state |
+| `WorkflowDefinition::canTransition(string, string, string)` | Check transition validity (bool) |
+| `WorkflowDefinition::assertTransition(string, string, string)` | Assert valid; throws 409 if not |
+| `WorkflowDefinition::allStates(string)` | All states in a workflow |
+
+### Controller pattern
+
+```php
+// POST /orders/{id}/transition
+public function transitionPostRest(): array
+{
+    $order    = $this->orderMapper->find($this->getOrderId());
+    $toState  = (string)($this->body['status'] ?? '');
+
+    WorkflowDefinition::assertTransition('order', $order->status, $toState);   // 409 on invalid
+
+    $this->orderMapper->updateStatus($order->id, $toState);
+    return $this->API_RESPONSE->success([
+        'status'       => $toState,
+        'allowed_next' => WorkflowDefinition::allowedNext('order', $toState),
+    ]);
+}
+```
+
+## WorkflowDefinition (skeleton)
 
 ```php
 // class/func/WorkflowDefinition.php
