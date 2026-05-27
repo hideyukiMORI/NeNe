@@ -6,9 +6,17 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT67 are complete (FT36 deferred as ADR-class); ADR-0001–0013 are in place. Next work is FT68+ — see **Field Trials** and **Backlog Candidates** below.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT72 are complete (FT36 deferred as ADR-class); ADR-0001–0013 are in place. Next work is FT73+ — see **Field Trials** and **Backlog Candidates** below.
 
 ## Recently Completed
+
+### 2026-05-27 — FT68–FT72: Extended social patterns wave (5 trials)
+
+**FT68 — Tag Manager**: `TagManager` M:N entity-tag; syncTags atomic; (entity_type, entity_id). PR #502.
+**FT69 — Comment Thread**: `CommentThread` depth stored; soft delete (body redacted); depth limit. PR #503.
+**FT70 — Subscription**: `Subscription` subscribe/changePlan/cancel/renew; history table. PR #504.
+**FT71 — Search History**: `SearchHistory` upsert dedup; auto-trim; push/recent/clear. PR #505.
+**FT72 — Bookmark**: `Bookmark` save/remove/isSaved/list; collection grouping; UNIQUE constraint. PR #506.
 
 ### 2026-05-27 — FT63–FT67: Social + loyalty patterns wave (5 trials)
 

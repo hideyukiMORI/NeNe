@@ -12,37 +12,37 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ---
 
-## Active candidates (FT68+)
+## Active candidates (FT73+)
 
-### FT68 — Tag / Label System
+### FT73 — Rate-limited Queue (Simple Job Queue)
 
-**Why**: エンティティへのタグ付け（M:N 関係）。記事・商品・タスクなどに複数タグを付与・取得。
-**Scope**: `Nene\Xion\TagManager` — attach/detach/syncTags/tagsFor/entitiesWithTag、重複防止。
-**Size**: small.
-
-### FT69 — Comment Thread
-
-**Why**: 階層コメント（親コメントへの返信）。ブログ・レビュー・フォーラムで頻出。
-**Scope**: `Nene\Xion\CommentThread` — post/reply/list/softDelete、parent_id 階層、ネスト深さ制限。
+**Why**: DB-backed lightweight job queue。バックグラウンド処理の最小実装。FT36 (大型) より前の軽量版。
+**Scope**: `Nene\Xion\JobQueue` — enqueue/dequeue/complete/fail/retry、ステータス管理。
 **Size**: small–medium.
 
-### FT70 — Subscription / Plan
+### FT74 — Geo / Location Helper
 
-**Why**: SaaS のユーザープラン管理。ユーザーを plan に紐付け、有効期限・更新・キャンセルを管理。
-**Scope**: `Nene\Xion\Subscription` — subscribe/cancel/isActive/currentPlan、プラン変更履歴。
+**Why**: 緯度経度ベースの距離計算・バウンディングボックス。近隣スポット検索等に使用。
+**Scope**: `Nene\Func\GeoHelper` — distanceKm/distanceMi/boundingBox、Haversine 公式。
+**Size**: small.
+
+### FT75 — File Storage Metadata
+
+**Why**: アップロードファイルのメタデータ管理（実ストレージは外部）。パス・サイズ・MIME・所有者。
+**Scope**: `Nene\Xion\FileMetadata` — register/find/findByOwner/delete、soft-delete。
+**Size**: small.
+
+### FT76 — Two-Factor Authentication (TOTP)
+
+**Why**: TOTP ベースの 2FA。Google Authenticator 互換。Secret 生成・コード検証・バックアップコード。
+**Scope**: `Nene\Xion\TotpAuthenticator` — generateSecret/verifyCode/generateBackupCodes、RFC 6238。
+**Size**: medium.
+
+### FT77 — Address Book
+
+**Why**: ユーザーの配送先・請求先住所管理。複数住所・デフォルト設定。
+**Scope**: `Nene\Xion\AddressBook` — add/update/remove/list/setDefault、複数住所対応。
 **Size**: small–medium.
-
-### FT71 — Search History
-
-**Why**: ユーザーごとの検索履歴。最近の検索クエリを保持し、重複除去・上限管理。
-**Scope**: `Nene\Xion\SearchHistory` — push/recent/clear、重複時は更新（upsert）、上限 N 件。
-**Size**: small.
-
-### FT72 — Bookmark / Saved Items
-
-**Why**: ユーザーが任意エンティティをブックマーク。お気に入り・ウィッシュリスト・後で読む等に汎用。
-**Scope**: `Nene\Xion\Bookmark` — save/remove/isSaved/list、entity_type + entity_id 汎用設計。
-**Size**: small.
 
 ---
 
@@ -82,6 +82,11 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT72 — Bookmark** (2026-05-27): `Nene\Xion\Bookmark` — save/remove/isSaved/list; collection grouping; UNIQUE constraint. PR #506.
+- **FT71 — Search History** (2026-05-27): `Nene\Xion\SearchHistory` — upsert dedup, auto-trim, push/recent/clear. PR #505.
+- **FT70 — Subscription** (2026-05-27): `Nene\Xion\Subscription` — subscribe/changePlan/cancel/renew; history table. PR #504.
+- **FT69 — Comment Thread** (2026-05-27): `Nene\Xion\CommentThread` — depth stored; soft delete (body redacted); depth limit. PR #503.
+- **FT68 — Tag Manager** (2026-05-27): `Nene\Xion\TagManager` — M:N entity-tag; syncTags atomic; (entity_type, entity_id). PR #502.
 - **FT67 — Point / Loyalty System** (2026-05-27): `Nene\Xion\PointLedger` — append-only ledger, earn/spend/balance/history, negative-balance prevention. PR #501.
 - **FT66 — Coupon / Promo Code** (2026-05-27): `Nene\Xion\CouponCode` — usage limits, per-user redemption, atomic redeem, two-table design. PR #500.
 - **FT65 — Personal Access Token** (2026-05-27): `Nene\Xion\PersonalAccessToken` — ability-based auth, last_used_at tracking, pat_ prefix. PR #499.
