@@ -6,9 +6,24 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT175 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is complete — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT185 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
 
 ## Recently Completed
+
+### 2026-05-27 — FT176–FT185: Xion third extended wave (10 trials)
+
+Continuous wave of 10 field trials adding further Xion helper patterns. All PRs #613–#622.
+
+**FT176 — Label**: `Label` two-table colored label system (labels + assignments); idempotent attach/detach; forEntity/entitiesWithLabel. PR #613.
+**FT177 — Checklist**: `Checklist` ordered checklist items on any entity; check/uncheck; percent() 0–100; pending() filter. PR #614.
+**FT178 — Reaction**: `Reaction` emoji/symbol reactions per user per entity; toggle (add/remove); counts() grouped by type. PR #615.
+**FT179 — Mention**: `Mention` @-mention tracking with unread inbox, markRead, unreadCount, mentionedIn. PR #616.
+**FT180 — Watchlist**: `Watchlist` entity watch subscriptions; toggle; watcherIds(); watching(userId) for notification routing. PR #617.
+**FT181 — Attachment**: `Attachment` file attachment metadata linked to any entity; totalBytes(); forUser(). PR #618.
+**FT182 — SavedSearch**: `SavedSearch` per-user named search queries with upsert, usage tracking, and scope filtering. PR #619.
+**FT183 — ContentFilter**: `ContentFilter` DB-backed banned word list; detect/mask with optional whole-word mode; in-memory cache. PR #620.
+**FT184 — Reminder**: `Reminder` user-set future reminders; due() for cron-poll; markSent; purgeSent. PR #621.
+**FT185 — KnowledgeBase**: `KnowledgeBase` help articles with draft→published→archived lifecycle; search; recordView. PR #622.
 
 ### 2026-05-27 — FT166–FT175: Xion second extended wave (10 trials)
 

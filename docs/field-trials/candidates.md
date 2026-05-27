@@ -14,7 +14,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ## Active candidates
 
-The Xion helper wave (FT78–FT175) is complete as of 2026-05-27. No immediate Xion-class candidates remain. Trigger-based and structural candidates are listed in the next section.
+The Xion helper wave (FT78–FT185) is ongoing as of 2026-05-27. Trigger-based and structural candidates are listed in the next section.
 
 ---
 
@@ -54,6 +54,16 @@ The Xion helper wave (FT78–FT175) is complete as of 2026-05-27. No immediate X
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT185 — KnowledgeBase** (2026-05-27): `Nene\Xion\KnowledgeBase` — help articles with draft→published→archived lifecycle, category filter, keyword search, view tracking. PR #622.
+- **FT184 — Reminder** (2026-05-27): `Nene\Xion\Reminder` — user-set future reminders; due() for cron-poll; markSent; purgeSent. PR #621.
+- **FT183 — ContentFilter** (2026-05-27): `Nene\Xion\ContentFilter` — DB-backed banned word list with detect/mask and optional whole-word mode; in-memory cache. PR #620.
+- **FT182 — SavedSearch** (2026-05-27): `Nene\Xion\SavedSearch` — per-user named search queries with upsert, usage tracking, and scope filtering. PR #619.
+- **FT181 — Attachment** (2026-05-27): `Nene\Xion\Attachment` — file attachment metadata linked to any entity; totalBytes; forUser. PR #618.
+- **FT180 — Watchlist** (2026-05-27): `Nene\Xion\Watchlist` — entity watch subscriptions; toggle; watcherIds; watching(userId). PR #617.
+- **FT179 — Mention** (2026-05-27): `Nene\Xion\Mention` — @-mention tracking with unread inbox, markRead, unreadCount, mentionedIn. PR #616.
+- **FT178 — Reaction** (2026-05-27): `Nene\Xion\Reaction` — emoji/symbol reactions per user; toggle; counts() grouped by type. PR #615.
+- **FT177 — Checklist** (2026-05-27): `Nene\Xion\Checklist` — ordered checklist items on any entity; check/uncheck; percent(). PR #614.
+- **FT176 — Label** (2026-05-27): `Nene\Xion\Label` — two-table colored label system; idempotent attach/detach; forEntity/entitiesWithLabel. PR #613.
 - **FT175 — UserNote** (2026-05-27): `Nene\Xion\UserNote` — admin/staff notes attached to user records with pinning. PR #611.
 - **FT174 — ScheduledTask** (2026-05-27): `Nene\Xion\ScheduledTask` — cron-style task schedule registry with last-run tracking and due() query. PR #610.
 - **FT173 — GuestSession** (2026-05-27): `Nene\Xion\GuestSession` — anonymous visitor session with key-value data bag; login promotion via linkUser(). PR #609.
