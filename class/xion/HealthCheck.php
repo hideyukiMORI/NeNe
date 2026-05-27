@@ -7,56 +7,49 @@ namespace Nene\Xion;
 use PDO;
 
 /**
- * HealthCheck — persistent service health status with history.
+ * HealthCheck — service/component health monitoring log.
  *
- * Services report their health (ok/degraded/down) via heartbeat. The current
- * status and recent history are queryable. Useful for dashboards and alerting.
+ * Records health check results for named services or components with a
+ * status, optional message, and response time. Surfaces the latest status,
+ * average response time, and failure rate for dashboards and alerting.
+ *
+ * Distinct from IntegrationLog (individual API calls); HealthCheck is a
+ * periodic monitoring probe result — "is the service healthy right now?"
  *
  * ## Usage
  *
  * ```php
  * $hc = new HealthCheck($pdo);
  *
- * // Report health
- * $hc->report('database', 'ok');
- * $hc->report('email-service', 'degraded', 'Slow response times');
- * $hc->report('payments', 'down', 'Connection refused');
+ * $hc->record('database', HealthCheck::STATUS_OK,      120);
+ * $hc->record('cache',    HealthCheck::STATUS_DEGRADED, 850, 'High latency');
+ * $hc->record('queue',    HealthCheck::STATUS_FAIL,     0,   'Connection refused');
  *
- * // Get current status
- * $hc->status('database'); // 'ok'|'degraded'|'down'|null
- *
- * // Get all current statuses
- * $hc->all();
- *
- * // Get recent history
- * $hc->history('email-service', 20);
- *
- * // Check if all services are healthy
- * $hc->isHealthy(); // true if all current statuses are 'ok'
+ * $status  = $hc->latestStatus('database');    // 'ok'
+ * $all     = $hc->latestAll();                 // ['database' => 'ok', 'cache' => 'degraded', ...]
+ * $avgMs   = $hc->avgResponseTime('database'); // float ms
+ * $rate    = $hc->failureRate('queue', 10);    // 1.0 (100%)
  * ```
  *
  * ## Schema (SQLite / MySQL compatible)
  *
  * ```sql
  * CREATE TABLE health_checks (
- *     id          INTEGER PRIMARY KEY AUTOINCREMENT,
- *     service     VARCHAR(255) NOT NULL,
- *     status      VARCHAR(20)  NOT NULL DEFAULT 'ok',
- *     message     TEXT         NOT NULL DEFAULT '',
- *     checked_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+ *     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+ *     service         VARCHAR(100) NOT NULL,
+ *     status          VARCHAR(20)  NOT NULL,
+ *     response_time   INTEGER      NOT NULL DEFAULT 0,
+ *     message         TEXT         NULL,
+ *     checked_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
  * );
- *
- * CREATE TABLE health_check_current (
- *     service     VARCHAR(255) NOT NULL PRIMARY KEY,
- *     status      VARCHAR(20)  NOT NULL DEFAULT 'ok',
- *     message     TEXT         NOT NULL DEFAULT '',
- *     checked_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
- * );
+ * CREATE INDEX idx_health_checks_service ON health_checks (service, checked_at);
  * ```
  */
 final class HealthCheck
 {
-    private const VALID_STATUSES = ['ok', 'degraded', 'down'];
+    public const STATUS_OK       = 'ok';
+    public const STATUS_DEGRADED = 'degraded';
+    public const STATUS_FAIL     = 'fail';
 
     public function __construct(private readonly ?PDO $db = null)
     {
@@ -65,144 +58,183 @@ final class HealthCheck
     // ── public API ────────────────────────────────────────────────────────────
 
     /**
-     * Report the health of a service.
+     * Record a health check result.
      *
-     * Appends to history and updates the current status.
-     *
-     * @param  string $status  One of: 'ok', 'degraded', 'down'.
-     * @param  string $message Optional detail message.
-     * @throws \InvalidArgumentException if service name is empty or status is invalid.
+     * @param string   $service      Service or component name.
+     * @param string   $status       One of STATUS_OK / STATUS_DEGRADED / STATUS_FAIL.
+     * @param int      $responseTime Response time in milliseconds (0 for failed checks).
+     * @param string   $message      Optional diagnostic message.
+     * @throws \InvalidArgumentException on empty service or invalid status.
      */
-    public function report(string $service, string $status, string $message = ''): void
-    {
+    public function record(
+        string $service,
+        string $status,
+        int $responseTime = 0,
+        string $message = ''
+    ): int {
         $service = trim($service);
         if ($service === '') {
             throw new \InvalidArgumentException('service must not be empty.');
         }
-        if (!in_array($status, self::VALID_STATUSES, true)) {
+        if (!in_array($status, [self::STATUS_OK, self::STATUS_DEGRADED, self::STATUS_FAIL], true)) {
             throw new \InvalidArgumentException(
-                'status must be one of: ' . implode(', ', self::VALID_STATUSES) . '.'
+                "status must be one of: ok, degraded, fail. Got '{$status}'."
             );
         }
 
-        $db = $this->db();
-
-        // Append to history
-        $db->prepare(
-            'INSERT INTO health_checks (service, status, message) VALUES (:svc, :status, :msg)'
-        )->execute([':svc' => $service, ':status' => $status, ':msg' => $message]);
-
-        // Update current status (upsert)
-        $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
-        if ($driver === 'sqlite') {
-            $db->prepare(
-                'INSERT INTO health_check_current (service, status, message)
-                 VALUES (:svc, :status, :msg)
-                 ON CONFLICT (service)
-                 DO UPDATE SET status = excluded.status,
-                               message = excluded.message,
-                               checked_at = CURRENT_TIMESTAMP'
-            )->execute([':svc' => $service, ':status' => $status, ':msg' => $message]);
-        } else {
-            $db->prepare(
-                'INSERT INTO health_check_current (service, status, message)
-                 VALUES (:svc, :status, :msg)
-                 ON DUPLICATE KEY UPDATE status = VALUES(status),
-                                         message = VALUES(message),
-                                         checked_at = CURRENT_TIMESTAMP'
-            )->execute([':svc' => $service, ':status' => $status, ':msg' => $message]);
-        }
+        $now  = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        $stmt = $this->db()->prepare(
+            'INSERT INTO health_checks (service, status, response_time, message, checked_at)
+             VALUES (:service, :status, :rt, :msg, :now)'
+        );
+        $stmt->execute([
+            ':service' => $service,
+            ':status'  => $status,
+            ':rt'      => $responseTime,
+            ':msg'     => $message !== '' ? $message : null,
+            ':now'     => $now,
+        ]);
+        return (int)$this->db()->lastInsertId();
     }
 
     /**
-     * Get the current status of a service.
+     * Return the status of the most recent check for a service.
      *
-     * @return 'ok'|'degraded'|'down'|null  null if the service has never reported.
+     * @return string|null null if no checks recorded.
      */
-    public function status(string $service): ?string
+    public function latestStatus(string $service): ?string
     {
         $service = trim($service);
         $stmt    = $this->db()->prepare(
-            'SELECT status FROM health_check_current WHERE service = :svc LIMIT 1'
+            'SELECT status FROM health_checks WHERE service = :service ORDER BY id DESC LIMIT 1'
         );
-        $stmt->execute([':svc' => $service]);
-        $val = $stmt->fetchColumn();
-        return $val !== false ? (string)$val : null;
-    }
-
-    /**
-     * Get full current status record for a service.
-     *
-     * @return array<string,mixed>|null
-     */
-    public function current(string $service): ?array
-    {
-        $service = trim($service);
-        $stmt    = $this->db()->prepare(
-            'SELECT service, status, message, checked_at
-             FROM health_check_current WHERE service = :svc LIMIT 1'
-        );
-        $stmt->execute([':svc' => $service]);
+        $stmt->execute([':service' => $service]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row !== false ? $row : null;
+        return $row !== false ? (string)$row['status'] : null;
     }
 
     /**
-     * Get all services' current statuses.
+     * Return a map of service → latest status for all services.
+     *
+     * @return array<string,string>
+     */
+    public function latestAll(): array
+    {
+        // Subquery to get the latest check id per service
+        $stmt = $this->db()->query(
+            'SELECT h.service, h.status
+             FROM health_checks h
+             INNER JOIN (
+                 SELECT service, MAX(id) AS max_id
+                 FROM health_checks
+                 GROUP BY service
+             ) latest ON h.service = latest.service AND h.id = latest.max_id
+             ORDER BY h.service ASC'
+        );
+        if ($stmt === false) {
+            return [];
+        }
+        $rows   = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = [];
+        foreach ($rows as $row) {
+            $result[(string)$row['service']] = (string)$row['status'];
+        }
+        return $result;
+    }
+
+    /**
+     * Return recent check records for a service (newest first).
      *
      * @return list<array<string,mixed>>
      */
-    public function all(): array
-    {
-        $stmt = $this->db()->prepare(
-            'SELECT service, status, message, checked_at
-             FROM health_check_current ORDER BY service ASC'
-        );
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-    }
-
-    /**
-     * Check if all known services are currently 'ok'.
-     *
-     * Returns true if there are no services or all are 'ok'.
-     */
-    public function isHealthy(): bool
-    {
-        $stmt = $this->db()->prepare(
-            "SELECT COUNT(*) FROM health_check_current WHERE status != 'ok'"
-        );
-        $stmt->execute();
-        return (int)$stmt->fetchColumn() === 0;
-    }
-
-    /**
-     * Get the recent health history for a service.
-     *
-     * @return list<array<string,mixed>>
-     */
-    public function history(string $service, int $limit = 20): array
+    public function recent(string $service, int $limit = 20): array
     {
         $service = trim($service);
         $limit   = max(1, $limit);
         $stmt    = $this->db()->prepare(
-            "SELECT id, service, status, message, checked_at
-             FROM health_checks WHERE service = :svc
-             ORDER BY id DESC LIMIT {$limit}"
+            'SELECT id, service, status, response_time, message, checked_at
+             FROM health_checks
+             WHERE service = :service
+             ORDER BY id DESC
+             LIMIT :limit'
         );
-        $stmt->execute([':svc' => $service]);
+        $stmt->bindValue(':service', $service, PDO::PARAM_STR);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
-     * Purge history entries older than N days.
+     * Return the average response time (ms) for a service over the last $n checks.
+     *
+     * Returns 0.0 if no checks found.
+     */
+    public function avgResponseTime(string $service, int $last = 10): float
+    {
+        $service = trim($service);
+        $last    = max(1, $last);
+
+        // Average of the last N rows
+        $driver = $this->db()->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') {
+            $sql = 'SELECT AVG(response_time) AS avg_rt
+                    FROM (SELECT response_time FROM health_checks
+                          WHERE service = :service ORDER BY id DESC LIMIT :last)';
+        } else {
+            $sql = 'SELECT AVG(response_time) AS avg_rt
+                    FROM (SELECT response_time FROM health_checks
+                          WHERE service = :service ORDER BY id DESC LIMIT :last) sub';
+        }
+        $stmt = $this->db()->prepare($sql);
+        $stmt->bindValue(':service', $service, PDO::PARAM_STR);
+        $stmt->bindValue(':last', $last, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row !== false && $row['avg_rt'] !== null ? (float)$row['avg_rt'] : 0.0;
+    }
+
+    /**
+     * Return the failure rate (0.0–1.0) for a service over the last $n checks.
+     *
+     * A "failure" is STATUS_FAIL only. Returns 0.0 if no checks found.
+     */
+    public function failureRate(string $service, int $last = 10): float
+    {
+        $service = trim($service);
+        $last    = max(1, $last);
+
+        $driver = $this->db()->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') {
+            $sql = 'SELECT COUNT(*) AS total,
+                           SUM(CASE WHEN status = \'fail\' THEN 1 ELSE 0 END) AS failures
+                    FROM (SELECT status FROM health_checks
+                          WHERE service = :service ORDER BY id DESC LIMIT :last)';
+        } else {
+            $sql = 'SELECT COUNT(*) AS total,
+                           SUM(CASE WHEN status = \'fail\' THEN 1 ELSE 0 END) AS failures
+                    FROM (SELECT status FROM health_checks
+                          WHERE service = :service ORDER BY id DESC LIMIT :last) sub';
+        }
+        $stmt = $this->db()->prepare($sql);
+        $stmt->bindValue(':service', $service, PDO::PARAM_STR);
+        $stmt->bindValue(':last', $last, PDO::PARAM_INT);
+        $stmt->execute();
+        $row   = $stmt->fetch(PDO::FETCH_ASSOC);
+        $total = $row !== false ? (int)$row['total'] : 0;
+        if ($total === 0) {
+            return 0.0;
+        }
+        return (float)((int)$row['failures']) / $total;
+    }
+
+    /**
+     * Delete check records older than $cutoff.
      *
      * @return int Number of rows deleted.
      */
-    public function purgeOlderThan(int $days): int
+    public function purgeOlderThan(string $cutoff): int
     {
-        $cutoff = (new \DateTimeImmutable())->modify("-{$days} days")->format('Y-m-d H:i:s');
-        $stmt   = $this->db()->prepare('DELETE FROM health_checks WHERE checked_at < :cutoff');
+        $stmt = $this->db()->prepare('DELETE FROM health_checks WHERE checked_at < :cutoff');
         $stmt->execute([':cutoff' => $cutoff]);
         return $stmt->rowCount();
     }
