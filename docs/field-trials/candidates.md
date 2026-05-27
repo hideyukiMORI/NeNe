@@ -12,92 +12,42 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ---
 
-## NENE2 parity roadmap (FT25–FT36+)
+## Active candidates (FT51+)
 
-**Goal**: NeNe が NENE2 と同等の品質を担保する。構造は異なるが、アプリ実装者が必要とするパターンを一通り実装・ドキュメント化する。
+### FT51 — i18n / メッセージカタログ
 
-NENE2 は FT2–FT155（156本）完了済み。NeNe は FT1–FT24 完了。FT23 で NENE2 FT80–99 のパターンを docs として移植済みだが、コード実装はこれから。
+**NENE2 対応**: FT155 (i18nlog)
+**Why**: エラーメッセージ・UI テキストの多言語化。`{name}` プレースホルダー構文でシンプルな翻訳カタログ。
+**Scope**: `Nene\Func\I18n` static helper、`load(locale, messages)`、`t(key, params, locale)`、デフォルトロケール設定、howto doc。
+**Size**: small.
 
-以下の優先順位で進める。
+### FT52 — Event dispatcher (軽量 pub-sub)
 
-### FT25 — Cursor-based pagination
-
-**NENE2 対応**: FT42 (cursorlog), FT63 (cursorlog), FT100 (offset vs cursor performance)
-**Why**: 実アプリほぼ全てに必要。OFFSET は大規模データで破綻するため cursor 方式を先に整備する。
-**Scope**: `DataMapperBase` or helper class に `paginateCursor()` 相当を追加、OpenAPI `cursor`/`next_cursor` 規約、howto doc。
+**NENE2 対応**: FT148 (eventlog)
+**Why**: Service 間の密結合を緩和する in-process イベントバス。外部キューへの橋頭堡。
+**Scope**: `EventDispatcher`、`listen(event, handler)`、`emit(event, payload)`、テスト。
+**Trigger**: コントローラーで「A 完了後に B・C・D を呼ぶ」パターンが3件以上蓄積したとき。
 **Size**: small–medium.
 
-### FT26 — Soft delete
+### FT53 — Personal data export (GDPR Article 20)
 
-**NENE2 対応**: FT35 (softlog), FT49 (softdelete), FT62 (softdeletelog), FT108
-**Why**: 削除取り消し・ゴミ箱・論理削除は多くのサービスで必須。`deleted_at` カラム + Mapper フィルタのパターン確立。
-**Scope**: `deleted_at` 規約、`DataMapperBase` への論理削除フィルタ、restore、howto doc。
+**NENE2 対応**: FT144 (gdprlog)
+**Why**: ユーザーデータポータビリティ。複数テーブルからのデータ収集・JSON 出力パターン。
+**Scope**: `PersonalDataExport` helper、複数プロバイダーの集約、JSON 出力。
+**Trigger**: ユーザー管理を持つサービスが実アプリに登場したとき。
 **Size**: small.
 
-### FT27 — Optimistic locking / ETag 実装
+### FT54 — リクエストボディ検証ミドルウェア (JSON Schema)
 
-**NENE2 対応**: FT39 (locklog), FT54 (optimisticlog), FT56 (etaglog), FT70, FT105, FT106
-**Why**: `docs/development/optimistic-locking.md` はあるが実装がない。`version` カラム + `If-Match` ヘッダの実働コードを整備する。
-**Scope**: `ControllerBase` または helper に ETag/If-Match 処理、Mapper に version bump、テスト。
-**Size**: medium.
+**Why**: OpenAPI スキーマをランタイムで検証することで「定義と実装の乖離」を即座に検出する。
+**Trigger**: 実アプリでリクエスト検証の漏れが問題になったとき。
+**Size**: medium / ADR.
 
-### FT28 — Rate limiting 実装
+---
 
-**NENE2 対応**: FT46 (ratelimitlog), FT53 (ratelog), FT73 (quotalog), FT107
-**Why**: `docs/development/rate-limiting.md` はあるが実装がない。Redis INCR+EXPIRE パターンを NeNe の Middleware/ControllerBase フックとして実装する。
-**Scope**: `RateLimiter` クラス、`preAction()` フック例、429 レスポンス、Retry-After ヘッダ、テスト。
-**Size**: medium.
+## 保留候補（trigger-based）
 
-### FT29 — State machine 実装
-
-**NENE2 対応**: FT40 (flowlog), FT61 (statemachinelog), FT68
-**Why**: `docs/development/state-machines.md` はあるが実装がない。注文ワークフローや承認フローの canonical パターンを確立する。
-**Scope**: `WorkflowDefinition` / transitions 規約、遷移違反で 409、howto doc 更新。
-**Size**: medium.
-
-### FT30 — JWT 認証
-
-**NENE2 対応**: FT110, FT113 (JWT refresh token rotation), FT136 (tokenlog)
-**Why**: Bearer auth（FT16）は NeNe 独自トークン。JWT (HS256/RS256) で外部サービスや SPA との統合に対応する。
-**Scope**: `JwtAuthenticator`、`exp`/`sub` 検証、`alg:none` 防御、refresh rotation、ADR。
-**Size**: medium.
-
-### FT31 — RBAC
-
-**NENE2 対応**: FT111
-**Why**: 現状は「認証済みか否か」だけ。ロールベースのアクセス制御を `preAction()` フックで実装する最小形を確立する。
-**Scope**: `roles` テーブル、`ControllerBase` に `requireRole()` フック、テスト。
-**Size**: medium.
-
-### FT32 — パスワードリセット
-
-**NENE2 対応**: FT126
-**Why**: ユーザー認証を持つサービスに必須。`invitation-tokens.md` の派生として実装できる。
-**Scope**: リセットトークン生成・メール送信・検証・パスワード更新フロー、expiry、howto doc。
-**Size**: small.
-
-### FT33 — 監査ログ
-
-**NENE2 対応**: FT59 (auditlog), FT74 (auditlog), FT114
-**Why**: コンプライアンスや障害調査に必要。append-only の `audit_logs` テーブルへの書き込みパターン。
-**Scope**: `AuditLogger` helper、Mapper の mutation フック例、検索 API、howto doc。
-**Size**: small.
-
-### FT34 — Webhook 配信 + HMAC 署名
-
-**NENE2 対応**: FT48 (webhooklog), FT104 (hmaclog), FT120
-**Why**: 外部サービスとの統合に必須。HMAC-SHA256 署名付き配信、リトライ、タイムアウト。
-**Scope**: `WebhookDispatcher`、HMAC 署名、配信ログ、リトライ戦略、howto doc。
-**Size**: medium.
-
-### FT35 — Feature flags 実装
-
-**NENE2 対応**: FT71, FT121
-**Why**: `docs/development/feature-flags.md` はあるが実装がない。Redis / DB バックエンドでのグローバル + per-user override。
-**Scope**: `FeatureFlag` helper、Redis / DB 両対応、howto doc 更新。
-**Size**: small.
-
-### FT36 — バックグラウンドジョブ
+### FT36 — バックグラウンドジョブ ★大型・要 ADR
 
 **NENE2 対応**: FT65 (job queue), FT72 (dead letter queue), FT116
 **Why**: メール送信・ファイル処理・定期クリーンアップが今はリクエストをブロックする。ADR-class。
@@ -105,32 +55,22 @@ NENE2 は FT2–FT155（156本）完了済み。NeNe は FT1–FT24 完了。FT2
 **Trigger**: 実アプリで "POST /foo が8秒かかる" 摩擦が発生したとき。
 **Size**: large / ADR.
 
----
-
-## 他の保留候補
-
-### Observability
-
-#### OpenTelemetry traceparent / tracestate
+### Observability — OpenTelemetry traceparent / tracestate
 **Why**: 業界標準の分散トレーシング。現状は `X-Request-ID` のみ。
 **Trigger**: 実デプロイで OTel コレクターが必要になったとき。Pre-implement しない。
 **Size**: ADR + medium.
 
-### Structural / governance
-
-#### Constraint-changes ADR (unique / FK additions)
+### Structural — Constraint-changes ADR (unique / FK additions)
 **Why**: ADR-0009 が制約変更を "warning-only" パスに置いた。実運用で摩擦が出たら昇格。
 **Trigger**: 3件以上の「UNIQUE 制約追加が辛かった」オペレーター事例。
 **Size**: ADR + medium.
 
-#### Multi-tenancy
+### Structural — Multi-tenancy
 **Why**: `users` テーブルはシングルテナント。B2B SaaS デプロイで row-scoped 隔離が必要になる。
 **Trigger**: 実デプロイが求めたとき。先設計はオーバーエンジニアリングリスクが高い。
 **Size**: ADR + large.
 
-### Meta / evaluation
-
-#### docs-journey-newcomer
+### Meta — docs-journey-newcomer
 **Why**: ai-agent-journey の人間版。NeNe を初めて触る開発者との実施。
 **Trigger**: ボランティアが現れたとき。
 **Size**: medium, ボランティアの時間に合わせた time-box。
@@ -141,6 +81,31 @@ NENE2 は FT2–FT155（156本）完了済み。NeNe は FT1–FT24 完了。FT2
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT50 — Input validation rules** (2026-05-27): `Nene\Func\Validator` fluent validator — required/maxLength/minLength/email/url/integer/in/regex + VALIDATION-FAILED error code. PR #481 (pending).
+- **FT49 — Money value object** (2026-05-27): `Nene\Func\Money` immutable integer-based monetary value — add/subtract/multiply/round/format (JPY/USD/EUR). PR #482 (pending).
+- **FT48 — Offset pagination** (2026-05-27): `Nene\Xion\OffsetPage` + `Nene\Func\PaginationHelper` — page/total/hasPrev/hasNext envelope + window() UI helper. PR #480.
+- **FT47 — Tree/Hierarchy helper** (2026-05-27): `Nene\Func\TreeHelper` — build/ancestors/descendants/depth/flatten for adjacency-list trees. PR #478.
+- **FT46 — File upload** (2026-05-27): `Nene\Xion\FileUpload` — require/load/validateSize/validateMime/moveTo fluent helper; uses finfo for MIME detection. PR #479.
+- **FT45 — CORS** (2026-05-27): `Nene\Xion\Cors` — sendHeaders/handlePreflight/isAllowed; wildcard vs explicit origin; credentials support. PR #477.
+- **FT44 — HTTP cache headers** (2026-05-27): `Nene\Xion\HttpCache` — sendCacheControl/sendLastModified/isNotModified/send304/sendNoCache; conditional GET (304). PR #476.
+- **FT43 — Circuit breaker** (2026-05-27): `Nene\Xion\CircuitBreaker` — CLOSED/OPEN/HALF-OPEN state machine; DB-backed; configurable threshold + cooldown. PR #475.
+- **FT42 — Signed URL** (2026-05-27): `Nene\Xion\SignedUrl` — HMAC-SHA256 sign/verify/requireValid with expiry; SIGNED-URL-EXPIRED (410) / SIGNED-URL-INVALID (403). PR #474.
+- **FT41 — Account lockout** (2026-05-27): `Nene\Xion\LoginAttemptTracker` — DB-backed failure counter; locks at threshold; reset on success; ACCOUNT-LOCKED (423). PR #473.
+- **FT40 — Batch operations** (2026-05-27): `Nene\Xion\BatchResult` — addSuccess/addFailure/httpStatus/toArray; 200/207/422 based on partial success. PR #472.
+- **FT39 — API versioning + deprecation headers** (2026-05-27): `Nene\Xion\ApiDeprecation` — RFC 8594 Deprecation/Sunset/Link headers; ADR-0013 URI prefix versioning. PR #471.
+- **FT38 — Full-text search helper** (2026-05-27): `Nene\Func\SearchQuery` — escapeLike/likePattern/sanitizeFts/normalize; FTS5 patterns doc. PR #470.
+- **FT37 — Idempotency keys** (2026-05-27): `Nene\Xion\IdempotencyStore` — DB-backed get/put/hash; INSERT IGNORE/INSERT OR IGNORE; X-Idempotency-Key / X-Idempotent-Replayed. PR #469.
+- **FT35 — Feature flags** (2026-05-27): `Nene\Func\FeatureFlagService` — DB-backed; 3-tier priority (user override → global → rollout%); deterministic crc32 bucket. PR #468.
+- **FT34 — Webhook signing** (2026-05-27): `Nene\Xion\WebhookSigner` — Stripe-style `t=<ts>,v1=<hmac>`; hash_equals timing-safe; generateSecret(). PR #467.
+- **FT33 — 監査ログ** (2026-05-27): `Nene\Xion\AuditLogger` — append-only audit_log; PDO injection; PDOException caught internally. PR #466.
+- **FT32 — パスワードリセット** (2026-05-27): `Nene\Xion\PasswordResetToken` — bin2hex(random_bytes(32)) + SHA-256 stored hash; isExpired/expiresAt. PR #465.
+- **FT31 — RBAC** (2026-05-27): `Nene\Xion\RoleGuard` — JWT claims-based require/requireAny/has; 401 vs 403 distinction. PR #464.
+- **FT30 — JWT HS256** (2026-05-27): `Nene\Xion\JwtCodec` — pure PHP HMAC-SHA256; issue/decode/require; alg:none防御; JWT-INVALID (401). PR #463.
+- **FT29 — State machine** (2026-05-27): `Nene\Func\WorkflowDefinition` — code-driven transition map; assertTransition 409; initial/allowed/allStates. PR #462.
+- **FT28 — Rate limiting** (2026-05-27): `Nene\Func\RateLimiter` + Redis storage; fixed-window INCR+EXPIRE; X-RateLimit-* headers; 429 + Retry-After. PR #461.
+- **FT27 — Optimistic locking / ETag** (2026-05-27): `Nene\Xion\OptimisticLock` — parseIfMatch/etagFor/sendETag/requireVersion/conflict; 412/428. PR #460.
+- **FT26 — Soft delete** (2026-05-27): `DataMapperBase::SOFT_DELETE` constant; softDelete/restore/findTrashed/purge; deleted_at フィルタ自動適用。PR #459.
+- **FT25 — Cursor-based pagination** (2026-05-27): `Nene\Xion\Cursor` + `CursorPage`; base64url token; (created_at, id) keyset; LIMIT n+1 probe. PR #458.
 - **FT24 — CLI command framework** (2026-05-27): `Nene\Xion\Command` abstract base class; 4 CLI scripts refactored to thin shells; `initSQLite.php` fixed to use SchemaCompiler (removed hardcoded DDL); 16 unit tests. PR #457.
 - **FT23 — NENE2 pattern survey** (2026-05-27): systematic review of NENE2 FT80–99; 1 code fix (`JSON_UNESCAPED_UNICODE`), 19 new docs, 1 enhanced doc. PR #455.
 - **FT22 — ai-agent-journey** (2026-05-27): clean subagent built `bookmarks` REST service end-to-end using only docs. 5 doc gaps found (F-1/F-5 fixed immediately, F-2/F-3/F-4 deferred as Issues #446-#450). PR #451.
