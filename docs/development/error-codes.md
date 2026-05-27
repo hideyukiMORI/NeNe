@@ -38,6 +38,7 @@ Every failure response uses the same envelope, documented in OpenAPI as `ApiFail
 | `UPLOAD-FILE-REQUIRED` | 400 | Upload file is required. | Thrown by `UploadedFile::validate()` when the upload is missing or `is_uploaded_file()` returns false. |
 | `UPLOAD-TOO-LARGE` | 413 | Upload exceeds size limit. | Thrown by `UploadedFile::validate(['maxBytes' => N])` when `size() > N`. |
 | `UPLOAD-MIME-REJECTED` | 415 | Upload mime type is not allowed. | Thrown by `UploadedFile::validate(['allowedMime' => [...]])` when `finfo` mime is not on the allowlist. |
+| `JWT-INVALID` | 401 | The JWT token is invalid or expired. | Thrown by `JwtCodec::require()` when the `Authorization: Bearer` header is absent, the token is malformed, the signature is wrong, the token has expired, or the algorithm is not HS256. |
 
 ## Adding a new error code
 
