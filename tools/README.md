@@ -11,9 +11,24 @@ Single-purpose scripts that make NeNe's day-to-day workflow less typing-heavy. E
 | `tools/wait-healthy.sh [port] [timeout]` | Block until `/health` returns 200, with a timeout. | After `docker compose up -d app`, before running curl probes. |
 | `tools/trial-status.sh <FT-N>` | List every Issue + PR mentioning a trial number, open and closed. | Closing-out check: "is every spawned Issue closed?" |
 | `php tools/error-code-add.php CODE "Message" <http-status> ["notes"]` | Insert a new error code into both `config/error_codes.php` and `docs/development/error-codes.md` atomically. | Adding an error code without the manual two-file dance. |
+| `php tools/make-xion.php ClassName` | Scaffold `class/xion/ClassName.php` + `tests/Unit/Xion/ClassNameTest.php` with PDO injection skeleton; auto-registers in `class/xion/INDEX.md`. | Starting a new Xion helper class. |
+| `php tools/xion-index.php` | Regenerate `class/xion/INDEX.md` from PHPDoc. Updates descriptions, removes stale entries, adds new classes to Uncategorized. | After editing a Xion class PHPDoc description. |
+| `php tools/ft-done.php FT265 ClassName "desc" 712` | Update `docs/todo/current.md`, `docs/field-trials/candidates.md`, and `docs/roadmap.md` in one shot after merging an FT PR. | After every merged Xion FT PR. |
 | `tools/test-http-preflight.php` | Print a one-line summary of the HTTP smoke target before PHPUnit runs. | Called automatically by `composer test:http`. |
 
 ## Composer scripts (in `composer.json`)
+
+### Pre-push checklist
+
+```bash
+composer precommit    # format → analyze (full Phan) → unit tests — run before every push
+```
+
+`composer precommit` is the right command for day-to-day local verification. It runs everything that can fail CI, in the order that catches problems fastest.
+
+`composer ci` runs the full CI suite including HTTP smoke tests (requires Docker). Use it when changing HTTP-layer code or verifying a release candidate; it is slower and not needed for every push.
+
+### All scripts
 
 | Script | What it does |
 | --- | --- |
@@ -24,15 +39,20 @@ Single-purpose scripts that make NeNe's day-to-day workflow less typing-heavy. E
 | `composer test` | Unit tests (`phpunit --testsuite unit`). |
 | `composer test:http` | HTTP smoke tests (`phpunit --testsuite http`). |
 | `composer test:all` | Both suites. |
-| `composer analyze` | Static analysis (Phan + baseline). |
+| `composer analyze` | Full static analysis — Phan + baseline (~40 s). Same as CI. |
+| `composer analyze:file -- a.php b.php` | Targeted Phan analysis for one or a few files (~14 s). Use before pushing a new Xion class. |
 | `composer format` | Apply PHP CS Fixer. |
 | `composer format:check` | Dry-run PHP CS Fixer (CI gate). |
-| `composer check` | `test` + `test:http` + `analyze`. (Excludes `format:check` — see `composer ci`.) |
-| **`composer ci`** | **`test` + `test:http` + `analyze` + `format:check`** — runs exactly what CI runs. Use this before pushing. |
+| **`composer precommit`** | **format → analyze → test** — run before every push. |
+| `composer make:xion -- ClassName` | Scaffold a new Xion class + test file + INDEX registration. |
+| `composer xion:index` | Regenerate `class/xion/INDEX.md` from PHPDoc. |
+| `composer ft:done -- FT265 Foo "desc" 712` | Update three tracking docs after merging an FT PR. |
+| `composer check` | `test` + `test:http` + `analyze`. |
+| `composer ci` | `test` + `test:http` + `analyze` + `format:check` — full CI suite including Docker HTTP tests. |
 
 ### Argument passthrough
 
-Composer 2 forwards everything after `--` to the underlying tool. The most useful case:
+Composer 2 forwards everything after `--` to the underlying tool:
 
 ```bash
 # Run a single HTTP smoke test class
@@ -43,9 +63,10 @@ composer test -- --filter SchemaDifferTest
 
 # Run a single method
 composer test -- --filter 'SchemaDifferTest::testNewIndexEmitsCreateIndex'
-```
 
-The preflight in `test:http` silently ignores extra args, so the same pattern works for both suites.
+# Analyse specific files (fast Phan, ~14 s)
+composer analyze:file -- class/xion/Foo.php tests/Unit/Xion/FooTest.php
+```
 
 ## Shared composer cache
 
@@ -62,5 +83,5 @@ Each project's `vendor/` directory stays per-project (composer.lock may differ b
 
 1. Drop the script in `tools/`. PHP for anything that touches PHP source / config files; bash for shell glue.
 2. Add a one-line entry in the **Quick reference** table above.
-3. If the script ergonomically wraps a `composer` step, also add a composer script alias in `composer.json`.
+3. Add a row to the **All scripts** table if it wraps a `composer` step.
 4. Keep tools single-purpose. A script that does three unrelated things should be three scripts.
