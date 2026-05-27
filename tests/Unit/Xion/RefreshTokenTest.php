@@ -72,8 +72,10 @@ final class RefreshTokenTest extends TestCase
     {
         $old    = $this->rt->issue('user:1');
         $result = $this->rt->rotate($old);
-        $this->assertIsArray($result);
+        $this->assertNotNull($result);
+        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
         $this->assertArrayHasKey('rawToken', $result);
+        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
         $this->assertArrayHasKey('userId', $result);
         $this->assertSame('user:1', $result['userId']);
         $this->assertNotSame($old, $result['rawToken']);
