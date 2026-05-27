@@ -14,7 +14,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ## Active candidates
 
-The Xion helper wave (FT78–FT195) is ongoing as of 2026-05-27. Trigger-based and structural candidates are listed in the next section.
+The Xion helper wave (FT78–FT200) is ongoing as of 2026-05-27. Trigger-based and structural candidates are listed in the next section.
 
 ---
 
@@ -54,6 +54,11 @@ The Xion helper wave (FT78–FT195) is ongoing as of 2026-05-27. Trigger-based a
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT200 — UserSegment** (2026-05-27): `Nene\Xion\UserSegment` — user cohort/segment assignment; two-table design (definitions + members); idempotent addUser; segmentsFor/usersIn. PR #639.
+- **FT199 — AppVersion** (2026-05-27): `Nene\Xion\AppVersion` — deployment/release version history per environment; current() latest; history() newest-first; environments(). PR #638.
+- **FT198 — OrderLine** (2026-05-27): `Nene\Xion\OrderLine` — e-commerce order with line items (two-table); integer-cent amounts; pending→confirmed→shipped→delivered|cancelled. PR #637.
+- **FT197 — TopicSubscription** (2026-05-27): `Nene\Xion\TopicSubscription` — user subscriptions to named topics; idempotent subscribe; subscribersOf() fanout; distinct from NewsletterSubscription. PR #636.
+- **FT196 — DataImportJob** (2026-05-27): `Nene\Xion\DataImportJob` — two-table CSV import job tracking with per-row errors; pending→validating→processing→done|failed; error_count. PR #635.
 - **FT195 — UserTier** (2026-05-27): `Nene\Xion\UserTier` — gamification tier assignment with two-table design (current + history); hasEverHad(). PR #633.
 - **FT194 — FaqItem** (2026-05-27): `Nene\Xion\FaqItem` — FAQ articles with category, position ordering, keyword search, helpfulness voting. PR #632.
 - **FT193 — ProductReview** (2026-05-27): `Nene\Xion\ProductReview` — entity reviews with 1–5 star ratings; approval workflow; helpfulness voting; one review per user per entity. PR #631.
