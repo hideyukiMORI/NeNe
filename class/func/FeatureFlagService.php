@@ -99,7 +99,7 @@ final class FeatureFlagService
             'SELECT is_enabled FROM flag_overrides WHERE flag_name = :flag AND user_id = :uid LIMIT 1'
         );
         $stmt->bindValue(':flag', $flagName, PDO::PARAM_STR);
-        $stmt->bindValue(':uid',  $userId,   PDO::PARAM_INT);
+        $stmt->bindValue(':uid', $userId, PDO::PARAM_INT);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (is_array($row)) {

@@ -198,8 +198,11 @@ final class CommandTest extends TestCase
 
     public function testLineOutputsMessageWithNewline(): void
     {
-        $cmd = new class extends Command {
-            protected function helpText(): string { return ''; }
+        $cmd = new class () extends Command {
+            protected function helpText(): string
+            {
+                return '';
+            }
             /** @param array<string, string|false> $options */
             protected function handle(array $options): int
             {
@@ -215,8 +218,11 @@ final class CommandTest extends TestCase
 
     public function testLineWithNoArgumentOutputsBlankLine(): void
     {
-        $cmd = new class extends Command {
-            protected function helpText(): string { return ''; }
+        $cmd = new class () extends Command {
+            protected function helpText(): string
+            {
+                return '';
+            }
             /** @param array<string, string|false> $options */
             protected function handle(array $options): int
             {
@@ -232,8 +238,11 @@ final class CommandTest extends TestCase
 
     public function testErrorReturnsCorrectExitCode(): void
     {
-        $cmd = new class extends Command {
-            protected function helpText(): string { return ''; }
+        $cmd = new class () extends Command {
+            protected function helpText(): string
+            {
+                return '';
+            }
             /** @param array<string, string|false> $options */
             protected function handle(array $options): int
             {
@@ -248,8 +257,11 @@ final class CommandTest extends TestCase
 
     public function testWriteOutputsWithoutTrailingNewline(): void
     {
-        $cmd = new class extends Command {
-            protected function helpText(): string { return ''; }
+        $cmd = new class () extends Command {
+            protected function helpText(): string
+            {
+                return '';
+            }
             /** @param array<string, string|false> $options */
             protected function handle(array $options): int
             {
@@ -265,8 +277,11 @@ final class CommandTest extends TestCase
 
     public function testLineAndWriteProduceDistinctOutput(): void
     {
-        $cmd = new class extends Command {
-            protected function helpText(): string { return ''; }
+        $cmd = new class () extends Command {
+            protected function helpText(): string
+            {
+                return '';
+            }
             /** @param array<string, string|false> $options */
             protected function handle(array $options): int
             {
