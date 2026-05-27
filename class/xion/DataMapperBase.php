@@ -312,6 +312,75 @@ abstract class DataMapperBase
     }
 
     /**
+     * Cursor-based (keyset) paginated fetch.
+     *
+     * Returns up to $limit rows ordered by created_at DESC, id DESC.
+     * Pass the previous page's next_cursor as $cursor to get the next page.
+     * $limit is clamped to [1, 100].
+     *
+     * The query uses a (created_at, id) keyset — the table MUST have a
+     * created_at column (DB_COLUMN_NAME_CREATED) and the primary key
+     * defined in KEY_SID.
+     *
+     * @param string|null $cursor Raw base64url cursor token, or null for the first page.
+     * @param int         $limit  Maximum number of items to return (clamped to 1–100).
+     *
+     * @return CursorPage<object> Page result with items, has_more flag, and next cursor.
+     */
+    public function findPage(?string $cursor, int $limit = 20): CursorPage
+    {
+        $limit = max(1, min(100, $limit));
+        $fetch = $limit + 1;            // fetch one extra to detect has_more
+        $createdCol = DB_COLUMN_NAME_CREATED;
+        $idCol      = static::KEY_SID;
+        $table      = static::TARGET_TABLE;
+
+        $decoded = $cursor !== null ? Cursor::decode($cursor) : null;
+
+        if ($decoded === null) {
+            // First page — no WHERE filter
+            $stmt = $this->DB->prepare(
+                "SELECT * FROM {$table}
+                 ORDER BY {$createdCol} DESC, {$idCol} DESC
+                 LIMIT :fetch"
+            );
+            $stmt->bindValue(':fetch', $fetch, \PDO::PARAM_INT);
+        } else {
+            // Subsequent pages — keyset filter
+            $stmt = $this->DB->prepare(
+                "SELECT * FROM {$table}
+                 WHERE ({$createdCol} < :ca OR ({$createdCol} = :ca2 AND {$idCol} < :id))
+                 ORDER BY {$createdCol} DESC, {$idCol} DESC
+                 LIMIT :fetch"
+            );
+            $stmt->bindValue(':ca', $decoded->createdAt);
+            $stmt->bindValue(':ca2', $decoded->createdAt);
+            $stmt->bindValue(':id', $decoded->id, \PDO::PARAM_INT);
+            $stmt->bindValue(':fetch', $fetch, \PDO::PARAM_INT);
+        }
+
+        $stmt = $this->execute($stmt);
+        $stmt = $this->decorate($stmt);
+        $rows = $stmt->fetchAll();
+
+        $hasMore = count($rows) > $limit;
+        if ($hasMore) {
+            array_pop($rows);   // discard the probe row
+        }
+
+        $nextCursor = null;
+        if ($hasMore && $rows !== []) {
+            $last = end($rows);
+            $nextCursor = (new Cursor(
+                (string)($last->{$createdCol} ?? ''),
+                (int)($last->{$idCol} ?? 0)
+            ))->encode();
+        }
+
+        return new CursorPage($rows, $hasMore, $nextCursor);
+    }
+
+    /**
      * COUNT BY ID
      * Returns whether there is a primary key row with the specified value.
      *
