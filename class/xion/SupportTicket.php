@@ -7,12 +7,12 @@ namespace Nene\Xion;
 use PDO;
 
 /**
- * SupportTicket — lightweight help-desk ticketing with replies and status lifecycle.
+ * SupportTicket — simple help desk ticket queue with reply thread.
  *
- * Users open tickets; agents reply and close them. Tickets can be assigned to agents.
- * All messages are append-only; tickets transition through defined statuses.
- *
- * Status lifecycle: `open` → `pending` | `closed` (can reopen: `closed` → `open`)
+ * Manages customer/user support tickets with a status lifecycle
+ * (open → in_progress → resolved → closed) and an append-only reply
+ * thread. Tickets belong to a user (reporter) and can be assigned to
+ * a staff member.
  *
  * ## Usage
  *
@@ -20,17 +20,17 @@ use PDO;
  * $st = new SupportTicket($pdo);
  *
  * // Open a ticket
- * $id = $st->open('user-1', 'Login broken', 'I cannot log in since yesterday');
+ * $id = $st->open('user-1', 'Cannot log in', 'I get error 500 when...');
  *
- * // Add a reply
- * $st->reply($id, 'agent-1', 'Can you share your browser?', isAgent: true);
+ * // Staff workflow
+ * $st->assign($id, 'staff-1');
+ * $st->addReply($id, 'staff-1', 'We are looking into this.');
+ * $st->resolve($id, 'staff-1');
  *
- * // Assign and change status
- * $st->assign($id, 'agent-1');
- * $st->close($id, 'agent-1');
- *
- * // List open tickets
- * $st->listByStatus('open');
+ * // Query
+ * $open    = $st->openTickets();
+ * $mine    = $st->forUser('user-1');
+ * $thread  = $st->replies($id);
  * ```
  *
  * ## Schema (SQLite / MySQL compatible)
@@ -39,25 +39,38 @@ use PDO;
  * CREATE TABLE support_tickets (
  *     id          INTEGER PRIMARY KEY AUTOINCREMENT,
  *     user_id     VARCHAR(255) NOT NULL,
- *     subject     VARCHAR(500) NOT NULL DEFAULT '',
+ *     subject     VARCHAR(255) NOT NULL,
+ *     body        TEXT         NOT NULL DEFAULT '',
  *     status      VARCHAR(20)  NOT NULL DEFAULT 'open',
+ *     priority    VARCHAR(20)  NOT NULL DEFAULT 'normal',
  *     assigned_to VARCHAR(255) NOT NULL DEFAULT '',
+ *     resolved_at DATETIME     NULL,
+ *     closed_at   DATETIME     NULL,
  *     created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
  *     updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
  * );
  *
- * CREATE TABLE support_ticket_replies (
- *     id        INTEGER PRIMARY KEY AUTOINCREMENT,
- *     ticket_id INTEGER      NOT NULL,
- *     author_id VARCHAR(255) NOT NULL,
- *     body      TEXT         NOT NULL,
- *     is_agent  TINYINT(1)   NOT NULL DEFAULT 0,
- *     created_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP
+ * CREATE TABLE ticket_replies (
+ *     id         INTEGER PRIMARY KEY AUTOINCREMENT,
+ *     ticket_id  INTEGER      NOT NULL,
+ *     author_id  VARCHAR(255) NOT NULL,
+ *     body       TEXT         NOT NULL,
+ *     created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
  * );
  * ```
  */
 final class SupportTicket
 {
+    public const STATUS_OPEN        = 'open';
+    public const STATUS_IN_PROGRESS = 'in_progress';
+    public const STATUS_RESOLVED    = 'resolved';
+    public const STATUS_CLOSED      = 'closed';
+
+    public const PRIORITY_LOW    = 'low';
+    public const PRIORITY_NORMAL = 'normal';
+    public const PRIORITY_HIGH   = 'high';
+    public const PRIORITY_URGENT = 'urgent';
+
     public function __construct(private readonly ?PDO $db = null)
     {
     }
@@ -67,11 +80,15 @@ final class SupportTicket
     /**
      * Open a new support ticket.
      *
-     * @return int  The new ticket ID.
-     * @throws \InvalidArgumentException if user_id or subject is empty.
+     * @return int Row ID.
+     * @throws \InvalidArgumentException on empty fields.
      */
-    public function open(string $userId, string $subject, string $body = ''): int
-    {
+    public function open(
+        string $userId,
+        string $subject,
+        string $body = '',
+        string $priority = self::PRIORITY_NORMAL
+    ): int {
         $userId  = trim($userId);
         $subject = trim($subject);
         if ($userId === '') {
@@ -81,147 +98,173 @@ final class SupportTicket
             throw new \InvalidArgumentException('subject must not be empty.');
         }
 
-        $db = $this->db();
-        $db->prepare(
-            'INSERT INTO support_tickets (user_id, subject) VALUES (:uid, :sub)'
-        )->execute([':uid' => $userId, ':sub' => $subject]);
-        $ticketId = (int)$db->lastInsertId();
+        $stmt = $this->db()->prepare(
+            'INSERT INTO support_tickets (user_id, subject, body, priority)
+             VALUES (:uid, :subj, :body, :prio)'
+        );
+        $stmt->execute([
+            ':uid'  => $userId,
+            ':subj' => $subject,
+            ':body' => $body,
+            ':prio' => $priority,
+        ]);
+        return (int)$this->db()->lastInsertId();
+    }
 
-        if ($body !== '') {
-            $this->addReply($db, $ticketId, $userId, $body, false);
-        }
+    /**
+     * Find a ticket by ID.
+     *
+     * @return array<string,mixed>|null
+     */
+    public function find(int $id): ?array
+    {
+        $stmt = $this->db()->prepare('SELECT * FROM support_tickets WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row !== false ? $row : null;
+    }
 
-        return $ticketId;
+    /**
+     * Assign a ticket to a staff member and move to in_progress.
+     *
+     * @return bool True if found and updated.
+     */
+    public function assign(int $id, string $assignedTo): bool
+    {
+        $now  = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        $stmt = $this->db()->prepare(
+            'UPDATE support_tickets
+             SET assigned_to = :staff, status = :status, updated_at = :now
+             WHERE id = :id'
+        );
+        $stmt->execute([
+            ':staff'  => trim($assignedTo),
+            ':status' => self::STATUS_IN_PROGRESS,
+            ':now'    => $now,
+            ':id'     => $id,
+        ]);
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Mark a ticket as resolved (only from open or in_progress).
+     *
+     * @return bool True if found and transitioned.
+     */
+    public function resolve(int $id): bool
+    {
+        $now  = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        $stmt = $this->db()->prepare(
+            'UPDATE support_tickets
+             SET status = :resolved, resolved_at = :now, updated_at = :now
+             WHERE id = :id AND (status = :open OR status = :ip)'
+        );
+        $stmt->execute([
+            ':resolved' => self::STATUS_RESOLVED,
+            ':now'      => $now,
+            ':id'       => $id,
+            ':open'     => self::STATUS_OPEN,
+            ':ip'       => self::STATUS_IN_PROGRESS,
+        ]);
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Close a ticket (final state).
+     *
+     * @return bool True if found and transitioned.
+     */
+    public function close(int $id): bool
+    {
+        $now  = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        $stmt = $this->db()->prepare(
+            'UPDATE support_tickets
+             SET status = :closed, closed_at = :now, updated_at = :now
+             WHERE id = :id AND status != :closed'
+        );
+        $stmt->execute([
+            ':closed' => self::STATUS_CLOSED,
+            ':now'    => $now,
+            ':id'     => $id,
+        ]);
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Reopen a closed/resolved ticket.
+     *
+     * @return bool True if found and transitioned.
+     */
+    public function reopen(int $id): bool
+    {
+        $now  = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        $stmt = $this->db()->prepare(
+            'UPDATE support_tickets
+             SET status = :open, resolved_at = NULL, closed_at = NULL, updated_at = :now
+             WHERE id = :id AND (status = :resolved OR status = :closed)'
+        );
+        $stmt->execute([
+            ':open'     => self::STATUS_OPEN,
+            ':now'      => $now,
+            ':id'       => $id,
+            ':resolved' => self::STATUS_RESOLVED,
+            ':closed'   => self::STATUS_CLOSED,
+        ]);
+        return $stmt->rowCount() > 0;
     }
 
     /**
      * Add a reply to a ticket.
      *
-     * @param  bool   $isAgent  True if the reply is from an agent.
-     * @return int  The new reply ID.
-     * @throws \InvalidArgumentException if ticket not found or author/body empty.
+     * @return int Reply row ID.
+     * @throws \InvalidArgumentException on empty body.
      */
-    public function reply(int $ticketId, string $authorId, string $body, bool $isAgent = false): int
+    public function addReply(int $ticketId, string $authorId, string $body): int
     {
-        $authorId = trim($authorId);
-        $body     = trim($body);
-        if ($authorId === '') {
-            throw new \InvalidArgumentException('author_id must not be empty.');
-        }
+        $body = trim($body);
         if ($body === '') {
             throw new \InvalidArgumentException('body must not be empty.');
         }
 
-        $db = $this->db();
-        $id = $this->addReply($db, $ticketId, $authorId, $body, $isAgent);
-
-        // Touch updated_at
-        $db->prepare(
-            'UPDATE support_tickets SET updated_at = CURRENT_TIMESTAMP WHERE id = :id'
-        )->execute([':id' => $ticketId]);
-
-        return $id;
-    }
-
-    /**
-     * Assign a ticket to an agent.
-     *
-     * @return bool True if the ticket was found and updated.
-     */
-    public function assign(int $ticketId, string $agentId): bool
-    {
+        $now  = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
         $stmt = $this->db()->prepare(
-            'UPDATE support_tickets
-             SET assigned_to = :agent, updated_at = CURRENT_TIMESTAMP
-             WHERE id = :id'
+            'INSERT INTO ticket_replies (ticket_id, author_id, body)
+             VALUES (:tid, :author, :body)'
         );
-        $stmt->execute([':agent' => trim($agentId), ':id' => $ticketId]);
-        return $stmt->rowCount() > 0;
+        $stmt->execute([':tid' => $ticketId, ':author' => trim($authorId), ':body' => $body]);
+
+        // Touch updated_at on the ticket
+        $this->db()->prepare('UPDATE support_tickets SET updated_at = :now WHERE id = :id')
+            ->execute([':now' => $now, ':id' => $ticketId]);
+
+        return (int)$this->db()->lastInsertId();
     }
 
     /**
-     * Set a ticket to 'pending' status (waiting on user).
-     *
-     * @return bool True if the ticket was open and updated.
-     */
-    public function pending(int $ticketId): bool
-    {
-        return $this->setStatus($ticketId, 'pending', ['open']);
-    }
-
-    /**
-     * Reopen a closed ticket.
-     *
-     * @return bool True if the ticket was closed and reopened.
-     */
-    public function reopen(int $ticketId): bool
-    {
-        return $this->setStatus($ticketId, 'open', ['closed', 'pending']);
-    }
-
-    /**
-     * Close a ticket.
-     *
-     * @return bool True if the ticket was not already closed.
-     */
-    public function close(int $ticketId, string $closedBy = ''): bool
-    {
-        return $this->setStatus($ticketId, 'closed', ['open', 'pending']);
-    }
-
-    /**
-     * Get a ticket with all its replies.
-     *
-     * @return array<string,mixed>|null
-     */
-    public function find(int $ticketId): ?array
-    {
-        $stmt = $this->db()->prepare(
-            'SELECT id, user_id, subject, status, assigned_to, created_at, updated_at
-             FROM support_tickets WHERE id = :id LIMIT 1'
-        );
-        $stmt->execute([':id' => $ticketId]);
-        $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($ticket === false) {
-            return null;
-        }
-
-        $replies = $this->db()->prepare(
-            'SELECT id, author_id, body, is_agent, created_at
-             FROM support_ticket_replies WHERE ticket_id = :id ORDER BY id ASC'
-        );
-        $replies->execute([':id' => $ticketId]);
-        $ticket['replies'] = $replies->fetchAll(PDO::FETCH_ASSOC) ?: [];
-
-        return $ticket;
-    }
-
-    /**
-     * List tickets by status.
+     * List all replies for a ticket (oldest first).
      *
      * @return list<array<string,mixed>>
      */
-    public function listByStatus(string $status, int $limit = 50): array
+    public function replies(int $ticketId): array
     {
-        $limit = max(1, $limit);
-        $stmt  = $this->db()->prepare(
-            "SELECT id, user_id, subject, status, assigned_to, created_at, updated_at
-             FROM support_tickets WHERE status = :status
-             ORDER BY id DESC LIMIT {$limit}"
+        $stmt = $this->db()->prepare(
+            'SELECT id, ticket_id, author_id, body, created_at
+             FROM ticket_replies WHERE ticket_id = :tid ORDER BY id ASC'
         );
-        $stmt->execute([':status' => $status]);
+        $stmt->execute([':tid' => $ticketId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
-     * List all tickets for a user.
+     * List tickets for a user (newest first).
      *
      * @return list<array<string,mixed>>
      */
-    public function listForUser(string $userId): array
+    public function forUser(string $userId): array
     {
         $stmt = $this->db()->prepare(
-            'SELECT id, user_id, subject, status, assigned_to, created_at, updated_at
+            'SELECT id, user_id, subject, body, status, priority, assigned_to,
+                    resolved_at, closed_at, created_at, updated_at
              FROM support_tickets WHERE user_id = :uid ORDER BY id DESC'
         );
         $stmt->execute([':uid' => trim($userId)]);
@@ -229,18 +272,43 @@ final class SupportTicket
     }
 
     /**
-     * Count tickets by status.
+     * List open/in-progress tickets, newest first.
+     *
+     * @return list<array<string,mixed>>
      */
-    public function count(?string $status = null): int
+    public function openTickets(int $limit = 50): array
     {
-        if ($status !== null) {
-            $stmt = $this->db()->prepare('SELECT COUNT(*) FROM support_tickets WHERE status = :status');
-            $stmt->execute([':status' => $status]);
-        } else {
-            $stmt = $this->db()->prepare('SELECT COUNT(*) FROM support_tickets');
-            $stmt->execute();
+        $stmt = $this->db()->prepare(
+            'SELECT id, user_id, subject, status, priority, assigned_to, created_at, updated_at
+             FROM support_tickets
+             WHERE status = :open OR status = :ip
+             ORDER BY id ASC
+             LIMIT :lim'
+        );
+        $stmt->bindValue(':open', self::STATUS_OPEN);
+        $stmt->bindValue(':ip', self::STATUS_IN_PROGRESS);
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Count tickets grouped by status.
+     *
+     * @return array<string, int>
+     */
+    public function countByStatus(): array
+    {
+        $stmt = $this->db()->prepare(
+            'SELECT status, COUNT(*) AS cnt FROM support_tickets GROUP BY status'
+        );
+        $stmt->execute();
+        $rows   = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = [];
+        foreach ($rows as $row) {
+            $result[(string)$row['status']] = (int)$row['cnt'];
         }
-        return (int)$stmt->fetchColumn();
+        return $result;
     }
 
     // ── internal helpers ─────────────────────────────────────────────────────
@@ -248,29 +316,5 @@ final class SupportTicket
     private function db(): PDO
     {
         return $this->db ?? PdoConnection::getInstance();
-    }
-
-    private function addReply(PDO $db, int $ticketId, string $authorId, string $body, bool $isAgent): int
-    {
-        $db->prepare(
-            'INSERT INTO support_ticket_replies (ticket_id, author_id, body, is_agent)
-             VALUES (:tid, :auth, :body, :agent)'
-        )->execute([':tid' => $ticketId, ':auth' => $authorId, ':body' => $body, ':agent' => $isAgent ? 1 : 0]);
-        return (int)$db->lastInsertId();
-    }
-
-    /**
-     * @param list<string> $allowedFrom
-     */
-    private function setStatus(int $ticketId, string $newStatus, array $allowedFrom): bool
-    {
-        $in   = implode(',', array_fill(0, count($allowedFrom), '?'));
-        $args = array_merge([$newStatus, $ticketId], $allowedFrom);
-        $stmt = $this->db()->prepare(
-            "UPDATE support_tickets SET status = ?, updated_at = CURRENT_TIMESTAMP
-             WHERE id = ? AND status IN ({$in})"
-        );
-        $stmt->execute($args);
-        return $stmt->rowCount() > 0;
     }
 }

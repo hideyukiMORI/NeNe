@@ -2,81 +2,67 @@
 
 declare(strict_types=1);
 
-namespace Nene\Tests\Unit\Xion;
+namespace Tests\Unit\Xion;
 
 use Nene\Xion\SupportTicket;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Unit tests for SupportTicket.
- */
 final class SupportTicketTest extends TestCase
 {
-    private PDO $db;
+    private PDO $pdo;
     private SupportTicket $st;
 
     protected function setUp(): void
     {
-        $this->db = new PDO('sqlite::memory:');
-        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->db->exec('
+        $this->pdo = new PDO('sqlite::memory:');
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->pdo->exec('
             CREATE TABLE support_tickets (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id     VARCHAR(255) NOT NULL,
-                subject     VARCHAR(500) NOT NULL DEFAULT \'\',
+                subject     VARCHAR(255) NOT NULL,
+                body        TEXT         NOT NULL DEFAULT \'\',
                 status      VARCHAR(20)  NOT NULL DEFAULT \'open\',
+                priority    VARCHAR(20)  NOT NULL DEFAULT \'normal\',
                 assigned_to VARCHAR(255) NOT NULL DEFAULT \'\',
+                resolved_at DATETIME     NULL,
+                closed_at   DATETIME     NULL,
                 created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         ');
-        $this->db->exec('
-            CREATE TABLE support_ticket_replies (
+        $this->pdo->exec('
+            CREATE TABLE ticket_replies (
                 id         INTEGER PRIMARY KEY AUTOINCREMENT,
                 ticket_id  INTEGER      NOT NULL,
                 author_id  VARCHAR(255) NOT NULL,
                 body       TEXT         NOT NULL,
-                is_agent   TINYINT(1)   NOT NULL DEFAULT 0,
                 created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         ');
-        $this->st = new SupportTicket($this->db);
+        $this->st = new SupportTicket($this->pdo);
     }
 
     // ── open ──────────────────────────────────────────────────────────────────
 
-    public function testOpenReturnsTicketId(): void
+    public function testOpenReturnsId(): void
     {
-        $id = $this->st->open('user-1', 'Login broken');
+        $id = $this->st->open('user-1', 'Cannot log in');
         $this->assertGreaterThan(0, $id);
     }
 
-    public function testOpenCreatesOpenTicket(): void
+    public function testOpenCreatesWithOpenStatus(): void
     {
-        $id     = $this->st->open('user-1', 'Subject');
-        $ticket = $this->st->find($id);
-        $this->assertNotNull($ticket);
+        $id  = $this->st->open('user-1', 'Subject', 'Body', SupportTicket::PRIORITY_HIGH);
+        $row = $this->st->find($id);
+        $this->assertNotNull($row);
         // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('open', $ticket['status']);
-    }
-
-    public function testOpenWithBodyCreatesInitialReply(): void
-    {
-        $id     = $this->st->open('user-1', 'Subject', 'My initial message');
-        $ticket = $this->st->find($id);
-        $this->assertNotNull($ticket);
+        $this->assertSame(SupportTicket::STATUS_OPEN, $row['status']);
         // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertCount(1, $ticket['replies']);
-    }
-
-    public function testOpenWithoutBodyCreatesNoReplies(): void
-    {
-        $id     = $this->st->open('user-1', 'Subject');
-        $ticket = $this->st->find($id);
-        $this->assertNotNull($ticket);
+        $this->assertSame(SupportTicket::PRIORITY_HIGH, $row['priority']);
         // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertCount(0, $ticket['replies']);
+        $this->assertSame('user-1', $row['user_id']);
     }
 
     public function testOpenThrowsOnEmptyUserId(): void
@@ -91,127 +77,186 @@ final class SupportTicketTest extends TestCase
         $this->st->open('user-1', '');
     }
 
-    // ── reply ─────────────────────────────────────────────────────────────────
+    // ── find ──────────────────────────────────────────────────────────────────
 
-    public function testReplyAddsMessage(): void
+    public function testFindReturnsNullForMissingId(): void
     {
-        $id = $this->st->open('user-1', 'Subject');
-        $this->st->reply($id, 'agent-1', 'We are looking into it', isAgent: true);
-        $ticket = $this->st->find($id);
-        $this->assertNotNull($ticket);
-        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertCount(1, $ticket['replies']);
-        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame(1, (int)$ticket['replies'][0]['is_agent']);
-    }
-
-    public function testReplyThrowsOnEmptyBody(): void
-    {
-        $id = $this->st->open('user-1', 'Subject');
-        $this->expectException(\InvalidArgumentException::class);
-        $this->st->reply($id, 'agent-1', '');
+        $this->assertNull($this->st->find(9999));
     }
 
     // ── assign ────────────────────────────────────────────────────────────────
 
-    public function testAssignSetsAgent(): void
+    public function testAssignSetsStaffAndInProgress(): void
     {
-        $id = $this->st->open('user-1', 'Subject');
-        $this->assertTrue($this->st->assign($id, 'agent-1'));
-        $ticket = $this->st->find($id);
-        $this->assertNotNull($ticket);
+        $id = $this->st->open('user-1', 'Help!');
+        $result = $this->st->assign($id, 'staff-1');
+        $this->assertTrue($result);
+
+        $row = $this->st->find($id);
+        $this->assertNotNull($row);
         // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('agent-1', $ticket['assigned_to']);
-    }
-
-    // ── status transitions ────────────────────────────────────────────────────
-
-    public function testPendingChangesStatusFromOpen(): void
-    {
-        $id = $this->st->open('user-1', 'Subject');
-        $this->assertTrue($this->st->pending($id));
-        $ticket = $this->st->find($id);
-        $this->assertNotNull($ticket);
+        $this->assertSame(SupportTicket::STATUS_IN_PROGRESS, $row['status']);
         // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('pending', $ticket['status']);
+        $this->assertSame('staff-1', $row['assigned_to']);
     }
 
-    public function testCloseChangesStatusFromOpen(): void
+    public function testAssignReturnsFalseForMissingId(): void
     {
-        $id = $this->st->open('user-1', 'Subject');
-        $this->assertTrue($this->st->close($id));
-        $ticket = $this->st->find($id);
-        $this->assertNotNull($ticket);
+        $this->assertFalse($this->st->assign(9999, 'staff-1'));
+    }
+
+    // ── resolve ───────────────────────────────────────────────────────────────
+
+    public function testResolveTransitionsFromOpen(): void
+    {
+        $id = $this->st->open('user-1', 'Issue');
+        $result = $this->st->resolve($id);
+        $this->assertTrue($result);
+
+        $row = $this->st->find($id);
+        $this->assertNotNull($row);
         // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('closed', $ticket['status']);
+        $this->assertSame(SupportTicket::STATUS_RESOLVED, $row['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertNotNull($row['resolved_at']);
     }
 
-    public function testCloseChangesStatusFromPending(): void
+    public function testResolveTransitionsFromInProgress(): void
     {
-        $id = $this->st->open('user-1', 'Subject');
-        $this->st->pending($id);
-        $this->assertTrue($this->st->close($id));
+        $id = $this->st->open('user-1', 'Issue');
+        $this->st->assign($id, 'staff-1');
+        $this->assertTrue($this->st->resolve($id));
     }
 
-    public function testCloseReturnsFalseIfAlreadyClosed(): void
+    public function testResolveReturnsFalseForAlreadyResolved(): void
     {
-        $id = $this->st->open('user-1', 'Subject');
+        $id = $this->st->open('user-1', 'Issue');
+        $this->st->resolve($id);
+        $this->assertFalse($this->st->resolve($id));
+    }
+
+    // ── close ─────────────────────────────────────────────────────────────────
+
+    public function testCloseFromOpen(): void
+    {
+        $id = $this->st->open('user-1', 'Issue');
+        $result = $this->st->close($id);
+        $this->assertTrue($result);
+
+        $row = $this->st->find($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(SupportTicket::STATUS_CLOSED, $row['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertNotNull($row['closed_at']);
+    }
+
+    public function testCloseReturnsFalseForAlreadyClosed(): void
+    {
+        $id = $this->st->open('user-1', 'Issue');
         $this->st->close($id);
         $this->assertFalse($this->st->close($id));
     }
 
-    public function testReopenChangesStatusFromClosed(): void
+    // ── reopen ────────────────────────────────────────────────────────────────
+
+    public function testReopenFromResolved(): void
     {
-        $id = $this->st->open('user-1', 'Subject');
-        $this->st->close($id);
-        $this->assertTrue($this->st->reopen($id));
-        $ticket = $this->st->find($id);
-        $this->assertNotNull($ticket);
+        $id = $this->st->open('user-1', 'Issue');
+        $this->st->resolve($id);
+        $result = $this->st->reopen($id);
+        $this->assertTrue($result);
+
+        $row = $this->st->find($id);
+        $this->assertNotNull($row);
         // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('open', $ticket['status']);
+        $this->assertSame(SupportTicket::STATUS_OPEN, $row['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertNull($row['resolved_at']);
     }
 
-    public function testReopenReturnsFalseIfAlreadyOpen(): void
+    public function testReopenFromClosed(): void
     {
-        $id = $this->st->open('user-1', 'Subject');
+        $id = $this->st->open('user-1', 'Issue');
+        $this->st->close($id);
+        $this->assertTrue($this->st->reopen($id));
+    }
+
+    public function testReopenReturnsFalseForOpen(): void
+    {
+        $id = $this->st->open('user-1', 'Issue');
         $this->assertFalse($this->st->reopen($id));
     }
 
-    // ── listByStatus ──────────────────────────────────────────────────────────
+    // ── addReply / replies ────────────────────────────────────────────────────
 
-    public function testListByStatusFiltersCorrectly(): void
+    public function testAddReplyStoresReply(): void
+    {
+        $id  = $this->st->open('user-1', 'Issue');
+        $rid = $this->st->addReply($id, 'staff-1', 'We are looking into it.');
+        $this->assertGreaterThan(0, $rid);
+
+        $replies = $this->st->replies($id);
+        $this->assertCount(1, $replies);
+        $this->assertSame('We are looking into it.', $replies[0]['body']);
+        $this->assertSame('staff-1', $replies[0]['author_id']);
+    }
+
+    public function testAddReplyThrowsOnEmptyBody(): void
+    {
+        $id = $this->st->open('user-1', 'Issue');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->st->addReply($id, 'staff-1', '');
+    }
+
+    public function testRepliesAreOrderedOldestFirst(): void
+    {
+        $id = $this->st->open('user-1', 'Issue');
+        $r1 = $this->st->addReply($id, 'user-1', 'First');
+        $r2 = $this->st->addReply($id, 'staff-1', 'Second');
+
+        $replies = $this->st->replies($id);
+        $this->assertSame($r1, (int)$replies[0]['id']);
+        $this->assertSame($r2, (int)$replies[1]['id']);
+    }
+
+    // ── forUser ───────────────────────────────────────────────────────────────
+
+    public function testForUserReturnsUserTickets(): void
+    {
+        $this->st->open('user-1', 'A');
+        $this->st->open('user-1', 'B');
+        $this->st->open('user-2', 'C');
+
+        $rows = $this->st->forUser('user-1');
+        $this->assertCount(2, $rows);
+    }
+
+    // ── openTickets ───────────────────────────────────────────────────────────
+
+    public function testOpenTicketsExcludesResolvedAndClosed(): void
+    {
+        $id1 = $this->st->open('user-1', 'Open');
+        $id2 = $this->st->open('user-1', 'Resolved');
+        $id3 = $this->st->open('user-1', 'Closed');
+        $this->st->resolve($id2);
+        $this->st->close($id3);
+
+        $rows = $this->st->openTickets();
+        $this->assertCount(1, $rows);
+        $this->assertSame($id1, (int)$rows[0]['id']);
+    }
+
+    // ── countByStatus ─────────────────────────────────────────────────────────
+
+    public function testCountByStatusGroupsCorrectly(): void
     {
         $this->st->open('user-1', 'A');
         $id2 = $this->st->open('user-1', 'B');
-        $this->st->close($id2);
-        $this->assertCount(1, $this->st->listByStatus('open'));
-        $this->assertCount(1, $this->st->listByStatus('closed'));
-    }
+        $this->st->resolve($id2);
 
-    // ── listForUser ───────────────────────────────────────────────────────────
-
-    public function testListForUserFiltersCorrectly(): void
-    {
-        $this->st->open('user-1', 'A');
-        $this->st->open('user-2', 'B');
-        $this->assertCount(1, $this->st->listForUser('user-1'));
-    }
-
-    // ── count ─────────────────────────────────────────────────────────────────
-
-    public function testCountAll(): void
-    {
-        $this->st->open('user-1', 'A');
-        $this->st->open('user-1', 'B');
-        $this->assertSame(2, $this->st->count());
-    }
-
-    public function testCountByStatus(): void
-    {
-        $id = $this->st->open('user-1', 'A');
-        $this->st->open('user-1', 'B');
-        $this->st->close($id);
-        $this->assertSame(1, $this->st->count('open'));
-        $this->assertSame(1, $this->st->count('closed'));
+        $counts = $this->st->countByStatus();
+        $this->assertSame(1, $counts[SupportTicket::STATUS_OPEN]);
+        $this->assertSame(1, $counts[SupportTicket::STATUS_RESOLVED]);
     }
 }
