@@ -73,7 +73,7 @@ final class DeviceTokenTest extends TestCase
         $raw    = $this->dt->issue('user-1');
         $result = $this->dt->validate($raw);
         $this->assertNotNull($result);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('user-1', $result['user_id']);
     }
 
