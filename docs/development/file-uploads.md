@@ -1,21 +1,92 @@
 # File Uploads
 
-How NeNe accepts `multipart/form-data` file uploads end-to-end: the framework helpers, storage convention, env-driven size limits, and the security details that surfaced during FT12.
+How NeNe accepts `multipart/form-data` file uploads end-to-end: the framework helpers, storage convention, env-driven size limits, and the security details that surfaced during FT12 and FT46.
 
-Audience: anyone authoring an endpoint that receives a file. Trial source: FT12 (`docs/field-trials/2026-05-field-trial-12.md`).
+Audience: anyone authoring an endpoint that receives a file. Trial sources: FT12 (`docs/field-trials/2026-05-field-trial-12.md`), FT46 (`docs/field-trials/2026-05-field-trial-46.md`).
 
 ## The pieces
 
 | What | Where |
 | --- | --- |
 | Typed wrapper for one `$_FILES` entry | `Nene\Xion\UploadedFile` |
+| Fluent upload helper with direct HttpTermination | `Nene\Xion\FileUpload` |
 | Read an uploaded file from the request | `Nene\Xion\Request::getFile(string $key): ?UploadedFile` |
-| Validate (size, mime) | `UploadedFile::validate(['maxBytes' => N, 'allowedMime' => [...]])` |
-| Move to a final destination | `UploadedFile::moveTo(string $target): bool` |
+| Validate (size, mime) — `UploadedFile` style | `UploadedFile::validate(['maxBytes' => N, 'allowedMime' => [...]])` |
+| Validate (size, mime) — `FileUpload` style | `FileUpload::require()->validateSize(N)->validateMime([...])` |
+| Move to a final destination | `UploadedFile::moveTo(string $target): bool` / `FileUpload::moveTo(string $dir): string` |
 | Send a stored file back as a binary response | `ControllerBase::sendFile(string $path, string $mime, ?string $downloadName = null): never` |
 | Suggested storage root | `data/uploads/` (mkdir'd by `init.sh`) |
 | Upload size env overrides | `NENE_UPLOAD_MAX_FILESIZE`, `NENE_POST_MAX_SIZE` |
 | Error codes | `UPLOAD-FILE-REQUIRED` (400), `UPLOAD-TOO-LARGE` (413), `UPLOAD-MIME-REJECTED` (415) |
+
+## FileUpload — fluent multipart helper (FT46)
+
+`FileUpload` is a standalone helper that loads, validates, and stores a single multipart file using a fluent chain. Validation failures throw `HttpTermination` directly (not `DomainException`), so the chain terminates immediately without reaching the top-level exception handler.
+
+### API reference
+
+| Method | Description |
+| --- | --- |
+| `FileUpload::require(string $field, ?array $files = null): self` | Load the field; throw 400 (`UPLOAD-FILE-REQUIRED`) if absent or errored. |
+| `FileUpload::load(string $field, ?array $files = null): ?self` | Load the field; return `null` if absent (`UPLOAD_ERR_NO_FILE`). |
+| `->validateSize(int $maxBytes): static` | Throw 413 (`UPLOAD-TOO-LARGE`) if `size > $maxBytes`. |
+| `->validateMime(string[] $allowed): static` | Throw 415 (`UPLOAD-MIME-REJECTED`) if detected MIME is not in `$allowed`. |
+| `->moveTo(string $destDir, ?string $filename = null): string` | Move to `$destDir`; generate random hex filename by default. Returns full destination path. |
+| `->originalName(): string` | Client-supplied filename (basename only, path stripped). |
+| `->tmpPath(): string` | PHP tmp path. |
+| `->size(): int` | Reported file size in bytes. |
+| `->mimeType(): string` | `finfo`-detected MIME type (client-supplied `$_FILES[]['type']` is never used). |
+
+### Controller pattern
+
+```php
+class AvatarController extends ControllerBase
+{
+    public function indexPostRest(): array
+    {
+        $userId = $this->getLoginUserId();
+
+        $upload = FileUpload::require('avatar')          // 400 if missing
+            ->validateSize(2 * 1024 * 1024)              // 413 if > 2 MB
+            ->validateMime(['image/jpeg', 'image/png']); // 415 if wrong type
+
+        $dir = DIR_ROOT . 'data/uploads/' . $userId;
+        if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
+            throw new \RuntimeException('Could not create upload directory.');
+        }
+
+        $path = $upload->moveTo($dir); // random hex filename, original extension kept
+
+        return $this->API_RESPONSE->success([
+            'avatar' => [
+                'path' => basename($path),
+                'size' => $upload->size(),
+                'mime' => $upload->mimeType(),
+            ],
+        ]);
+    }
+}
+```
+
+Each validation step returns `$this` for chaining. A failure throws `HttpTermination` with the appropriate status and catalog error code; the controller method never continues past the failed step.
+
+### Destination directory setup
+
+The destination directory must exist before calling `moveTo()`. Recommended practice:
+
+- Store files **outside the webroot** (`data/uploads/` rather than `htdocs/uploads/`) so PHP cannot serve them as executable scripts even if a `.htaccess` guard is missing.
+- Create per-user or per-entity sub-directories on demand (as shown above).
+- Set ownership and permissions to `www-data:www-data` with mode `775` (matching `init.sh`'s conventions for `data/`).
+
+### Generating safe filenames
+
+`moveTo()` generates a `bin2hex(random_bytes(16))` filename by default, appending the original extension extracted from `originalName()`. This:
+
+- Prevents collisions (128 bits of entropy).
+- Avoids path-traversal attacks (the client filename is never used verbatim).
+- Preserves the extension for readability without trusting the MIME the client claims.
+
+Pass a `$filename` override only in tests or when the destination filename is determined by a preceding database insert.
 
 ## Receiving a file
 
@@ -138,6 +209,8 @@ Multipart endpoints document their request body as `multipart/form-data` with a 
 - `docs/development/error-rendering.md` — how `DomainException('UPLOAD-...')` renders on REST vs HTML paths.
 - `docs/review/file-upload.md` — review checklist.
 - `docs/tutorials/building-a-service.md` § "Update OpenAPI" → "File upload (multipart) operations" — yaml shape.
-- `docs/field-trials/2026-05-field-trial-12.md` — the trial that surfaced every behavior above.
-- `class/xion/UploadedFile.php` — wrapper source.
+- `docs/field-trials/2026-05-field-trial-12.md` — the trial that surfaced every behavior in the `UploadedFile` section.
+- `docs/field-trials/2026-05-field-trial-46.md` — the trial that introduced the fluent `FileUpload` helper.
+- `class/xion/UploadedFile.php` — original wrapper source.
+- `class/xion/FileUpload.php` — fluent helper source (FT46).
 - `class/xion/ControllerBase.php::sendFile` — binary response helper.
