@@ -38,6 +38,9 @@ Every failure response uses the same envelope, documented in OpenAPI as `ApiFail
 | `UPLOAD-FILE-REQUIRED` | 400 | Upload file is required. | Thrown by `UploadedFile::validate()` when the upload is missing or `is_uploaded_file()` returns false. |
 | `UPLOAD-TOO-LARGE` | 413 | Upload exceeds size limit. | Thrown by `UploadedFile::validate(['maxBytes' => N])` when `size() > N`. |
 | `UPLOAD-MIME-REJECTED` | 415 | Upload mime type is not allowed. | Thrown by `UploadedFile::validate(['allowedMime' => [...]])` when `finfo` mime is not on the allowlist. |
+| `PRECONDITION-REQUIRED` | 428 | If-Match header is required for this operation. | Thrown by `OptimisticLock::requireVersion()` when a conditional write is attempted without an `If-Match` header (RFC 9110 §13.1). |
+| `PRECONDITION-FAILED` | 412 | The resource was modified by another request. Fetch the latest version and retry. | Thrown by `OptimisticLock::conflict()` when a conditional UPDATE affects zero rows, indicating a concurrent writer incremented the version. |
+| `CONFLICT` | 409 | A conflicting operation is already in progress. | Reserved for operations where a second request conflicts with one already underway (e.g. duplicate idempotency key). |
 
 ## Adding a new error code
 

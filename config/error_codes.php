@@ -55,4 +55,16 @@ return [
         'message' => 'Upload mime type is not allowed.',
         'httpStatus' => 415,
     ],
+    'PRECONDITION-REQUIRED' => [
+        'message' => 'If-Match header is required for this operation.',
+        'httpStatus' => 428,
+    ],
+    'PRECONDITION-FAILED' => [
+        'message' => 'The resource was modified by another request. Fetch the latest version and retry.',
+        'httpStatus' => 412,
+    ],
+    'CONFLICT' => [
+        'message' => 'A conflicting operation is already in progress.',
+        'httpStatus' => 409,
+    ],
 ];
