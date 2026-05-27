@@ -81,7 +81,9 @@ final class ContentVersionTest extends TestCase
         $this->cv->save('post', '1', 'v2');
         $row = $this->cv->get('post', '1');
         $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(2, (int)$row['version']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('v2', $row['body']);
     }
 
@@ -90,6 +92,7 @@ final class ContentVersionTest extends TestCase
         $this->cv->save('post', '1', 'v1');
         $this->cv->save('post', '1', 'v2');
         $row = $this->cv->get('post', '1', 1);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('v1', $row['body']);
     }
 
@@ -130,6 +133,7 @@ final class ContentVersionTest extends TestCase
         $newVer = $this->cv->rollback('post', '1', 1);
         $this->assertSame(3, $newVer);
         $row = $this->cv->get('post', '1');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('original', $row['body']);
     }
 
@@ -160,6 +164,7 @@ final class ContentVersionTest extends TestCase
         $this->assertSame(2, $deleted);
         $this->assertSame(3, $this->cv->count('post', '1'));
         $row = $this->cv->get('post', '1');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('v5', $row['body']);
     }
 
