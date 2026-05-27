@@ -61,7 +61,7 @@ final class EmailBounce
      * Hard bounces and complaints are always suppressed.
      * Soft bounces are optionally suppressed ($suppress = false by default).
      *
-     * @param  bool $suppress Whether to add to the suppression list (default true for hard, false for soft).
+     * @param  bool|null $suppress Whether to add to the suppression list (default true for hard, false for soft).
      * @return int New bounce record ID.
      * @throws \InvalidArgumentException on empty email or invalid type.
      */
