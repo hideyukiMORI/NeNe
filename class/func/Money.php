@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace Nene\Func;
 
 /**
@@ -29,7 +31,8 @@ final readonly class Money
     public function __construct(
         private int $amount,
         private string $currency = 'JPY',
-    ) {}
+    ) {
+    }
 
     /**
      * Named constructor for clarity.
@@ -47,8 +50,14 @@ final readonly class Money
         return new self(0, $currency);
     }
 
-    public function amount(): int    { return $this->amount; }
-    public function currency(): string { return $this->currency; }
+    public function amount(): int
+    {
+        return $this->amount;
+    }
+    public function currency(): string
+    {
+        return $this->currency;
+    }
 
     /**
      * Add another Money value of the same currency.
@@ -112,9 +121,18 @@ final readonly class Money
         return new self(-$this->amount, $this->currency);
     }
 
-    public function isZero(): bool     { return $this->amount === 0; }
-    public function isPositive(): bool { return $this->amount > 0; }
-    public function isNegative(): bool { return $this->amount < 0; }
+    public function isZero(): bool
+    {
+        return $this->amount === 0;
+    }
+    public function isPositive(): bool
+    {
+        return $this->amount > 0;
+    }
+    public function isNegative(): bool
+    {
+        return $this->amount < 0;
+    }
 
     /**
      * Value equality (same amount AND same currency).
