@@ -2,188 +2,191 @@
 
 declare(strict_types=1);
 
-namespace Nene\Tests\Unit\Xion;
+namespace Tests\Unit\Xion;
 
 use Nene\Xion\SurveyResponse;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Unit tests for SurveyResponse.
- */
 final class SurveyResponseTest extends TestCase
 {
-    private PDO $db;
+    private PDO $pdo;
     private SurveyResponse $sr;
 
     protected function setUp(): void
     {
-        $this->db = new PDO('sqlite::memory:');
-        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->db->exec('
+        $this->pdo = new PDO('sqlite::memory:');
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->pdo->exec('
             CREATE TABLE survey_responses (
                 id           INTEGER PRIMARY KEY AUTOINCREMENT,
-                survey_id    VARCHAR(255) NOT NULL,
-                user_id      VARCHAR(255) NOT NULL,
-                question_key VARCHAR(255) NOT NULL,
-                answer       TEXT         NOT NULL DEFAULT \'\',
-                created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE (survey_id, user_id, question_key)
+                survey_name  VARCHAR(100) NOT NULL,
+                respondent   VARCHAR(255) NULL,
+                submitted_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         ');
-        $this->sr = new SurveyResponse($this->db);
+        $this->pdo->exec('
+            CREATE TABLE survey_answers (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                response_id  INTEGER      NOT NULL,
+                question_key VARCHAR(100) NOT NULL,
+                answer       TEXT         NOT NULL
+            )
+        ');
+        $this->sr = new SurveyResponse($this->pdo);
     }
 
     // ── submit ────────────────────────────────────────────────────────────────
 
+    public function testSubmitReturnsId(): void
+    {
+        $id = $this->sr->submit('nps', 'user-1', ['score' => '9']);
+        $this->assertGreaterThan(0, $id);
+    }
+
+    public function testSubmitStoresResponseHeader(): void
+    {
+        $id  = $this->sr->submit('nps', 'user-1', ['score' => '9']);
+        $row = $this->sr->find($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('nps', $row['survey_name']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('user-1', $row['respondent']);
+    }
+
     public function testSubmitStoresAnswers(): void
     {
-        $this->sr->submit('s1', 'user-1', ['q1' => 'yes', 'q2' => 'no']);
-        $answers = $this->sr->get('s1', 'user-1');
-        $this->assertSame(['q1' => 'yes', 'q2' => 'no'], $answers);
+        $id      = $this->sr->submit('nps', 'user-1', ['score' => '9', 'comment' => 'Great!']);
+        $answers = $this->sr->answers($id);
+        $this->assertSame('9', $answers['score']);
+        $this->assertSame('Great!', $answers['comment']);
     }
 
-    public function testSubmitIsUpsert(): void
+    public function testSubmitAllowsNullRespondent(): void
     {
-        $this->sr->submit('s1', 'user-1', ['q1' => 'yes']);
-        $this->sr->submit('s1', 'user-1', ['q1' => 'no']); // update
-        $this->assertSame('no', $this->sr->getAnswer('s1', 'user-1', 'q1'));
+        $id  = $this->sr->submit('nps', null, ['score' => '7']);
+        $row = $this->sr->find($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertNull($row['respondent']);
     }
 
-    public function testSubmitThrowsOnEmptySurveyId(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->sr->submit('', 'user-1', ['q1' => 'yes']);
-    }
-
-    public function testSubmitThrowsOnEmptyUserId(): void
+    public function testSubmitThrowsOnEmptySurveyName(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->sr->submit('s1', '', ['q1' => 'yes']);
+        $this->sr->submit('', 'user-1', ['score' => '5']);
     }
 
     public function testSubmitThrowsOnEmptyAnswers(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->sr->submit('s1', 'user-1', []);
+        $this->sr->submit('nps', 'user-1', []);
     }
 
-    // ── hasResponded ──────────────────────────────────────────────────────────
+    // ── find ──────────────────────────────────────────────────────────────────
 
-    public function testHasRespondedTrueAfterSubmit(): void
+    public function testFindReturnsNullForMissingId(): void
     {
-        $this->sr->submit('s1', 'user-1', ['q1' => 'yes']);
-        $this->assertTrue($this->sr->hasResponded('s1', 'user-1'));
+        $this->assertNull($this->sr->find(9999));
     }
 
-    public function testHasRespondedFalseBeforeSubmit(): void
+    // ── delete ────────────────────────────────────────────────────────────────
+
+    public function testDeleteRemovesResponseAndAnswers(): void
     {
-        $this->assertFalse($this->sr->hasResponded('s1', 'user-1'));
+        $id = $this->sr->submit('nps', 'user-1', ['score' => '8', 'comment' => 'Good']);
+        $this->assertTrue($this->sr->delete($id));
+        $this->assertNull($this->sr->find($id));
+        $this->assertSame([], $this->sr->answers($id));
     }
 
-    public function testHasRespondedIsUserScoped(): void
+    public function testDeleteReturnsFalseForMissingId(): void
     {
-        $this->sr->submit('s1', 'user-1', ['q1' => 'yes']);
-        $this->assertFalse($this->sr->hasResponded('s1', 'user-2'));
+        $this->assertFalse($this->sr->delete(9999));
     }
 
-    // ── get ───────────────────────────────────────────────────────────────────
+    // ── answers ───────────────────────────────────────────────────────────────
 
-    public function testGetReturnsEmptyForNoResponse(): void
+    public function testAnswersReturnsEmptyForMissingResponseId(): void
     {
-        $this->assertSame([], $this->sr->get('s1', 'user-1'));
+        $this->assertSame([], $this->sr->answers(9999));
     }
 
-    public function testGetIsUserScoped(): void
+    // ── forSurvey ─────────────────────────────────────────────────────────────
+
+    public function testForSurveyReturnsNewestFirst(): void
     {
-        $this->sr->submit('s1', 'user-1', ['q1' => 'a']);
-        $this->sr->submit('s1', 'user-2', ['q1' => 'b']);
-        $this->assertSame(['q1' => 'a'], $this->sr->get('s1', 'user-1'));
+        $id1 = $this->sr->submit('nps', 'user-1', ['score' => '9']);
+        $id2 = $this->sr->submit('nps', 'user-2', ['score' => '7']);
+        $list = $this->sr->forSurvey('nps');
+        $this->assertCount(2, $list);
+        $this->assertSame($id2, (int)$list[0]['id']);
+        $this->assertSame($id1, (int)$list[1]['id']);
     }
 
-    // ── getAnswer ─────────────────────────────────────────────────────────────
-
-    public function testGetAnswerReturnsAnswer(): void
+    public function testForSurveyIsIsolatedBySurvey(): void
     {
-        $this->sr->submit('s1', 'user-1', ['q1' => 'yes']);
-        $this->assertSame('yes', $this->sr->getAnswer('s1', 'user-1', 'q1'));
+        $this->sr->submit('nps', 'user-1', ['score' => '9']);
+        $this->sr->submit('csat', 'user-2', ['rating' => '5']);
+        $this->assertCount(1, $this->sr->forSurvey('nps'));
+        $this->assertCount(1, $this->sr->forSurvey('csat'));
     }
 
-    public function testGetAnswerReturnsNullForMissingQuestion(): void
+    public function testForSurveyReturnsEmptyWhenNone(): void
     {
-        $this->assertNull($this->sr->getAnswer('s1', 'user-1', 'missing'));
+        $this->assertSame([], $this->sr->forSurvey('unknown'));
     }
 
-    // ── respondentCount ───────────────────────────────────────────────────────
-
-    public function testRespondentCountCountsDistinctUsers(): void
+    public function testForSurveyRespectsLimitOffset(): void
     {
-        $this->sr->submit('s1', 'user-1', ['q1' => 'a']);
-        $this->sr->submit('s1', 'user-1', ['q2' => 'b']); // same user
-        $this->sr->submit('s1', 'user-2', ['q1' => 'c']);
-        $this->assertSame(2, $this->sr->respondentCount('s1'));
+        for ($i = 0; $i < 5; $i++) {
+            $this->sr->submit('nps', 'user-' . $i, ['score' => (string)$i]);
+        }
+        $page1 = $this->sr->forSurvey('nps', 3, 0);
+        $page2 = $this->sr->forSurvey('nps', 3, 3);
+        $this->assertCount(3, $page1);
+        $this->assertCount(2, $page2);
     }
 
-    public function testRespondentCountZeroForNoResponses(): void
+    // ── countForSurvey ────────────────────────────────────────────────────────
+
+    public function testCountForSurvey(): void
     {
-        $this->assertSame(0, $this->sr->respondentCount('s1'));
+        $this->sr->submit('nps', 'user-1', ['score' => '9']);
+        $this->sr->submit('nps', 'user-2', ['score' => '7']);
+        $this->sr->submit('csat', 'user-3', ['rating' => '5']);
+        $this->assertSame(2, $this->sr->countForSurvey('nps'));
+        $this->assertSame(1, $this->sr->countForSurvey('csat'));
     }
 
-    // ── tally ─────────────────────────────────────────────────────────────────
+    // ── answerFrequency ───────────────────────────────────────────────────────
 
-    public function testTallyCountsAnswers(): void
+    public function testAnswerFrequencyReturnsCounts(): void
     {
-        $this->sr->submit('s1', 'user-1', ['q1' => 'yes']);
-        $this->sr->submit('s1', 'user-2', ['q1' => 'yes']);
-        $this->sr->submit('s1', 'user-3', ['q1' => 'no']);
-        $tally = $this->sr->tally('s1', 'q1');
-        $this->assertSame(2, $tally['yes']);
-        $this->assertSame(1, $tally['no']);
+        $this->sr->submit('nps', 'u1', ['score' => '9']);
+        $this->sr->submit('nps', 'u2', ['score' => '9']);
+        $this->sr->submit('nps', 'u3', ['score' => '7']);
+
+        $freq = $this->sr->answerFrequency('nps', 'score');
+        $this->assertSame(2, $freq['9']);
+        $this->assertSame(1, $freq['7']);
     }
 
-    public function testTallyReturnsEmptyForNoAnswers(): void
+    public function testAnswerFrequencySortsByCountDesc(): void
     {
-        $this->assertSame([], $this->sr->tally('s1', 'q1'));
+        $this->sr->submit('nps', 'u1', ['score' => '9']);
+        $this->sr->submit('nps', 'u2', ['score' => '9']);
+        $this->sr->submit('nps', 'u3', ['score' => '7']);
+
+        $freq = $this->sr->answerFrequency('nps', 'score');
+        $keys = array_keys($freq);
+        // PHP converts numeric string keys to int; compare with ==
+        $this->assertEquals('9', $keys[0]);
     }
 
-    // ── deleteUser ────────────────────────────────────────────────────────────
-
-    public function testDeleteUserRemovesResponses(): void
+    public function testAnswerFrequencyReturnsEmptyWhenNone(): void
     {
-        $this->sr->submit('s1', 'user-1', ['q1' => 'yes']);
-        $this->assertTrue($this->sr->deleteUser('s1', 'user-1'));
-        $this->assertFalse($this->sr->hasResponded('s1', 'user-1'));
-    }
-
-    public function testDeleteUserReturnsFalseIfNoneFound(): void
-    {
-        $this->assertFalse($this->sr->deleteUser('s1', 'user-99'));
-    }
-
-    public function testDeleteUserDoesNotAffectOtherUsers(): void
-    {
-        $this->sr->submit('s1', 'user-1', ['q1' => 'yes']);
-        $this->sr->submit('s1', 'user-2', ['q1' => 'no']);
-        $this->sr->deleteUser('s1', 'user-1');
-        $this->assertTrue($this->sr->hasResponded('s1', 'user-2'));
-    }
-
-    // ── deleteSurvey ──────────────────────────────────────────────────────────
-
-    public function testDeleteSurveyRemovesAll(): void
-    {
-        $this->sr->submit('s1', 'user-1', ['q1' => 'yes']);
-        $this->sr->submit('s1', 'user-2', ['q1' => 'no']);
-        $this->assertSame(2, $this->sr->deleteSurvey('s1'));
-        $this->assertSame(0, $this->sr->respondentCount('s1'));
-    }
-
-    public function testDeleteSurveyDoesNotAffectOtherSurveys(): void
-    {
-        $this->sr->submit('s1', 'user-1', ['q1' => 'yes']);
-        $this->sr->submit('s2', 'user-1', ['q1' => 'no']);
-        $this->sr->deleteSurvey('s1');
-        $this->assertTrue($this->sr->hasResponded('s2', 'user-1'));
+        $this->assertSame([], $this->sr->answerFrequency('nps', 'score'));
     }
 }
