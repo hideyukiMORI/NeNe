@@ -62,6 +62,7 @@
         "analyze:file": "bash tools/phan-file.sh",
         "make:xion": "@php tools/make-xion.php",
         "xion:index": "@php tools/xion-index.php",
+        "ft:done": "@php tools/ft-done.php",
         "format": "php-cs-fixer fix --config=.php-cs-fixer.dist.php",
         "format:check": "php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff",
         "precommit": [

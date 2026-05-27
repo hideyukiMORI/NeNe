@@ -113,15 +113,26 @@ PHP;
 file_put_contents($classFile, $classBody . "\n");
 file_put_contents($testFile,  $testBody  . "\n");
 
+// ── Register in INDEX.md ──────────────────────────────────────────────────────
+
+$indexScript = __DIR__ . '/xion-index.php';
+if (file_exists($indexScript)) {
+    passthru("php {$indexScript}", $indexExit);
+    if ($indexExit !== 0) {
+        fwrite(STDERR, "Warning: xion-index.php exited with code {$indexExit}\n");
+    }
+}
+
 // ── Summary ───────────────────────────────────────────────────────────────────
 
 echo "Created:\n";
 echo "  class/xion/{$name}.php\n";
 echo "  tests/Unit/Xion/{$name}Test.php\n";
+echo "  class/xion/INDEX.md updated (Uncategorized)\n";
 echo "\n";
 echo "Next steps:\n";
 echo "  1. Edit the class body and add your public methods\n";
 echo "  2. Add the table DDL to class/xion/SchemaDefinition.php\n";
-echo "  3. Add an entry to class/xion/INDEX.md  (or run: composer xion:index)\n";
+echo "  3. Move the Uncategorized entry in class/xion/INDEX.md to the right section\n";
 echo "  4. Write your tests\n";
 echo "  5. composer analyze:file -- class/xion/{$name}.php tests/Unit/Xion/{$name}Test.php\n";

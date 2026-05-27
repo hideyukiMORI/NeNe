@@ -103,6 +103,13 @@ foreach ($classDesc as $cls => $_) {
     }
 }
 
+// Remove any existing empty Uncategorized section first (table has no data rows)
+$updated = (string)preg_replace(
+    '/\n---\n\n## Uncategorized\n\n_[^\n]+_\n\n\| Class \| Description \|\n\|[-| ]+\|\n\n?/s',
+    "\n",
+    $updated
+);
+
 if ($newClasses !== []) {
     // Strip trailing newlines then append the section
     $updated = rtrim($updated) . "\n\n";

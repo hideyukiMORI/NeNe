@@ -31,12 +31,31 @@ composer make:xion -- ClassName
 ```
 
 Creates `class/xion/ClassName.php` + `tests/Unit/Xion/ClassNameTest.php` with
-the PDO injection skeleton. Then:
+the PDO injection skeleton, **and automatically adds the class to the
+Uncategorized section of `class/xion/INDEX.md`**. Then:
 
 1. Fill in the public API and table DDL
 2. Add the table to `class/xion/SchemaDefinition.php`
-3. Run `composer xion:index` to refresh the class index
+3. Move the Uncategorized entry in `class/xion/INDEX.md` to the right section
 4. Run `composer analyze:file -- class/xion/ClassName.php tests/Unit/Xion/ClassNameTest.php`
+
+---
+
+## Completing an FT
+
+After merging the PR, run:
+
+```bash
+composer ft:done -- FT265 ClassName "one-line description of what it does" 712
+```
+
+Updates three files in one shot:
+
+| File | Change |
+|---|---|
+| `docs/todo/current.md` | Advances `FT1–FT264 are complete` → `FT1–FT265` |
+| `docs/field-trials/candidates.md` | Prepends archive entry |
+| `docs/roadmap.md` | Advances `FT1–FT264 complete as of …` → `FT1–FT265` |
 
 ---
 
