@@ -102,7 +102,7 @@ final class SearchQueryTest extends TestCase
 
     public function testNormalizeCollapsesWhitespace(): void
     {
-        self::assertSame('hello world', SearchQuery::normalize("hello  world"));
+        self::assertSame('hello world', SearchQuery::normalize('hello  world'));
     }
 
     public function testNormalizeTrimsLeadingTrailing(): void
