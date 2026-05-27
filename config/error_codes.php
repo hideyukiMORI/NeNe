@@ -55,4 +55,12 @@ return [
         'message' => 'Upload mime type is not allowed.',
         'httpStatus' => 415,
     ],
+    'BATCH-TOO-LARGE' => [
+        'message' => 'Batch request exceeds the maximum number of items.',
+        'httpStatus' => 400,
+    ],
+    'BATCH-ITEM-FAILED' => [
+        'message' => 'One or more batch items failed.',
+        'httpStatus' => 422,
+    ],
 ];

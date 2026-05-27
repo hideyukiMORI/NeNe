@@ -38,6 +38,8 @@ Every failure response uses the same envelope, documented in OpenAPI as `ApiFail
 | `UPLOAD-FILE-REQUIRED` | 400 | Upload file is required. | Thrown by `UploadedFile::validate()` when the upload is missing or `is_uploaded_file()` returns false. |
 | `UPLOAD-TOO-LARGE` | 413 | Upload exceeds size limit. | Thrown by `UploadedFile::validate(['maxBytes' => N])` when `size() > N`. |
 | `UPLOAD-MIME-REJECTED` | 415 | Upload mime type is not allowed. | Thrown by `UploadedFile::validate(['allowedMime' => [...]])` when `finfo` mime is not on the allowlist. |
+| `BATCH-TOO-LARGE` | 400 | Batch request exceeds the maximum number of items. | Returned by batch endpoints when the input array exceeds the configured per-endpoint maximum (guard with `BATCH-TOO-LARGE` before the loop). |
+| `BATCH-ITEM-FAILED` | 422 | One or more batch items failed. | Recorded per-item in `BatchResult::addFailure()` when a single batch item cannot be processed; the overall response may be 207 (partial) or 422 (all failed). |
 
 ## Adding a new error code
 
