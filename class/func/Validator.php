@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace Nene\Func;
 
 /**
@@ -29,7 +31,9 @@ final class Validator
     /**
      * @param array<string, mixed> $input The input array to validate (e.g. from $_POST or parsed JSON).
      */
-    public function __construct(private readonly array $input) {}
+    public function __construct(private readonly array $input)
+    {
+    }
 
     // -----------------------------------------------------------------------
     // Rules
