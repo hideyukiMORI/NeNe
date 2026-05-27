@@ -53,7 +53,9 @@ final class UserGroupTest extends TestCase
         $id  = $this->ug->create('engineers', 'Engineering team');
         $row = $this->ug->find($id);
         $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('engineers', $row['name']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Engineering team', $row['description']);
     }
 
@@ -67,6 +69,7 @@ final class UserGroupTest extends TestCase
         $this->ug->create('devops');
         $row = $this->ug->findByName('devops');
         $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('devops', $row['name']);
     }
 
