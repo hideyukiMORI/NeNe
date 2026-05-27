@@ -55,4 +55,8 @@ return [
         'message' => 'Upload mime type is not allowed.',
         'httpStatus' => 415,
     ],
+    'VALIDATION-FAILED' => [
+        'message' => 'One or more input fields failed validation.',
+        'httpStatus' => 422,
+    ],
 ];
