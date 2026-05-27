@@ -6,9 +6,24 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT200 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT210 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
 
 ## Recently Completed
+
+### 2026-05-27 — FT201–FT210: Xion sixth extended wave (10 trials)
+
+Continuous wave of 10 field trials adding further Xion helper patterns. All PRs #641–#650.
+
+**FT201 — InventoryStock**: `InventoryStock` product/SKU stock tracking with atomic three-phase reserve/release/commit; inventory_log audit trail. PR #641.
+**FT202 — TimeEntry**: `TimeEntry` work time tracking with start/stop timers and manual entries; totalSeconds() per project. PR #642.
+**FT203 — TimeSlot**: `TimeSlot` appointment/time-slot booking with capacity; atomic UPDATE WHERE booked < capacity prevents overbooking. PR #643.
+**FT204 — IntegrationLog**: `IntegrationLog` external API call log with service/endpoint/status/body/duration; errors() surfaces non-2xx; deleteOlderThan() TTL. PR #644.
+**FT205 — GdprRequest**: `GdprRequest` GDPR data-subject request tracking (access/rectification/erasure/portability); pending→acknowledged→completed|rejected. PR #645.
+**FT206 — WaitlistEntry**: `WaitlistEntry` product/feature waitlist with queue positioning; inviteNext() batch; position() 1-based rank. PR #646.
+**FT207 — TaxRate**: `TaxRate` regional tax rate lookup by region+category; cross-driver upsert; calculateCents()/totalWithTaxCents() integer-cent safety. PR #647.
+**FT208 — DeviceToken**: `DeviceToken` push notification device token management per user; register() reactivates existing; deleteInactive() cleanup. PR #648.
+**FT209 — ContentTag**: `ContentTag` flexible entity tagging; tags normalised to lowercase slugs; cloud() tag→count map; entitiesWith() reverse lookup. PR #649.
+**FT210 — ResourceLock**: `ResourceLock` advisory entity locking with TTL; acquire() returns int|null; extend(); releaseExpired() cron cleanup. PR #650.
 
 ### 2026-05-27 — FT196–FT200: Xion fifth extended wave (5 trials)
 

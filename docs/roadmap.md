@@ -186,7 +186,7 @@ Future candidates:
 
 ## 7. Field Trials
 
-Status: methodology adopted (ADR 0002). FT1–FT200 complete as of 2026-05-27 (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61).
+Status: methodology adopted (ADR 0002). FT1–FT210 complete as of 2026-05-27 (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61).
 
 Goal:
 
@@ -239,6 +239,7 @@ Completed (wave summary):
 - **FT176–FT185**: Xion third extended wave. 10 trials covering colored labels, ordered checklists, emoji reactions, @-mention tracking, watchlists, file attachments, saved searches, content filtering, user reminders, and knowledge base articles. PRs #613–#622.
 - **FT186–FT195**: Xion fourth extended wave. 10 trials covering support ticketing, event sourcing log, daily digest accumulator, per-resource ACL, 2FA backup codes, typed global settings, ordered media gallery, entity reviews with ratings, FAQ articles, and gamification tier tracking. PRs #624–#633.
 - **FT196–FT200**: Xion fifth extended wave. 5 trials covering CSV import job tracking with per-row errors, topic-based pub/sub subscriptions, e-commerce orders with line items, deployment version history, and user cohort/segment assignment. PRs #635–#639.
+- **FT201–FT210**: Xion sixth extended wave. 10 trials covering inventory stock tracking with atomic reserve/commit, work time entries with start/stop timers, appointment time slot booking with capacity, external API call logging, GDPR data-subject request tracking, product/feature waitlist management, regional tax rate calculation, push notification device token management, flexible entity tagging with tag clouds, and advisory resource locking with TTL. PRs #641–#650.
 
 Future candidates:
 

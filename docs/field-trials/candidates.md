@@ -14,7 +14,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ## Active candidates
 
-The Xion helper wave (FT78–FT200) is ongoing as of 2026-05-27. Trigger-based and structural candidates are listed in the next section.
+The Xion helper wave (FT78–FT210) is ongoing as of 2026-05-27. Trigger-based and structural candidates are listed in the next section.
 
 ---
 
@@ -54,6 +54,16 @@ The Xion helper wave (FT78–FT200) is ongoing as of 2026-05-27. Trigger-based a
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT210 — ResourceLock** (2026-05-27): `Nene\Xion\ResourceLock` — advisory entity locking with TTL; acquire() int|null; extend(); releaseExpired() cron cleanup. PR #650.
+- **FT209 — ContentTag** (2026-05-27): `Nene\Xion\ContentTag` — flexible entity tagging; tags normalised to lowercase slugs; cloud() tag→count; entitiesWith() reverse lookup. PR #649.
+- **FT208 — DeviceToken** (2026-05-27): `Nene\Xion\DeviceToken` — push notification device token management per user; register() reactivates existing; deleteInactive() cleanup. PR #648.
+- **FT207 — TaxRate** (2026-05-27): `Nene\Xion\TaxRate` — regional tax rate lookup by region+category; calculateCents()/totalWithTaxCents() integer-cent safety. PR #647.
+- **FT206 — WaitlistEntry** (2026-05-27): `Nene\Xion\WaitlistEntry` — product/feature waitlist with queue positioning; inviteNext() batch; position() 1-based rank. PR #646.
+- **FT205 — GdprRequest** (2026-05-27): `Nene\Xion\GdprRequest` — GDPR data-subject request tracking (access/rectification/erasure/portability); pending→acknowledged→completed|rejected. PR #645.
+- **FT204 — IntegrationLog** (2026-05-27): `Nene\Xion\IntegrationLog` — external API call log with service/endpoint/status/body/duration; errors() non-2xx; deleteOlderThan() TTL. PR #644.
+- **FT203 — TimeSlot** (2026-05-27): `Nene\Xion\TimeSlot` — appointment/time-slot booking with capacity; atomic UPDATE WHERE booked < capacity. PR #643.
+- **FT202 — TimeEntry** (2026-05-27): `Nene\Xion\TimeEntry` — work time tracking with start/stop timers and manual entries; totalSeconds(). PR #642.
+- **FT201 — InventoryStock** (2026-05-27): `Nene\Xion\InventoryStock` — product/SKU stock tracking with atomic three-phase reserve/release/commit; inventory_log. PR #641.
 - **FT200 — UserSegment** (2026-05-27): `Nene\Xion\UserSegment` — user cohort/segment assignment; two-table design (definitions + members); idempotent addUser; segmentsFor/usersIn. PR #639.
 - **FT199 — AppVersion** (2026-05-27): `Nene\Xion\AppVersion` — deployment/release version history per environment; current() latest; history() newest-first; environments(). PR #638.
 - **FT198 — OrderLine** (2026-05-27): `Nene\Xion\OrderLine` — e-commerce order with line items (two-table); integer-cent amounts; pending→confirmed→shipped→delivered|cancelled. PR #637.
