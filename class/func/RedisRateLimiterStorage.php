@@ -14,7 +14,9 @@ use Predis\Client;
  */
 final class RedisRateLimiterStorage implements RateLimiterStorageInterface
 {
-    public function __construct(private readonly Client $redis) {}
+    public function __construct(private readonly Client $redis)
+    {
+    }
 
     public function increment(string $key, int $windowSeconds): int
     {

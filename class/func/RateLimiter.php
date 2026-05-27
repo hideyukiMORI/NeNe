@@ -35,7 +35,9 @@ use Nene\Xion\JsonResponder;
  */
 final class RateLimiter
 {
-    public function __construct(private readonly RateLimiterStorageInterface $storage) {}
+    public function __construct(private readonly RateLimiterStorageInterface $storage)
+    {
+    }
 
     /**
      * Check the rate limit for a key.

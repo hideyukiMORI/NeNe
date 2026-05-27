@@ -38,7 +38,23 @@ Every failure response uses the same envelope, documented in OpenAPI as `ApiFail
 | `UPLOAD-FILE-REQUIRED` | 400 | Upload file is required. | Thrown by `UploadedFile::validate()` when the upload is missing or `is_uploaded_file()` returns false. |
 | `UPLOAD-TOO-LARGE` | 413 | Upload exceeds size limit. | Thrown by `UploadedFile::validate(['maxBytes' => N])` when `size() > N`. |
 | `UPLOAD-MIME-REJECTED` | 415 | Upload mime type is not allowed. | Thrown by `UploadedFile::validate(['allowedMime' => [...]])` when `finfo` mime is not on the allowlist. |
+| `ACCOUNT-LOCKED` | 423 | Account is locked due to too many failed login attempts. | Returned by login endpoints when `LoginAttemptTracker::isLocked()` is true. Cleared by `reset()` after successful authentication or by an admin SQL update. |
+| `BATCH-ITEM-FAILED` | 422 | One or more batch items failed. | Recorded per-item in `BatchResult::addFailure()` when a single batch item cannot be processed; the overall response may be 207 (partial) or 422 (all failed). |
+| `BATCH-TOO-LARGE` | 400 | Batch request exceeds the maximum number of items. | Returned by batch endpoints when the input array exceeds the configured per-endpoint maximum (guard with `BATCH-TOO-LARGE` before the loop). |
+| `CIRCUIT-OPEN` | 503 | The downstream service is temporarily unavailable. | Returned when a `CircuitBreaker` is in the OPEN state and the caller should not attempt the downstream call. See `docs/development/circuit-breaker.md`. |
+| `CONFLICT` | 409 | A conflicting operation is already in progress. | Reserved for operations where a second request conflicts with one already underway (e.g. duplicate idempotency key). |
+| `FORBIDDEN` | 403 | You do not have permission to perform this action. | Returned by `RoleGuard::require()` / `requireAny()` when the JWT `role` claim does not satisfy the endpoint's role requirement. |
+| `INVALID-TRANSITION` | 409 | The requested state transition is not allowed. | Thrown by `WorkflowDefinition::assertTransition()` when the `from → to` state pair is not in the workflow's allowed-transitions map. |
+| `JWT-INVALID` | 401 | The JWT token is invalid or expired. | Thrown by `JwtCodec::require()` when the `Authorization: Bearer` header is absent, the token is malformed, the signature is wrong, the token has expired, or the algorithm is not HS256. |
+| `PRECONDITION-FAILED` | 412 | The resource was modified by another request. Fetch the latest version and retry. | Thrown by `OptimisticLock::conflict()` when a conditional UPDATE affects zero rows, indicating a concurrent writer incremented the version. |
+| `PRECONDITION-REQUIRED` | 428 | If-Match header is required for this operation. | Thrown by `OptimisticLock::requireVersion()` when a conditional write is attempted without an `If-Match` header (RFC 9110 §13.1). |
 | `RATE-LIMIT-EXCEEDED` | 429 | Too many requests. Please try again later. | Thrown by `RateLimiter::check()` when the per-key counter exceeds the configured limit within the current window. Response includes `Retry-After` header. |
+| `SIGNED-URL-EXPIRED` | 410 | The signed URL has expired. | Thrown by `SignedUrl::requireValid()` when the `expires` timestamp is in the past. |
+| `SIGNED-URL-INVALID` | 403 | The signed URL is invalid. | Thrown by `SignedUrl::requireValid()` when the signature does not match or required parameters are missing. |
+| `TOKEN-ALREADY-USED` | 409 | The reset token has already been used. | Returned by password-reset complete endpoint when `used_at` is not null. |
+| `TOKEN-EXPIRED` | 410 | The reset token has expired. | Returned by password-reset complete endpoint when `PasswordResetToken::isExpired()` is true. |
+| `VALIDATION-FAILED` | 422 | One or more input fields failed validation. | Returned by controllers using `Nene\Func\Validator` when `$v->passes()` returns false. Use `$v->errors()` or `$v->firstErrors()` to include field-level detail in the response body. |
+| `WEBHOOK-SIGNATURE-INVALID` | 401 | Webhook signature is invalid or stale. | Returned when inbound `X-Webhook-Signature` header is missing, malformed, or fails HMAC verification. See `docs/development/webhook-signing.md`. |
 
 ## Adding a new error code
 

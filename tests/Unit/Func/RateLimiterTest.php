@@ -181,7 +181,7 @@ final class RateLimiterTest extends TestCase
         $result  = $storage->increment('rate:key', 60);
 
         self::assertSame(1, $result);
-        self::assertSame('incr',   $callLog[0]['method']);
+        self::assertSame('incr', $callLog[0]['method']);
         self::assertSame('expire', $callLog[1]['method']);
         self::assertSame(['rate:key', 60], $callLog[1]['args']);
     }
@@ -210,7 +210,7 @@ final class RateLimiterTest extends TestCase
         self::assertSame(2, $result);
 
         $methods = array_column($callLog, 'method');
-        self::assertContains('incr',     $methods);
+        self::assertContains('incr', $methods);
         self::assertNotContains('expire', $methods);
     }
 
