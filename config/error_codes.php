@@ -55,6 +55,70 @@ return [
         'message' => 'Upload mime type is not allowed.',
         'httpStatus' => 415,
     ],
+    'ACCOUNT-LOCKED' => [
+        'message' => 'Account is locked due to too many failed login attempts.',
+        'httpStatus' => 423,
+    ],
+    'BATCH-ITEM-FAILED' => [
+        'message' => 'One or more batch items failed.',
+        'httpStatus' => 422,
+    ],
+    'BATCH-TOO-LARGE' => [
+        'message' => 'Batch request exceeds the maximum number of items.',
+        'httpStatus' => 400,
+    ],
+    'CIRCUIT-OPEN' => [
+        'message' => 'The downstream service is temporarily unavailable.',
+        'httpStatus' => 503,
+    ],
+    'CONFLICT' => [
+        'message' => 'A conflicting operation is already in progress.',
+        'httpStatus' => 409,
+    ],
+    'FORBIDDEN' => [
+        'message' => 'You do not have permission to perform this action.',
+        'httpStatus' => 403,
+    ],
+    'INVALID-TRANSITION' => [
+        'message' => 'The requested state transition is not allowed.',
+        'httpStatus' => 409,
+    ],
+    'JWT-INVALID' => [
+        'message' => 'The JWT token is invalid or expired.',
+        'httpStatus' => 401,
+    ],
+    'PRECONDITION-FAILED' => [
+        'message' => 'The resource was modified by another request. Fetch the latest version and retry.',
+        'httpStatus' => 412,
+    ],
+    'PRECONDITION-REQUIRED' => [
+        'message' => 'If-Match header is required for this operation.',
+        'httpStatus' => 428,
+    ],
+    'RATE-LIMIT-EXCEEDED' => [
+        'message' => 'Too many requests. Please try again later.',
+        'httpStatus' => 429,
+    ],
+    'SIGNED-URL-EXPIRED' => [
+        'message' => 'The signed URL has expired.',
+        'httpStatus' => 410,
+    ],
+    'SIGNED-URL-INVALID' => [
+        'message' => 'The signed URL is invalid.',
+        'httpStatus' => 403,
+    ],
+    'TOKEN-ALREADY-USED' => [
+        'message' => 'The reset token has already been used.',
+        'httpStatus' => 409,
+    ],
+    'TOKEN-EXPIRED' => [
+        'message' => 'The reset token has expired.',
+        'httpStatus' => 410,
+    ],
+    'VALIDATION-FAILED' => [
+        'message' => 'One or more input fields failed validation.',
+        'httpStatus' => 422,
+    ],
     'WEBHOOK-SIGNATURE-INVALID' => [
         'message' => 'Webhook signature is invalid or stale.',
         'httpStatus' => 401,

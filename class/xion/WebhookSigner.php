@@ -49,7 +49,8 @@ final readonly class WebhookSigner
     public function __construct(
         private string $secret,
         private int $tolerance = 300,
-    ) {}
+    ) {
+    }
 
     /**
      * Generate a signed header value for an outbound webhook.
