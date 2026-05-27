@@ -233,9 +233,9 @@ final class GdprRequest
     }
 
     /**
-     * Count requests grouped by type.
+     * Count requests of a given type.
      *
-     * @return array<string,int>  e.g. ['erasure' => 12, 'access' => 5]
+     * @return int
      */
     public function countByType(string $type): int
     {
