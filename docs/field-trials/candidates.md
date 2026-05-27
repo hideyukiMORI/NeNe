@@ -14,7 +14,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ## Active candidates
 
-The Xion helper wave (FT78–FT165) is complete as of 2026-05-27. No immediate Xion-class candidates remain. Trigger-based and structural candidates are listed in the next section.
+The Xion helper wave (FT78–FT175) is complete as of 2026-05-27. No immediate Xion-class candidates remain. Trigger-based and structural candidates are listed in the next section.
 
 ---
 
@@ -54,6 +54,16 @@ The Xion helper wave (FT78–FT165) is complete as of 2026-05-27. No immediate X
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT175 — UserNote** (2026-05-27): `Nene\Xion\UserNote` — admin/staff notes attached to user records with pinning. PR #611.
+- **FT174 — ScheduledTask** (2026-05-27): `Nene\Xion\ScheduledTask` — cron-style task schedule registry with last-run tracking and due() query. PR #610.
+- **FT173 — GuestSession** (2026-05-27): `Nene\Xion\GuestSession` — anonymous visitor session with key-value data bag; login promotion via linkUser(). PR #609.
+- **FT172 — PinCode** (2026-05-27): `Nene\Xion\PinCode` — short PIN/OTP issuance with attempt limiting and expiry; SHA-256 hash storage. PR #608.
+- **FT171 — PaymentRecord** (2026-05-27): `Nene\Xion\PaymentRecord` — simple payment/transaction ledger; integer-cent amounts; pending→paid|failed, paid→refunded. PR #607.
+- **FT170 — TrustScore** (2026-05-27): `Nene\Xion\TrustScore` — append-only fraud/trust score per user; signed deltas; below() for risk queries. PR #606.
+- **FT169 — TeamMembership** (2026-05-27): `Nene\Xion\TeamMembership` — team/org membership with per-member roles; idempotent add; cross-driver upsert. PR #605.
+- **FT168 — Approval** (2026-05-27): `Nene\Xion\Approval` — single-approver request/approve/reject workflow; cannot re-decide. PR #604.
+- **FT167 — ShareLink** (2026-05-27): `Nene\Xion\ShareLink` — shareable links with optional password, view limits, and TTL expiry. PR #603.
+- **FT166 — Quota** (2026-05-27): `Nene\Xion\Quota` — plan-based resource quota management; unlimited (0), TTL windows, auto-reset. PR #602.
 - **FT165 — FileChunk** (2026-05-27): `Nene\Xion\FileChunk` — chunked file upload tracking and reassembly coordination. PR #600.
 - **FT164 — CounterMetric** (2026-05-27): `Nene\Xion\CounterMetric` — named metric counters with daily/hourly bucket aggregation. PR #599.
 - **FT163 — PushSubscription** (2026-05-27): `Nene\Xion\PushSubscription` — Web Push notification subscription registry. PR #598.

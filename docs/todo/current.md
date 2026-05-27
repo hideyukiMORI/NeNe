@@ -6,9 +6,24 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT165 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is complete — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT175 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is complete — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
 
 ## Recently Completed
+
+### 2026-05-27 — FT166–FT175: Xion second extended wave (10 trials)
+
+Continuous wave of 10 field trials adding new Xion helper patterns. All PRs #602–#611.
+
+**FT166 — Quota**: `Quota` plan-based resource quota management; unlimited (0), optional TTL reset windows, auto-reset on consume(). PR #602.
+**FT167 — ShareLink**: `ShareLink` shareable links with optional password protection, view limits, and TTL expiry; password_hash omitted from resolve(). PR #603.
+**FT168 — Approval**: `Approval` single-approver request/approve/reject workflow; only pending records can be decided; cannot re-decide. PR #604.
+**FT169 — TeamMembership**: `TeamMembership` team/org membership with per-member roles; idempotent add (upserts role); cross-driver upsert. PR #605.
+**FT170 — TrustScore**: `TrustScore` append-only fraud/trust score per user; signed deltas; below() for risk queries; purgeOlderThan(). PR #606.
+**FT171 — PaymentRecord**: `PaymentRecord` payment/transaction ledger; integer-cent amounts; pending→paid|failed, paid→refunded; cannot re-decide. PR #607.
+**FT172 — PinCode**: `PinCode` short PIN/OTP (4–8 digits) with attempt limiting, expiry, and SHA-256 hash storage; one active PIN per user+purpose. PR #608.
+**FT173 — GuestSession**: `GuestSession` anonymous visitor sessions with JSON key-value data bag; login promotion via linkUser(); TTL with touch(). PR #609.
+**FT174 — ScheduledTask**: `ScheduledTask` cron-style task schedule registry; due() returns overdue tasks; complements CronLog. PR #610.
+**FT175 — UserNote**: `UserNote` admin/staff notes attached to user records; supports pinning (pinned-first ordering); CRM/support use case. PR #611.
 
 ### 2026-05-27 — FT141–FT165: Xion extended helper wave (25 trials)
 
@@ -287,7 +302,7 @@ Single-day wave of trial-driven improvements across the framework, documentation
 
 ## Next
 
-FT1–FT140 complete (FT36 deferred as ADR-class). The Xion helper wave is complete. Remaining work is trigger-based — see `docs/field-trials/candidates.md` for the 保留候補 list.
+FT1–FT175 complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61). The Xion helper wave is complete. Remaining work is trigger-based — see `docs/field-trials/candidates.md` for the 保留候補 list.
 
 ## Field Trials
 
