@@ -25,7 +25,8 @@ final class FileUpload
         private readonly string $tmpPath,
         private readonly int    $size,
         private readonly string $mimeType,
-    ) {}
+    ) {
+    }
 
     /**
      * Load an uploaded file from $_FILES, throwing 400 if absent or invalid.
@@ -142,8 +143,20 @@ final class FileUpload
         return $destPath;
     }
 
-    public function originalName(): string { return $this->originalName; }
-    public function tmpPath(): string      { return $this->tmpPath; }
-    public function size(): int            { return $this->size; }
-    public function mimeType(): string     { return $this->mimeType; }
+    public function originalName(): string
+    {
+        return $this->originalName;
+    }
+    public function tmpPath(): string
+    {
+        return $this->tmpPath;
+    }
+    public function size(): int
+    {
+        return $this->size;
+    }
+    public function mimeType(): string
+    {
+        return $this->mimeType;
+    }
 }
