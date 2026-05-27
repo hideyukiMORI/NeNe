@@ -56,7 +56,9 @@ final class AlertRuleTest extends TestCase
         $this->ar->define('cpu-high', 'cpu_percent', 90.0, 'gte');
         $this->ar->define('cpu-high', 'cpu_percent', 95.0, 'gt');
         $rule = $this->ar->find('cpu-high');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(95.0, (float)$rule['threshold']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('gt', $rule['condition_op']);
     }
 
@@ -133,6 +135,7 @@ final class AlertRuleTest extends TestCase
         $this->ar->define('cpu-high', 'cpu', 90.0, 'gt');
         $this->ar->evaluate('cpu-high', 95.0);
         $rule = $this->ar->find('cpu-high');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertNotNull($rule['last_triggered_at']);
     }
 
