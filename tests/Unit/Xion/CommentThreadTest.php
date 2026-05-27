@@ -9,7 +9,7 @@ use PDO;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Unit tests for CommentThread using an in-memory SQLite database.
+ * Unit tests for CommentThread.
  */
 final class CommentThreadTest extends TestCase
 {
@@ -20,19 +20,19 @@ final class CommentThreadTest extends TestCase
     {
         $this->db = new PDO('sqlite::memory:');
         $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->db->exec(
-            'CREATE TABLE comments (
-                id          INTEGER      PRIMARY KEY AUTOINCREMENT,
-                entity_type VARCHAR(64)  NOT NULL,
+        $this->db->exec('
+            CREATE TABLE comments (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                entity_type VARCHAR(100) NOT NULL,
                 entity_id   VARCHAR(255) NOT NULL,
+                user_id     VARCHAR(255) NOT NULL,
                 parent_id   INTEGER      DEFAULT NULL,
-                author_id   VARCHAR(255),
                 body        TEXT         NOT NULL,
-                depth       INTEGER      NOT NULL DEFAULT 0,
                 deleted_at  DATETIME     DEFAULT NULL,
-                created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-            )'
-        );
+                created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        ');
         $this->ct = new CommentThread($this->db);
     }
 
@@ -40,155 +40,164 @@ final class CommentThreadTest extends TestCase
 
     public function testPostReturnsId(): void
     {
-        $id = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $this->assertIsInt($id);
+        $id = $this->ct->post('post', '1', 'user-1', 'Hello!');
         $this->assertGreaterThan(0, $id);
     }
 
-    public function testPostedCommentAppearsInList(): void
+    public function testPostCreatesTopLevelComment(): void
     {
-        $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $list = $this->ct->list('article', '1');
-        $this->assertCount(1, $list);
-        $this->assertSame('Hello!', $list[0]['body']);
+        $id  = $this->ct->post('post', '1', 'user-1', 'Hello!');
+        $row = $this->ct->get($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertNull($row['parent_id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('Hello!', $row['body']);
     }
 
-    public function testPostedCommentHasDepthZero(): void
-    {
-        $id = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $list = $this->ct->list('article', '1');
-        $this->assertSame(0, $list[0]['depth']);
-    }
-
-    public function testPostEmptyBodyThrows(): void
+    public function testPostThrowsOnEmptyBody(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->ct->post('article', '1', 'user:1', '');
+        $this->ct->post('post', '1', 'user-1', '');
+    }
+
+    public function testPostThrowsOnEmptyEntityType(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->ct->post('', '1', 'user-1', 'Hello');
     }
 
     // ── reply ─────────────────────────────────────────────────────────────────
 
-    public function testReplyReturnsId(): void
+    public function testReplyLinksToParent(): void
     {
-        $parentId = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $replyId  = $this->ct->reply($parentId, 'user:2', 'Thanks!');
-        $this->assertIsInt($replyId);
-        $this->assertNotSame($parentId, $replyId);
+        $parentId = $this->ct->post('post', '1', 'user-1', 'Parent');
+        $replyId  = $this->ct->reply('post', '1', 'user-2', 'Reply', $parentId);
+        $row      = $this->ct->get($replyId);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame((string)$parentId, (string)$row['parent_id']);
     }
 
-    public function testReplyHasDepthOneMoreThanParent(): void
+    public function testReplyThrowsIfParentNotExists(): void
     {
-        $parentId = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $this->ct->reply($parentId, 'user:2', 'Thanks!');
-        $list = $this->ct->list('article', '1');
-        $this->assertSame(1, $list[1]['depth']);
+        $this->expectException(\RuntimeException::class);
+        $this->ct->reply('post', '1', 'user-1', 'Reply', 999);
     }
 
-    public function testReplyHasParentIdSet(): void
+    public function testReplyThrowsIfParentIsDeleted(): void
     {
-        $parentId = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $replyId  = $this->ct->reply($parentId, 'user:2', 'Thanks!');
-        $list     = $this->ct->list('article', '1');
-        $reply    = array_values(array_filter($list, fn ($c) => $c['id'] === $replyId))[0];
-        $this->assertSame($parentId, $reply['parent_id']);
+        $parentId = $this->ct->post('post', '1', 'user-1', 'Parent');
+        $this->ct->delete($parentId);
+        $this->expectException(\RuntimeException::class);
+        $this->ct->reply('post', '1', 'user-2', 'Reply', $parentId);
     }
 
-    public function testReplyToNonexistentParentThrows(): void
+    // ── edit ──────────────────────────────────────────────────────────────────
+
+    public function testEditUpdatesBody(): void
     {
+        $id = $this->ct->post('post', '1', 'user-1', 'Original');
+        $this->assertTrue($this->ct->edit($id, 'user-1', 'Updated'));
+        $row = $this->ct->get($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('Updated', $row['body']);
+    }
+
+    public function testEditReturnsFalseForWrongUser(): void
+    {
+        $id = $this->ct->post('post', '1', 'user-1', 'Original');
+        $this->assertFalse($this->ct->edit($id, 'user-2', 'Hijack'));
+    }
+
+    public function testEditThrowsOnEmptyBody(): void
+    {
+        $id = $this->ct->post('post', '1', 'user-1', 'Original');
         $this->expectException(\InvalidArgumentException::class);
-        $this->ct->reply(9999, 'user:1', 'Hello!');
+        $this->ct->edit($id, 'user-1', '');
     }
 
-    public function testReplyEmptyBodyThrows(): void
+    // ── delete ────────────────────────────────────────────────────────────────
+
+    public function testDeleteReplacesBodyWithTombstone(): void
     {
-        $parentId = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $this->expectException(\InvalidArgumentException::class);
-        $this->ct->reply($parentId, 'user:2', '   ');
+        $id = $this->ct->post('post', '1', 'user-1', 'Original');
+        $this->assertTrue($this->ct->delete($id, 'user-1'));
+        $row = $this->ct->get($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('[deleted]', $row['body']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertNotNull($row['deleted_at']);
     }
 
-    public function testReplyMaxDepthEnforced(): void
+    public function testDeleteReturnsFalseForWrongUser(): void
     {
-        // With maxDepth=2, depth 0→1→2 is allowed, depth 3 is not
-        $ct = new CommentThread($this->db, maxDepth: 2);
-        $d0 = $ct->post('article', '1', 'user:1', 'depth 0');
-        $d1 = $ct->reply($d0, 'user:1', 'depth 1');
-        $d2 = $ct->reply($d1, 'user:1', 'depth 2');
-        $this->expectException(\InvalidArgumentException::class);
-        $ct->reply($d2, 'user:1', 'depth 3 — too deep');
+        $id = $this->ct->post('post', '1', 'user-1', 'Original');
+        $this->assertFalse($this->ct->delete($id, 'user-2'));
     }
 
-    // ── softDelete ────────────────────────────────────────────────────────────
-
-    public function testSoftDeleteReturnsTrueByAuthor(): void
+    public function testDeleteWithNullUserIdForceDeletes(): void
     {
-        $id = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $this->assertTrue($this->ct->softDelete($id, 'user:1'));
+        $id = $this->ct->post('post', '1', 'user-1', 'Original');
+        $this->assertTrue($this->ct->delete($id, null));
     }
 
-    public function testSoftDeleteReturnsFalseByNonAuthor(): void
+    public function testDeleteIsIdempotentReturnsFalseSecondTime(): void
     {
-        $id = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $this->assertFalse($this->ct->softDelete($id, 'user:2'));
+        $id = $this->ct->post('post', '1', 'user-1', 'Original');
+        $this->ct->delete($id);
+        $this->assertFalse($this->ct->delete($id));
     }
 
-    public function testSoftDeleteReplacesBody(): void
+    // ── thread ────────────────────────────────────────────────────────────────
+
+    public function testThreadReturnsAllComments(): void
     {
-        $id = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $this->ct->softDelete($id, 'user:1');
-        $list = $this->ct->list('article', '1');
-        $this->assertSame('[deleted]', $list[0]['body']);
+        $this->ct->post('post', '1', 'user-1', 'A');
+        $this->ct->post('post', '1', 'user-2', 'B');
+        $this->assertCount(2, $this->ct->thread('post', '1'));
     }
 
-    public function testSoftDeleteNullsAuthorId(): void
+    public function testThreadIncludesDeletedAsTombstone(): void
     {
-        $id = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $this->ct->softDelete($id, 'user:1');
-        $list = $this->ct->list('article', '1');
-        $this->assertNull($list[0]['author_id']);
+        $id = $this->ct->post('post', '1', 'user-1', 'A');
+        $this->ct->delete($id);
+        $this->assertCount(1, $this->ct->thread('post', '1'));
     }
 
-    public function testSoftDeleteSetsDeletedAt(): void
+    public function testThreadIsEntityScoped(): void
     {
-        $id = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $this->ct->softDelete($id, 'user:1');
-        $list = $this->ct->list('article', '1');
-        $this->assertNotNull($list[0]['deleted_at']);
+        $this->ct->post('post', '1', 'user-1', 'A');
+        $this->ct->post('post', '2', 'user-1', 'B');
+        $this->assertCount(1, $this->ct->thread('post', '1'));
     }
 
-    public function testSoftDeleteAlreadyDeletedReturnsFalse(): void
+    // ── topLevel / replies ────────────────────────────────────────────────────
+
+    public function testTopLevelExcludesReplies(): void
     {
-        $id = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $this->ct->softDelete($id, 'user:1');
-        $this->assertFalse($this->ct->softDelete($id, 'user:1'));
+        $parentId = $this->ct->post('post', '1', 'user-1', 'Parent');
+        $this->ct->reply('post', '1', 'user-2', 'Reply', $parentId);
+        $this->assertCount(1, $this->ct->topLevel('post', '1'));
     }
 
-    // ── list ──────────────────────────────────────────────────────────────────
-
-    public function testListReturnsAllCommentsIncludingDeleted(): void
+    public function testRepliesReturnsChildComments(): void
     {
-        $id = $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $this->ct->softDelete($id, 'user:1');
-        $this->assertCount(1, $this->ct->list('article', '1'));
+        $parentId = $this->ct->post('post', '1', 'user-1', 'Parent');
+        $this->ct->reply('post', '1', 'user-2', 'Reply 1', $parentId);
+        $this->ct->reply('post', '1', 'user-3', 'Reply 2', $parentId);
+        $this->assertCount(2, $this->ct->replies($parentId));
     }
 
-    public function testListIsEntityTypeIsolated(): void
-    {
-        $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $this->assertEmpty($this->ct->list('product', '1'));
-    }
+    // ── count ─────────────────────────────────────────────────────────────────
 
-    public function testListIsEntityIdIsolated(): void
+    public function testCountExcludesDeletedComments(): void
     {
-        $this->ct->post('article', '1', 'user:1', 'Hello!');
-        $this->assertEmpty($this->ct->list('article', '2'));
-    }
-
-    public function testListOrdersByIdAscending(): void
-    {
-        $this->ct->post('article', '1', 'user:1', 'first');
-        $this->ct->post('article', '1', 'user:2', 'second');
-        $list = $this->ct->list('article', '1');
-        $this->assertSame('first', $list[0]['body']);
-        $this->assertSame('second', $list[1]['body']);
+        $id = $this->ct->post('post', '1', 'user-1', 'A');
+        $this->ct->post('post', '1', 'user-2', 'B');
+        $this->ct->delete($id);
+        $this->assertSame(1, $this->ct->count('post', '1'));
     }
 }
