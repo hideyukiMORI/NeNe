@@ -53,7 +53,9 @@ final class EmailQueueTest extends TestCase
         $id  = $this->eq->enqueue('user@example.com', 'Hi', 'Hello');
         $row = $this->eq->claim();
         $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame($id, (int)$row['id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(1, (int)$row['attempts']);
     }
 
@@ -72,6 +74,7 @@ final class EmailQueueTest extends TestCase
         $this->db->exec("UPDATE email_queue SET send_after = '2000-01-01' WHERE id = 1");
         $row = $this->eq->claim();
         $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(2, (int)$row['attempts']);
     }
 
@@ -81,7 +84,9 @@ final class EmailQueueTest extends TestCase
         $this->eq->claim();
         $this->assertTrue($this->eq->markSent($id));
         $row = $this->eq->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('sent', $row['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertNotNull($row['sent_at']);
     }
 
@@ -91,7 +96,9 @@ final class EmailQueueTest extends TestCase
         $this->eq->claim();
         $this->assertTrue($this->eq->markFailed($id, 'timeout'));
         $row = $this->eq->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('pending', $row['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('timeout', $row['error']);
     }
 
@@ -102,6 +109,7 @@ final class EmailQueueTest extends TestCase
         $this->db->exec("UPDATE email_queue SET attempts = 3 WHERE id = {$id}");
         $this->assertTrue($this->eq->markFailed($id, 'final error'));
         $row = $this->eq->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('failed', $row['status']);
     }
 
