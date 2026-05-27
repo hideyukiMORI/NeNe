@@ -55,4 +55,12 @@ return [
         'message' => 'Upload mime type is not allowed.',
         'httpStatus' => 415,
     ],
+    'SIGNED-URL-EXPIRED' => [
+        'message' => 'The signed URL has expired.',
+        'httpStatus' => 410,
+    ],
+    'SIGNED-URL-INVALID' => [
+        'message' => 'The signed URL is invalid.',
+        'httpStatus' => 403,
+    ],
 ];
