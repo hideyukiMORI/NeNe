@@ -6,9 +6,17 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT72 are complete (FT36 deferred as ADR-class); ADR-0001–0013 are in place. Next work is FT73+ — see **Field Trials** and **Backlog Candidates** below.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT77 are complete (FT36 deferred as ADR-class); ADR-0001–0013 are in place. Next work is FT78+ — see **Field Trials** and **Backlog Candidates** below.
 
 ## Recently Completed
+
+### 2026-05-27 — FT73–FT77: Infrastructure + auth + geo + identity wave (5 trials)
+
+**FT73 — Job Queue**: `JobQueue` enqueue/dequeue/complete/fail; atomic dequeue; delayed jobs. PR #507.
+**FT74 — Geo Helper**: `GeoHelper` distanceKm/distanceMi/boundingBox; Haversine formula. PR #508.
+**FT75 — File Metadata**: `FileMetadata` register/find/findByOwner/delete; soft delete; MIME filter. PR #509.
+**FT76 — TOTP Authenticator**: `TotpAuthenticator` RFC 6238; generateSecret/verifyCode/otpauthUri/backup codes. PR #510.
+**FT77 — Address Book**: `AddressBook` add/update/remove/list/setDefault; atomic default swap. PR #511.
 
 ### 2026-05-27 — FT68–FT72: Extended social patterns wave (5 trials)
 

@@ -12,37 +12,37 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ---
 
-## Active candidates (FT73+)
+## Active candidates (FT78+)
 
-### FT73 — Rate-limited Queue (Simple Job Queue)
+### FT78 — Newsletter Subscription
 
-**Why**: DB-backed lightweight job queue。バックグラウンド処理の最小実装。FT36 (大型) より前の軽量版。
-**Scope**: `Nene\Xion\JobQueue` — enqueue/dequeue/complete/fail/retry、ステータス管理。
+**Why**: メーリングリスト購読管理。ダブルオプトイン・購読解除・ステータス管理。
+**Scope**: `Nene\Xion\NewsletterSubscription` — subscribe/confirm/unsubscribe/status/list、確認トークン管理。
 **Size**: small–medium.
 
-### FT74 — Geo / Location Helper
+### FT79 — User Block List
 
-**Why**: 緯度経度ベースの距離計算・バウンディングボックス。近隣スポット検索等に使用。
-**Scope**: `Nene\Func\GeoHelper` — distanceKm/distanceMi/boundingBox、Haversine 公式。
+**Why**: ユーザー間のブロック機能。コンテンツ非表示・フォロー防止等の基盤。
+**Scope**: `Nene\Xion\BlockList` — block/unblock/isBlocked/blockedBy/list、双方向チェック。
 **Size**: small.
 
-### FT75 — File Storage Metadata
+### FT80 — Poll / Survey
 
-**Why**: アップロードファイルのメタデータ管理（実ストレージは外部）。パス・サイズ・MIME・所有者。
-**Scope**: `Nene\Xion\FileMetadata` — register/find/findByOwner/delete、soft-delete。
-**Size**: small.
-
-### FT76 — Two-Factor Authentication (TOTP)
-
-**Why**: TOTP ベースの 2FA。Google Authenticator 互換。Secret 生成・コード検証・バックアップコード。
-**Scope**: `Nene\Xion\TotpAuthenticator` — generateSecret/verifyCode/generateBackupCodes、RFC 6238。
+**Why**: 選択式投票。単一/複数選択・集計・ユーザー投票履歴。
+**Scope**: `Nene\Xion\Poll` — createPoll/addOption/vote/results/hasVoted、設問+選択肢+集計。
 **Size**: medium.
 
-### FT77 — Address Book
+### FT81 — Wishlist
 
-**Why**: ユーザーの配送先・請求先住所管理。複数住所・デフォルト設定。
-**Scope**: `Nene\Xion\AddressBook` — add/update/remove/list/setDefault、複数住所対応。
-**Size**: small–medium.
+**Why**: ユーザーの「お気に入り商品」管理。entity-agnostic設計でどんなコンテンツにも対応。
+**Scope**: `Nene\Xion\Wishlist` — add/remove/contains/list、entity_type+entity_idペア。
+**Size**: small.
+
+### FT82 — Notification Preferences
+
+**Why**: 通知チャンネル・種別ごとの受信設定。メール/Push/SMS等の配信制御基盤。
+**Scope**: `Nene\Xion\NotificationPreference` — setEnabled/isEnabled/all/reset、チャンネル×種別マトリクス。
+**Size**: small.
 
 ---
 
@@ -82,6 +82,11 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT77 — Address Book** (2026-05-27): `Nene\Xion\AddressBook` — add/update/remove/list/setDefault; default swap transaction; partial update. PR #511.
+- **FT76 — Two-Factor Authentication (TOTP)** (2026-05-27): `Nene\Xion\TotpAuthenticator` — RFC 6238; generateSecret/verifyCode/otpauthUri/generateBackupCodes; HMAC-SHA1 HOTP. PR #510.
+- **FT75 — File Storage Metadata** (2026-05-27): `Nene\Xion\FileMetadata` — register/find/findByOwner/delete; MIME prefix filter; soft delete; storage field. PR #509.
+- **FT74 — Geo / Location Helper** (2026-05-27): `Nene\Func\GeoHelper` — distanceKm/distanceMi/boundingBox; Haversine formula; pole-safe lonDelta. PR #508.
+- **FT73 — Rate-limited Queue (Simple Job Queue)** (2026-05-27): `Nene\Xion\JobQueue` — enqueue/dequeue/complete/fail; atomic dequeue; delayed jobs. PR #507.
 - **FT72 — Bookmark** (2026-05-27): `Nene\Xion\Bookmark` — save/remove/isSaved/list; collection grouping; UNIQUE constraint. PR #506.
 - **FT71 — Search History** (2026-05-27): `Nene\Xion\SearchHistory` — upsert dedup, auto-trim, push/recent/clear. PR #505.
 - **FT70 — Subscription** (2026-05-27): `Nene\Xion\Subscription` — subscribe/changePlan/cancel/renew; history table. PR #504.
