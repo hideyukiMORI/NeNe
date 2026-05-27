@@ -55,4 +55,8 @@ return [
         'message' => 'Upload mime type is not allowed.',
         'httpStatus' => 415,
     ],
+    'INVALID-TRANSITION' => [
+        'message' => 'The requested state transition is not allowed.',
+        'httpStatus' => 409,
+    ],
 ];

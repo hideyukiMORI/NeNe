@@ -38,6 +38,7 @@ Every failure response uses the same envelope, documented in OpenAPI as `ApiFail
 | `UPLOAD-FILE-REQUIRED` | 400 | Upload file is required. | Thrown by `UploadedFile::validate()` when the upload is missing or `is_uploaded_file()` returns false. |
 | `UPLOAD-TOO-LARGE` | 413 | Upload exceeds size limit. | Thrown by `UploadedFile::validate(['maxBytes' => N])` when `size() > N`. |
 | `UPLOAD-MIME-REJECTED` | 415 | Upload mime type is not allowed. | Thrown by `UploadedFile::validate(['allowedMime' => [...]])` when `finfo` mime is not on the allowlist. |
+| `INVALID-TRANSITION` | 409 | The requested state transition is not allowed. | Thrown by `WorkflowDefinition::assertTransition()` when the `from → to` state pair is not in the workflow's allowed-transitions map. |
 
 ## Adding a new error code
 
