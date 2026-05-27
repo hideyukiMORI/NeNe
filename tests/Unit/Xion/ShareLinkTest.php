@@ -134,7 +134,7 @@ final class ShareLinkTest extends TestCase
         $token = $this->sl->create('doc', '7', password: 'secret');
         $link  = $this->sl->resolve($token, 'secret');
         $this->assertNotNull($link);
-        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
         $this->assertArrayNotHasKey('password_hash', $link);
     }
 
