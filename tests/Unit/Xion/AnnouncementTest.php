@@ -63,7 +63,9 @@ final class AnnouncementTest extends TestCase
         $id  = $this->ann->publish('Maintenance', 'warning');
         $row = $this->ann->find($id);
         $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Maintenance', $row['body']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('warning', $row['category']);
     }
 
