@@ -4,6 +4,46 @@ When two users edit the same resource concurrently, the second write silently ov
 
 NeNe has no built-in `If-Match` helper. This guide shows how to implement it in a mapper and controller.
 
+## Framework helper: `OptimisticLock`
+
+`Nene\Xion\OptimisticLock` provides the HTTP-layer primitives so controllers
+stay concise:
+
+| Method | Description |
+|--------|-------------|
+| `OptimisticLock::requireVersion()` | Read If-Match header → int; throws 428 if absent |
+| `OptimisticLock::sendETag(int $v)` | Emit `ETag: "vN"` response header |
+| `OptimisticLock::conflict()` | Throw 412 Precondition Failed (never returns) |
+| `OptimisticLock::parseIfMatch(?string)` | Parse header string → int\|null (no side effects) |
+| `OptimisticLock::etagFor(int $v)` | Return `"vN"` string without emitting a header |
+
+### Minimal controller pattern
+
+```php
+// GET /docs/{id}
+public function itemGetRest(): array
+{
+    $doc = $this->mapper->findById($this->getDocId());
+    if ($doc === false) { /* ... 404 ... */ }
+    OptimisticLock::sendETag($doc->version);
+    return $this->API_RESPONSE->success(['doc' => $doc]);
+}
+
+// PUT /docs/{id}
+public function itemPutRest(): array
+{
+    $version = OptimisticLock::requireVersion();   // 428 if absent
+    $updated = $this->mapper->updateIfVersion(
+        $this->getDocId(), $this->body(), $version
+    );
+    if ($updated === null) {
+        OptimisticLock::conflict();                // 412 if stale
+    }
+    OptimisticLock::sendETag($updated->version);
+    return $this->API_RESPONSE->success(['doc' => $updated]);
+}
+```
+
 ## How it works
 
 1. **GET** returns the resource with an `ETag` header: `ETag: "v3"` (based on a `version` column).
