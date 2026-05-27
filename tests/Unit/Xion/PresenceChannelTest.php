@@ -40,6 +40,7 @@ final class PresenceChannelTest extends TestCase
     public function testConstructorThrowsOnNonPositiveTtl(): void
     {
         $this->expectException(\InvalidArgumentException::class);
+        // @phan-suppress-next-line PhanNoopNew
         new PresenceChannel($this->db, 0);
     }
 
