@@ -113,6 +113,7 @@ final class OAuthTokenTest extends TestCase
         $result      = $this->ot->refresh($refresh);
         $this->assertNotNull($result);
         $this->assertIsArray($result);
+        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
         $this->assertCount(2, $result);
     }
 
