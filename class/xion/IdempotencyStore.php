@@ -54,7 +54,8 @@ final class IdempotencyStore
     public function __construct(
         private readonly ?PDO $db = null,
         private readonly string $table = self::TABLE,
-    ) {}
+    ) {
+    }
 
     /**
      * Look up a cached response by raw idempotency key.
@@ -94,8 +95,8 @@ final class IdempotencyStore
 
         $stmt = $db->prepare($sql);
         $stmt->bindValue(':h', $this->hash($rawKey), PDO::PARAM_STR);
-        $stmt->bindValue(':s', $statusCode,           PDO::PARAM_INT);
-        $stmt->bindValue(':b', $body,                 PDO::PARAM_STR);
+        $stmt->bindValue(':s', $statusCode, PDO::PARAM_INT);
+        $stmt->bindValue(':b', $body, PDO::PARAM_STR);
         try {
             $stmt->execute();
         } catch (\PDOException) {
