@@ -14,7 +14,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ## Active candidates
 
-The Xion helper wave (FT78–FT238) is ongoing as of 2026-05-28. Trigger-based and structural candidates are listed in the next section.
+The Xion helper wave (FT78–FT250) is ongoing as of 2026-05-28. Trigger-based and structural candidates are listed in the next section.
 
 ---
 
@@ -54,6 +54,18 @@ The Xion helper wave (FT78–FT238) is ongoing as of 2026-05-28. Trigger-based a
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT250 — KpiTracker** (2026-05-28): `Nene\Xion\KpiTracker` — KPI/OKR metric tracking with target/actual; record() time-series; progress() {actual, target, pct}; purgeOlderThan() per definition. PR #693.
+- **FT249 — FeatureRequest** (2026-05-28): `Nene\Xion\FeatureRequest` — product feature requests with voting; OPEN→PLANNED→IN_PROGRESS→SHIPPED; one-vote-per-user; top() by vote count. PR #692.
+- **FT248 — DocumentSignature** (2026-05-28): `Nene\Xion\DocumentSignature` — e-signature workflow; multi-signatory; sign() auto-completes; decline() cancels; pendingFor() inbox. PR #691.
+- **FT247 — EventRsvp** (2026-05-28): `Nene\Xion\EventRsvp` — event RSVP; RESPONSE_YES/NO/MAYBE; capacity guard; guests count; checkin() marks attendance. PR #690.
+- **FT246 — AssetRegistry** (2026-05-28): `Nene\Xion\AssetRegistry` — asset inventory; AVAILABLE/ASSIGNED/RETIRED; assign() records history; unassign() sets returned_at. PR #689.
+- **FT245 — BudgetTracker** (2026-05-28): `Nene\Xion\BudgetTracker` — period budget allocation; spend() with OverflowException; auto-marks EXHAUSTED at 100%; remaining()/isExhausted(). PR #688.
+- **FT244 — ChangeRequest** (2026-05-28): `Nene\Xion\ChangeRequest` — RFC change-management; DRAFT→SUBMITTED→APPROVED/REJECTED→IMPLEMENTED→CLOSED; each transition guards prior status. PR #687.
+- **FT243 — IncidentLog** (2026-05-28): `Nene\Xion\IncidentLog` — IT incident tracking; SEVERITY_P1–P4; two-table with events; investigate()/resolve()/close(); bySeverity(). PR #686.
+- **FT242 — GiftCard** (2026-05-28): `Nene\Xion\GiftCard` — partial-redemption gift cards; auto-generates code; STATUS_EXHAUSTED at balance=0; expireStale(). PR #685.
+- **FT241 — PresenceTracker** (2026-05-28): `Nene\Xion\PresenceTracker` — online presence per user+context; cross-driver upsert; isOnline() window-based; online()/onlineIn(). PR #684.
+- **FT240 — SubscriptionPlan** (2026-05-28): `Nene\Xion\SubscriptionPlan` — subscription lifecycle; STATUS_TRIAL/ACTIVE/CANCELLED/EXPIRED; isActive() checks status+date range; expireStale(). PR #683.
+- **FT239 — VotePoll** (2026-05-28): `Nene\Xion\VotePoll` — two-table polls; one-vote-per-user upsert; vote() validates option vs. JSON list; results() by popularity. PR #682.
 - **FT238 — MediaConversionJob** (2026-05-28): `Nene\Xion\MediaConversionJob` — async media processing FIFO queue; nextPending()/start()/complete()/fail()/retry(); attempts counter. PR #680.
 - **FT237 — SlaTracker** (2026-05-28): `Nene\Xion\SlaTracker` — SLA/SLO breach detection; start() computes deadline; pause/resume accumulates paused_seconds; breached() cron query. PR #679.
 - **FT236 — DeviceFingerprint** (2026-05-28): `Nene\Xion\DeviceFingerprint` — device recognition; SHA-256 hash; seen() cross-driver upsert increments seen_count; isTrusted()/isBlocked(). PR #678.

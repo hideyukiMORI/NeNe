@@ -6,9 +6,26 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-28: all non-promotion Issues are closed; FT1–FT238 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-28: all non-promotion Issues are closed; FT1–FT250 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
 
 ## Recently Completed
+
+### 2026-05-28 — FT239–FT250: Xion ninth extended wave (12 trials)
+
+Continuous wave of 12 field trials adding further Xion helper patterns. All PRs #682–#693.
+
+**FT239 — VotePoll**: `VotePoll` two-table polls with named options; one-vote-per-user cross-driver upsert; vote() validates option against JSON-stored list; close() stops further votes. PR #682.
+**FT240 — SubscriptionPlan**: `SubscriptionPlan` user subscription lifecycle; STATUS_TRIAL/ACTIVE/CANCELLED/EXPIRED; isActive() checks status+date range; cancelAtEnd()/cancelNow()/changePlan(); expireStale(). PR #683.
+**FT241 — PresenceTracker**: `PresenceTracker` online presence tracking per user+context; cross-driver upsert; isOnline() window-based; online()/onlineIn() for room listing; leave()/purgeOlderThan(). PR #684.
+**FT242 — GiftCard**: `GiftCard` partial-redemption gift cards; auto-generates code; STATUS_EXHAUSTED when balance=0; redeem() validates redeemable+sufficient balance; expireStale(). PR #685.
+**FT243 — IncidentLog**: `IncidentLog` IT/service incident tracking; SEVERITY_P1–P4; two-table (incident_logs + incident_events); investigate()/resolve()/close() lifecycle; bySeverity(). PR #686.
+**FT244 — ChangeRequest**: `ChangeRequest` RFC change-management approval workflow; DRAFT→SUBMITTED→APPROVED/REJECTED→IMPLEMENTED→CLOSED; each transition guards prior status in WHERE clause. PR #687.
+**FT245 — BudgetTracker**: `BudgetTracker` period-based budget allocation and spend tracking; allocate()/spend() (OverflowException if exceeds); remaining()/isExhausted(); auto-marks EXHAUSTED at 100%. PR #688.
+**FT246 — AssetRegistry**: `AssetRegistry` physical/digital asset inventory; AVAILABLE/ASSIGNED/RETIRED; assign() records history row; unassign() sets returned_at; history() full assignment trail. PR #689.
+**FT247 — EventRsvp**: `EventRsvp` event RSVP tracking; RESPONSE_YES/NO/MAYBE; optional capacity limit with overflow guard; guests count; checkin() marks attendance; acceptedCount() includes guests. PR #690.
+**FT248 — DocumentSignature**: `DocumentSignature` e-signature request workflow; multi-signatory support; sign() auto-completes when all signed; decline() immediately cancels; pendingFor() pending inbox. PR #691.
+**FT249 — FeatureRequest**: `FeatureRequest` product feature requests with upvoting; OPEN→PLANNED→IN_PROGRESS→SHIPPED; upvote()/downvote() with one-per-user enforcement; hasVoted(); top() by vote count. PR #692.
+**FT250 — KpiTracker**: `KpiTracker` KPI/OKR metric tracking; define() with optional target/period/unit; record() time-series data points; progress() returns {actual, target, pct}; purgeOlderThan() per definition. PR #693.
 
 ### 2026-05-28 — FT229–FT238: Xion eighth extended wave (10 trials)
 
