@@ -81,7 +81,7 @@ final class DbUpsert
         $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
 
         if ($driver === 'mysql') {
-            $setParts = array_map(fn(string $c) => "{$c} = VALUES({$c})", $updateCols);
+            $setParts = array_map(fn (string $c) => "{$c} = VALUES({$c})", $updateCols);
 
             foreach ($updateExprs as $col => $expr) {
                 $setParts[] = "{$col} = {$expr}";
@@ -92,7 +92,7 @@ final class DbUpsert
                        . ($setClause !== '' ? " ON DUPLICATE KEY UPDATE {$setClause}" : '');
         } else {
             $conflictList = implode(', ', $conflictCols);
-            $setParts     = array_map(fn(string $c) => "{$c} = excluded.{$c}", $updateCols);
+            $setParts     = array_map(fn (string $c) => "{$c} = excluded.{$c}", $updateCols);
 
             foreach ($updateExprs as $col => $expr) {
                 $setParts[] = "{$col} = {$expr}";

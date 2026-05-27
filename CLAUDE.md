@@ -5,6 +5,41 @@ Full context is in `docs/ai/README.md` and the `docs/ai/self-review/` checklists
 
 ---
 
+## Pre-commit Checklist
+
+Run this before every `git push`:
+
+```bash
+composer precommit   # format → analyze (full) → test
+```
+
+Or piecemeal:
+
+```bash
+composer format                      # auto-fix code style
+composer analyze:file -- class/xion/Foo.php tests/Unit/Xion/FooTest.php   # targeted Phan (~14 s)
+composer analyze                     # full Phan (~40 s) — same as CI
+composer test                        # PHPUnit unit suite
+```
+
+---
+
+## Scaffolding a New Xion Class
+
+```bash
+composer make:xion -- ClassName
+```
+
+Creates `class/xion/ClassName.php` + `tests/Unit/Xion/ClassNameTest.php` with
+the PDO injection skeleton. Then:
+
+1. Fill in the public API and table DDL
+2. Add the table to `class/xion/SchemaDefinition.php`
+3. Run `composer xion:index` to refresh the class index
+4. Run `composer analyze:file -- class/xion/ClassName.php tests/Unit/Xion/ClassNameTest.php`
+
+---
+
 ## Static Analysis (Phan)
 
 ```bash
@@ -76,6 +111,12 @@ Never use a date that is only "near" the boundary and hope it works.
 
 `class/xion/INDEX.md` — all ~230 Xion classes grouped by domain.
 Consult it before starting a new Xion class to avoid duplicates.
+
+To regenerate after adding classes:
+
+```bash
+composer xion:index   # updates descriptions, adds new classes to Uncategorized
+```
 
 ---
 
