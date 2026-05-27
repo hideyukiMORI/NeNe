@@ -12,7 +12,7 @@ The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops
 
 ### 2026-05-27 — FT25–FT50: NENE2 parity wave + extended patterns (26 trials)
 
-Single-day wave of 26 field trials covering NENE2-equivalent patterns plus additional production-readiness helpers. All PRs #458–#482 (pending merge).
+Single-day wave of 26 field trials covering NENE2-equivalent patterns plus additional production-readiness helpers. All PRs #458–#483 merged.
 
 **FT25 — Cursor pagination**: `Cursor` + `CursorPage`; base64url token; keyset SQL (created_at, id). PR #458.
 **FT26 — Soft delete**: `DataMapperBase::SOFT_DELETE`; softDelete/restore/findTrashed/purge; deleted_at auto-filter. PR #459.
@@ -148,9 +148,7 @@ Single-day wave of trial-driven improvements across the framework, documentation
 
 ## Next
 
-Pick the next field trial or implementation improvement from the **Backlog Candidates** section below.
-
-The two earlier "AI-readable reference implementation" Issues (#145, #165) were closed on 2026-05-21 — the goals they encoded are now delivered through FT3–FT6 plus the tutorial and `docs/review/` checklists. New reference-implementation needs should be spawned as new field trials.
+FT1–FT50 complete (FT36 deferred). Next is FT51+ — see `docs/field-trials/candidates.md` for the active candidate list.
 
 ## Field Trials
 
@@ -177,21 +175,23 @@ When a trial is run, summarize it here with the format below, then move the bloc
 
 ## Backlog Candidates
 
-### Next field trial themes (FT7+)
+Active candidates are maintained in `docs/field-trials/candidates.md`. Summary:
 
-FT1–FT6 covered REST, M:N relations, auth/CSRF, HTML rendering, auth × HTML cross, and CLI tooling. The remaining FT-untouched surfaces are:
+### Next field trials (FT51+)
 
-- **error pages** — 404 / 500 templates, the catch-all in `htdocs/index.php`, error rendering for HTML vs REST contexts. Small, well-bounded.
-- **production-mode deployment probe** — `NENE_APP_ENV=production` + `NENE_APP_DEBUG=0` + `NENE_SESSION_SECURE=1`, error display behavior, log file rotation. Medium surface.
-- **Smarty custom plugin authoring** — `view/plugins/` (referenced by `DIR_SMARTY_PLUGINS`), how to ship a project-specific Smarty modifier or function. Niche.
-- **OpenAPI authoring workflow** — now that ADR-0003 / the contract test / `docs/development/error-codes.md` / `docs/review/openapi-contract.md` are in place, a trial that adds a fresh small entity end-to-end and measures whether the documented workflow holds up.
-- **schema source-of-truth consolidation (ADR candidate)** — FT6 F-2 surfaced that schema lives in three sites (`docker/mysql/init/001_schema.sql`, `cli/initSQLite.php`, `class/xion/DatabaseInstaller.php`). Long-term consolidation into a single PHP source is ADR-class. Trigger this when a future trial actually trips on the drift.
+- **FT51** — i18n / メッセージカタログ (`Nene\Func\I18n`). Small.
+- **FT52** — Event dispatcher / 軽量 pub-sub (`EventDispatcher`). Small–medium. Trigger-based.
+- **FT53** — Personal data export / GDPR Article 20. Small. Trigger-based.
+- **FT54** — リクエストボディ JSON Schema 検証. Medium / ADR. Trigger-based.
+- **FT36** — バックグラウンドジョブ (deferred, ADR-class, large).
 
-### General code-quality candidates
+### Real-world surface trials (still unrun)
 
-- Improve PHPDoc accuracy and native types across `class/xion/`, starting with shared base classes.
-- Extract dispatcher route parsing and method resolution boundaries further if future tests need lower-level coverage.
-- Decide PHP minimum and target version policy in an ADR if support outside Docker PHP 8.4 becomes important.
-- Add CI coverage for Docker runtime checks when repository resources and runtime cost are acceptable.
-- Review GitHub Actions runtime deprecation warnings and update workflow actions when Node.js 24-ready versions are available.
-- Optionally deprecate `cli/initSQLite.php` toward a thin wrapper that delegates to `cli/setupDatabase.php` (would close the redundancy surfaced by FT6 F-1; held back for backwards-compat).
+- **error pages** — 404 / 500 templates, HTML vs REST error rendering. Small.
+- **production-mode deployment probe** — `NENE_APP_ENV=production` + `NENE_APP_DEBUG=0`. Medium.
+- **OpenAPI authoring workflow** — end-to-end new entity with current tooling. Small.
+
+### General code-quality
+
+- PHPDoc accuracy and native types across `class/xion/`.
+- GitHub Actions: review Node.js deprecation warnings when v24-ready actions are available.
