@@ -42,6 +42,7 @@ final class UserSessionTest extends TestCase
     public function testConstructorThrowsOnNonPositiveTtl(): void
     {
         $this->expectException(\InvalidArgumentException::class);
+        // @phan-suppress-next-line PhanNoopNew
         new UserSession($this->db, 0);
     }
 
