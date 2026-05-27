@@ -52,7 +52,9 @@ final class ConsentLogTest extends TestCase
     {
         $this->cl->grant('user-1', 'analytics', '2.0', '1.2.3.4');
         $row = $this->cl->current('user-1', 'analytics');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('2.0', $row['policy_ver']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('1.2.3.4', $row['ip_address']);
     }
 
@@ -107,6 +109,7 @@ final class ConsentLogTest extends TestCase
         $this->cl->grant('user-1', 'analytics');
         $this->cl->withdraw('user-1', 'analytics');
         $row = $this->cl->current('user-1', 'analytics');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('withdraw', $row['action']);
     }
 
