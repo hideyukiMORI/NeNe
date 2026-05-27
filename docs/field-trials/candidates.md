@@ -14,7 +14,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ## Active candidates
 
-The Xion helper wave (FT78–FT140) is complete as of 2026-05-27. No immediate Xion-class candidates remain. Trigger-based and structural candidates are listed in the next section.
+The Xion helper wave (FT78–FT165) is complete as of 2026-05-27. No immediate Xion-class candidates remain. Trigger-based and structural candidates are listed in the next section.
 
 ---
 
@@ -54,6 +54,31 @@ The Xion helper wave (FT78–FT140) is complete as of 2026-05-27. No immediate X
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT165 — FileChunk** (2026-05-27): `Nene\Xion\FileChunk` — chunked file upload tracking and reassembly coordination. PR #600.
+- **FT164 — CounterMetric** (2026-05-27): `Nene\Xion\CounterMetric` — named metric counters with daily/hourly bucket aggregation. PR #599.
+- **FT163 — PushSubscription** (2026-05-27): `Nene\Xion\PushSubscription` — Web Push notification subscription registry. PR #598.
+- **FT162 — ChangeLog** (2026-05-27): `Nene\Xion\ChangeLog` — human-readable entity change history with before/after snapshots. PR #597.
+- **FT161 — ServiceAccount** (2026-05-27): `Nene\Xion\ServiceAccount` — machine-to-machine auth credentials with key rotation. PR #596.
+- **FT160 — BatchJob** (2026-05-27): `Nene\Xion\BatchJob` — batch processing job tracking with progress lifecycle. PR #595.
+- **FT159 — EmailTemplate** (2026-05-27): `Nene\Xion\EmailTemplate` — DB-stored email templates with {{variable}} substitution and locale support. PR #594.
+- **FT158 — UserActivity** (2026-05-27): `Nene\Xion\UserActivity` — user last-seen tracking and named action event log. PR #593.
+- **FT157 — OAuthToken** (2026-05-27): `Nene\Xion\OAuthToken` — OAuth2 access/refresh token storage with rotation; SHA-256 hashed. PR #592.
+- **FT156 — ApiUsageLog** (2026-05-27): `Nene\Xion\ApiUsageLog` — per-API-key request tracking with endpoint and status logging. PR #591.
+- **FT155 — DocumentLock** (2026-05-27): `Nene\Xion\DocumentLock` — collaborative editing lock with TTL; only holder can refresh/release. PR #590.
+- **FT154 — EmailQueue** (2026-05-27): `Nene\Xion\EmailQueue` — DB-backed outgoing email queue with exponential backoff retry. PR #589.
+- **FT153 — SlugRegistry** (2026-05-27): `Nene\Xion\SlugRegistry` — namespace-scoped URL slug generation and uniqueness enforcement. PR #588.
+- **FT152 — MagicLink** (2026-05-27): `Nene\Xion\MagicLink` — email-based passwordless auth; single-use time-limited tokens. PR #587.
+- **FT151 — Announcement** (2026-05-27): `Nene\Xion\Announcement` — site-wide announcements with scheduling and per-user dismissal. PR #586.
+- **FT150 — AlertRule** (2026-05-27): `Nene\Xion\AlertRule` — metric threshold alerts with condition evaluation and event log. PR #585.
+- **FT149 — ContentVersion** (2026-05-27): `Nene\Xion\ContentVersion` — append-only content versioning with rollback. PR #584.
+- **FT148 — IpBlocklist** (2026-05-27): `Nene\Xion\IpBlocklist` — global IP address blocklist with optional expiry. PR #583.
+- **FT147 — ExportJob** (2026-05-27): `Nene\Xion\ExportJob` — async data export job tracking with status lifecycle. PR #582.
+- **FT146 — CronLog** (2026-05-27): `Nene\Xion\CronLog` — scheduled task execution log. PR #581.
+- **FT145 — ShoppingCart** (2026-05-27): `Nene\Xion\ShoppingCart` — cart item management with qty and price tracking. PR #580.
+- **FT144 — ChatMessage** (2026-05-27): `Nene\Xion\ChatMessage` — simple chat room message store with soft-delete. PR #579.
+- **FT143 — UserGroup** (2026-05-27): `Nene\Xion\UserGroup` — user group membership with per-member roles. PR #578.
+- **FT142 — CacheEntry** (2026-05-27): `Nene\Xion\CacheEntry` — DB-backed key-value cache with TTL. PR #577.
+- **FT141 — ConfigStore** (2026-05-27): `Nene\Xion\ConfigStore` — global app key-value config store. PR #576.
 - **FT140 — TaskList** (2026-05-27): `Nene\Xion\TaskList` — per-user to-do list with named lists and completion tracking. PR #574.
 - **FT139 — GeoFence** (2026-05-27): `Nene\Xion\GeoFence` — named circular geo-fence definition and point containment; Haversine. PR #573.
 - **FT138 — CreditLedger** (2026-05-27): `Nene\Xion\CreditLedger` — append-only credit/debit ledger per user; balance guard. PR #572.

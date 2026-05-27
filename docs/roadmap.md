@@ -186,7 +186,7 @@ Future candidates:
 
 ## 7. Field Trials
 
-Status: methodology adopted (ADR 0002). FT1–FT140 complete as of 2026-05-27 (FT36 deferred as ADR-class).
+Status: methodology adopted (ADR 0002). FT1–FT165 complete as of 2026-05-27 (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61).
 
 Goal:
 
@@ -234,6 +234,7 @@ Completed (wave summary):
 - **FT25–FT50**: NENE2 parity + extended pattern wave. 26 trials covering pagination, soft delete, JWT, RBAC, rate limiting, feature flags, idempotency, webhook signing, and more. PRs #458–#483.
 - **FT51–FT77**: Extended social/content/identity wave. 27 trials covering i18n, pub-sub, GDPR export, leaderboard, bookmarks, TOTP, address book, and more. PRs #485–#511.
 - **FT78–FT140**: Xion helper wave. 63 trials covering social, content moderation, analytics, SaaS infrastructure, A/B testing, event sourcing, and more. PRs #512–#574.
+- **FT141–FT165**: Xion extended wave. 25 trials covering config store, cache, user groups, chat, shopping cart, cron log, export jobs, IP blocklist, content versioning, alert rules, announcements, magic links, slug registry, email queue, document locks, API usage log, OAuth tokens, user activity, email templates, batch jobs, service accounts, change logs, push subscriptions, counter metrics, and file chunk uploads. PRs #576–#600.
 
 Future candidates:
 
