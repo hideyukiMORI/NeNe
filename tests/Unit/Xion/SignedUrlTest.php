@@ -165,7 +165,7 @@ final class SignedUrlTest extends TestCase
             self::fail('Expected HttpTermination to be thrown');
         } catch (\Throwable $e) {
             self::assertInstanceOf(\Nene\Xion\HttpTermination::class, $e);
-            /** @var \Nene\Xion\HttpTermination $e */
+            \assert($e instanceof \Nene\Xion\HttpTermination);
             self::assertSame(410, $e->response()->statusCode());
         }
     }
@@ -179,7 +179,7 @@ final class SignedUrlTest extends TestCase
             self::fail('Expected HttpTermination to be thrown');
         } catch (\Throwable $e) {
             self::assertInstanceOf(\Nene\Xion\HttpTermination::class, $e);
-            /** @var \Nene\Xion\HttpTermination $e */
+            \assert($e instanceof \Nene\Xion\HttpTermination);
             self::assertSame(403, $e->response()->statusCode());
         }
     }
