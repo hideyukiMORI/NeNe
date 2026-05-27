@@ -4,9 +4,9 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 ## Active
 
-- #178: Prepare the Qiita hands-on implementation tutorial article.
+No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously through 2026-05-21. As of that day's close: zero non-promotion Issues remain open, six trials (FT1–FT6) are complete, and four ADRs are in place (0001–0004). The framework is ready for the publication / outreach push (#178 → #179 → #180) which is the only currently active line of work.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT24 are complete; ADR-0001–0012 are in place. Next work is a new field trial or implementation improvement — see **Field Trials** and **Backlog Candidates** below.
 
 ## Recently Completed
 
@@ -116,8 +116,7 @@ Single-day wave of trial-driven improvements across the framework, documentation
 
 ## Next
 
-- #179: Prepare the DEV Community English introduction article.
-- #180: Decide on Reddit/Hacker News only after the first article feedback.
+Pick the next field trial or implementation improvement from the **Backlog Candidates** section below.
 
 The two earlier "AI-readable reference implementation" Issues (#145, #165) were closed on 2026-05-21 — the goals they encoded are now delivered through FT3–FT6 plus the tutorial and `docs/review/` checklists. New reference-implementation needs should be spawned as new field trials.
 
