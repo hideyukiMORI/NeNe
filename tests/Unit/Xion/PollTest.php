@@ -69,7 +69,7 @@ final class PollTest extends TestCase
         $id  = $this->poll->create('Best PHP framework?', ['NeNe', 'Laravel']);
         $row = $this->poll->get($id);
         $this->assertNotNull($row);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Best PHP framework?', $row['question']);
     }
 
@@ -179,7 +179,7 @@ final class PollTest extends TestCase
         $this->poll->vote($pollId, (int)$options[1]['id'], 'user-1');
         $vote = $this->poll->userVote($pollId, 'user-1');
         $this->assertNotNull($vote);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('B', $vote['label']);
     }
 
