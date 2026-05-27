@@ -68,6 +68,7 @@ final class MagicLinkTest extends TestCase
         $token  = $this->ml->generate('user@example.com');
         $record = $this->ml->consume($token);
         $this->assertNotNull($record);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('user@example.com', $record['email']);
     }
 
