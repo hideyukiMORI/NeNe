@@ -38,12 +38,14 @@ final class TokenBucketTest extends TestCase
     public function testConstructorThrowsOnNonPositiveCapacity(): void
     {
         $this->expectException(\InvalidArgumentException::class);
+        // @phan-suppress-next-line PhanNoopNew
         new TokenBucket($this->db, 0.0, 1.0);
     }
 
     public function testConstructorThrowsOnNonPositiveRefillRate(): void
     {
         $this->expectException(\InvalidArgumentException::class);
+        // @phan-suppress-next-line PhanNoopNew
         new TokenBucket($this->db, 10.0, 0.0);
     }
 
