@@ -7,35 +7,31 @@ namespace Nene\Xion;
 use PDO;
 
 /**
- * Device trust / Remember-Me token manager.
+ * DeviceToken — push notification device token management per user.
  *
- * Issues long-lived opaque tokens that identify a trusted device or browser session.
- * Raw token is shown once; only its SHA-256 hash is stored.
- * Tokens expire and can be revoked individually or all at once per user.
+ * Stores FCM / APNs / WebPush device tokens for users. A user may have
+ * multiple tokens (one per device). Tokens can be deactivated when a push
+ * fails or when a device is unregistered. The platform field distinguishes
+ * token format and routing.
  *
  * ## Usage
  *
  * ```php
  * $dt = new DeviceToken($pdo);
  *
- * // Issue a 30-day remember-me token
- * $raw = $dt->issue('user-1', ttlDays: 30, label: 'MacBook Chrome');
- * // Store $raw in a cookie; the class stores only its hash.
+ * // Register
+ * $id = $dt->register('user-42', 'fcm:abc123', DeviceToken::PLATFORM_ANDROID);
  *
- * // Validate on next visit
- * $result = $dt->validate($raw);
- * if ($result !== null) {
- *     // $result['user_id'] is the authenticated user
- * }
+ * // Deactivate after push failure
+ * $dt->deactivate($id);
  *
- * // Revoke one token
- * $dt->revoke($raw);
+ * // Query
+ * $tokens  = $dt->activeFor('user-42');
+ * $all     = $dt->forUser('user-42');
+ * $found   = $dt->findByToken('fcm:abc123');
  *
- * // Revoke all tokens for a user (e.g. on password change)
- * $dt->revokeAll('user-1');
- *
- * // List active tokens for a user (for "logged-in devices" UI)
- * $dt->list('user-1');
+ * // Cleanup
+ * $dt->deleteInactive('user-42');
  * ```
  *
  * ## Schema (SQLite / MySQL compatible)
@@ -44,17 +40,20 @@ use PDO;
  * CREATE TABLE device_tokens (
  *     id          INTEGER PRIMARY KEY AUTOINCREMENT,
  *     user_id     VARCHAR(255) NOT NULL,
- *     token_hash  VARCHAR(64)  NOT NULL UNIQUE,
- *     label       VARCHAR(255) NOT NULL DEFAULT '',
- *     expires_at  DATETIME     NOT NULL,
- *     last_used_at DATETIME    DEFAULT NULL,
- *     created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+ *     token       TEXT         NOT NULL,
+ *     platform    VARCHAR(20)  NOT NULL DEFAULT 'unknown',
+ *     is_active   TINYINT(1)   NOT NULL DEFAULT 1,
+ *     created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ *     updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
  * );
  * ```
  */
 final class DeviceToken
 {
-    private const DEFAULT_TTL_DAYS = 30;
+    public const PLATFORM_IOS     = 'ios';
+    public const PLATFORM_ANDROID = 'android';
+    public const PLATFORM_WEB     = 'web';
+    public const PLATFORM_UNKNOWN = 'unknown';
 
     public function __construct(private readonly ?PDO $db = null)
     {
@@ -63,126 +62,164 @@ final class DeviceToken
     // ── public API ────────────────────────────────────────────────────────────
 
     /**
-     * Issue a new device/remember-me token.
+     * Register a device token for a user.
      *
-     * @param  string $userId  User to associate the token with.
-     * @param  int    $ttlDays Number of days until the token expires (default 30).
-     * @param  string $label   Human-readable device label (e.g. 'MacBook Chrome').
-     * @return string          Raw token — store in a secure HTTP-only cookie.
+     * If the token already exists for this user (any status), it is reactivated
+     * and the platform is updated. Otherwise a new row is inserted.
+     *
+     * @return int Row ID.
+     * @throws \InvalidArgumentException on empty userId or token.
      */
-    public function issue(string $userId, int $ttlDays = self::DEFAULT_TTL_DAYS, string $label = ''): string
+    public function register(string $userId, string $token, string $platform = self::PLATFORM_UNKNOWN): int
     {
-        $raw       = bin2hex(random_bytes(32)); // 64 hex chars
-        $hash      = hash('sha256', $raw);
-        $expiresAt = date('Y-m-d H:i:s', time() + $ttlDays * 86400);
-
-        $this->db()->prepare(
-            'INSERT INTO device_tokens (user_id, token_hash, label, expires_at)
-             VALUES (:user, :hash, :label, :expires)'
-        )->execute([
-            ':user'    => $userId,
-            ':hash'    => $hash,
-            ':label'   => trim($label),
-            ':expires' => $expiresAt,
-        ]);
-
-        return $raw;
-    }
-
-    /**
-     * Validate a raw token.
-     *
-     * Checks expiry and updates `last_used_at` on success.
-     *
-     * @param  string $rawToken Raw token from the cookie.
-     * @return array<string, mixed>|null Full token row (with user_id), or null if invalid/expired.
-     */
-    public function validate(string $rawToken): ?array
-    {
-        $hash = hash('sha256', $rawToken);
-        $db   = $this->db();
-
-        $stmt = $db->prepare(
-            'SELECT * FROM device_tokens
-             WHERE token_hash = :hash AND expires_at > CURRENT_TIMESTAMP
-             LIMIT 1'
-        );
-        $stmt->execute([':hash' => $hash]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($row === false) {
-            return null;
+        $userId = trim($userId);
+        $token  = trim($token);
+        if ($userId === '') {
+            throw new \InvalidArgumentException('userId must not be empty.');
+        }
+        if ($token === '') {
+            throw new \InvalidArgumentException('token must not be empty.');
         }
 
-        // Update last_used_at
-        $db->prepare(
-            'UPDATE device_tokens SET last_used_at = CURRENT_TIMESTAMP WHERE token_hash = :hash'
-        )->execute([':hash' => $hash]);
+        $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
-        return $row;
+        // Check for existing token for this user
+        $stmt = $this->db()->prepare(
+            'SELECT id FROM device_tokens WHERE user_id = :uid AND token = :token'
+        );
+        $stmt->execute([':uid' => $userId, ':token' => $token]);
+        $existing = $stmt->fetchColumn();
+
+        if ($existing !== false) {
+            // Reactivate
+            $stmt2 = $this->db()->prepare(
+                'UPDATE device_tokens SET is_active = 1, platform = :platform, updated_at = :now
+                 WHERE id = :id'
+            );
+            $stmt2->execute([':platform' => $platform, ':now' => $now, ':id' => (int)$existing]);
+            return (int)$existing;
+        }
+
+        $stmt3 = $this->db()->prepare(
+            'INSERT INTO device_tokens (user_id, token, platform, is_active, created_at, updated_at)
+             VALUES (:uid, :token, :platform, 1, :now, :now)'
+        );
+        $stmt3->execute([
+            ':uid'      => $userId,
+            ':token'    => $token,
+            ':platform' => $platform,
+            ':now'      => $now,
+        ]);
+        return (int)$this->db()->lastInsertId();
     }
 
     /**
-     * Revoke a single token by raw value.
+     * Find a single device token record by ID.
      *
-     * @return bool True if a token was found and deleted.
+     * @return array<string,mixed>|null
      */
-    public function revoke(string $rawToken): bool
+    public function find(int $id): ?array
     {
-        $hash = hash('sha256', $rawToken);
-        $stmt = $this->db()->prepare('DELETE FROM device_tokens WHERE token_hash = :hash');
-        $stmt->execute([':hash' => $hash]);
+        $stmt = $this->db()->prepare('SELECT * FROM device_tokens WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row !== false ? $row : null;
+    }
+
+    /**
+     * Find a record by token string (regardless of user).
+     *
+     * @return array<string,mixed>|null
+     */
+    public function findByToken(string $token): ?array
+    {
+        $stmt = $this->db()->prepare('SELECT * FROM device_tokens WHERE token = :token');
+        $stmt->execute([':token' => trim($token)]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row !== false ? $row : null;
+    }
+
+    /**
+     * Deactivate a device token.
+     *
+     * @return bool True if found and updated.
+     */
+    public function deactivate(int $id): bool
+    {
+        $now  = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        $stmt = $this->db()->prepare(
+            'UPDATE device_tokens SET is_active = 0, updated_at = :now WHERE id = :id'
+        );
+        $stmt->execute([':now' => $now, ':id' => $id]);
         return $stmt->rowCount() > 0;
     }
 
     /**
-     * Revoke all tokens for a user (e.g. on password change or account compromise).
+     * Delete a device token record permanently.
      *
-     * @return int Number of tokens revoked.
+     * @return bool True if found and deleted.
      */
-    public function revokeAll(string $userId): int
+    public function delete(int $id): bool
     {
-        $stmt = $this->db()->prepare('DELETE FROM device_tokens WHERE user_id = :user');
-        $stmt->execute([':user' => $userId]);
-        return $stmt->rowCount();
+        $stmt = $this->db()->prepare('DELETE FROM device_tokens WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        return $stmt->rowCount() > 0;
     }
 
     /**
-     * List all non-expired tokens for a user (for "trusted devices" UI).
+     * List active tokens for a user.
      *
-     * Note: token hashes are NOT included in the returned rows.
-     *
-     * @return list<array{id: int, label: string, expires_at: string, last_used_at: string|null, created_at: string}>
+     * @return list<array<string,mixed>>
      */
-    public function list(string $userId): array
+    public function activeFor(string $userId): array
     {
         $stmt = $this->db()->prepare(
-            'SELECT id, label, expires_at, last_used_at, created_at
-             FROM device_tokens
-             WHERE user_id = :user AND expires_at > CURRENT_TIMESTAMP
-             ORDER BY created_at DESC'
+            'SELECT * FROM device_tokens
+             WHERE user_id = :uid AND is_active = 1
+             ORDER BY id DESC'
         );
-        $stmt->execute([':user' => $userId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute([':uid' => trim($userId)]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
-     * Purge all expired tokens for a user (or all users if userId is empty).
+     * List all tokens for a user (active and inactive).
      *
-     * @return int Number of tokens purged.
+     * @return list<array<string,mixed>>
      */
-    public function purgeExpired(string $userId = ''): int
+    public function forUser(string $userId): array
     {
-        if ($userId !== '') {
-            $stmt = $this->db()->prepare(
-                'DELETE FROM device_tokens WHERE user_id = :user AND expires_at <= CURRENT_TIMESTAMP'
-            );
-            $stmt->execute([':user' => $userId]);
-        } else {
-            $stmt = $this->db()->prepare('DELETE FROM device_tokens WHERE expires_at <= CURRENT_TIMESTAMP');
-            $stmt->execute();
-        }
+        $stmt = $this->db()->prepare(
+            'SELECT * FROM device_tokens WHERE user_id = :uid ORDER BY id DESC'
+        );
+        $stmt->execute([':uid' => trim($userId)]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Delete all inactive tokens for a user.
+     *
+     * @return int Number of rows deleted.
+     */
+    public function deleteInactive(string $userId): int
+    {
+        $stmt = $this->db()->prepare(
+            'DELETE FROM device_tokens WHERE user_id = :uid AND is_active = 0'
+        );
+        $stmt->execute([':uid' => trim($userId)]);
         return $stmt->rowCount();
+    }
+
+    /**
+     * Count active tokens for a user.
+     */
+    public function countActive(string $userId): int
+    {
+        $stmt = $this->db()->prepare(
+            'SELECT COUNT(*) FROM device_tokens WHERE user_id = :uid AND is_active = 1'
+        );
+        $stmt->execute([':uid' => trim($userId)]);
+        return (int)$stmt->fetchColumn();
     }
 
     // ── internal helpers ─────────────────────────────────────────────────────
