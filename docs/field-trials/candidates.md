@@ -14,7 +14,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ## Active candidates
 
-The Xion helper wave (FT78–FT228) is ongoing as of 2026-05-28. Trigger-based and structural candidates are listed in the next section.
+The Xion helper wave (FT78–FT238) is ongoing as of 2026-05-28. Trigger-based and structural candidates are listed in the next section.
 
 ---
 
@@ -54,6 +54,16 @@ The Xion helper wave (FT78–FT228) is ongoing as of 2026-05-28. Trigger-based a
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT238 — MediaConversionJob** (2026-05-28): `Nene\Xion\MediaConversionJob` — async media processing FIFO queue; nextPending()/start()/complete()/fail()/retry(); attempts counter. PR #680.
+- **FT237 — SlaTracker** (2026-05-28): `Nene\Xion\SlaTracker` — SLA/SLO breach detection; start() computes deadline; pause/resume accumulates paused_seconds; breached() cron query. PR #679.
+- **FT236 — DeviceFingerprint** (2026-05-28): `Nene\Xion\DeviceFingerprint` — device recognition; SHA-256 hash; seen() cross-driver upsert increments seen_count; isTrusted()/isBlocked(). PR #678.
+- **FT235 — CreditNote** (2026-05-28): `Nene\Xion\CreditNote` — financial credit notes; integer-cent amounts; PENDING→APPLIED/VOIDED; pendingTotal() sum. PR #677.
+- **FT234 — ScoreBoard** (2026-05-28): `Nene\Xion\ScoreBoard` — high-score table; top() derives MAX(score) per player; rank() counts players with higher best; period scoping. PR #676.
+- **FT233 — ResourceReservation** (2026-05-28): `Nene\Xion\ResourceReservation` — time-bounded reservation with overlap detection; isAvailable() excludeId; forResource() range query. PR #675.
+- **FT232 — StockAlert** (2026-05-28): `Nene\Xion\StockAlert` — stock availability alerts; pendingTriggers()/markTriggered() for cron; dismiss() silences without delete. PR #674.
+- **FT231 — EntitySnapshot** (2026-05-28): `Nene\Xion\EntitySnapshot` — point-in-time entity snapshots; findAt() nearest; list() metadata only; purgeOlderThan() TTL. PR #673.
+- **FT230 — RecipientGroup** (2026-05-28): `Nene\Xion\RecipientGroup` — mailing list groups; UNIQUE slug; addMember() cross-driver upsert; isMember()/groupsFor(). PR #672.
+- **FT229 — SurveyTemplate** (2026-05-28): `Nene\Xion\SurveyTemplate` — two-table form template with typed questions; inactive by default; activate()/deactivate(). PR #671.
 - **FT210 — ResourceLock** (2026-05-27): `Nene\Xion\ResourceLock` — advisory entity locking with TTL; acquire() int|null; extend(); releaseExpired() cron cleanup. PR #650.
 - **FT209 — ContentTag** (2026-05-27): `Nene\Xion\ContentTag` — flexible entity tagging; tags normalised to lowercase slugs; cloud() tag→count; entitiesWith() reverse lookup. PR #649.
 - **FT208 — DeviceToken** (2026-05-27): `Nene\Xion\DeviceToken` — push notification device token management per user; register() reactivates existing; deleteInactive() cleanup. PR #648.
