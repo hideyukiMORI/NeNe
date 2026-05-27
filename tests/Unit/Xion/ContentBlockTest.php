@@ -135,7 +135,9 @@ final class ContentBlockTest extends TestCase
     {
         $id = $this->cb->add('page', 'home', 'text', ['body' => 'old'], 1);
         $this->assertTrue($this->cb->update($id, ['body' => 'new']));
-        $row     = $this->cb->get($id);
+        $row = $this->cb->get($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $content = json_decode((string)$row['content'], true);
         $this->assertSame('new', $content['body']);
     }
@@ -159,6 +161,8 @@ final class ContentBlockTest extends TestCase
         $id = $this->cb->add('page', 'home', 'hero', ['title' => 'x'], 3);
         $this->assertTrue($this->cb->reorder($id, 1));
         $row = $this->cb->get($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(1, (int)$row['position']);
     }
 
