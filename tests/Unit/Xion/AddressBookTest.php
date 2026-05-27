@@ -71,13 +71,13 @@ final class AddressBookTest extends TestCase
         $id  = $this->book->add('user-1', $this->sampleData());
         $row = $this->book->get('user-1', $id);
         $this->assertNotNull($row);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Home', $row['label']);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Taro Yamada', $row['name']);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('1-2-3 Shinjuku', $row['line1']);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('JP', $row['country']);
     }
 
@@ -98,7 +98,7 @@ final class AddressBookTest extends TestCase
         $id  = $this->book->add('user-1', $this->sampleData(['is_default' => true]));
         $row = $this->book->get('user-1', $id);
         $this->assertNotNull($row);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(1, (int)$row['is_default']);
     }
 
@@ -111,9 +111,9 @@ final class AddressBookTest extends TestCase
         $row2 = $this->book->get('user-1', $id2);
         $this->assertNotNull($row1);
         $this->assertNotNull($row2);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(0, (int)$row1['is_default'], 'old default should be cleared');
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(1, (int)$row2['is_default'], 'new default should be set');
     }
 
@@ -178,9 +178,9 @@ final class AddressBookTest extends TestCase
 
         $row = $this->book->get('user-1', $id);
         $this->assertNotNull($row);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Office', $row['label']);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('Osaka', $row['city']);
     }
 
@@ -208,9 +208,9 @@ final class AddressBookTest extends TestCase
         $row2 = $this->book->get('user-1', $id2);
         $this->assertNotNull($row1);
         $this->assertNotNull($row2);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(0, (int)$row1['is_default']);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(1, (int)$row2['is_default']);
     }
 
@@ -244,7 +244,7 @@ final class AddressBookTest extends TestCase
 
         $row = $this->book->get('user-1', $id);
         $this->assertNotNull($row);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(1, (int)$row['is_default']);
     }
 
@@ -257,7 +257,7 @@ final class AddressBookTest extends TestCase
 
         $row1 = $this->book->get('user-1', $id1);
         $this->assertNotNull($row1);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(0, (int)$row1['is_default']);
     }
 
@@ -272,7 +272,7 @@ final class AddressBookTest extends TestCase
         $id = $this->book->add('user-1', $this->sampleData(['is_default' => true]));
         $def = $this->book->getDefault('user-1');
         $this->assertNotNull($def);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame((string)$id, (string)$def['id']);
     }
 
