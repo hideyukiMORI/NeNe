@@ -53,8 +53,11 @@ final class MediaMetadataTest extends TestCase
     {
         $id  = $this->mm->register('img-1', 'image/jpeg', 204800, ['width' => 1920, 'height' => 1080]);
         $row = $this->mm->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('image/jpeg', $row['mime_type']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(204800, (int)$row['file_size']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(['width' => 1920, 'height' => 1080], $row['attributes']);
     }
 
@@ -75,6 +78,7 @@ final class MediaMetadataTest extends TestCase
     {
         $this->mm->register('uuid-abc', 'video/mp4');
         $row = $this->mm->findByKey('uuid-abc');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('video/mp4', $row['mime_type']);
     }
 
