@@ -180,6 +180,7 @@ final class VotePoll
         );
         $stmt->execute([':pid' => $pollId]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // @phan-suppress-next-line PhanTypeComparisonFromArray
         if ($rows === false) {
             return [];
         }
