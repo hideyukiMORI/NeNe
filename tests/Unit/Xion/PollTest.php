@@ -53,6 +53,7 @@ final class PollTest extends TestCase
     {
         $id   = $this->poll->create('Pick one', ['a', 'b', 'c']);
         $poll = $this->poll->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame(['a', 'b', 'c'], $poll['options']);
     }
 
@@ -116,6 +117,7 @@ final class PollTest extends TestCase
         $id = $this->poll->create('Q?', ['a']);
         $this->assertTrue($this->poll->close($id));
         $poll = $this->poll->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertNotNull($poll['closed_at']);
     }
 
