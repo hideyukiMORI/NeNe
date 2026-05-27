@@ -1,6 +1,38 @@
 # Rate Limiting
 
-How to add request rate limiting to NeNe endpoints using Redis (already available via `predis/predis`). NeNe does not ship a built-in rate-limiting middleware — this guide shows how to add it.
+How to add request rate limiting to NeNe endpoints using the built-in `RateLimiter` class (backed by Redis via `predis/predis`).
+
+## Framework class: `RateLimiter`
+
+`Nene\Func\RateLimiter` and `Nene\Func\RedisRateLimiterStorage` are built-in.
+Add `predis/predis` to your project if not already present (it ships with NeNe).
+
+### Typical usage
+
+```php
+use Nene\Func\RateLimiter;
+use Nene\Func\RedisRateLimiterStorage;
+use Nene\Xion\RedisConnection;
+
+protected function preAction(): void
+{
+    $storage = new RedisRateLimiterStorage(RedisConnection::getInstance());
+    $limiter = new RateLimiter($storage);
+    $limiter->check(
+        key: 'login:ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'),
+        limit: 10,
+        windowSeconds: 60
+    );
+}
+```
+
+`check()` throws `HttpTermination(429)` with a `Retry-After` header when the limit is exceeded. On every request it also sets `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers. No further action is needed in the controller — the framework catches `HttpTermination` and emits the response automatically.
+
+To inspect the remaining quota without consuming a request, use `remaining()`:
+
+```php
+$left = $limiter->remaining('login:ip:' . $ip, 10);
+```
 
 ## When to add rate limiting
 
@@ -12,83 +44,38 @@ How to add request rate limiting to NeNe endpoints using Redis (already availabl
 | API endpoints (general) | Abuse / scraping | Optional — depends on traffic |
 | Internal admin endpoints | Lower risk | Low priority |
 
-## The sliding window counter pattern
+## The fixed-window counter pattern
 
-The simplest Redis-based approach uses a per-key counter with a TTL:
+`RateLimiter` uses a fixed-window counter backed by Redis:
 
 1. `INCR key` — atomically increment the counter and get the new value.
-2. If the returned value is 1 (first request), set the key TTL with `EXPIRE key <window_seconds>`.
-3. If the counter exceeds the limit, return 429.
+2. If the returned value is 1 (first request in the window), set the key TTL with `EXPIRE key <window_seconds>`.
+3. If the counter exceeds the limit, throw `HttpTermination(429)` with `Retry-After`.
 
-```php
-// class/func/RateLimiter.php
-
-namespace Nene\Func;
-
-use Predis\Client;
-
-final class RateLimiter
-{
-    private Client $redis;
-
-    public function __construct(Client $redis)
-    {
-        $this->redis = $redis;
-    }
-
-    /**
-     * Check if the given key is within the allowed rate.
-     *
-     * @param string $key      Unique identifier (e.g. "login:ip:1.2.3.4")
-     * @param int    $limit    Max requests allowed within the window
-     * @param int    $window   Window duration in seconds
-     * @return bool  true = allowed, false = rate limit exceeded
-     */
-    public function allow(string $key, int $limit, int $window): bool
-    {
-        $count = (int)$this->redis->incr($key);
-        if ($count === 1) {
-            $this->redis->expire($key, $window);
-        }
-        return $count <= $limit;
-    }
-
-    /** Remaining requests in the current window */
-    public function remaining(string $key, int $limit): int
-    {
-        $count = (int)($this->redis->get($key) ?? 0);
-        return max(0, $limit - $count);
-    }
-
-    /** Seconds until the current window resets */
-    public function ttl(string $key): int
-    {
-        return max(0, (int)$this->redis->ttl($key));
-    }
-}
-```
+`RedisRateLimiterStorage` handles steps 1–2. `RateLimiter::check()` handles step 3.
 
 ## Usage in a controller
 
+Call `check()` from `preAction()` (applies to all methods in the controller) or from a specific REST method:
+
 ```php
 use Nene\Func\RateLimiter;
+use Nene\Func\RedisRateLimiterStorage;
 use Nene\Xion\RedisConnection;
 
-// POST /session/login
+// POST /session/login — 10 attempts per 15 minutes per IP
 public function indexPostRest(): array
 {
     $ip      = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $limiter = new RateLimiter(RedisConnection::getInstance());
-    $key     = 'rate:login:ip:' . $ip;
-
-    // 10 attempts per 15 minutes per IP
-    if (!$limiter->allow($key, limit: 10, window: 900)) {
-        return $this->API_RESPONSE->failure('RATE-LIMIT-EXCEEDED');
-    }
+    $storage = new RedisRateLimiterStorage(RedisConnection::getInstance());
+    $limiter = new RateLimiter($storage);
+    $limiter->check('rate:login:ip:' . $ip, limit: 10, windowSeconds: 900);
 
     // ... verify credentials ...
 }
 ```
+
+If the limit is exceeded, `check()` terminates the request with a 429 JSON response before reaching your credential logic.
 
 ## Rate limit key strategies
 
@@ -112,33 +99,27 @@ Namespace keys with `rate:` to distinguish from session and feature-flag keys in
 
 ## Response headers
 
-Include `Retry-After` and rate limit headers in 429 responses to help clients back off correctly:
+`RateLimiter::check()` sets these headers on every request (not just 429):
 
-```php
-if (!$limiter->allow($key, 10, 900)) {
-    $retryAfter = $limiter->ttl($key);
-    header('Retry-After: ' . $retryAfter);
-    header('X-RateLimit-Limit: 10');
-    header('X-RateLimit-Remaining: 0');
-    header('X-RateLimit-Reset: ' . (time() + $retryAfter));
-    return $this->API_RESPONSE->failure('RATE-LIMIT-EXCEEDED');
-}
-```
+| Header | Value |
+|---|---|
+| `X-RateLimit-Limit` | The configured `$limit` |
+| `X-RateLimit-Remaining` | Remaining requests in the current window (0 if exceeded) |
+| `X-RateLimit-Reset` | Seconds until the window resets |
+
+On a 429 response, `Retry-After` is also set to the same TTL value so clients can back off correctly. No manual header management is required — `check()` handles all of this before throwing.
 
 ## Error code
 
-```php
-// config/error_codes.php
-'RATE-LIMIT-EXCEEDED' => ['message' => 'Too many requests. Please try again later.', 'httpStatus' => 429],
-```
+`RATE-LIMIT-EXCEEDED` (HTTP 429) is already registered in `config/error_codes.php`. No action needed — `RateLimiter::check()` uses it automatically.
 
 ## RedisConnection
 
 NeNe already has `class/xion/RedisConnection.php` (singleton Predis client). Check the connection uses the same Redis instance as session storage. The rate limiter keys live alongside session keys — use distinct prefixes to avoid collisions.
 
 ```php
-$redis = \Nene\Xion\RedisConnection::getInstance();
-$limiter = new RateLimiter($redis);
+$storage = new \Nene\Func\RedisRateLimiterStorage(\Nene\Xion\RedisConnection::getInstance());
+$limiter = new \Nene\Func\RateLimiter($storage);
 ```
 
 ## Limitations of the simple INCR pattern
