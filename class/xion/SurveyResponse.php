@@ -7,44 +7,46 @@ namespace Nene\Xion;
 use PDO;
 
 /**
- * SurveyResponse — store and query structured survey/quiz answers.
+ * SurveyResponse — form/survey response collection and analysis.
  *
- * Each response is keyed by (survey_id, user_id, question_key).
- * Supports re-submission (upsert), result aggregation, and per-user retrieval.
+ * Stores form submissions (survey responses) as named answer sets. Each
+ * response belongs to a named survey and optionally a respondent. Individual
+ * answers are stored in a child table. Aggregate summaries (answer frequency)
+ * are available for result analysis.
  *
  * ## Usage
  *
  * ```php
  * $sr = new SurveyResponse($pdo);
  *
- * // Submit answers
- * $sr->submit('survey-1', 'user-1', ['q1' => 'yes', 'q2' => 'no']);
+ * // Submit a response
+ * $id = $sr->submit('nps-2026-q2', 'user-42', [
+ *     'score'   => '9',
+ *     'comment' => 'Great product!',
+ * ]);
  *
- * // Check if user completed the survey
- * $sr->hasResponded('survey-1', 'user-1'); // true
- *
- * // Get a user's answers
- * $answers = $sr->get('survey-1', 'user-1');
- *
- * // Count responses per survey
- * $sr->respondentCount('survey-1');
- *
- * // Aggregate answers for a question
- * $sr->tally('survey-1', 'q1'); // ['yes' => 5, 'no' => 3]
+ * // Query
+ * $response  = $sr->find($id);
+ * $answers   = $sr->answers($id);
+ * $all       = $sr->forSurvey('nps-2026-q2', 50, 0);
+ * $count     = $sr->countForSurvey('nps-2026-q2');
+ * $frequency = $sr->answerFrequency('nps-2026-q2', 'score');
  * ```
  *
  * ## Schema (SQLite / MySQL compatible)
  *
  * ```sql
  * CREATE TABLE survey_responses (
- *     id            INTEGER PRIMARY KEY AUTOINCREMENT,
- *     survey_id     VARCHAR(255) NOT NULL,
- *     user_id       VARCHAR(255) NOT NULL,
- *     question_key  VARCHAR(255) NOT NULL,
- *     answer        TEXT         NOT NULL DEFAULT '',
- *     created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
- *     updated_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
- *     UNIQUE (survey_id, user_id, question_key)
+ *     id           INTEGER PRIMARY KEY AUTOINCREMENT,
+ *     survey_name  VARCHAR(100) NOT NULL,
+ *     respondent   VARCHAR(255) NULL,
+ *     submitted_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+ * );
+ * CREATE TABLE survey_answers (
+ *     id           INTEGER PRIMARY KEY AUTOINCREMENT,
+ *     response_id  INTEGER      NOT NULL,
+ *     question_key VARCHAR(100) NOT NULL,
+ *     answer       TEXT         NOT NULL
  * );
  * ```
  */
@@ -57,165 +59,144 @@ final class SurveyResponse
     // ── public API ────────────────────────────────────────────────────────────
 
     /**
-     * Submit (or update) a user's answers for a survey.
+     * Submit a survey response with answers.
      *
-     * @param  array<string,string> $answers  Map of question_key => answer.
-     * @throws \InvalidArgumentException if survey_id, user_id, or answers is empty.
+     * @param array<string,string> $answers  question_key => answer value.
+     * @return int Row ID of the new response.
+     * @throws \InvalidArgumentException on empty surveyName or empty answers map.
      */
-    public function submit(string $surveyId, string $userId, array $answers): void
+    public function submit(string $surveyName, ?string $respondent, array $answers): int
     {
-        [$surveyId, $userId] = $this->normalise($surveyId, $userId);
-        if (empty($answers)) {
+        $surveyName = trim($surveyName);
+        if ($surveyName === '') {
+            throw new \InvalidArgumentException('surveyName must not be empty.');
+        }
+        if ($answers === []) {
             throw new \InvalidArgumentException('answers must not be empty.');
         }
 
-        $db     = $this->db();
-        $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
+        // Insert response header
+        $stmt = $this->db()->prepare(
+            'INSERT INTO survey_responses (survey_name, respondent) VALUES (:name, :resp)'
+        );
+        $stmt->execute([':name' => $surveyName, ':resp' => $respondent]);
+        $responseId = (int)$this->db()->lastInsertId();
 
+        // Insert individual answers
+        $aStmt = $this->db()->prepare(
+            'INSERT INTO survey_answers (response_id, question_key, answer)
+             VALUES (:rid, :key, :ans)'
+        );
         foreach ($answers as $key => $value) {
-            $key   = trim((string)$key);
-            $value = (string)$value;
-            if ($key === '') {
-                continue;
-            }
-            if ($driver === 'sqlite') {
-                $db->prepare(
-                    'INSERT INTO survey_responses (survey_id, user_id, question_key, answer)
-                     VALUES (:sid, :uid, :key, :val)
-                     ON CONFLICT (survey_id, user_id, question_key)
-                     DO UPDATE SET answer = excluded.answer,
-                                   updated_at = CURRENT_TIMESTAMP'
-                )->execute([':sid' => $surveyId, ':uid' => $userId, ':key' => $key, ':val' => $value]);
-            } else {
-                $db->prepare(
-                    'INSERT INTO survey_responses (survey_id, user_id, question_key, answer)
-                     VALUES (:sid, :uid, :key, :val)
-                     ON DUPLICATE KEY UPDATE answer = VALUES(answer),
-                                             updated_at = CURRENT_TIMESTAMP'
-                )->execute([':sid' => $surveyId, ':uid' => $userId, ':key' => $key, ':val' => $value]);
-            }
+            $aStmt->execute([':rid' => $responseId, ':key' => (string)$key, ':ans' => (string)$value]);
         }
+
+        return $responseId;
     }
 
     /**
-     * Check whether a user has submitted at least one answer for a survey.
-     */
-    public function hasResponded(string $surveyId, string $userId): bool
-    {
-        [$surveyId, $userId] = $this->normalise($surveyId, $userId);
-        $stmt = $this->db()->prepare(
-            'SELECT COUNT(*) FROM survey_responses
-             WHERE survey_id = :sid AND user_id = :uid'
-        );
-        $stmt->execute([':sid' => $surveyId, ':uid' => $userId]);
-        return (int)$stmt->fetchColumn() > 0;
-    }
-
-    /**
-     * Get all answers submitted by a user for a survey.
+     * Find a response header by ID.
      *
-     * @return array<string,string>  Map of question_key => answer.
+     * @return array<string,mixed>|null
      */
-    public function get(string $surveyId, string $userId): array
+    public function find(int $id): ?array
     {
-        [$surveyId, $userId] = $this->normalise($surveyId, $userId);
+        $stmt = $this->db()->prepare('SELECT * FROM survey_responses WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row !== false ? $row : null;
+    }
+
+    /**
+     * Delete a response and all its answers.
+     *
+     * @return bool True if found and deleted.
+     */
+    public function delete(int $id): bool
+    {
+        // Delete answers first
+        $stmt = $this->db()->prepare('DELETE FROM survey_answers WHERE response_id = :id');
+        $stmt->execute([':id' => $id]);
+
+        $stmt2 = $this->db()->prepare('DELETE FROM survey_responses WHERE id = :id');
+        $stmt2->execute([':id' => $id]);
+        return $stmt2->rowCount() > 0;
+    }
+
+    /**
+     * Get all answers for a response as question_key => answer array.
+     *
+     * @return array<string,string>
+     */
+    public function answers(int $responseId): array
+    {
         $stmt = $this->db()->prepare(
-            'SELECT question_key, answer FROM survey_responses
-             WHERE survey_id = :sid AND user_id = :uid
-             ORDER BY id ASC'
+            'SELECT question_key, answer FROM survey_answers WHERE response_id = :rid ORDER BY id ASC'
         );
-        $stmt->execute([':sid' => $surveyId, ':uid' => $userId]);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $out  = [];
+        $stmt->execute([':rid' => $responseId]);
+        $rows   = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $result = [];
         foreach ($rows as $row) {
-            $out[$row['question_key']] = $row['answer'];
+            $result[(string)$row['question_key']] = (string)$row['answer'];
         }
-        return $out;
+        return $result;
     }
 
     /**
-     * Get the answer for a specific question from a user.
+     * List response headers for a survey (newest first).
      *
-     * @return string|null  null if not answered.
+     * @return list<array<string,mixed>>
      */
-    public function getAnswer(string $surveyId, string $userId, string $questionKey): ?string
+    public function forSurvey(string $surveyName, int $limit = 50, int $offset = 0): array
     {
-        [$surveyId, $userId] = $this->normalise($surveyId, $userId);
-        $questionKey = trim($questionKey);
         $stmt = $this->db()->prepare(
-            'SELECT answer FROM survey_responses
-             WHERE survey_id = :sid AND user_id = :uid AND question_key = :key LIMIT 1'
+            'SELECT * FROM survey_responses
+             WHERE survey_name = :name
+             ORDER BY id DESC
+             LIMIT :lim OFFSET :off'
         );
-        $stmt->execute([':sid' => $surveyId, ':uid' => $userId, ':key' => $questionKey]);
-        $val = $stmt->fetchColumn();
-        return $val !== false ? (string)$val : null;
+        $stmt->bindValue(':name', trim($surveyName));
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
-     * Count distinct users who responded to a survey.
+     * Count total responses for a survey.
      */
-    public function respondentCount(string $surveyId): int
+    public function countForSurvey(string $surveyName): int
     {
-        $surveyId = trim($surveyId);
         $stmt = $this->db()->prepare(
-            'SELECT COUNT(DISTINCT user_id) FROM survey_responses WHERE survey_id = :sid'
+            'SELECT COUNT(*) FROM survey_responses WHERE survey_name = :name'
         );
-        $stmt->execute([':sid' => $surveyId]);
+        $stmt->execute([':name' => trim($surveyName)]);
         return (int)$stmt->fetchColumn();
     }
 
     /**
-     * Tally all answers for a given question across all respondents.
+     * Return answer frequency for a question across a survey.
+     * Result: answer_value => count, sorted by count desc.
      *
-     * @return array<string,int>  Map of answer => count, sorted by count desc.
+     * @return array<string,int>
      */
-    public function tally(string $surveyId, string $questionKey): array
+    public function answerFrequency(string $surveyName, string $questionKey): array
     {
-        $surveyId    = trim($surveyId);
-        $questionKey = trim($questionKey);
         $stmt = $this->db()->prepare(
-            'SELECT answer, COUNT(*) AS cnt FROM survey_responses
-             WHERE survey_id = :sid AND question_key = :key
-             GROUP BY answer
-             ORDER BY cnt DESC'
+            'SELECT a.answer, COUNT(*) AS cnt
+             FROM survey_answers a
+             JOIN survey_responses r ON r.id = a.response_id
+             WHERE r.survey_name = :name AND a.question_key = :key
+             GROUP BY a.answer
+             ORDER BY cnt DESC, a.answer ASC'
         );
-        $stmt->execute([':sid' => $surveyId, ':key' => $questionKey]);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $out  = [];
+        $stmt->execute([':name' => trim($surveyName), ':key' => trim($questionKey)]);
+        $rows   = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $result = [];
         foreach ($rows as $row) {
-            $out[$row['answer']] = (int)$row['cnt'];
+            $result[(string)$row['answer']] = (int)$row['cnt'];
         }
-        return $out;
-    }
-
-    /**
-     * Delete all responses from a user for a survey.
-     *
-     * @return bool True if any rows were deleted.
-     */
-    public function deleteUser(string $surveyId, string $userId): bool
-    {
-        [$surveyId, $userId] = $this->normalise($surveyId, $userId);
-        $stmt = $this->db()->prepare(
-            'DELETE FROM survey_responses WHERE survey_id = :sid AND user_id = :uid'
-        );
-        $stmt->execute([':sid' => $surveyId, ':uid' => $userId]);
-        return $stmt->rowCount() > 0;
-    }
-
-    /**
-     * Delete all responses for an entire survey.
-     *
-     * @return int Number of rows deleted.
-     */
-    public function deleteSurvey(string $surveyId): int
-    {
-        $surveyId = trim($surveyId);
-        $stmt = $this->db()->prepare(
-            'DELETE FROM survey_responses WHERE survey_id = :sid'
-        );
-        $stmt->execute([':sid' => $surveyId]);
-        return $stmt->rowCount();
+        return $result;
     }
 
     // ── internal helpers ─────────────────────────────────────────────────────
@@ -223,21 +204,5 @@ final class SurveyResponse
     private function db(): PDO
     {
         return $this->db ?? PdoConnection::getInstance();
-    }
-
-    /**
-     * @return array{string, string}
-     */
-    private function normalise(string $surveyId, string $userId): array
-    {
-        $surveyId = trim($surveyId);
-        $userId   = trim($userId);
-        if ($surveyId === '') {
-            throw new \InvalidArgumentException('survey_id must not be empty.');
-        }
-        if ($userId === '') {
-            throw new \InvalidArgumentException('user_id must not be empty.');
-        }
-        return [$surveyId, $userId];
     }
 }
