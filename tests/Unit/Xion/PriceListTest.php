@@ -2,151 +2,212 @@
 
 declare(strict_types=1);
 
-namespace Nene\Tests\Unit\Xion;
+namespace Tests\Unit\Xion;
 
 use Nene\Xion\PriceList;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Unit tests for PriceList.
- */
 final class PriceListTest extends TestCase
 {
-    private PDO $db;
+    private PDO $pdo;
     private PriceList $pl;
 
     protected function setUp(): void
     {
-        $this->db = new PDO('sqlite::memory:');
-        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->db->exec('
+        $this->pdo = new PDO('sqlite::memory:');
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->pdo->exec('
             CREATE TABLE price_list (
-                id         INTEGER PRIMARY KEY AUTOINCREMENT,
-                sku        VARCHAR(100) NOT NULL,
-                currency   VARCHAR(3)   NOT NULL,
-                tier       VARCHAR(50)  NOT NULL DEFAULT \'default\',
-                amount     INTEGER      NOT NULL,
-                updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE (sku, currency, tier)
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                sku          VARCHAR(255) NOT NULL,
+                price_type   VARCHAR(50)  NOT NULL DEFAULT \'retail\',
+                price_cents  INTEGER      NOT NULL,
+                effective_at DATETIME     NULL,
+                expires_at   DATETIME     NULL,
+                created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (sku, price_type)
             )
         ');
-        $this->pl = new PriceList($this->db);
+        $this->pl = new PriceList($this->pdo);
     }
 
-    // ── set ───────────────────────────────────────────────────────────────────
+    // ── setPrice ──────────────────────────────────────────────────────────────
 
-    public function testSetCreatesPrice(): void
+    public function testSetPriceReturnsId(): void
     {
-        $this->pl->set('SKU-1', 'USD', 1999);
-        $this->assertSame(1999, $this->pl->get('SKU-1', 'USD'));
+        $id = $this->pl->setPrice('SKU-001', 'retail', 1999);
+        $this->assertGreaterThan(0, $id);
     }
 
-    public function testSetIsUpsert(): void
+    public function testSetPriceStoresCorrectly(): void
     {
-        $this->pl->set('SKU-1', 'USD', 1999);
-        $this->pl->set('SKU-1', 'USD', 2499);
-        $this->assertSame(2499, $this->pl->get('SKU-1', 'USD'));
+        $id  = $this->pl->setPrice('SKU-001', PriceList::TYPE_RETAIL, 1999);
+        $row = $this->pl->find($id);
+        $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('SKU-001', $row['sku']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(PriceList::TYPE_RETAIL, $row['price_type']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(1999, (int)$row['price_cents']);
     }
 
-    public function testSetNormalisescurrencyToUppercase(): void
+    public function testSetPriceUpsertUpdatesExisting(): void
     {
-        $this->pl->set('SKU-1', 'usd', 1000);
-        $this->assertSame(1000, $this->pl->get('SKU-1', 'USD'));
+        $this->pl->setPrice('SKU-001', 'retail', 1999);
+        $this->pl->setPrice('SKU-001', 'retail', 2499);
+        $this->assertSame(2499, $this->pl->getPrice('SKU-001', 'retail'));
     }
 
-    public function testSetWithTier(): void
+    public function testSetPriceDefaultsTypeToRetail(): void
     {
-        $this->pl->set('SKU-1', 'USD', 1999);
-        $this->pl->set('SKU-1', 'USD', 1499, tier: 'member');
-        $this->assertSame(1999, $this->pl->get('SKU-1', 'USD'));
-        $this->assertSame(1499, $this->pl->get('SKU-1', 'USD', 'member'));
+        $this->pl->setPrice('SKU-001', '', 999);
+        $this->assertSame(999, $this->pl->getPrice('SKU-001', 'retail'));
     }
 
-    public function testSetThrowsOnEmptySku(): void
+    public function testSetPriceAllowsZeroCents(): void
+    {
+        $id = $this->pl->setPrice('FREE-001', 'retail', 0);
+        $this->assertGreaterThan(0, $id);
+        $this->assertSame(0, $this->pl->getPrice('FREE-001', 'retail'));
+    }
+
+    public function testSetPriceThrowsOnEmptySku(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->pl->set('', 'USD', 100);
+        $this->pl->setPrice('', 'retail', 999);
     }
 
-    public function testSetThrowsOnEmptyCurrency(): void
+    public function testSetPriceThrowsOnNegativeCents(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->pl->set('SKU-1', '', 100);
+        $this->pl->setPrice('SKU-001', 'retail', -1);
     }
 
-    public function testSetThrowsOnNegativeAmount(): void
+    // ── find ──────────────────────────────────────────────────────────────────
+
+    public function testFindReturnsNullForMissingId(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->pl->set('SKU-1', 'USD', -1);
+        $this->assertNull($this->pl->find(9999));
     }
 
-    public function testSetAllowsZeroAmount(): void
+    // ── getPrice ──────────────────────────────────────────────────────────────
+
+    public function testGetPriceReturnsCorrectValue(): void
     {
-        $this->pl->set('SKU-1', 'USD', 0);
-        $this->assertSame(0, $this->pl->get('SKU-1', 'USD'));
+        $this->pl->setPrice('SKU-001', 'wholesale', 1299);
+        $this->assertSame(1299, $this->pl->getPrice('SKU-001', 'wholesale'));
     }
 
-    // ── get ───────────────────────────────────────────────────────────────────
-
-    public function testGetReturnsNullForMissingPrice(): void
+    public function testGetPriceReturnsNullWhenNotSet(): void
     {
-        $this->assertNull($this->pl->get('NO-SUCH-SKU', 'USD'));
+        $this->assertNull($this->pl->getPrice('NONE', 'retail'));
     }
 
-    public function testGetReturnsNullForMissingTier(): void
+    public function testGetPriceIgnoresDateWindow(): void
     {
-        $this->pl->set('SKU-1', 'USD', 1999);
-        $this->assertNull($this->pl->get('SKU-1', 'USD', 'vip'));
+        // Expired price still returned by getPrice
+        $past = new \DateTimeImmutable('-1 year');
+        $this->pl->setPrice('SKU-001', 'promo', 999, null, $past);
+        $this->assertSame(999, $this->pl->getPrice('SKU-001', 'promo'));
     }
 
-    // ── allForSku ─────────────────────────────────────────────────────────────
+    // ── activePrice ───────────────────────────────────────────────────────────
 
-    public function testAllForSkuReturnsAllPrices(): void
+    public function testActivePriceReturnsWhenNoDates(): void
     {
-        $this->pl->set('SKU-1', 'USD', 1999);
-        $this->pl->set('SKU-1', 'JPY', 2000);
-        $this->pl->set('SKU-1', 'USD', 1499, tier: 'member');
-        $all = $this->pl->allForSku('SKU-1');
-        $this->assertCount(3, $all);
+        $this->pl->setPrice('SKU-001', 'retail', 1999);
+        $this->assertSame(1999, $this->pl->activePrice('SKU-001', 'retail'));
     }
 
-    public function testAllForSkuReturnsEmptyForUnknownSku(): void
+    public function testActivePriceReturnsNullWhenExpired(): void
     {
-        $this->assertSame([], $this->pl->allForSku('GHOST'));
+        $past = new \DateTimeImmutable('-1 second');
+        $this->pl->setPrice('SKU-001', 'promo', 999, null, $past);
+        $this->assertNull($this->pl->activePrice('SKU-001', 'promo'));
     }
 
-    public function testAllForSkuAmountIsInt(): void
+    public function testActivePriceReturnsNullWhenNotYetEffective(): void
     {
-        $this->pl->set('SKU-1', 'USD', 1999);
-        $all = $this->pl->allForSku('SKU-1');
-        $this->assertSame(1999, $all[0]['amount']);
+        $future = new \DateTimeImmutable('+1 hour');
+        $this->pl->setPrice('SKU-001', 'promo', 999, $future, null);
+        $this->assertNull($this->pl->activePrice('SKU-001', 'promo'));
     }
 
-    // ── delete ────────────────────────────────────────────────────────────────
-
-    public function testDeleteRemovesRow(): void
+    public function testActivePriceReturnsWhenInWindow(): void
     {
-        $this->pl->set('SKU-1', 'USD', 1999, tier: 'member');
-        $this->assertTrue($this->pl->delete('SKU-1', 'USD', 'member'));
-        $this->assertNull($this->pl->get('SKU-1', 'USD', 'member'));
+        $past   = new \DateTimeImmutable('-1 hour');
+        $future = new \DateTimeImmutable('+1 hour');
+        $this->pl->setPrice('SKU-001', 'promo', 999, $past, $future);
+        $this->assertSame(999, $this->pl->activePrice('SKU-001', 'promo'));
     }
 
-    public function testDeleteReturnsFalseForMissingRow(): void
+    public function testActivePriceReturnsNullWhenNotFound(): void
     {
-        $this->assertFalse($this->pl->delete('GHOST', 'USD'));
+        $this->assertNull($this->pl->activePrice('NONE', 'retail'));
     }
 
-    // ── exists ────────────────────────────────────────────────────────────────
+    // ── delete / deleteSku ────────────────────────────────────────────────────
 
-    public function testExistsReturnsFalseForNewSku(): void
+    public function testDeleteRemovesRecord(): void
     {
-        $this->assertFalse($this->pl->exists('GHOST'));
+        $id = $this->pl->setPrice('SKU-001', 'retail', 1999);
+        $this->assertTrue($this->pl->delete($id));
+        $this->assertNull($this->pl->find($id));
     }
 
-    public function testExistsReturnsTrueAfterSet(): void
+    public function testDeleteReturnsFalseForMissingId(): void
     {
-        $this->pl->set('SKU-1', 'USD', 1000);
-        $this->assertTrue($this->pl->exists('SKU-1'));
+        $this->assertFalse($this->pl->delete(9999));
+    }
+
+    public function testDeleteSkuRemovesAllPricesForSku(): void
+    {
+        $this->pl->setPrice('SKU-001', 'retail', 1999);
+        $this->pl->setPrice('SKU-001', 'wholesale', 1299);
+        $this->pl->setPrice('SKU-002', 'retail', 2999);
+
+        $count = $this->pl->deleteSku('SKU-001');
+        $this->assertSame(2, $count);
+        $this->assertSame([], $this->pl->forSku('SKU-001'));
+        $this->assertCount(1, $this->pl->forSku('SKU-002'));
+    }
+
+    // ── forSku ────────────────────────────────────────────────────────────────
+
+    public function testForSkuReturnsAllPriceTypes(): void
+    {
+        $this->pl->setPrice('SKU-001', 'retail', 1999);
+        $this->pl->setPrice('SKU-001', 'wholesale', 1299);
+        $this->pl->setPrice('SKU-002', 'retail', 2999);
+
+        $list = $this->pl->forSku('SKU-001');
+        $this->assertCount(2, $list);
+    }
+
+    public function testForSkuReturnsEmptyWhenNone(): void
+    {
+        $this->assertSame([], $this->pl->forSku('MISSING'));
+    }
+
+    // ── skus ─────────────────────────────────────────────────────────────────
+
+    public function testSkusReturnsDistinctSkus(): void
+    {
+        $this->pl->setPrice('SKU-001', 'retail', 1999);
+        $this->pl->setPrice('SKU-001', 'wholesale', 1299);
+        $this->pl->setPrice('SKU-002', 'retail', 2999);
+
+        $skus = $this->pl->skus();
+        $this->assertCount(2, $skus);
+        $this->assertContains('SKU-001', $skus);
+        $this->assertContains('SKU-002', $skus);
+    }
+
+    public function testSkusReturnsEmptyWhenNone(): void
+    {
+        $this->assertSame([], $this->pl->skus());
     }
 }
