@@ -9,152 +9,255 @@ use PDO;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Unit tests for JobQueue using an in-memory SQLite database.
+ * Unit tests for JobQueue.
  */
 final class JobQueueTest extends TestCase
 {
     private PDO $db;
-    private JobQueue $q;
+    private JobQueue $jq;
 
     protected function setUp(): void
     {
         $this->db = new PDO('sqlite::memory:');
         $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->db->exec(
-            'CREATE TABLE job_queue (
-                id           INTEGER      PRIMARY KEY AUTOINCREMENT,
-                queue        VARCHAR(64)  NOT NULL DEFAULT \'default\',
-                payload      TEXT         NOT NULL,
-                status       VARCHAR(16)  NOT NULL DEFAULT \'pending\',
-                attempts     INTEGER      NOT NULL DEFAULT 0,
-                max_attempts INTEGER      NOT NULL DEFAULT 3,
-                error        TEXT         DEFAULT NULL,
-                available_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-            )'
-        );
-        $this->q = new JobQueue($this->db);
+        $this->db->exec('
+            CREATE TABLE job_queue (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                type         VARCHAR(100) NOT NULL,
+                payload      TEXT         NOT NULL DEFAULT \'{}\',
+                status       VARCHAR(20)  NOT NULL DEFAULT \'pending\',
+                attempts     INT          NOT NULL DEFAULT 0,
+                max_attempts INT          NOT NULL DEFAULT 3,
+                error        TEXT         NOT NULL DEFAULT \'\',
+                run_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                claimed_at   DATETIME     DEFAULT NULL,
+                done_at      DATETIME     DEFAULT NULL,
+                created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        ');
+        $this->jq = new JobQueue($this->db, 3);
     }
 
     // ── enqueue ───────────────────────────────────────────────────────────────
 
     public function testEnqueueReturnsId(): void
     {
-        $id = $this->q->enqueue(['type' => 'email']);
-        $this->assertIsInt($id);
+        $id = $this->jq->enqueue('send_email');
         $this->assertGreaterThan(0, $id);
     }
 
-    public function testEnqueuedJobIsPending(): void
+    public function testEnqueueStoresPayload(): void
     {
-        $this->q->enqueue(['type' => 'email']);
-        $this->assertSame(1, $this->q->count('default', 'pending'));
+        $id  = $this->jq->enqueue('process', ['key' => 'value']);
+        $job = $this->jq->find($id);
+        $this->assertNotNull($job);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(['key' => 'value'], $job['payload']);
     }
 
-    public function testEnqueueWithCustomQueue(): void
+    public function testEnqueueSetsStatusToPending(): void
     {
-        $this->q->enqueue(['type' => 'email'], queue: 'emails');
-        $this->assertSame(1, $this->q->count('emails', 'pending'));
-        $this->assertSame(0, $this->q->count('default', 'pending'));
+        $id  = $this->jq->enqueue('ping');
+        $job = $this->jq->find($id);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('pending', $job['status']);
     }
 
-    public function testEnqueueWithDelay(): void
+    public function testEnqueueThrowsOnEmptyType(): void
     {
-        $this->q->enqueue(['type' => 'email'], delaySeconds: 3600);
-        // Job is not yet available
-        $job = $this->q->dequeue();
+        $this->expectException(\InvalidArgumentException::class);
+        $this->jq->enqueue('');
+    }
+
+    public function testEnqueueWithDelayIsNotImmediatelyClaimed(): void
+    {
+        $this->jq->enqueue('delayed', [], 3600);
+        $job = $this->jq->claim();
         $this->assertNull($job);
     }
 
-    // ── dequeue ───────────────────────────────────────────────────────────────
+    // ── claim ─────────────────────────────────────────────────────────────────
 
-    public function testDequeueReturnsJob(): void
+    public function testClaimReturnsJob(): void
     {
-        $this->q->enqueue(['type' => 'email', 'to' => 'a@b.com']);
-        $job = $this->q->dequeue();
+        $this->jq->enqueue('ping');
+        $job = $this->jq->claim();
         $this->assertNotNull($job);
         // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('email', $job['payload']['type']);
+        $this->assertSame('running', $job['status']);
     }
 
-    public function testDequeueReturnsNullWhenEmpty(): void
+    public function testClaimIncrementsAttempts(): void
     {
-        $this->assertNull($this->q->dequeue());
+        $this->jq->enqueue('ping');
+        $job = $this->jq->claim();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame(1, (int)$job['attempts']);
     }
 
-    public function testDequeueChangesStatusToProcessing(): void
+    public function testClaimReturnsNullWhenEmpty(): void
     {
-        $this->q->enqueue(['type' => 'email']);
-        $this->q->dequeue();
-        $this->assertSame(0, $this->q->count('default', 'pending'));
-        $this->assertSame(1, $this->q->count('default', 'processing'));
+        $this->assertNull($this->jq->claim());
     }
 
-    public function testDequeueIncrementsAttempts(): void
+    public function testClaimReturnsJobsInOrder(): void
     {
-        $this->q->enqueue(['type' => 'email']);
-        $job = $this->q->dequeue();
-        $this->assertIsArray($job);
-        $this->assertSame(1, $job['attempts']);
-    }
-
-    public function testDequeueIsFIFO(): void
-    {
-        $id1 = $this->q->enqueue(['order' => 1]);
-        $id2 = $this->q->enqueue(['order' => 2]);
-        $job = $this->q->dequeue();
-        $this->assertIsArray($job);
-        $this->assertSame($id1, $job['id']);
+        $id1 = $this->jq->enqueue('first');
+        $id2 = $this->jq->enqueue('second');
+        $job = $this->jq->claim();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame($id1, (int)$job['id']);
     }
 
     // ── complete ──────────────────────────────────────────────────────────────
 
-    public function testCompleteMarksJobDone(): void
+    public function testCompleteMarksDone(): void
     {
-        $this->q->enqueue(['type' => 'email']);
-        $job = $this->q->dequeue();
-        $this->assertIsArray($job);
-        $this->q->complete($job['id']);
-        $this->assertSame(1, $this->q->count('default', 'completed'));
+        $this->jq->enqueue('task');
+        $job = $this->jq->claim();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertTrue($this->jq->complete((int)$job['id']));
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $done = $this->jq->find((int)$job['id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('done', $done['status']);
     }
 
-    // ── fail ──────────────────────────────────────────────────────────────────
-
-    public function testFailWithRemainingAttemptsReQueues(): void
+    public function testCompleteReturnsFalseIfNotRunning(): void
     {
-        $this->q->enqueue(['type' => 'email'], maxAttempts: 3);
-        $job = $this->q->dequeue();
-        $this->assertIsArray($job);
-        $this->q->fail($job['id'], 'connection error');
-        // 1 attempt used, 2 remaining — status should be pending again
-        $this->assertSame(1, $this->q->count('default', 'pending'));
+        $id = $this->jq->enqueue('task');
+        $this->assertFalse($this->jq->complete($id));
     }
 
-    public function testFailWithNoAttemptsRemainingMarksFailed(): void
+    // ── fail / retry ──────────────────────────────────────────────────────────
+
+    public function testFailResetsToPendingWhenAttemptsRemain(): void
     {
-        $this->q->enqueue(['type' => 'email'], maxAttempts: 1);
-        $job = $this->q->dequeue();
-        $this->assertIsArray($job);
-        $this->q->fail($job['id'], 'permanent error');
-        $this->assertSame(1, $this->q->count('default', 'failed'));
-        $this->assertSame(0, $this->q->count('default', 'pending'));
+        $jq = new JobQueue($this->db, 3);
+        $jq->enqueue('task');
+        $job = $jq->claim(); // attempts = 1, max = 3
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $jq->fail((int)$job['id'], 'timeout');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $updated = $jq->find((int)$job['id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('pending', $updated['status']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('timeout', $updated['error']);
+    }
+
+    public function testFailMarksFailedWhenMaxAttemptsReached(): void
+    {
+        $jq = new JobQueue($this->db, 1);
+        $jq->enqueue('task');
+        $job = $jq->claim(); // attempts = 1, max = 1
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $jq->fail((int)$job['id'], 'fatal');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $updated = $jq->find((int)$job['id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('failed', $updated['status']);
+    }
+
+    public function testFailReturnsFalseIfNotRunning(): void
+    {
+        $id = $this->jq->enqueue('task');
+        $this->assertFalse($this->jq->fail($id, 'oops'));
+    }
+
+    // ── release ───────────────────────────────────────────────────────────────
+
+    public function testReleaseResetsToTending(): void
+    {
+        $this->jq->enqueue('task');
+        $job = $this->jq->claim();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertTrue($this->jq->release((int)$job['id']));
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $updated = $this->jq->find((int)$job['id']);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->assertSame('pending', $updated['status']);
+    }
+
+    public function testReleaseReturnsFalseIfNotRunning(): void
+    {
+        $id = $this->jq->enqueue('task');
+        $this->assertFalse($this->jq->release($id));
+    }
+
+    // ── listPending ───────────────────────────────────────────────────────────
+
+    public function testListPendingReturnsAvailableJobs(): void
+    {
+        $this->jq->enqueue('a');
+        $this->jq->enqueue('b');
+        $list = $this->jq->listPending(10);
+        $this->assertCount(2, $list);
+    }
+
+    public function testListPendingFiltersByType(): void
+    {
+        $this->jq->enqueue('email');
+        $this->jq->enqueue('sms');
+        $list = $this->jq->listPending(10, 'email');
+        $this->assertCount(1, $list);
+        $this->assertSame('email', $list[0]['type']);
+    }
+
+    public function testListPendingExcludesRunning(): void
+    {
+        $this->jq->enqueue('task');
+        $this->jq->claim();
+        $list = $this->jq->listPending(10);
+        $this->assertCount(0, $list);
     }
 
     // ── count ─────────────────────────────────────────────────────────────────
 
-    public function testCountAllStatusesWhenNullFilter(): void
+    public function testCountReturnsAllJobs(): void
     {
-        $this->q->enqueue(['a' => 1]);
-        $this->q->enqueue(['b' => 2]);
-        $this->assertSame(2, $this->q->count('default'));
+        $this->jq->enqueue('a');
+        $this->jq->enqueue('b');
+        $this->assertSame(2, $this->jq->count());
     }
 
-    public function testCountIsQueueIsolated(): void
+    public function testCountByStatus(): void
     {
-        $this->q->enqueue(['a' => 1], queue: 'q1');
-        $this->q->enqueue(['b' => 2], queue: 'q2');
-        $this->assertSame(1, $this->q->count('q1'));
-        $this->assertSame(1, $this->q->count('q2'));
+        $this->jq->enqueue('a');
+        $this->jq->enqueue('b');
+        $this->jq->claim();
+        $this->assertSame(1, $this->jq->count('pending'));
+        $this->assertSame(1, $this->jq->count('running'));
+    }
+
+    public function testCountReturnsZeroForEmptyQueue(): void
+    {
+        $this->assertSame(0, $this->jq->count());
+    }
+
+    // ── purgeCompleted ────────────────────────────────────────────────────────
+
+    public function testPurgeCompletedDeletesOldDoneJobs(): void
+    {
+        $id = $this->jq->enqueue('task');
+        $this->jq->claim();
+        $this->jq->complete($id);
+
+        // Manually set done_at to the past
+        $this->db->exec("UPDATE job_queue SET done_at = '2000-01-01 00:00:00' WHERE id = {$id}");
+
+        $deleted = $this->jq->purgeCompleted(1);
+        $this->assertSame(1, $deleted);
+        $this->assertNull($this->jq->find($id));
+    }
+
+    public function testPurgeCompletedLeavesRecentJobs(): void
+    {
+        $this->jq->enqueue('task');
+        $job = $this->jq->claim();
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $this->jq->complete((int)$job['id']);
+        $deleted = $this->jq->purgeCompleted(30);
+        $this->assertSame(0, $deleted);
     }
 }
