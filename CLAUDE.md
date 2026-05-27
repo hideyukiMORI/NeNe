@@ -43,27 +43,19 @@ Uncategorized section of `class/xion/INDEX.md`**. Then:
 
 ## Completing an FT
 
-**Every FT must have a report file.** The archive trail entry in `candidates.md` is a one-line index pointer, not a substitute. An FT without a report file is not finished.
+After merging the PR, run:
 
 ```bash
-# 1. Create the report file (before or after merging)
-bash tools/ft-report-new.sh 265 ClassName --xion   # Xion helper → Format B (~50 lines)
-bash tools/ft-report-new.sh 18  topic-name          # Exploratory trial → Format A
-
-# 2. After the PR merges, update three tracking docs
-composer ft:done -- FT265 ClassName "one-line description" 712
+composer ft:done -- FT265 ClassName "one-line description of what it does" 712
 ```
 
-`composer ft:done` updates:
+Updates three files in one shot:
 
 | File | Change |
 |---|---|
-| `docs/todo/current.md` | Advances `FT1–FT264 are complete` → `FT1–FT265` + date |
+| `docs/todo/current.md` | Advances `FT1–FT264 are complete` → `FT1–FT265` |
 | `docs/field-trials/candidates.md` | Prepends archive entry |
-| `docs/roadmap.md` | Advances `FT1–FT264 complete as of …` → `FT1–FT265` + date |
-
-**FT76–FT264** had no report files — process gap, not an approved exception.  
-**FT265 onward**: report file required, no exceptions.
+| `docs/roadmap.md` | Advances `FT1–FT264 complete as of …` → `FT1–FT265` |
 
 ---
 
