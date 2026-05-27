@@ -6,9 +6,24 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-28: all non-promotion Issues are closed; FT1–FT250 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-28: all non-promotion Issues are closed; FT1–FT264 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
 
 ## Recently Completed
+
+### 2026-05-28 — FT255–FT264: Xion tenth extended wave (10 trials)
+
+Continuous wave of 10 field trials adding further Xion helper patterns. All PRs #699–#708.
+
+**FT255 — DailyStreak**: `DailyStreak` per-user daily activity streak tracker; checkin() increments on consecutive days, resets on gap; longestStreak() tracks all-time best; reset() preserves longest. PR #699.
+**FT256 — UserFeedback**: `UserFeedback` general satisfaction feedback (NPS/star ratings + free text) per context; averageScore(); countByScore() distribution; forUser()/recent()/clearContext(). PR #700.
+**FT257 — ProfileBadge**: `ProfileBadge` gamification badge award/revoke; award() idempotent; hasBadge()/userBadges()/usersWithBadge()/countForBadge(); revokeAll() for account cleanup. PR #701.
+**FT258 — ContentReport**: `ContentReport` user-submitted content moderation reports; STATUS_PENDING/ACTIONED/DISMISSED; action()/dismiss() guard pending status; forContent()/countByReason(). PR #702.
+**FT259 — ApiWebhook**: `ApiWebhook` webhook subscription endpoint registry; auto-generates HMAC secret; rotateSecret(); activate()/deactivate(); forEvent() active subscribers. PR #703.
+**FT260 — RecurringPayment**: `RecurringPayment` subscription billing schedule; due() for cron; recordBilling() advances next_billing_date by frequency; pause()/resume()/cancel(); integer-cent amounts. PR #704.
+**FT261 — ImpersonationLog**: `ImpersonationLog` admin impersonation session audit; start()/end() guards IS NULL; active(?adminId); history(targetId); purgeOlderThan() skips active sessions. PR #705.
+**FT262 — TextTemplate**: `TextTemplate` DB-backed body-only text template for SMS/push/Slack/etc.; {{variable}} substitution; locale fallback to 'en'; cross-driver upsert; activate()/deactivate()/remove(). PR #706.
+**FT263 — AccessLog**: `AccessLog` append-only security resource access log; forResource()/byActor()/byAction() queries; purgeOlderThan() TTL; distinct from AuditLog (mutations) and IntegrationLog (HTTP). PR #707.
+**FT264 — PasswordExpiry**: `PasswordExpiry` password expiry policy; set() resets clock on change; isExpired()/mustChange(); forceChange() for security incidents; expiringSoon() for proactive notification. PR #708.
 
 ### 2026-05-28 — FT239–FT250: Xion ninth extended wave (12 trials)
 

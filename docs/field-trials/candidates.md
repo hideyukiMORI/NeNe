@@ -14,7 +14,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ## Active candidates
 
-The Xion helper wave (FT78–FT250) is ongoing as of 2026-05-28. Trigger-based and structural candidates are listed in the next section.
+The Xion helper wave (FT78–FT264) is ongoing as of 2026-05-28. Trigger-based and structural candidates are listed in the next section.
 
 ---
 
@@ -54,6 +54,16 @@ The Xion helper wave (FT78–FT250) is ongoing as of 2026-05-28. Trigger-based a
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT264 — PasswordExpiry** (2026-05-28): `Nene\Xion\PasswordExpiry` — password expiry policy; set() resets clock; forceChange() for incidents; expiringSoon() notification cron. PR #708.
+- **FT263 — AccessLog** (2026-05-28): `Nene\Xion\AccessLog` — append-only resource access log; forResource/byActor/byAction; purgeOlderThan(). PR #707.
+- **FT262 — TextTemplate** (2026-05-28): `Nene\Xion\TextTemplate` — body-only text template for SMS/push/Slack; {{variable}} substitution; locale fallback; cross-driver upsert. PR #706.
+- **FT261 — ImpersonationLog** (2026-05-28): `Nene\Xion\ImpersonationLog` — admin impersonation session audit; start()/end(); active(?admin); purgeOlderThan() skips active. PR #705.
+- **FT260 — RecurringPayment** (2026-05-28): `Nene\Xion\RecurringPayment` — subscription billing schedule; due() cron; recordBilling() advances next_billing_date; pause/resume/cancel. PR #704.
+- **FT259 — ApiWebhook** (2026-05-28): `Nene\Xion\ApiWebhook` — webhook subscription endpoint registry; auto-generates HMAC secret; rotateSecret(); forEvent() active subscribers. PR #703.
+- **FT258 — ContentReport** (2026-05-28): `Nene\Xion\ContentReport` — user-submitted content moderation reports; STATUS_PENDING/ACTIONED/DISMISSED; action()/dismiss() guard pending status. PR #702.
+- **FT257 — ProfileBadge** (2026-05-28): `Nene\Xion\ProfileBadge` — gamification badge award/revoke; award() idempotent; userBadges()/usersWithBadge()/countForBadge(). PR #701.
+- **FT256 — UserFeedback** (2026-05-28): `Nene\Xion\UserFeedback` — general NPS/star satisfaction feedback; averageScore(); countByScore(); forUser()/recent()/clearContext(). PR #700.
+- **FT255 — DailyStreak** (2026-05-28): `Nene\Xion\DailyStreak` — per-user daily activity streak; checkin() idempotent same-day; longestStreak preserved through reset(). PR #699.
 - **FT250 — KpiTracker** (2026-05-28): `Nene\Xion\KpiTracker` — KPI/OKR metric tracking with target/actual; record() time-series; progress() {actual, target, pct}; purgeOlderThan() per definition. PR #693.
 - **FT249 — FeatureRequest** (2026-05-28): `Nene\Xion\FeatureRequest` — product feature requests with voting; OPEN→PLANNED→IN_PROGRESS→SHIPPED; one-vote-per-user; top() by vote count. PR #692.
 - **FT248 — DocumentSignature** (2026-05-28): `Nene\Xion\DocumentSignature` — e-signature workflow; multi-signatory; sign() auto-completes; decline() cancels; pendingFor() inbox. PR #691.
