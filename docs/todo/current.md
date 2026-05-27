@@ -6,9 +6,77 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT77 are complete (FT36 deferred as ADR-class); ADR-0001–0013 are in place. Next work is FT78+ — see **Field Trials** and **Backlog Candidates** below.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT140 are complete (FT36 deferred as ADR-class); ADR-0001–0013 are in place. The Xion helper wave is complete — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
 
 ## Recently Completed
+
+### 2026-05-27 — FT78–FT140: Xion helper wave (63 trials)
+
+Continuous single-day wave of 63 field trials covering social, content, security, analytics, and infrastructure helpers. All PRs #512–#574 merged.
+
+**FT78 — NewsletterSubscription**: `NewsletterSubscription` double opt-in mailing list subscribe/confirm/unsubscribe. PR #512.
+**FT79 — BlockList**: `BlockList` directional user block with bidirectional query. PR #513.
+**FT80 — Poll**: `Poll` single-choice poll with vote tally and per-user state (first version). PR #514.
+**FT81 — Wishlist**: `Wishlist` entity-agnostic per-user saved items with notes. PR #515.
+**FT82 — NotificationPreference**: `NotificationPreference` channel×type opt-in/out with default opt-in. PR #516.
+**FT83 — ReadProgress**: `ReadProgress` track user read position with completion flag. PR #517.
+**FT84 — DeviceToken**: `DeviceToken` remember-me / trusted-device token with expiry. PR #518.
+**FT85 — ReferralCode**: `ReferralCode` referral code generation and conversion tracking (first version). PR #519.
+**FT86 — ActivityFeed**: `ActivityFeed` append-only user event timeline with cursor pagination. PR #520.
+**FT87 — MaintenanceMode**: `MaintenanceMode` global maintenance flag with user allowlist. PR #521.
+**FT88 — ContentFlag**: `ContentFlag` user content flagging and moderation queue. PR #522.
+**FT89 — TermConsent**: `TermConsent` ToS/privacy acceptance tracking with audit trail. PR #523.
+**FT90 — DownloadCounter**: `DownloadCounter` per-entity download tracking with user limits. PR #524.
+**FT91 — PasswordHistory**: `PasswordHistory` prevent recent password reuse. PR #525.
+**FT92 — PriceList**: `PriceList` SKU/currency/tier pricing table. PR #526.
+**FT93 — Waitlist**: `Waitlist` join/invite/confirm/cancel/status/position/count. PR #527.
+**FT94 — ContentSchedule**: `ContentSchedule` publish/expire windows with draft/published/expired/cancelled lifecycle. PR #528.
+**FT95 — StorageQuota**: `StorageQuota` per-owner byte tracking with configurable limits and overflow guard. PR #529.
+**FT96 — ReactionCounter**: `ReactionCounter` per-user emoji reactions with toggle and switch semantics. PR #530.
+**FT97 — GeoBlocker**: `GeoBlocker` country-level access control with blocklist/allowlist modes. PR #531.
+**FT98 — EmailVerification**: `EmailVerification` token-based email verification with TTL and SHA-256 hash storage. PR #532.
+**FT99 — UserBan**: `UserBan` user ban/unban with reason, expiry, and full history. PR #533.
+**FT100 — OnlineStatus**: `OnlineStatus` heartbeat-based online/idle/offline tracking. PR #534.
+**FT101 — FriendRequest**: `FriendRequest` friend request lifecycle with pending/accepted/declined/cancelled states. PR #535.
+**FT102 — LoginHistory**: `LoginHistory` append-only login attempt log with IP, user-agent, and failure tracking. PR #536.
+**FT103 — CommentThread**: `CommentThread` threaded comments with soft-delete tombstones (first version). PR #537.
+**FT104 — ShortUrl**: `ShortUrl` URL shortener with auto-code, custom slug, click tracking, and expiry. PR #538.
+**FT105 — EventTicket**: `EventTicket` event ticketing with capacity management and check-in. PR #539.
+**FT106 — MediaProcessing**: `MediaProcessing` async media job tracking with pending/processing/ready/failed states and retry. PR #540.
+**FT107 — NoticeBoard**: `NoticeBoard` admin announcements with per-user read-acknowledgment. PR #541.
+**FT108 — SurveyResponse**: `SurveyResponse` structured survey/quiz answer storage with tally. PR #542.
+**FT109 — FileQuarantine**: `FileQuarantine` file quarantine/release/reject workflow. PR #543.
+**FT110 — TokenBucket**: `TokenBucket` DB-backed token bucket for flexible rate limiting. PR #544.
+**FT111 — AuditLog**: `AuditLog` append-only action log with JSON context and actor/resource filtering. PR #545.
+**FT112 — LeaderBoard**: `LeaderBoard` named scoreboards with upsert, ranking, and windowed queries. PR #546.
+**FT113 — PresenceChannel**: `PresenceChannel` heartbeat-based channel presence tracking. PR #547.
+**FT114 — TagIndex**: `TagIndex` flexible entity tagging with multi-tag AND queries. PR #548.
+**FT115 — AccessToken**: `AccessToken` personal access token issue/verify/revoke with SHA-256 hash storage. PR #549.
+**FT116 — DraftManager**: `DraftManager` versioned draft persistence with history and prune. PR #550.
+**FT117 — BookmarkCollection**: `BookmarkCollection` user-curated bookmark collections with move and clear. PR #551.
+**FT118 — InviteCode**: `InviteCode` single-use invite codes with quota and expiry. PR #552.
+**FT119 — SupportTicket**: `SupportTicket` help-desk ticketing with replies and status lifecycle. PR #553.
+**FT120 — HealthCheck**: `HealthCheck` service health status with history and isHealthy aggregate. PR #554.
+**FT121 — IpAllowlist**: `IpAllowlist` per-resource IP allowlist with CIDR range support. PR #555.
+**FT122 — UserSession**: `UserSession` DB-backed server-side session store with TTL and payload. PR #556.
+**FT123 — PriceHistory**: `PriceHistory` append-only price change log with lowest/highest aggregation. PR #557.
+**FT124 — FeatureFlag**: `FeatureFlag` DB-backed feature flags with global on/off and per-user overrides. PR #558.
+**FT125 — JobQueue**: `JobQueue` DB-backed background job queue with retry and delay (revised design). PR #559.
+**FT126 — EventLog**: `EventLog` append-only domain event store with aggregate and event-type queries. PR #560.
+**FT127 — ConsentLog**: `ConsentLog` immutable GDPR/CCPA consent audit log; eraseUser GDPR right. PR #561.
+**FT128 — WebhookDelivery**: `WebhookDelivery` outbound webhook delivery log with exponential backoff retry. PR #562.
+**FT129 — UserPreference**: `UserPreference` key-value preference store with upsert (revised design). PR #563.
+**FT130 — SessionFlash**: `SessionFlash` DB-backed one-time flash messages for post/redirect/get. PR #564.
+**FT131 — MediaMetadata**: `MediaMetadata` media file registry with key-value metadata sidecar table. PR #565.
+**FT132 — AbTest**: `AbTest` A/B test variant assignment (deterministic crc32) and conversion tracking. PR #566.
+**FT133 — CommentThread**: `CommentThread` threaded comments with soft-delete (revised design). PR #567.
+**FT134 — Poll**: `Poll` polls with named options and per-user vote tracking (revised design). PR #568.
+**FT135 — Subscription**: `Subscription` recurring subscription plan tracking with auto-expiry detection. PR #569.
+**FT136 — SearchIndex**: `SearchIndex` lightweight full-text search index with token frequency ranking. PR #570.
+**FT137 — Referral**: `Referral` referral code generation, attribution, and conversion tracking (revised design). PR #571.
+**FT138 — CreditLedger**: `CreditLedger` append-only credit/debit ledger per user; balance guard. PR #572.
+**FT139 — GeoFence**: `GeoFence` named circular geo-fence definition and point containment; Haversine. PR #573.
+**FT140 — TaskList**: `TaskList` per-user to-do list with named lists and completion tracking. PR #574.
 
 ### 2026-05-27 — FT73–FT77: Infrastructure + auth + geo + identity wave (5 trials)
 
@@ -189,7 +257,7 @@ Single-day wave of trial-driven improvements across the framework, documentation
 
 ## Next
 
-FT1–FT50 complete (FT36 deferred). Next is FT51+ — see `docs/field-trials/candidates.md` for the active candidate list.
+FT1–FT140 complete (FT36 deferred as ADR-class). The Xion helper wave is complete. Remaining work is trigger-based — see `docs/field-trials/candidates.md` for the 保留候補 list.
 
 ## Field Trials
 
@@ -218,13 +286,12 @@ When a trial is run, summarize it here with the format below, then move the bloc
 
 Active candidates are maintained in `docs/field-trials/candidates.md`. Summary:
 
-### Next field trials (FT51+)
+### Trigger-based candidates
 
-- **FT51** — i18n / メッセージカタログ (`Nene\Func\I18n`). Small.
-- **FT52** — Event dispatcher / 軽量 pub-sub (`EventDispatcher`). Small–medium. Trigger-based.
-- **FT53** — Personal data export / GDPR Article 20. Small. Trigger-based.
-- **FT54** — リクエストボディ JSON Schema 検証. Medium / ADR. Trigger-based.
-- **FT36** — バックグラウンドジョブ (deferred, ADR-class, large).
+- **FT36** — バックグラウンドジョブ (deferred, ADR-class, large). Trigger: real "POST takes 8s" friction.
+- **Observability** — OpenTelemetry traceparent/tracestate. Trigger: OTel collector needed in real deploy.
+- **Structural: Multi-tenancy** — row-scoped tenant isolation. Trigger: real B2B SaaS deploy.
+- **Structural: Constraint-changes ADR** — promote ADR-0009 "warning-only" to hard constraint path. Trigger: 3+ operator friction cases.
 
 ### Real-world surface trials (still unrun)
 

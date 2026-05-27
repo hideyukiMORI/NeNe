@@ -12,37 +12,9 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ---
 
-## Active candidates (FT78+)
+## Active candidates
 
-### FT78 — Newsletter Subscription
-
-**Why**: メーリングリスト購読管理。ダブルオプトイン・購読解除・ステータス管理。
-**Scope**: `Nene\Xion\NewsletterSubscription` — subscribe/confirm/unsubscribe/status/list、確認トークン管理。
-**Size**: small–medium.
-
-### FT79 — User Block List
-
-**Why**: ユーザー間のブロック機能。コンテンツ非表示・フォロー防止等の基盤。
-**Scope**: `Nene\Xion\BlockList` — block/unblock/isBlocked/blockedBy/list、双方向チェック。
-**Size**: small.
-
-### FT80 — Poll / Survey
-
-**Why**: 選択式投票。単一/複数選択・集計・ユーザー投票履歴。
-**Scope**: `Nene\Xion\Poll` — createPoll/addOption/vote/results/hasVoted、設問+選択肢+集計。
-**Size**: medium.
-
-### FT81 — Wishlist
-
-**Why**: ユーザーの「お気に入り商品」管理。entity-agnostic設計でどんなコンテンツにも対応。
-**Scope**: `Nene\Xion\Wishlist` — add/remove/contains/list、entity_type+entity_idペア。
-**Size**: small.
-
-### FT82 — Notification Preferences
-
-**Why**: 通知チャンネル・種別ごとの受信設定。メール/Push/SMS等の配信制御基盤。
-**Scope**: `Nene\Xion\NotificationPreference` — setEnabled/isEnabled/all/reset、チャンネル×種別マトリクス。
-**Size**: small.
+The Xion helper wave (FT78–FT140) is complete as of 2026-05-27. No immediate Xion-class candidates remain. Trigger-based and structural candidates are listed in the next section.
 
 ---
 
@@ -82,6 +54,69 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT140 — TaskList** (2026-05-27): `Nene\Xion\TaskList` — per-user to-do list with named lists and completion tracking. PR #574.
+- **FT139 — GeoFence** (2026-05-27): `Nene\Xion\GeoFence` — named circular geo-fence definition and point containment; Haversine. PR #573.
+- **FT138 — CreditLedger** (2026-05-27): `Nene\Xion\CreditLedger` — append-only credit/debit ledger per user; balance guard. PR #572.
+- **FT137 — Referral** (2026-05-27): `Nene\Xion\Referral` — referral code generation, attribution, and conversion tracking. PR #571.
+- **FT136 — SearchIndex** (2026-05-27): `Nene\Xion\SearchIndex` — lightweight full-text search index with token frequency ranking. PR #570.
+- **FT135 — Subscription** (2026-05-27): `Nene\Xion\Subscription` — recurring subscription plan tracking with auto-expiry detection. PR #569.
+- **FT134 — Poll** (2026-05-27): `Nene\Xion\Poll` — polls with named options and per-user vote tracking. PR #568.
+- **FT133 — CommentThread** (2026-05-27): `Nene\Xion\CommentThread` — threaded comments with soft-delete (revised design). PR #567.
+- **FT132 — AbTest** (2026-05-27): `Nene\Xion\AbTest` — A/B test variant assignment (deterministic crc32) and conversion tracking. PR #566.
+- **FT131 — MediaMetadata** (2026-05-27): `Nene\Xion\MediaMetadata` — media file registry with key-value metadata sidecar table. PR #565.
+- **FT130 — SessionFlash** (2026-05-27): `Nene\Xion\SessionFlash` — DB-backed one-time flash messages for post/redirect/get. PR #564.
+- **FT129 — UserPreference** (2026-05-27): `Nene\Xion\UserPreference` — key-value preference store with upsert (revised design). PR #563.
+- **FT128 — WebhookDelivery** (2026-05-27): `Nene\Xion\WebhookDelivery` — outbound webhook delivery log with exponential backoff retry. PR #562.
+- **FT127 — ConsentLog** (2026-05-27): `Nene\Xion\ConsentLog` — immutable GDPR/CCPA consent audit log; eraseUser GDPR right. PR #561.
+- **FT126 — EventLog** (2026-05-27): `Nene\Xion\EventLog` — append-only domain event store with aggregate and event-type queries. PR #560.
+- **FT125 — JobQueue** (2026-05-27): `Nene\Xion\JobQueue` — DB-backed background job queue with retry and delay (revised design). PR #559.
+- **FT124 — FeatureFlag** (2026-05-27): `Nene\Xion\FeatureFlag` — DB-backed feature flags with global on/off and per-user overrides. PR #558.
+- **FT123 — PriceHistory** (2026-05-27): `Nene\Xion\PriceHistory` — append-only price change log with lowest/highest aggregation. PR #557.
+- **FT122 — UserSession** (2026-05-27): `Nene\Xion\UserSession` — DB-backed server-side session store with TTL and payload. PR #556.
+- **FT121 — IpAllowlist** (2026-05-27): `Nene\Xion\IpAllowlist` — per-resource IP allowlist with CIDR range support. PR #555.
+- **FT120 — HealthCheck** (2026-05-27): `Nene\Xion\HealthCheck` — service health status with history and isHealthy aggregate. PR #554.
+- **FT119 — SupportTicket** (2026-05-27): `Nene\Xion\SupportTicket` — help-desk ticketing with replies and status lifecycle. PR #553.
+- **FT118 — InviteCode** (2026-05-27): `Nene\Xion\InviteCode` — single-use invite codes with quota and expiry. PR #552.
+- **FT117 — BookmarkCollection** (2026-05-27): `Nene\Xion\BookmarkCollection` — user-curated bookmark collections with move and clear. PR #551.
+- **FT116 — DraftManager** (2026-05-27): `Nene\Xion\DraftManager` — versioned draft persistence with history and prune. PR #550.
+- **FT115 — AccessToken** (2026-05-27): `Nene\Xion\AccessToken` — personal access token issue/verify/revoke with SHA-256 hash storage. PR #549.
+- **FT114 — TagIndex** (2026-05-27): `Nene\Xion\TagIndex` — flexible entity tagging with multi-tag AND queries. PR #548.
+- **FT113 — PresenceChannel** (2026-05-27): `Nene\Xion\PresenceChannel` — heartbeat-based channel presence tracking. PR #547.
+- **FT112 — LeaderBoard** (2026-05-27): `Nene\Xion\LeaderBoard` — named scoreboards with upsert, ranking, and windowed queries. PR #546.
+- **FT111 — AuditLog** (2026-05-27): `Nene\Xion\AuditLog` — append-only action log with JSON context and actor/resource filtering. PR #545.
+- **FT110 — TokenBucket** (2026-05-27): `Nene\Xion\TokenBucket` — DB-backed token bucket for flexible rate limiting. PR #544.
+- **FT109 — FileQuarantine** (2026-05-27): `Nene\Xion\FileQuarantine` — file quarantine/release/reject workflow. PR #543.
+- **FT108 — SurveyResponse** (2026-05-27): `Nene\Xion\SurveyResponse` — structured survey/quiz answer storage with tally. PR #542.
+- **FT107 — NoticeBoard** (2026-05-27): `Nene\Xion\NoticeBoard` — admin announcements with per-user read-acknowledgment. PR #541.
+- **FT106 — MediaProcessing** (2026-05-27): `Nene\Xion\MediaProcessing` — async media job tracking with pending/processing/ready/failed states and retry. PR #540.
+- **FT105 — EventTicket** (2026-05-27): `Nene\Xion\EventTicket` — event ticketing with capacity management and check-in. PR #539.
+- **FT104 — ShortUrl** (2026-05-27): `Nene\Xion\ShortUrl` — URL shortener with auto-code, custom slug, click tracking, and expiry. PR #538.
+- **FT103 — CommentThread** (2026-05-27): `Nene\Xion\CommentThread` — threaded comments with soft-delete tombstones (first version). PR #537.
+- **FT102 — LoginHistory** (2026-05-27): `Nene\Xion\LoginHistory` — append-only login attempt log with IP, user-agent, and failure tracking. PR #536.
+- **FT101 — FriendRequest** (2026-05-27): `Nene\Xion\FriendRequest` — friend request lifecycle with pending/accepted/declined/cancelled states. PR #535.
+- **FT100 — OnlineStatus** (2026-05-27): `Nene\Xion\OnlineStatus` — heartbeat-based online/idle/offline tracking. PR #534.
+- **FT99 — UserBan** (2026-05-27): `Nene\Xion\UserBan` — user ban/unban with reason, expiry, and full history. PR #533.
+- **FT98 — EmailVerification** (2026-05-27): `Nene\Xion\EmailVerification` — token-based email verification with TTL and SHA-256 hash storage. PR #532.
+- **FT97 — GeoBlocker** (2026-05-27): `Nene\Xion\GeoBlocker` — country-level access control with blocklist/allowlist modes. PR #531.
+- **FT96 — ReactionCounter** (2026-05-27): `Nene\Xion\ReactionCounter` — per-user emoji reactions with toggle and switch semantics. PR #530.
+- **FT95 — StorageQuota** (2026-05-27): `Nene\Xion\StorageQuota` — per-owner byte tracking with configurable limits and overflow guard. PR #529.
+- **FT94 — ContentSchedule** (2026-05-27): `Nene\Xion\ContentSchedule` — publish/expire windows with draft/published/expired/cancelled lifecycle. PR #528.
+- **FT93 — Waitlist** (2026-05-27): `Nene\Xion\Waitlist` — join/invite/confirm/cancel/status/position/count. PR #527.
+- **FT92 — PriceList** (2026-05-27): `Nene\Xion\PriceList` — SKU/currency/tier pricing table. PR #526.
+- **FT91 — PasswordHistory** (2026-05-27): `Nene\Xion\PasswordHistory` — prevent recent password reuse. PR #525.
+- **FT90 — DownloadCounter** (2026-05-27): `Nene\Xion\DownloadCounter` — per-entity download tracking with user limits. PR #524.
+- **FT89 — TermConsent** (2026-05-27): `Nene\Xion\TermConsent` — ToS/privacy acceptance tracking with audit trail. PR #523.
+- **FT88 — ContentFlag** (2026-05-27): `Nene\Xion\ContentFlag` — user content flagging and moderation queue. PR #522.
+- **FT87 — MaintenanceMode** (2026-05-27): `Nene\Xion\MaintenanceMode` — global maintenance flag with user allowlist. PR #521.
+- **FT86 — ActivityFeed** (2026-05-27): `Nene\Xion\ActivityFeed` — append-only user event timeline with cursor pagination. PR #520.
+- **FT85 — ReferralCode** (2026-05-27): `Nene\Xion\ReferralCode` — referral code generation and conversion tracking (first version). PR #519.
+- **FT84 — DeviceToken** (2026-05-27): `Nene\Xion\DeviceToken` — remember-me / trusted-device token with expiry. PR #518.
+- **FT83 — ReadProgress** (2026-05-27): `Nene\Xion\ReadProgress` — track user read position with completion flag. PR #517.
+- **FT82 — NotificationPreference** (2026-05-27): `Nene\Xion\NotificationPreference` — channel×type opt-in/out with default opt-in. PR #516.
+- **FT81 — Wishlist** (2026-05-27): `Nene\Xion\Wishlist` — entity-agnostic per-user saved items with notes. PR #515.
+- **FT80 — Poll** (2026-05-27): `Nene\Xion\Poll` — single-choice poll with vote tally and per-user state (first version). PR #514.
+- **FT79 — BlockList** (2026-05-27): `Nene\Xion\BlockList` — directional user block with bidirectional query. PR #513.
+- **FT78 — NewsletterSubscription** (2026-05-27): `Nene\Xion\NewsletterSubscription` — double opt-in mailing list subscribe/confirm/unsubscribe. PR #512.
 - **FT77 — Address Book** (2026-05-27): `Nene\Xion\AddressBook` — add/update/remove/list/setDefault; default swap transaction; partial update. PR #511.
 - **FT76 — Two-Factor Authentication (TOTP)** (2026-05-27): `Nene\Xion\TotpAuthenticator` — RFC 6238; generateSecret/verifyCode/otpauthUri/generateBackupCodes; HMAC-SHA1 HOTP. PR #510.
 - **FT75 — File Storage Metadata** (2026-05-27): `Nene\Xion\FileMetadata` — register/find/findByOwner/delete; MIME prefix filter; soft delete; storage field. PR #509.

@@ -186,7 +186,7 @@ Future candidates:
 
 ## 7. Field Trials
 
-Status: methodology adopted (ADR 0002). FT1–FT6 complete as of 2026-05-21.
+Status: methodology adopted (ADR 0002). FT1–FT140 complete as of 2026-05-27 (FT36 deferred as ADR-class).
 
 Goal:
 
@@ -215,6 +215,10 @@ Completed:
 - **FT4** — server-rendered HTML trial from `ft4-smarty-html`. 9 findings covering Smarty escape behavior, asset auto-discovery convention, HTML form POST handling, compile cache hygiene, and a small `location()` URI fix. Report: `docs/field-trials/2026-05-field-trial-4.md`.
 - **FT5** — auth × HTML cross trial from `ft5-protected-notes`. 10 findings; ADR-0004 (`ControllerBase::unauthorizedRedirect()` hook) born. The CI workflow's `Wait for /health` step was hardened to require `healthStatus=ok` with a 120s budget after a debugging mis-diagnosis. Report: `docs/field-trials/2026-05-field-trial-5.md`.
 - **FT6** — CLI installer trial from `ft6-cli-tooling` (first CLI-only trial). 7 findings; `composer setup` shortcut, `cli/setupDatabase.php` `--env=PATH` strict mode, `cli/initSQLite.php` `--yes` / `--help`, schema 3-way parity documentation, new `docs/development/cli.md` declaring `setupDatabase.php` canonical and `initSQLite.php` legacy. Report: `docs/field-trials/2026-05-field-trial-6.md`.
+- **FT7–FT24** — infrastructure, tooling, and survey trials. ADR-0005–0013 established. AI-agent journey (FT22), NENE2 pattern survey (FT23), CLI framework (FT24).
+- **FT25–FT50** — NENE2 parity + extended pattern wave (26 trials). PRs #458–#483. Pagination, soft delete, JWT, RBAC, rate limiting, feature flags, idempotency, webhook signing, circuit breaker, and more.
+- **FT51–FT77** — extended social/content/identity wave (27 trials). PRs #485–#511. i18n, pub-sub, GDPR export, leaderboard, comment threads, TOTP, address book, and more.
+- **FT78–FT140** — Xion helper wave (63 trials). PRs #512–#574. Social, content moderation, SaaS infrastructure, analytics, A/B testing, event sourcing, consent management, and more. See `docs/todo/current.md` for the full list.
 
 Infrastructure landed alongside the trials:
 
@@ -224,7 +228,14 @@ Infrastructure landed alongside the trials:
 - `docs/review/field-trial-report.md` self-review checklist referenced by the methodology.
 - `docs/field-trials/follow-ups.md` rules for deferred findings, with FT2 F-5 escalated and removed during FT3.
 
+Completed (wave summary):
+
+- **FT7–FT24**: Infrastructure, tooling, and pattern survey trials. ADR-0005–0013. NENE2 pattern survey (FT23). AI-agent journey (FT22).
+- **FT25–FT50**: NENE2 parity + extended pattern wave. 26 trials covering pagination, soft delete, JWT, RBAC, rate limiting, feature flags, idempotency, webhook signing, and more. PRs #458–#483.
+- **FT51–FT77**: Extended social/content/identity wave. 27 trials covering i18n, pub-sub, GDPR export, leaderboard, bookmarks, TOTP, address book, and more. PRs #485–#511.
+- **FT78–FT140**: Xion helper wave. 63 trials covering social, content moderation, analytics, SaaS infrastructure, A/B testing, event sourcing, and more. PRs #512–#574.
+
 Future candidates:
 
-- **FT7+** — remaining FT-untouched surfaces: error pages (404 / 500 templates and the `htdocs/index.php` catch-all), production-mode deployment probe (`NENE_APP_ENV=production` + secure cookie + log rotation behavior), Smarty custom plugin authoring (`view/plugins/`), OpenAPI authoring workflow round-trip, schema source-of-truth consolidation (ADR-class, triggered when a future trial actually trips on the three-site drift surfaced by FT6 F-2).
-- Subsequent trials should each target a different surface rather than retesting paths already exercised by FT1–FT6.
+- **Trigger-based**: error pages (404/500 templates), production-mode deployment probe (`NENE_APP_ENV=production`), OpenAPI authoring workflow, FT36 (background jobs / ADR-class).
+- Subsequent trials should target surfaces not yet exercised, or validate revised Xion helper designs in a real service context.
