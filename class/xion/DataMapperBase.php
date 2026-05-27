@@ -64,6 +64,20 @@ abstract class DataMapperBase
     protected const KEY_SID = 'id';
 
     /**
+     * Whether this mapper uses soft-delete (logical deletion).
+     *
+     * When true:
+     * - delete() sets deleted_at = NOW() instead of removing the row.
+     * - find() / findALL() / findPage() / countAll() automatically exclude
+     *   soft-deleted rows (WHERE deleted_at IS NULL).
+     * - softDelete() / restore() / findTrashed() / purge() become available.
+     *
+     * Set to true in the concrete mapper subclass to opt in:
+     *   protected const SOFT_DELETE = true;
+     */
+    protected const SOFT_DELETE = false;
+
+    /**
      * CONSTRUCTOR
      */
     public function __construct()
@@ -205,39 +219,52 @@ abstract class DataMapperBase
 
     /**
      * DELETE
-     * To do a logical delete, use the update method or add logic to this method.
      *
-     * @param mixed $data Data object to update the database.
+     * Physical delete when DB_IS_PHYSICAL_DELETE is true (legacy global flag).
+     * Logical delete (soft delete) when SOFT_DELETE is true on this mapper:
+     * sets deleted_at = NOW() instead of removing the row.
+     *
+     * @param mixed $data Data object(s) to delete.
      *
      * @return void
      */
     public function delete(mixed $data): void
     {
-        if (DB_IS_PHYSICAL_DELETE) {
-            $stmt = $this->DB->prepare('
-                DELETE FROM ' . static::TARGET_TABLE . '
-                WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID . '
-            ');
-            if (!is_array($data)) {
-                $data = [$data];
-            }
-            foreach ($data as $row) {
-                if (!$row instanceof DataModelBase) {
-                    throw new \InvalidArgumentException(
-                        'DATA MAPPER ERROR. Not an instance of the specified "' .
-                            static::MODEL_CLASS . '" class.'
-                    );
-                }
-                $key_sid = $row->{static::KEY_SID};
-                $stmt->bindParam(':' . static::KEY_SID, $key_sid, PDO::PARAM_INT);
-                $this->execute($stmt);
+        if (!is_array($data)) {
+            $data = [$data];
+        }
+        foreach ($data as $row) {
+            if (!$row instanceof DataModelBase) {
+                throw new \InvalidArgumentException(
+                    'DATA MAPPER ERROR. Not an instance of the specified "' .
+                        static::MODEL_CLASS . '" class.'
+                );
             }
         }
+
+        if (DB_IS_PHYSICAL_DELETE && !static::SOFT_DELETE) {
+            $stmt = $this->DB->prepare(
+                'DELETE FROM ' . static::TARGET_TABLE .
+                ' WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID
+            );
+            foreach ($data as $row) {
+                $key_sid = $row->{static::KEY_SID};
+                $stmt->bindParam(':' . static::KEY_SID, $key_sid, \PDO::PARAM_INT);
+                $this->execute($stmt);
+            }
+            return;
+        }
+
+        if (static::SOFT_DELETE) {
+            $this->softDelete($data);
+        }
+        // When DB_IS_PHYSICAL_DELETE=false and SOFT_DELETE=false: no-op (legacy behaviour).
     }
 
     /**
      * FIND
-     * Search primary key by specified value and return one row.
+     * Returns one active row by primary key.
+     * Soft-deleted rows are excluded when SOFT_DELETE is true.
      *
      * @param integer $sid Primary key value to search.
      *
@@ -245,9 +272,14 @@ abstract class DataMapperBase
      */
     public function find(int $sid): object|false
     {
+        $deletedFilter = static::SOFT_DELETE
+            ? ' AND ' . DB_COLUMN_NAME_DELETED . ' IS NULL'
+            : '';
+
         $stmt = $this->DB->prepare('
             SELECT * FROM ' . static::TARGET_TABLE . '
-            WHERE   ' . static::KEY_SID . ' =:' . static::KEY_SID . '
+            WHERE   ' . static::KEY_SID . ' =:' . static::KEY_SID .
+            $deletedFilter . '
             LIMIT 1
         ');
         $stmt->bindParam(':' . static::KEY_SID, $sid, PDO::PARAM_INT);
@@ -258,18 +290,22 @@ abstract class DataMapperBase
 
     /**
      * Find all
-     * Returns all rows from a database table.
+     * Returns all active rows.
+     * Soft-deleted rows are excluded when SOFT_DELETE is true.
      *
-     * @param integer $limit Number of acquisitions.
+     * @param integer $limit Number of acquisitions (0 = unlimited).
      *
-     * @return PDOStatement  Search results.
+     * @return PDOStatement Search results.
      */
     public function findALL(int $limit = 0): PDOStatement
     {
         $limitSQL = $limit === 0 ? '' : ' LIMIT ' . (int)$limit;
+        $deletedFilter = static::SOFT_DELETE
+            ? ' AND ' . DB_COLUMN_NAME_DELETED . ' IS NULL'
+            : '';
         $stmt = $this->executeQuery('
             SELECT * FROM ' . static::TARGET_TABLE . '
-            WHERE 1
+            WHERE 1' . $deletedFilter . '
             ORDER BY ' . static::KEY_SID . $limitSQL . '
         ');
         return $this->decorate($stmt);
@@ -295,17 +331,145 @@ abstract class DataMapperBase
 
     /**
      * Count all
-     * Returns the number of rows in a database table.
+     * Returns the number of active rows.
+     * Soft-deleted rows are excluded when SOFT_DELETE is true.
      *
      * @return integer Number of rows.
      */
     public function countAll(): int
     {
+        $deletedFilter = static::SOFT_DELETE
+            ? ' AND ' . DB_COLUMN_NAME_DELETED . ' IS NULL'
+            : '';
         $stmt = $this->executeQuery('
             SELECT COUNT(*) FROM ' . static::TARGET_TABLE . '
-            WHERE 1
+            WHERE 1' . $deletedFilter . '
         ');
         return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Soft-delete one or more rows by setting deleted_at = NOW().
+     *
+     * Only available when SOFT_DELETE = true on the concrete mapper.
+     * Called automatically by delete() when SOFT_DELETE is enabled.
+     *
+     * @param mixed $data Data object(s) to soft-delete.
+     *
+     * @return void
+     */
+    public function softDelete(mixed $data): void
+    {
+        if (!static::SOFT_DELETE) {
+            return;
+        }
+        if (!is_array($data)) {
+            $data = [$data];
+        }
+        $stmt = $this->DB->prepare(
+            'UPDATE ' . static::TARGET_TABLE .
+            ' SET ' . DB_COLUMN_NAME_DELETED . ' = NOW()' .
+            ' WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID .
+            ' AND ' . DB_COLUMN_NAME_DELETED . ' IS NULL'
+        );
+        foreach ($data as $row) {
+            if (!$row instanceof DataModelBase) {
+                throw new \InvalidArgumentException(
+                    'DATA MAPPER ERROR. Not an instance of the specified "' .
+                        static::MODEL_CLASS . '" class.'
+                );
+            }
+            $key_sid = $row->{static::KEY_SID};
+            $stmt->bindParam(':' . static::KEY_SID, $key_sid, \PDO::PARAM_INT);
+            $this->execute($stmt);
+        }
+    }
+
+    /**
+     * Restore a soft-deleted row by clearing deleted_at.
+     *
+     * Only available when SOFT_DELETE = true on the concrete mapper.
+     *
+     * @param integer $sid Primary key value.
+     *
+     * @return bool True if the row was in trash and restored; false if not found in trash.
+     */
+    public function restore(int $sid): bool
+    {
+        if (!static::SOFT_DELETE) {
+            return false;
+        }
+        $stmt = $this->DB->prepare(
+            'UPDATE ' . static::TARGET_TABLE .
+            ' SET ' . DB_COLUMN_NAME_DELETED . ' = NULL' .
+            ' WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID .
+            ' AND ' . DB_COLUMN_NAME_DELETED . ' IS NOT NULL'
+        );
+        $stmt->bindParam(':' . static::KEY_SID, $sid, \PDO::PARAM_INT);
+        $this->execute($stmt);
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Find soft-deleted (trashed) rows.
+     *
+     * Only available when SOFT_DELETE = true on the concrete mapper.
+     * Returns rows WHERE deleted_at IS NOT NULL.
+     *
+     * @param integer $limit Number of acquisitions (0 = unlimited).
+     *
+     * @return PDOStatement Search results.
+     */
+    public function findTrashed(int $limit = 0): PDOStatement
+    {
+        $limitSQL = $limit === 0 ? '' : ' LIMIT ' . (int)$limit;
+        $stmt = $this->executeQuery('
+            SELECT * FROM ' . static::TARGET_TABLE . '
+            WHERE ' . DB_COLUMN_NAME_DELETED . ' IS NOT NULL
+            ORDER BY ' . DB_COLUMN_NAME_DELETED . ' DESC' . $limitSQL . '
+        ');
+        return $this->decorate($stmt);
+    }
+
+    /**
+     * Permanently delete a single trashed row (must already be soft-deleted).
+     *
+     * Guards against purging active rows. Returns false if the row is not in trash.
+     *
+     * @param integer $sid Primary key value.
+     *
+     * @return bool True if the row was purged; false if not found in trash.
+     */
+    public function purge(int $sid): bool
+    {
+        if (!static::SOFT_DELETE) {
+            return false;
+        }
+        $stmt = $this->DB->prepare(
+            'DELETE FROM ' . static::TARGET_TABLE .
+            ' WHERE ' . static::KEY_SID . ' =:' . static::KEY_SID .
+            ' AND ' . DB_COLUMN_NAME_DELETED . ' IS NOT NULL'
+        );
+        $stmt->bindParam(':' . static::KEY_SID, $sid, \PDO::PARAM_INT);
+        $this->execute($stmt);
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Permanently delete all trashed rows.
+     *
+     * @return int Number of rows purged.
+     */
+    public function purgeAll(): int
+    {
+        if (!static::SOFT_DELETE) {
+            return 0;
+        }
+        $stmt = $this->executeQuery(
+            'DELETE FROM ' . static::TARGET_TABLE .
+            ' WHERE ' . DB_COLUMN_NAME_DELETED . ' IS NOT NULL'
+        );
+        return $stmt->rowCount();
     }
 
     /**

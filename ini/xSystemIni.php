@@ -195,6 +195,11 @@ unset($getEnv);
 const DB_COLUMN_TIMESTAMP = true;
 const DB_COLUMN_NAME_CREATED = 'created_at';
 const DB_COLUMN_NAME_UPDATED = 'updated_at';
+/**
+ * Column name for soft-delete timestamp.
+ * Used by DataMapperBase when SOFT_DELETE = true.
+ */
+const DB_COLUMN_NAME_DELETED = 'deleted_at';
 const DB_AUTO_CREATED_STAMP = true;
 const DB_AUTO_UPDATED_STAMP = true;
 const DB_NUM_PREFIX = 'numPrefix_';
