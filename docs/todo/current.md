@@ -6,9 +6,24 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-28: all non-promotion Issues are closed; FT1–FT228 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-28: all non-promotion Issues are closed; FT1–FT238 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
 
 ## Recently Completed
+
+### 2026-05-28 — FT229–FT238: Xion eighth extended wave (10 trials)
+
+Continuous wave of 10 field trials adding further Xion helper patterns. All PRs #671–#680.
+
+**FT229 — SurveyTemplate**: `SurveyTemplate` two-table form/survey template definitions with typed questions (text/textarea/number/select/radio/checkbox); inactive by default. PR #671.
+**FT230 — RecipientGroup**: `RecipientGroup` mailing list / recipient group management; UNIQUE slug; addMember() cross-driver upsert; isMember()/groupsFor(). PR #672.
+**FT231 — EntitySnapshot**: `EntitySnapshot` point-in-time entity state snapshots; findAt() nearest snapshot; list() returns metadata only; purgeOlderThan() TTL. PR #673.
+**FT232 — StockAlert**: `StockAlert` stock/availability alert registrations; cron batch via pendingTriggers()/markTriggered(); dismiss() silences without delete. PR #674.
+**FT233 — ResourceReservation**: `ResourceReservation` time-bounded reservation with overlap detection; isAvailable() excludeId for re-booking; forResource() range query. PR #675.
+**FT234 — ScoreBoard**: `ScoreBoard` high-score table with personal-best per player; top() derives MAX(score) per player; rank() counts players with higher best. PR #676.
+**FT235 — CreditNote**: `CreditNote` financial credit notes against any entity; integer-cent amounts; PENDING→APPLIED/VOIDED lifecycle; pendingTotal() sum. PR #677.
+**FT236 — DeviceFingerprint**: `DeviceFingerprint` device recognition for fraud detection; SHA-256 hash storage; seen() cross-driver upsert increments seen_count; isTrusted()/isBlocked(). PR #678.
+**FT237 — SlaTracker**: `SlaTracker` SLA/SLO breach detection; start() computes deadline from duration; pause/resume accumulates paused_seconds; breached() cron query. PR #679.
+**FT238 — MediaConversionJob**: `MediaConversionJob` async media processing FIFO queue; nextPending()/start()/complete()/fail()/retry(); attempts counter for backoff. PR #680.
 
 ### 2026-05-28 — FT211–FT228: Xion seventh extended wave (18 trials)
 

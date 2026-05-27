@@ -186,7 +186,7 @@ Future candidates:
 
 ## 7. Field Trials
 
-Status: methodology adopted (ADR 0002). FT1–FT228 complete as of 2026-05-28 (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61).
+Status: methodology adopted (ADR 0002). FT1–FT238 complete as of 2026-05-28 (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61).
 
 Goal:
 
@@ -241,6 +241,7 @@ Completed (wave summary):
 - **FT196–FT200**: Xion fifth extended wave. 5 trials covering CSV import job tracking with per-row errors, topic-based pub/sub subscriptions, e-commerce orders with line items, deployment version history, and user cohort/segment assignment. PRs #635–#639.
 - **FT201–FT210**: Xion sixth extended wave. 10 trials covering inventory stock tracking with atomic reserve/commit, work time entries with start/stop timers, appointment time slot booking with capacity, external API call logging, GDPR data-subject request tracking, product/feature waitlist management, regional tax rate calculation, push notification device token management, flexible entity tagging with tag clouds, and advisory resource locking with TTL. PRs #641–#650.
 - **FT211–FT228**: Xion seventh extended wave. 18 trials covering product price catalog with tiers, compliance audit log with before/after snapshots, loyalty point ledger, flat entity comments, survey/form response collection, product bundle catalog, channel-agnostic notification queue, persistent stateful workflow instances, type-ahead search suggestion management, metered billing usage tracking, multiple entity identifier aliases, multi-device session management, ordered page builder content blocks, database-backed multilingual content, service health monitoring, page/resource view analytics, contact form inbox management, and time-bounded access delegation. PRs #652–#669.
+- **FT229–FT238**: Xion eighth extended wave. 10 trials covering form/survey template definitions with questions, mailing list recipient group management, point-in-time entity state snapshots, stock/availability alert registrations with cron batch processing, time-bounded resource reservation with overlap detection, high-score leaderboard with personal-best tracking, financial credit notes with lifecycle management, device fingerprint recognition for fraud detection, SLA/SLO breach detection with pause/resume, and async media processing job tracking. PRs #671–#680.
 
 Future candidates:
 
