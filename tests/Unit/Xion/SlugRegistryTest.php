@@ -77,6 +77,7 @@ final class SlugRegistryTest extends TestCase
         $this->sr->register('post', '1', 'Hello World');
         $row = $this->sr->resolve('post', 'hello-world');
         $this->assertNotNull($row);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('1', $row['entity_id']);
     }
 
