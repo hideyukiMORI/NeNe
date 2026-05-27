@@ -74,7 +74,7 @@ final class ReferralCodeTest extends TestCase
         $code = $this->ref->getOrCreate('user-1');
         $row  = $this->ref->findByCode($code);
         $this->assertNotNull($row);
-        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('user-1', $row['user_id']);
     }
 
