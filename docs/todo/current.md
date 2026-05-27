@@ -6,9 +6,32 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT210 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-28: all non-promotion Issues are closed; FT1–FT228 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
 
 ## Recently Completed
+
+### 2026-05-28 — FT211–FT228: Xion seventh extended wave (18 trials)
+
+Continuous wave of 18 field trials adding further Xion helper patterns. All PRs #652–#669.
+
+**FT211 — PriceList**: `PriceList` product price catalog with retail/wholesale/member tiers; integer-cent amounts; effective/expiry date windows; cross-driver upsert. PR #652.
+**FT212 — AuditLog**: `AuditLog` compliance-grade append-only entity change tracking; before/after JSON snapshots; forEntity()/byActor()/ofAction()/purgeOlderThan(). PR #653.
+**FT213 — PointBalance**: `PointBalance` loyalty/reward point ledger; earn()/spend() (guarded against negative)/expire(); balance() = COALESCE(SUM(delta),0). PR #654.
+**FT214 — EntityComment**: `EntityComment` flat (non-threaded) comments on any entity; soft-delete; edit tracking; author-only guards; purge() for admin hard-delete. PR #655.
+**FT215 — SurveyResponse**: `SurveyResponse` two-table form/survey response collection; per-response answers; answerFrequency() for analysis. PR #656.
+**FT216 — ProductBundle**: `ProductBundle` two-table product bundle catalog; inactive by default; addItem() upserts quantity; allActive(). PR #657.
+**FT217 — NotificationQueue**: `NotificationQueue` channel-agnostic outbox-pattern queue; dequeue() respects scheduled_at and max_attempts; markFailed() CASE WHEN exhaustion. PR #658.
+**FT218 — WorkflowInstance**: `WorkflowInstance` persistent stateful workflow tracking; two-table (instances + transitions); complete()/cancel() terminal states. PR #659.
+**FT219 — SearchSuggestion**: `SearchSuggestion` type-ahead suggestion management; record() cross-driver upsert; suggest() by (weight+frequency) desc; boost(); purge(). PR #660.
+**FT220 — BillingUsage**: `BillingUsage` metered usage tracking for billing; sum()/summary()/overage(); period defaults to current month; reset()/purgeOlderThan(). PR #661.
+**FT221 — EntityAlias**: `EntityAlias` multiple identifier aliases per entity; UNIQUE (entity_type, alias); idempotent register(); transfer() atomic reassignment. PR #662.
+**FT222 — UserSession**: `UserSession` multi-device session management; SHA-256 token hash storage; findByToken() auto-marks expired; invalidateAll() force-logout. PR #663.
+**FT223 — ContentBlock**: `ContentBlock` ordered page builder content blocks; JSON content payload; reorder()/deactivate()/activate(); clear() entity bulk-delete. PR #664.
+**FT224 — MultiLangContent**: `MultiLangContent` DB-backed multilingual content; UNIQUE (content_key, locale); get() with fallback locale; cross-driver upsert. PR #665.
+**FT225 — HealthCheck**: `HealthCheck` service health monitoring log; latestAll() MAX(id) subquery; avgResponseTime()/failureRate() over last N checks. PR #666.
+**FT226 — PageView**: `PageView` page view analytics; count()/uniqueCount() with period prefix filter; topUrls()/dailyCounts(); purgeOlderThan(). PR #667.
+**FT227 — ContactMessage**: `ContactMessage` contact form inbox; STATUS_UNREAD→READ→REPLIED/ARCHIVED lifecycle; unreadCount(); purgeArchived() TTL. PR #668.
+**FT228 — AccessGrant**: `AccessGrant` time-bounded access delegation; hasAccess() checks active+non-expired; myGrants()/grantsIGave() for both sides. PR #669.
 
 ### 2026-05-27 — FT201–FT210: Xion sixth extended wave (10 trials)
 
