@@ -17,9 +17,6 @@ declare(strict_types=1);
 
 namespace Nene\Xion;
 
-use Nene\Xion\HttpTermination;
-use Nene\Xion\JsonResponder;
-
 /**
  * Generates and verifies HMAC-SHA256-signed URLs with expiry.
  *
@@ -43,7 +40,8 @@ final readonly class SignedUrl
     public function __construct(
         private string $secret,
         private int $defaultTtl = 3600,
-    ) {}
+    ) {
+    }
 
     /**
      * Build a signed URL.
