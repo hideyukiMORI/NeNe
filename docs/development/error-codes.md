@@ -38,6 +38,7 @@ Every failure response uses the same envelope, documented in OpenAPI as `ApiFail
 | `UPLOAD-FILE-REQUIRED` | 400 | Upload file is required. | Thrown by `UploadedFile::validate()` when the upload is missing or `is_uploaded_file()` returns false. |
 | `UPLOAD-TOO-LARGE` | 413 | Upload exceeds size limit. | Thrown by `UploadedFile::validate(['maxBytes' => N])` when `size() > N`. |
 | `UPLOAD-MIME-REJECTED` | 415 | Upload mime type is not allowed. | Thrown by `UploadedFile::validate(['allowedMime' => [...]])` when `finfo` mime is not on the allowlist. |
+| `CIRCUIT-OPEN` | 503 | The downstream service is temporarily unavailable. | Returned when a `CircuitBreaker` is in the OPEN state and the caller should not attempt the downstream call. See `docs/development/circuit-breaker.md`. |
 
 ## Adding a new error code
 

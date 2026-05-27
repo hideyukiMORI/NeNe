@@ -55,4 +55,8 @@ return [
         'message' => 'Upload mime type is not allowed.',
         'httpStatus' => 415,
     ],
+    'CIRCUIT-OPEN' => [
+        'message' => 'The downstream service is temporarily unavailable.',
+        'httpStatus' => 503,
+    ],
 ];
