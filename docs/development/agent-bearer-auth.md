@@ -102,9 +102,27 @@ A future trial may pick this up when:
 - Token rotation needs an overlap window (old + new valid simultaneously).
 - Per-route or per-scope authorization is needed beyond "is this the admin?".
 
-## JWT-based Bearer auth (custom implementation)
+## JWT-based Bearer auth: `JwtCodec`
 
-NeNe's built-in Bearer auth uses a pre-shared static token (`NENE_AGENT_BEARER_TOKEN`) validated with `hash_equals`. If you build a custom JWT-based auth system (e.g., for user-facing API tokens), these edge cases must be handled:
+`Nene\Xion\JwtCodec` ships with NeNe. Set `NENE_JWT_SECRET` in `.env` and use:
+
+```php
+$jwt = new JwtCodec((string)getenv('NENE_JWT_SECRET'));
+
+// Issue (e.g. in login action)
+$token = $jwt->issue(['sub' => $userId, 'email' => $user->email]);
+
+// Verify in preAction (throws 401 on invalid/expired)
+protected function preAction(): void
+{
+    $this->JWT_CLAIMS = (new JwtCodec((string)getenv('NENE_JWT_SECRET')))->require();
+}
+
+// Access claims in REST method
+$userId = (int)($this->JWT_CLAIMS['sub'] ?? 0);
+```
+
+`issue()` automatically sets `iat` and `exp`. Tokens without `exp` are always rejected.
 
 ### Security edge cases (FT94 findings from NENE2)
 
