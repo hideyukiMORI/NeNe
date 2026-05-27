@@ -7,31 +7,29 @@ namespace Nene\Xion;
 use PDO;
 
 /**
- * Polls and surveys — create questions, vote, and tally results.
+ * Poll — create polls with options and record per-user votes.
  *
- * Supports single-choice polls. Each user may cast at most one vote per poll
- * (INSERT OR IGNORE / INSERT IGNORE enforces the constraint).
+ * Each poll has named options. A user can vote for one option
+ * (or multiple if the poll is multi-choice). Votes are stored once
+ * per (poll_id, user_id, option_key) combination.
  *
  * ## Usage
  *
  * ```php
  * $poll = new Poll($pdo);
  *
- * // Create poll with options
- * $pollId  = $poll->create('Which framework?', ['NeNe', 'Laravel', 'Symfony']);
- * $options = $poll->options($pollId);
+ * // Create a poll
+ * $id = $poll->create('Favourite colour?', ['red', 'green', 'blue']);
  *
  * // Vote
- * $optionId = $options[0]['id'];
- * $poll->vote($pollId, $optionId, 'user-1');
+ * $poll->vote($id, 'user-1', 'red');
  *
- * // Results
- * $results = $poll->results($pollId);
- * // [['option_id' => ..., 'label' => 'NeNe', 'votes' => 1, 'percent' => 100.0], ...]
+ * // Get results
+ * $poll->results($id);  // ['red' => 1, 'green' => 0, 'blue' => 0]
  *
- * // Check if voted
- * $poll->hasVoted($pollId, 'user-1'); // true
- * $poll->userVote($pollId, 'user-1'); // ['option_id' => ..., 'label' => 'NeNe']
+ * // Check if user voted
+ * $poll->hasVoted($id, 'user-1');       // true
+ * $poll->votedFor($id, 'user-1');       // ['red']
  * ```
  *
  * ## Schema (SQLite / MySQL compatible)
@@ -39,23 +37,18 @@ use PDO;
  * ```sql
  * CREATE TABLE polls (
  *     id         INTEGER PRIMARY KEY AUTOINCREMENT,
- *     question   TEXT        NOT NULL,
- *     created_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP
- * );
- *
- * CREATE TABLE poll_options (
- *     id      INTEGER PRIMARY KEY AUTOINCREMENT,
- *     poll_id INTEGER     NOT NULL,
- *     label   VARCHAR(255) NOT NULL,
- *     sort    INTEGER     NOT NULL DEFAULT 0
+ *     question   TEXT    NOT NULL,
+ *     options    TEXT    NOT NULL DEFAULT '[]',
+ *     closed_at  DATETIME DEFAULT NULL,
+ *     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
  * );
  *
  * CREATE TABLE poll_votes (
- *     poll_id   INTEGER      NOT NULL,
- *     option_id INTEGER      NOT NULL,
- *     user_id   VARCHAR(255) NOT NULL,
- *     voted_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
- *     PRIMARY KEY (poll_id, user_id)
+ *     poll_id    INTEGER      NOT NULL,
+ *     user_id    VARCHAR(255) NOT NULL,
+ *     option_key VARCHAR(100) NOT NULL,
+ *     voted_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ *     PRIMARY KEY (poll_id, user_id, option_key)
  * );
  * ```
  */
@@ -68,166 +61,165 @@ final class Poll
     // ── public API ────────────────────────────────────────────────────────────
 
     /**
-     * Create a poll with a question and a list of option labels.
+     * Create a new poll.
      *
-     * @param  string        $question Non-empty question text.
-     * @param  list<string>  $options  Two or more non-empty option labels.
-     * @return int           New poll ID.
-     * @throws \InvalidArgumentException if question is empty or fewer than 2 options are given.
+     * @param  list<string> $options Non-empty list of option keys.
+     * @return int The new poll ID.
+     * @throws \InvalidArgumentException if question or options is empty.
      */
     public function create(string $question, array $options): int
     {
         $question = trim($question);
         if ($question === '') {
-            throw new \InvalidArgumentException('Poll question must not be empty.');
+            throw new \InvalidArgumentException('question must not be empty.');
         }
-
-        $options = array_values(array_filter(array_map('trim', $options), static fn (string $o): bool => $o !== ''));
-        if (count($options) < 2) {
-            throw new \InvalidArgumentException('A poll requires at least 2 options.');
+        if (empty($options)) {
+            throw new \InvalidArgumentException('options must not be empty.');
         }
 
         $db = $this->db();
-        $db->beginTransaction();
-        try {
-            $stmt = $db->prepare('INSERT INTO polls (question) VALUES (:q)');
-            $stmt->execute([':q' => $question]);
-            $pollId = (int)$db->lastInsertId();
+        $db->prepare(
+            'INSERT INTO polls (question, options) VALUES (:q, :opts)'
+        )->execute([
+            ':q'    => $question,
+            ':opts' => json_encode(array_values($options), JSON_THROW_ON_ERROR),
+        ]);
+        return (int)$db->lastInsertId();
+    }
 
-            $optStmt = $db->prepare('INSERT INTO poll_options (poll_id, label, sort) VALUES (:poll, :label, :sort)');
-            foreach ($options as $i => $label) {
-                $optStmt->execute([':poll' => $pollId, ':label' => $label, ':sort' => $i]);
-            }
+    /**
+     * Cast a vote.
+     *
+     * Idempotent — voting for the same option again has no effect.
+     *
+     * @return bool True if the vote was recorded; false if already voted for this option.
+     * @throws \InvalidArgumentException if poll is closed or option is invalid.
+     */
+    public function vote(int $pollId, string $userId, string $optionKey): bool
+    {
+        $userId    = trim($userId);
+        $optionKey = trim($optionKey);
 
-            $db->commit();
-            return $pollId;
-        } catch (\Throwable $e) {
-            $db->rollBack();
-            throw $e;
+        $poll = $this->find($pollId);
+        if ($poll === null) {
+            throw new \InvalidArgumentException("Poll {$pollId} not found.");
         }
-    }
-
-    /**
-     * Return the options for a poll, ordered by sort index.
-     *
-     * @return list<array<string, mixed>>
-     */
-    public function options(int $pollId): array
-    {
-        $stmt = $this->db()->prepare(
-            'SELECT * FROM poll_options WHERE poll_id = :poll ORDER BY sort ASC, id ASC'
-        );
-        $stmt->execute([':poll' => $pollId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * Cast a vote for an option in a poll.
-     *
-     * Idempotent for the same (pollId, userId) pair — a second call for the same
-     * user is silently ignored (INSERT OR IGNORE).
-     *
-     * @throws \InvalidArgumentException if the option does not belong to the poll.
-     */
-    public function vote(int $pollId, int $optionId, string $userId): bool
-    {
-        // Verify the option belongs to this poll
-        $check = $this->db()->prepare(
-            'SELECT 1 FROM poll_options WHERE id = :opt AND poll_id = :poll LIMIT 1'
-        );
-        $check->execute([':opt' => $optionId, ':poll' => $pollId]);
-        if ($check->fetchColumn() === false) {
-            throw new \InvalidArgumentException("Option #{$optionId} does not belong to poll #{$pollId}.");
+        if ($poll['closed_at'] !== null) {
+            throw new \InvalidArgumentException("Poll {$pollId} is closed.");
+        }
+        if (!in_array($optionKey, $poll['options'], true)) {
+            throw new \InvalidArgumentException("Invalid option '{$optionKey}'.");
         }
 
         $db     = $this->db();
         $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
-        $sql    = $driver === 'sqlite'
-            ? 'INSERT OR IGNORE INTO poll_votes (poll_id, option_id, user_id) VALUES (:poll, :opt, :user)'
-            : 'INSERT IGNORE INTO poll_votes (poll_id, option_id, user_id) VALUES (:poll, :opt, :user)';
 
-        $stmt = $db->prepare($sql);
-        $stmt->execute([':poll' => $pollId, ':opt' => $optionId, ':user' => $userId]);
+        if ($driver === 'sqlite') {
+            $stmt = $db->prepare(
+                'INSERT OR IGNORE INTO poll_votes (poll_id, user_id, option_key) VALUES (:pid, :uid, :opt)'
+            );
+        } else {
+            $stmt = $db->prepare(
+                'INSERT IGNORE INTO poll_votes (poll_id, user_id, option_key) VALUES (:pid, :uid, :opt)'
+            );
+        }
+        $stmt->execute([':pid' => $pollId, ':uid' => $userId, ':opt' => $optionKey]);
         return $stmt->rowCount() > 0;
     }
 
     /**
-     * Return vote tallies for all options in a poll.
+     * Close a poll (no more votes accepted).
      *
-     * @return list<array{option_id: int, label: string, votes: int, percent: float}>
+     * @return bool True if the poll was open and is now closed.
      */
-    public function results(int $pollId): array
+    public function close(int $pollId): bool
     {
         $stmt = $this->db()->prepare(
-            'SELECT o.id AS option_id, o.label,
-                    COUNT(v.user_id) AS votes
-             FROM poll_options o
-             LEFT JOIN poll_votes v ON v.option_id = o.id AND v.poll_id = o.poll_id
-             WHERE o.poll_id = :poll
-             GROUP BY o.id, o.label
-             ORDER BY o.sort ASC, o.id ASC'
+            'UPDATE polls SET closed_at = CURRENT_TIMESTAMP WHERE id = :id AND closed_at IS NULL'
         );
-        $stmt->execute([':poll' => $pollId]);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $total = array_sum(array_column($rows, 'votes'));
-
-        return array_map(
-            static function (array $r) use ($total): array {
-                $votes = (int)$r['votes'];
-                return [
-                    'option_id' => (int)$r['option_id'],
-                    'label'     => $r['label'],
-                    'votes'     => $votes,
-                    'percent'   => $total > 0 ? round($votes / $total * 100, 1) : 0.0,
-                ];
-            },
-            $rows
-        );
+        $stmt->execute([':id' => $pollId]);
+        return $stmt->rowCount() > 0;
     }
 
     /**
-     * Check whether a user has already voted in a poll.
+     * Get a poll (with options decoded).
+     *
+     * @return array<string,mixed>|null
+     */
+    public function find(int $pollId): ?array
+    {
+        $stmt = $this->db()->prepare(
+            'SELECT id, question, options, closed_at, created_at FROM polls WHERE id = :id LIMIT 1'
+        );
+        $stmt->execute([':id' => $pollId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row === false) {
+            return null;
+        }
+        $row['options'] = json_decode((string)$row['options'], true) ?? [];
+        return $row;
+    }
+
+    /**
+     * Get vote counts per option.
+     *
+     * @return array<string,int>
+     */
+    public function results(int $pollId): array
+    {
+        $poll = $this->find($pollId);
+        if ($poll === null) {
+            return [];
+        }
+
+        // Initialise all options to 0
+        $counts = array_fill_keys($poll['options'], 0);
+
+        $stmt = $this->db()->prepare(
+            'SELECT option_key, COUNT(*) AS cnt FROM poll_votes
+             WHERE poll_id = :pid GROUP BY option_key'
+        );
+        $stmt->execute([':pid' => $pollId]);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $counts[(string)$row['option_key']] = (int)$row['cnt'];
+        }
+        return $counts;
+    }
+
+    /**
+     * Check whether a user has voted in a poll.
      */
     public function hasVoted(int $pollId, string $userId): bool
     {
         $stmt = $this->db()->prepare(
-            'SELECT 1 FROM poll_votes WHERE poll_id = :poll AND user_id = :user LIMIT 1'
+            'SELECT COUNT(*) FROM poll_votes WHERE poll_id = :pid AND user_id = :uid'
         );
-        $stmt->execute([':poll' => $pollId, ':user' => $userId]);
-        return $stmt->fetchColumn() !== false;
+        $stmt->execute([':pid' => $pollId, ':uid' => $userId]);
+        return (int)$stmt->fetchColumn() > 0;
     }
 
     /**
-     * Return the option a user voted for, or null if they haven't voted.
+     * Get the options a user voted for.
      *
-     * @return array{option_id: int, label: string}|null
+     * @return list<string>
      */
-    public function userVote(int $pollId, string $userId): ?array
+    public function votedFor(int $pollId, string $userId): array
     {
         $stmt = $this->db()->prepare(
-            'SELECT o.id AS option_id, o.label
-             FROM poll_votes v
-             JOIN poll_options o ON o.id = v.option_id
-             WHERE v.poll_id = :poll AND v.user_id = :user
-             LIMIT 1'
+            'SELECT option_key FROM poll_votes WHERE poll_id = :pid AND user_id = :uid ORDER BY voted_at ASC'
         );
-        $stmt->execute([':poll' => $pollId, ':user' => $userId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row !== false ? ['option_id' => (int)$row['option_id'], 'label' => $row['label']] : null;
+        $stmt->execute([':pid' => $pollId, ':uid' => $userId]);
+        return array_column($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [], 'option_key');
     }
 
     /**
-     * Get a poll record by ID, or null if not found.
-     *
-     * @return array<string, mixed>|null
+     * Total number of votes cast for a poll.
      */
-    public function get(int $pollId): ?array
+    public function totalVotes(int $pollId): int
     {
-        $stmt = $this->db()->prepare('SELECT * FROM polls WHERE id = :id LIMIT 1');
-        $stmt->execute([':id' => $pollId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row !== false ? $row : null;
+        $stmt = $this->db()->prepare('SELECT COUNT(*) FROM poll_votes WHERE poll_id = :pid');
+        $stmt->execute([':pid' => $pollId]);
+        return (int)$stmt->fetchColumn();
     }
 
     // ── internal helpers ─────────────────────────────────────────────────────
