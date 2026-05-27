@@ -7,51 +7,58 @@ namespace Nene\Xion;
 use PDO;
 
 /**
- * Product price list — manage prices per SKU, currency, and optional tier.
+ * PriceList — product price catalog with multiple price tiers per SKU.
  *
- * Prices are stored as integers (smallest currency unit: cents for USD, yen for JPY).
- * This avoids floating-point issues. Use `Nene\Func\Money` for formatting.
+ * Stores integer-cent prices for SKU + price-type combinations (e.g. retail,
+ * wholesale, member). Prices are upserted so re-running an import is safe.
+ * Effective/expiry dates allow time-limited promotional prices.
  *
- * Supports pricing tiers (e.g. 'retail', 'wholesale', 'member') per SKU/currency pair.
- * The latest price row for a (sku, currency, tier) triple is the effective price.
+ * This helper intentionally does not model discounts or quantity breaks — it
+ * is a flat price lookup by SKU and type. Use it as a canonical price catalog
+ * that other helpers (e.g. OrderLine, ShoppingCart) query.
  *
  * ## Usage
  *
  * ```php
  * $pl = new PriceList($pdo);
  *
- * // Set a price (upsert)
- * $pl->set('SKU-001', 'USD', 1999); // $19.99
- * $pl->set('SKU-001', 'USD', 1499, tier: 'member');
+ * // Set prices (integer cents)
+ * $pl->setPrice('SKU-001', 'retail',    1999);
+ * $pl->setPrice('SKU-001', 'wholesale', 1299);
+ * $pl->setPrice('SKU-001', 'member',    1599);
  *
- * // Get current price
- * $pl->get('SKU-001', 'USD');              // 1999
- * $pl->get('SKU-001', 'USD', 'member');    // 1499
+ * // Look up
+ * $cents = $pl->getPrice('SKU-001', 'retail');  // 1999
+ * $all   = $pl->forSku('SKU-001');
  *
- * // Get all prices for a SKU
- * $pl->allForSku('SKU-001');
- *
- * // Delete a specific tier price
- * $pl->delete('SKU-001', 'USD', 'member');
+ * // Time-limited promotion
+ * $pl->setPrice('SKU-001', 'promo', 999,
+ *     new \DateTimeImmutable('2026-06-01'),
+ *     new \DateTimeImmutable('2026-06-07'));
+ * $active = $pl->activePrice('SKU-001', 'promo');
  * ```
  *
  * ## Schema (SQLite / MySQL compatible)
  *
  * ```sql
  * CREATE TABLE price_list (
- *     id         INTEGER PRIMARY KEY AUTOINCREMENT,
- *     sku        VARCHAR(100) NOT NULL,
- *     currency   VARCHAR(3)   NOT NULL,
- *     tier       VARCHAR(50)  NOT NULL DEFAULT 'default',
- *     amount     INTEGER      NOT NULL,
- *     updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
- *     UNIQUE (sku, currency, tier)
+ *     id           INTEGER PRIMARY KEY AUTOINCREMENT,
+ *     sku          VARCHAR(255) NOT NULL,
+ *     price_type   VARCHAR(50)  NOT NULL DEFAULT 'retail',
+ *     price_cents  INTEGER      NOT NULL,
+ *     effective_at DATETIME     NULL,
+ *     expires_at   DATETIME     NULL,
+ *     created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ *     updated_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ *     UNIQUE (sku, price_type)
  * );
  * ```
  */
 final class PriceList
 {
-    private const DEFAULT_TIER = 'default';
+    public const TYPE_RETAIL    = 'retail';
+    public const TYPE_WHOLESALE = 'wholesale';
+    public const TYPE_MEMBER    = 'member';
 
     public function __construct(private readonly ?PDO $db = null)
     {
@@ -60,108 +67,184 @@ final class PriceList
     // ── public API ────────────────────────────────────────────────────────────
 
     /**
-     * Set (upsert) a price for a SKU / currency / tier combination.
+     * Set (upsert) a price for a SKU + price-type pair.
      *
-     * @param string $sku      Product identifier.
-     * @param string $currency ISO 4217 currency code (e.g. 'USD', 'JPY').
-     * @param int    $amount   Price in the smallest currency unit (cents/yen).
-     * @param string $tier     Pricing tier (default 'default').
-     * @throws \InvalidArgumentException if SKU or currency is empty, or amount is negative.
+     * @param int                    $priceCents   Price in integer cents (must be >= 0).
+     * @param \DateTimeImmutable|null $effectiveAt  Null = always effective.
+     * @param \DateTimeImmutable|null $expiresAt    Null = no expiry.
+     * @return int Row ID.
+     * @throws \InvalidArgumentException on invalid sku, type, or negative price.
      */
-    public function set(string $sku, string $currency, int $amount, string $tier = self::DEFAULT_TIER): void
-    {
-        $sku      = $this->notEmpty($sku, 'sku');
-        $currency = strtoupper($this->notEmpty($currency, 'currency'));
-        $tier     = trim($tier) !== '' ? trim($tier) : self::DEFAULT_TIER;
-
-        if ($amount < 0) {
-            throw new \InvalidArgumentException("Amount must be >= 0, got {$amount}.");
+    public function setPrice(
+        string $sku,
+        string $priceType,
+        int $priceCents,
+        ?\DateTimeImmutable $effectiveAt = null,
+        ?\DateTimeImmutable $expiresAt = null,
+    ): int {
+        $sku       = trim($sku);
+        $priceType = trim($priceType) ?: self::TYPE_RETAIL;
+        if ($sku === '') {
+            throw new \InvalidArgumentException('sku must not be empty.');
+        }
+        if ($priceCents < 0) {
+            throw new \InvalidArgumentException('price_cents must be >= 0.');
         }
 
-        $db     = $this->db();
-        $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $now         = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        $effectiveAt = $effectiveAt?->format('Y-m-d H:i:s');
+        $expiresAt   = $expiresAt?->format('Y-m-d H:i:s');
 
-        if ($driver === 'sqlite') {
-            $stmt = $db->prepare(
-                'INSERT OR REPLACE INTO price_list (sku, currency, tier, amount, updated_at)
-                 VALUES (:sku, :currency, :tier, :amount, CURRENT_TIMESTAMP)'
+        // SQLite upsert
+        $stmt = $this->db()->prepare(
+            'INSERT INTO price_list (sku, price_type, price_cents, effective_at, expires_at, created_at, updated_at)
+             VALUES (:sku, :type, :cents, :eff, :exp, :now, :now)
+             ON CONFLICT (sku, price_type) DO UPDATE SET
+                 price_cents  = :cents2,
+                 effective_at = :eff2,
+                 expires_at   = :exp2,
+                 updated_at   = :now2'
+        );
+        try {
+            $stmt->execute([
+                ':sku'   => $sku,
+                ':type'  => $priceType,
+                ':cents' => $priceCents,
+                ':eff'   => $effectiveAt,
+                ':exp'   => $expiresAt,
+                ':now'   => $now,
+                ':cents2' => $priceCents,
+                ':eff2'  => $effectiveAt,
+                ':exp2'  => $expiresAt,
+                ':now2'  => $now,
+            ]);
+            return (int)$this->db()->lastInsertId();
+        } catch (\PDOException) {
+            // MySQL fallback
+            $stmt2 = $this->db()->prepare(
+                'INSERT INTO price_list (sku, price_type, price_cents, effective_at, expires_at, created_at, updated_at)
+                 VALUES (:sku, :type, :cents, :eff, :exp, :now, :now)
+                 ON DUPLICATE KEY UPDATE
+                     price_cents  = :cents2,
+                     effective_at = :eff2,
+                     expires_at   = :exp2,
+                     updated_at   = :now2'
             );
-        } else {
-            $stmt = $db->prepare(
-                'INSERT INTO price_list (sku, currency, tier, amount, updated_at)
-                 VALUES (:sku, :currency, :tier, :amount, CURRENT_TIMESTAMP)
-                 ON DUPLICATE KEY UPDATE amount = VALUES(amount), updated_at = CURRENT_TIMESTAMP'
-            );
+            $stmt2->execute([
+                ':sku'   => $sku,
+                ':type'  => $priceType,
+                ':cents' => $priceCents,
+                ':eff'   => $effectiveAt,
+                ':exp'   => $expiresAt,
+                ':now'   => $now,
+                ':cents2' => $priceCents,
+                ':eff2'  => $effectiveAt,
+                ':exp2'  => $expiresAt,
+                ':now2'  => $now,
+            ]);
+            return (int)$this->db()->lastInsertId();
         }
-
-        $stmt->execute([
-            ':sku'      => $sku,
-            ':currency' => $currency,
-            ':tier'     => $tier,
-            ':amount'   => $amount,
-        ]);
     }
 
     /**
-     * Get the price for a SKU / currency / tier combination.
+     * Find a price record by ID.
      *
-     * @return int|null Amount in smallest currency unit, or null if not found.
+     * @return array<string,mixed>|null
      */
-    public function get(string $sku, string $currency, string $tier = self::DEFAULT_TIER): ?int
+    public function find(int $id): ?array
     {
-        $currency = strtoupper($currency);
-        $tier     = trim($tier) !== '' ? trim($tier) : self::DEFAULT_TIER;
+        $stmt = $this->db()->prepare('SELECT * FROM price_list WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row !== false ? $row : null;
+    }
 
+    /**
+     * Get the price in cents for a SKU + type (ignores effective/expiry dates).
+     *
+     * @return int|null null if not found.
+     */
+    public function getPrice(string $sku, string $priceType = self::TYPE_RETAIL): ?int
+    {
         $stmt = $this->db()->prepare(
-            'SELECT amount FROM price_list WHERE sku = :sku AND currency = :currency AND tier = :tier LIMIT 1'
+            'SELECT price_cents FROM price_list WHERE sku = :sku AND price_type = :type'
         );
-        $stmt->execute([':sku' => $sku, ':currency' => $currency, ':tier' => $tier]);
+        $stmt->execute([':sku' => trim($sku), ':type' => trim($priceType)]);
         $val = $stmt->fetchColumn();
         return $val !== false ? (int)$val : null;
     }
 
     /**
-     * Return all price rows for a SKU.
+     * Get the price in cents only if it is currently active (within effective/expires window).
      *
-     * @return list<array{sku: string, currency: string, tier: string, amount: int, updated_at: string}>
+     * @return int|null null if not found or outside the active window.
      */
-    public function allForSku(string $sku): array
+    public function activePrice(string $sku, string $priceType = self::TYPE_RETAIL): ?int
     {
+        $now  = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
         $stmt = $this->db()->prepare(
-            'SELECT * FROM price_list WHERE sku = :sku ORDER BY currency ASC, tier ASC'
+            'SELECT price_cents FROM price_list
+             WHERE sku = :sku AND price_type = :type
+               AND (effective_at IS NULL OR effective_at <= :now)
+               AND (expires_at   IS NULL OR expires_at   >  :now2)'
         );
-        $stmt->execute([':sku' => $sku]);
-        return array_map(
-            static fn (array $r): array => array_merge($r, ['amount' => (int)$r['amount']]),
-            $stmt->fetchAll(PDO::FETCH_ASSOC)
-        );
+        $stmt->execute([
+            ':sku'  => trim($sku),
+            ':type' => trim($priceType),
+            ':now'  => $now,
+            ':now2' => $now,
+        ]);
+        $val = $stmt->fetchColumn();
+        return $val !== false ? (int)$val : null;
     }
 
     /**
-     * Delete a specific price row.
+     * Delete a price record.
      *
-     * @return bool True if a row was deleted.
+     * @return bool True if found and deleted.
      */
-    public function delete(string $sku, string $currency, string $tier = self::DEFAULT_TIER): bool
+    public function delete(int $id): bool
     {
-        $currency = strtoupper($currency);
-        $tier     = trim($tier) !== '' ? trim($tier) : self::DEFAULT_TIER;
-
-        $stmt = $this->db()->prepare(
-            'DELETE FROM price_list WHERE sku = :sku AND currency = :currency AND tier = :tier'
-        );
-        $stmt->execute([':sku' => $sku, ':currency' => $currency, ':tier' => $tier]);
+        $stmt = $this->db()->prepare('DELETE FROM price_list WHERE id = :id');
+        $stmt->execute([':id' => $id]);
         return $stmt->rowCount() > 0;
     }
 
     /**
-     * Check if any price exists for a SKU.
+     * Delete all prices for a SKU.
+     *
+     * @return int Number of rows deleted.
      */
-    public function exists(string $sku): bool
+    public function deleteSku(string $sku): int
     {
-        $stmt = $this->db()->prepare('SELECT 1 FROM price_list WHERE sku = :sku LIMIT 1');
-        $stmt->execute([':sku' => $sku]);
-        return $stmt->fetchColumn() !== false;
+        $stmt = $this->db()->prepare('DELETE FROM price_list WHERE sku = :sku');
+        $stmt->execute([':sku' => trim($sku)]);
+        return $stmt->rowCount();
+    }
+
+    /**
+     * List all price records for a SKU.
+     *
+     * @return list<array<string,mixed>>
+     */
+    public function forSku(string $sku): array
+    {
+        $stmt = $this->db()->prepare(
+            'SELECT * FROM price_list WHERE sku = :sku ORDER BY price_type ASC'
+        );
+        $stmt->execute([':sku' => trim($sku)]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * List all distinct SKUs in the price list.
+     *
+     * @return list<string>
+     */
+    public function skus(): array
+    {
+        $stmt = $this->db()->query('SELECT DISTINCT sku FROM price_list ORDER BY sku ASC');
+        return $stmt !== false ? $stmt->fetchAll(PDO::FETCH_COLUMN) : [];
     }
 
     // ── internal helpers ─────────────────────────────────────────────────────
@@ -169,14 +252,5 @@ final class PriceList
     private function db(): PDO
     {
         return $this->db ?? PdoConnection::getInstance();
-    }
-
-    private function notEmpty(string $value, string $field): string
-    {
-        $value = trim($value);
-        if ($value === '') {
-            throw new \InvalidArgumentException("{$field} must not be empty.");
-        }
-        return $value;
     }
 }
