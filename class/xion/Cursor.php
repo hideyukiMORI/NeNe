@@ -28,7 +28,8 @@ final readonly class Cursor
     public function __construct(
         public readonly string $createdAt,
         public readonly int $id,
-    ) {}
+    ) {
+    }
 
     /**
      * Encode this cursor to an opaque base64url token.

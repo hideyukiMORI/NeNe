@@ -317,9 +317,9 @@ abstract class DataMapperBase
                  ORDER BY {$createdCol} DESC, {$idCol} DESC
                  LIMIT :fetch"
             );
-            $stmt->bindValue(':ca',    $decoded->createdAt);
-            $stmt->bindValue(':ca2',   $decoded->createdAt);
-            $stmt->bindValue(':id',    $decoded->id, \PDO::PARAM_INT);
+            $stmt->bindValue(':ca', $decoded->createdAt);
+            $stmt->bindValue(':ca2', $decoded->createdAt);
+            $stmt->bindValue(':id', $decoded->id, \PDO::PARAM_INT);
             $stmt->bindValue(':fetch', $fetch, \PDO::PARAM_INT);
         }
 

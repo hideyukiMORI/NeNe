@@ -33,7 +33,8 @@ final readonly class CursorPage
         public readonly array $items,
         public readonly bool $hasMore,
         public readonly ?string $nextCursor,
-    ) {}
+    ) {
+    }
 
     /**
      * Convert to an array suitable for use in an API response.
