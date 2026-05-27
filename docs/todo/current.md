@@ -6,9 +6,17 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT62 are complete (FT36 deferred as ADR-class); ADR-0001–0013 are in place. Next work is FT63+ — see **Field Trials** and **Backlog Candidates** below.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT67 are complete (FT36 deferred as ADR-class); ADR-0001–0013 are in place. Next work is FT68+ — see **Field Trials** and **Backlog Candidates** below.
 
 ## Recently Completed
+
+### 2026-05-27 — FT63–FT67: Social + loyalty patterns wave (5 trials)
+
+**FT63 — User Follow System**: `FollowRelation` directed follow/unfollow; isMutual; self-follow prevention. PR #497.
+**FT64 — User Preferences**: `UserPreference` key-value store; getInt/getBool type casting; upsert. PR #498.
+**FT65 — Personal Access Token**: `PersonalAccessToken` ability-based auth; last_used_at tracking; pat_ prefix. PR #499.
+**FT66 — Coupon / Promo Code**: `CouponCode` usage limits; per-user redemption; atomic redeem; two-table. PR #500.
+**FT67 — Point / Loyalty System**: `PointLedger` append-only ledger; earn/spend/balance/history; negative-balance prevention. PR #501.
 
 ### 2026-05-27 — FT51–FT62: Extended patterns wave (12 trials)
 

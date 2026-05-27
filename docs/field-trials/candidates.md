@@ -12,42 +12,37 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ---
 
-## Active candidates (FT63+)
+## Active candidates (FT68+)
 
-### FT63 — User Follow System
+### FT68 — Tag / Label System
 
-**NENE2 対応**: FT134 (followlog)
-**Why**: ユーザー間フォロー関係（following/followers）。M:N 関係、自己フォロー防止、フォロー済みチェック。
-**Scope**: `Nene\Xion\FollowRelation` — follow/unfollow/isFollowing/followers/following、相互フォロー検出。
+**Why**: エンティティへのタグ付け（M:N 関係）。記事・商品・タスクなどに複数タグを付与・取得。
+**Scope**: `Nene\Xion\TagManager` — attach/detach/syncTags/tagsFor/entitiesWithTag、重複防止。
 **Size**: small.
 
-### FT64 — User Preferences / Settings
+### FT69 — Comment Thread
 
-**NENE2 対応**: FT145 (preferencelog)
-**Why**: ユーザーごとの設定値の永続化。キー・バリュー形式、デフォルト値フォールバック。
-**Scope**: `Nene\Xion\UserPreference` — get/set/delete/all、デフォルト値、型キャスト。
+**Why**: 階層コメント（親コメントへの返信）。ブログ・レビュー・フォーラムで頻出。
+**Scope**: `Nene\Xion\CommentThread` — post/reply/list/softDelete、parent_id 階層、ネスト深さ制限。
+**Size**: small–medium.
+
+### FT70 — Subscription / Plan
+
+**Why**: SaaS のユーザープラン管理。ユーザーを plan に紐付け、有効期限・更新・キャンセルを管理。
+**Scope**: `Nene\Xion\Subscription` — subscribe/cancel/isActive/currentPlan、プラン変更履歴。
+**Size**: small–medium.
+
+### FT71 — Search History
+
+**Why**: ユーザーごとの検索履歴。最近の検索クエリを保持し、重複除去・上限管理。
+**Scope**: `Nene\Xion\SearchHistory` — push/recent/clear、重複時は更新（upsert）、上限 N 件。
 **Size**: small.
 
-### FT65 — Access Token Management (Personal Access Tokens)
+### FT72 — Bookmark / Saved Items
 
-**NENE2 対応**: FT136 (tokenlog)
-**Why**: 永続的なアクセストークン（PAT）の管理。ApiKey (FT56) の高レベルラッパー的な位置付け。ユーザーがダッシュボードから発行・管理するシナリオ。
-**Scope**: `Nene\Xion\PersonalAccessToken` — create/authenticate/list/revoke、最終使用日時記録。
-**Size**: small–medium.
-
-### FT66 — Coupon / Promo Code
-
-**NENE2 対応**: FT150 (couponlog)
-**Why**: 割引クーポンコードの管理。使用回数制限、有効期限、ユーザー per-use 制限。
-**Scope**: `Nene\Xion\CouponCode` — create/redeem/isValid、使用回数チェック、ユーザー重複使用防止。
-**Size**: small–medium.
-
-### FT67 — Point / Loyalty System
-
-**NENE2 対応**: FT152 (pointlog)
-**Why**: ポイント付与・消費・残高管理。台帳パターン（append-only）でポイント履歴を保持。
-**Scope**: `Nene\Xion\PointLedger` — earn/spend/balance/history、負残高防止。
-**Size**: small–medium.
+**Why**: ユーザーが任意エンティティをブックマーク。お気に入り・ウィッシュリスト・後で読む等に汎用。
+**Scope**: `Nene\Xion\Bookmark` — save/remove/isSaved/list、entity_type + entity_id 汎用設計。
+**Size**: small.
 
 ---
 
@@ -87,6 +82,11 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT67 — Point / Loyalty System** (2026-05-27): `Nene\Xion\PointLedger` — append-only ledger, earn/spend/balance/history, negative-balance prevention. PR #501.
+- **FT66 — Coupon / Promo Code** (2026-05-27): `Nene\Xion\CouponCode` — usage limits, per-user redemption, atomic redeem, two-table design. PR #500.
+- **FT65 — Personal Access Token** (2026-05-27): `Nene\Xion\PersonalAccessToken` — ability-based auth, last_used_at tracking, pat_ prefix. PR #499.
+- **FT64 — User Preferences** (2026-05-27): `Nene\Xion\UserPreference` — key-value store, type casting (getInt/getBool), upsert. PR #498.
+- **FT63 — User Follow System** (2026-05-27): `Nene\Xion\FollowRelation` — directed follow/unfollow, isMutual, self-follow prevention. PR #497.
 - **FT62 — Invitation Token** (2026-05-27): `Nene\Xion\InvitationToken` — 256-bit token, pending→accepted/cancelled lifecycle, expiry-before-status check, owner-enforced cancel. PR #496.
 - **FT61 — Leaderboard** (2026-05-27): `Nene\Xion\Leaderboard` — best-score retention, rank via COUNT, tied-score sharing, limit clamping. PR #495.
 - **FT60 — Content Draft** (2026-05-27): `Nene\Xion\ContentDraft` — draft/publish/archive lifecycle, SQL transition guards, 404-not-403 for hidden content. PR #494.
