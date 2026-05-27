@@ -6,9 +6,24 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT185 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT195 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
 
 ## Recently Completed
+
+### 2026-05-27 — FT186–FT195: Xion fourth extended wave (10 trials)
+
+Continuous wave of 10 field trials adding further Xion helper patterns. All PRs #623–#633.
+
+**FT186 — SupportTicket**: `SupportTicket` help-desk ticketing with ticket + reply tables; status/priority lifecycle. PR #624.
+**FT187 — EventLog**: `EventLog` append-only domain event log (event sourcing–lite); aggregate/actor/type queries. PR #625.
+**FT188 — DailyDigest**: `DailyDigest` per-user digest item accumulator with grouping and batch markSent. PR #626.
+**FT189 — AccessControl**: `AccessControl` per-resource subject ACL; idempotent grant; complements global RBAC. PR #627.
+**FT190 — TwoFactorBackupCode**: `TwoFactorBackupCode` one-time 2FA recovery codes; SHA-256 hash storage; generate() invalidates old codes. PR #628.
+**FT191 — SystemSetting**: `SystemSetting` typed global app settings (string/int/bool/json) with categories; cross-driver upsert. PR #629.
+**FT192 — MediaGallery**: `MediaGallery` ordered media item gallery per entity; cover photo designation; distinct from Attachment. PR #630.
+**FT193 — ProductReview**: `ProductReview` entity reviews with 1–5 star ratings; approval workflow; helpfulness voting. PR #631.
+**FT194 — FaqItem**: `FaqItem` FAQ articles with category, position ordering, keyword search, helpfulness voting. PR #632.
+**FT195 — UserTier**: `UserTier` gamification tier assignment with two-table design (current + history); hasEverHad(). PR #633.
 
 ### 2026-05-27 — FT176–FT185: Xion third extended wave (10 trials)
 

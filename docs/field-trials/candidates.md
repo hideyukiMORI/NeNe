@@ -14,7 +14,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ## Active candidates
 
-The Xion helper wave (FT78–FT185) is ongoing as of 2026-05-27. Trigger-based and structural candidates are listed in the next section.
+The Xion helper wave (FT78–FT195) is ongoing as of 2026-05-27. Trigger-based and structural candidates are listed in the next section.
 
 ---
 
@@ -54,6 +54,16 @@ The Xion helper wave (FT78–FT185) is ongoing as of 2026-05-27. Trigger-based a
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT195 — UserTier** (2026-05-27): `Nene\Xion\UserTier` — gamification tier assignment with two-table design (current + history); hasEverHad(). PR #633.
+- **FT194 — FaqItem** (2026-05-27): `Nene\Xion\FaqItem` — FAQ articles with category, position ordering, keyword search, helpfulness voting. PR #632.
+- **FT193 — ProductReview** (2026-05-27): `Nene\Xion\ProductReview` — entity reviews with 1–5 star ratings; approval workflow; helpfulness voting; one review per user per entity. PR #631.
+- **FT192 — MediaGallery** (2026-05-27): `Nene\Xion\MediaGallery` — ordered media item gallery per entity; cover photo designation; captions; position reordering. PR #630.
+- **FT191 — SystemSetting** (2026-05-27): `Nene\Xion\SystemSetting` — typed global app settings (string/int/bool/json) with categories; cross-driver upsert; distinct from ConfigStore. PR #629.
+- **FT190 — TwoFactorBackupCode** (2026-05-27): `Nene\Xion\TwoFactorBackupCode` — one-time 2FA recovery codes; SHA-256 hash storage; generate() invalidates all previous codes. PR #628.
+- **FT189 — AccessControl** (2026-05-27): `Nene\Xion\AccessControl` — per-resource subject ACL; idempotent grant; complements global RBAC (RoleGuard). PR #627.
+- **FT188 — DailyDigest** (2026-05-27): `Nene\Xion\DailyDigest` — per-user digest item accumulator; allPending() grouped by user; batch markSent; purgeSent. PR #626.
+- **FT187 — EventLog** (2026-05-27): `Nene\Xion\EventLog` — append-only domain event log (event sourcing–lite); forAggregate/ofType/byActor queries; JSON payload. PR #625.
+- **FT186 — SupportTicket** (2026-05-27): `Nene\Xion\SupportTicket` — help-desk ticketing with support_tickets + ticket_replies; status/priority constants; addReply; countByStatus. PR #624.
 - **FT185 — KnowledgeBase** (2026-05-27): `Nene\Xion\KnowledgeBase` — help articles with draft→published→archived lifecycle, category filter, keyword search, view tracking. PR #622.
 - **FT184 — Reminder** (2026-05-27): `Nene\Xion\Reminder` — user-set future reminders; due() for cron-poll; markSent; purgeSent. PR #621.
 - **FT183 — ContentFilter** (2026-05-27): `Nene\Xion\ContentFilter` — DB-backed banned word list with detect/mask and optional whole-word mode; in-memory cache. PR #620.
