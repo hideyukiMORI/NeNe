@@ -109,7 +109,7 @@ final class JsonSchemaValidator
                 $errors[] = self::path($pointer) . " must be at most {$schema['maxLength']} characters";
             }
             if (isset($schema['pattern']) && !preg_match($schema['pattern'], $data)) {
-                $errors[] = self::path($pointer) . " does not match required pattern";
+                $errors[] = self::path($pointer) . ' does not match required pattern';
             }
         }
 

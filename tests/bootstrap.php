@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 // Local-dev bootstrap for git worktrees.
 // On CI the vendor/ directory is freshly installed and Composer's generated
 // autoload_psr4.php already maps Nene\Func\, Nene\Xion\, and Nene\Tests\
