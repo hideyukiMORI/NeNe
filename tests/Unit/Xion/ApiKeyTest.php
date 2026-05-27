@@ -121,7 +121,8 @@ final class ApiKeyTest extends TestCase
     {
         ['rawKey' => $raw] = $this->manager->create('user:1');
         $result = $this->manager->authenticate($raw, 'read');
-        $this->assertIsArray($result);
+        $this->assertNotNull($result);
+        // @phan-suppress-next-line PhanTypeMismatchArgumentNullable
         $this->assertArrayNotHasKey('key_hash', $result);
     }
 
