@@ -9,7 +9,7 @@ use PDO;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Unit tests for Subscription using an in-memory SQLite database.
+ * Unit tests for Subscription.
  */
 final class SubscriptionTest extends TestCase
 {
@@ -20,191 +20,171 @@ final class SubscriptionTest extends TestCase
     {
         $this->db = new PDO('sqlite::memory:');
         $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->db->exec(
-            'CREATE TABLE subscriptions (
-                id         INTEGER      PRIMARY KEY AUTOINCREMENT,
-                user_id    VARCHAR(255) NOT NULL UNIQUE,
-                plan       VARCHAR(64)  NOT NULL,
-                status     VARCHAR(16)  NOT NULL DEFAULT \'active\',
-                expires_at DATETIME     DEFAULT NULL,
-                created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-            )'
-        );
-        $this->db->exec(
-            'CREATE TABLE subscription_history (
-                id         INTEGER      PRIMARY KEY AUTOINCREMENT,
-                user_id    VARCHAR(255) NOT NULL,
-                plan       VARCHAR(64)  NOT NULL,
-                action     VARCHAR(32)  NOT NULL,
-                created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-            )'
-        );
+        $this->db->exec('
+            CREATE TABLE subscriptions (
+                id                     INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id                VARCHAR(255) NOT NULL,
+                plan                   VARCHAR(100) NOT NULL,
+                status                 VARCHAR(20)  NOT NULL DEFAULT \'active\',
+                trial_ends_at          DATETIME     DEFAULT NULL,
+                current_period_ends_at DATETIME     NOT NULL,
+                cancelled_at           DATETIME     DEFAULT NULL,
+                created_at             DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (user_id, plan)
+            )
+        ');
         $this->sub = new Subscription($this->db);
+    }
+
+    private function future(string $modify = '+1 month'): \DateTimeImmutable
+    {
+        return new \DateTimeImmutable($modify);
+    }
+
+    private function past(string $modify = '-1 day'): \DateTimeImmutable
+    {
+        return new \DateTimeImmutable($modify);
     }
 
     // ── subscribe ─────────────────────────────────────────────────────────────
 
-    public function testSubscribeCreatesActiveSubscription(): void
+    public function testSubscribeReturnsId(): void
     {
-        $this->sub->subscribe('user:1', 'pro');
-        $this->assertTrue($this->sub->isActive('user:1'));
+        $id = $this->sub->subscribe('user-1', 'pro', $this->future());
+        $this->assertGreaterThan(0, $id);
     }
 
-    public function testSubscribeSetsCurrentPlan(): void
+    public function testSubscribeStatusIsActive(): void
     {
-        $this->sub->subscribe('user:1', 'pro');
-        $this->assertSame('pro', $this->sub->currentPlan('user:1'));
+        $this->sub->subscribe('user-1', 'pro', $this->future());
+        $this->assertSame('active', $this->sub->status('user-1', 'pro'));
     }
 
-    public function testSubscribeWithExpiryStoresExpiresAt(): void
+    public function testSubscribeWithTrialStatusIsTrialing(): void
     {
-        $this->sub->subscribe('user:1', 'pro', expiresIn: 3600);
-        $stmt = $this->db->query("SELECT expires_at FROM subscriptions WHERE user_id = 'user:1'");
-        $this->assertNotNull($stmt->fetchColumn());
+        $this->sub->subscribe('user-1', 'pro', $this->future(), $this->future('+14 days'));
+        $this->assertSame('trialing', $this->sub->status('user-1', 'pro'));
     }
 
-    public function testSubscribeReplacesExistingSubscription(): void
+    public function testSubscribeIsUpsert(): void
     {
-        $this->sub->subscribe('user:1', 'free');
-        $this->sub->subscribe('user:1', 'pro');
-        $this->assertSame('pro', $this->sub->currentPlan('user:1'));
+        $id1 = $this->sub->subscribe('user-1', 'pro', $this->future());
+        $id2 = $this->sub->subscribe('user-1', 'pro', $this->future('+2 months'));
+        $this->assertSame($id1, $id2);
     }
 
-    public function testSubscribeRecordsHistory(): void
+    public function testSubscribeThrowsOnEmptyUserId(): void
     {
-        $this->sub->subscribe('user:1', 'pro');
-        $history = $this->sub->history('user:1');
-        $this->assertSame('subscribe', $history[0]['action']);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->sub->subscribe('', 'pro', $this->future());
     }
 
-    // ── isActive ──────────────────────────────────────────────────────────────
-
-    public function testIsActiveReturnsFalseForNoSubscription(): void
+    public function testSubscribeThrowsOnEmptyPlan(): void
     {
-        $this->assertFalse($this->sub->isActive('user:1'));
-    }
-
-    public function testIsActiveReturnsFalseForExpiredSubscription(): void
-    {
-        $this->sub->subscribe('user:1', 'pro', expiresIn: 3600);
-        $this->db->exec("UPDATE subscriptions SET expires_at = '2000-01-01 00:00:00' WHERE user_id = 'user:1'");
-        $this->assertFalse($this->sub->isActive('user:1'));
-    }
-
-    public function testIsActiveReturnsFalseForCancelledSubscription(): void
-    {
-        $this->sub->subscribe('user:1', 'pro');
-        $this->sub->cancel('user:1');
-        $this->assertFalse($this->sub->isActive('user:1'));
-    }
-
-    // ── currentPlan ───────────────────────────────────────────────────────────
-
-    public function testCurrentPlanReturnsNullForNoSubscription(): void
-    {
-        $this->assertNull($this->sub->currentPlan('user:1'));
-    }
-
-    // ── changePlan ────────────────────────────────────────────────────────────
-
-    public function testChangePlanUpdatesPlan(): void
-    {
-        $this->sub->subscribe('user:1', 'free');
-        $this->sub->changePlan('user:1', 'enterprise');
-        $this->assertSame('enterprise', $this->sub->currentPlan('user:1'));
-    }
-
-    public function testChangePlanReturnsTrueOnSuccess(): void
-    {
-        $this->sub->subscribe('user:1', 'free');
-        $this->assertTrue($this->sub->changePlan('user:1', 'pro'));
-    }
-
-    public function testChangePlanReturnsFalseWhenNoSubscription(): void
-    {
-        $this->assertFalse($this->sub->changePlan('user:1', 'pro'));
-    }
-
-    public function testChangePlanRecordsHistory(): void
-    {
-        $this->sub->subscribe('user:1', 'free');
-        $this->sub->changePlan('user:1', 'pro');
-        $history = $this->sub->history('user:1');
-        $this->assertSame('change', $history[0]['action']);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->sub->subscribe('user-1', '', $this->future());
     }
 
     // ── cancel ────────────────────────────────────────────────────────────────
 
-    public function testCancelReturnsTrueOnSuccess(): void
+    public function testCancelSetsStatusToCancelled(): void
     {
-        $this->sub->subscribe('user:1', 'pro');
-        $this->assertTrue($this->sub->cancel('user:1'));
+        $this->sub->subscribe('user-1', 'pro', $this->future());
+        $this->assertTrue($this->sub->cancel('user-1', 'pro'));
+        $this->assertSame('cancelled', $this->sub->status('user-1', 'pro'));
     }
 
-    public function testCancelReturnsFalseWhenNoSubscription(): void
+    public function testCancelReturnsFalseIfAlreadyCancelled(): void
     {
-        $this->assertFalse($this->sub->cancel('user:1'));
-    }
-
-    public function testCancelReturnsFalseWhenAlreadyCancelled(): void
-    {
-        $this->sub->subscribe('user:1', 'pro');
-        $this->sub->cancel('user:1');
-        $this->assertFalse($this->sub->cancel('user:1'));
-    }
-
-    public function testCancelRecordsHistory(): void
-    {
-        $this->sub->subscribe('user:1', 'pro');
-        $this->sub->cancel('user:1');
-        $history = $this->sub->history('user:1');
-        $this->assertSame('cancel', $history[0]['action']);
+        $this->sub->subscribe('user-1', 'pro', $this->future());
+        $this->sub->cancel('user-1', 'pro');
+        $this->assertFalse($this->sub->cancel('user-1', 'pro'));
     }
 
     // ── renew ─────────────────────────────────────────────────────────────────
 
-    public function testRenewActivatesCancelledSubscription(): void
+    public function testRenewExtendsSubscription(): void
     {
-        $this->sub->subscribe('user:1', 'pro');
-        $this->sub->cancel('user:1');
-        $this->sub->renew('user:1', 86400);
-        $this->assertTrue($this->sub->isActive('user:1'));
+        $this->sub->subscribe('user-1', 'pro', $this->future());
+        $this->assertTrue($this->sub->renew('user-1', 'pro', $this->future('+2 months')));
+        $this->assertSame('active', $this->sub->status('user-1', 'pro'));
     }
 
-    public function testRenewReturnsTrueOnSuccess(): void
+    // ── markPastDue ───────────────────────────────────────────────────────────
+
+    public function testMarkPastDueSetsStatus(): void
     {
-        $this->sub->subscribe('user:1', 'pro');
-        $this->assertTrue($this->sub->renew('user:1', 86400));
+        $this->sub->subscribe('user-1', 'pro', $this->future());
+        $this->assertTrue($this->sub->markPastDue('user-1', 'pro'));
+        $row = $this->sub->find('user-1', 'pro');
+        $this->assertSame('past_due', $row['status']);
     }
 
-    public function testRenewReturnsFalseWhenNoSubscription(): void
+    // ── status ────────────────────────────────────────────────────────────────
+
+    public function testStatusReturnsNullForUnknown(): void
     {
-        $this->assertFalse($this->sub->renew('user:1', 86400));
+        $this->assertNull($this->sub->status('nobody', 'pro'));
     }
 
-    public function testRenewRecordsHistory(): void
+    public function testStatusReturnsExpiredWhenPeriodPassed(): void
     {
-        $this->sub->subscribe('user:1', 'pro');
-        $this->sub->renew('user:1', 86400);
-        $history = $this->sub->history('user:1');
-        $this->assertSame('renew', $history[0]['action']);
+        $this->sub->subscribe('user-1', 'pro', $this->past());
+        $this->assertSame('expired', $this->sub->status('user-1', 'pro'));
     }
 
-    // ── history ───────────────────────────────────────────────────────────────
+    // ── isActive ──────────────────────────────────────────────────────────────
 
-    public function testHistoryReturnsNewestFirst(): void
+    public function testIsActiveReturnsTrueForActiveSubscription(): void
     {
-        $this->sub->subscribe('user:1', 'free');
-        $this->sub->changePlan('user:1', 'pro');
-        $history = $this->sub->history('user:1');
-        $this->assertSame('change', $history[0]['action']);
-        $this->assertSame('subscribe', $history[1]['action']);
+        $this->sub->subscribe('user-1', 'pro', $this->future());
+        $this->assertTrue($this->sub->isActive('user-1'));
     }
 
-    public function testHistoryIsUserIsolated(): void
+    public function testIsActiveReturnsFalseWhenNoSubscription(): void
     {
-        $this->sub->subscribe('user:1', 'pro');
-        $this->assertEmpty($this->sub->history('user:2'));
+        $this->assertFalse($this->sub->isActive('nobody'));
+    }
+
+    public function testIsActiveReturnsFalseWhenExpired(): void
+    {
+        $this->sub->subscribe('user-1', 'pro', $this->past());
+        $this->assertFalse($this->sub->isActive('user-1'));
+    }
+
+    public function testIsActiveReturnsFalseWhenCancelled(): void
+    {
+        $this->sub->subscribe('user-1', 'pro', $this->future());
+        $this->sub->cancel('user-1', 'pro');
+        $this->assertFalse($this->sub->isActive('user-1'));
+    }
+
+    // ── isSubscribed ──────────────────────────────────────────────────────────
+
+    public function testIsSubscribedReturnsTrueForActivePlan(): void
+    {
+        $this->sub->subscribe('user-1', 'pro', $this->future());
+        $this->assertTrue($this->sub->isSubscribed('user-1', 'pro'));
+    }
+
+    public function testIsSubscribedReturnsFalseForDifferentPlan(): void
+    {
+        $this->sub->subscribe('user-1', 'pro', $this->future());
+        $this->assertFalse($this->sub->isSubscribed('user-1', 'enterprise'));
+    }
+
+    // ── listForUser ───────────────────────────────────────────────────────────
+
+    public function testListForUserReturnsAllPlans(): void
+    {
+        $this->sub->subscribe('user-1', 'pro', $this->future());
+        $this->sub->subscribe('user-1', 'addon', $this->future());
+        $list = $this->sub->listForUser('user-1');
+        $this->assertCount(2, $list);
+    }
+
+    public function testListForUserReturnsEmptyForUnknown(): void
+    {
+        $this->assertSame([], $this->sub->listForUser('nobody'));
     }
 }
