@@ -59,8 +59,16 @@
         ],
         "test:all": "phpunit",
         "analyze": "phan --allow-polyfill-parser --load-baseline .phan/baseline.php",
+        "analyze:file": "bash tools/phan-file.sh",
+        "make:xion": "@php tools/make-xion.php",
+        "xion:index": "@php tools/xion-index.php",
         "format": "php-cs-fixer fix --config=.php-cs-fixer.dist.php",
         "format:check": "php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff",
+        "precommit": [
+            "@format",
+            "@analyze",
+            "@test"
+        ],
         "check": [
             "@test",
             "@test:http",

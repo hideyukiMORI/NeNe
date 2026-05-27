@@ -15,5 +15,6 @@ NeNe should stay small, explicit, and reviewable. AI-assisted code is acceptable
 - `self-review/service-implementation.md`: full feature checklist for small-service changes.
 - `self-review/controller.md`: controller size and HTTP boundary checklist.
 - `self-review/database.md`: mapper, model, SQL, and transaction checklist.
+- `self-review/xion-class.md`: checklist for adding or modifying a `class/xion/` framework class.
 
 Use these checklists before opening a PR. If a change intentionally does not follow one of these rules, explain the reason in the Issue or PR.
