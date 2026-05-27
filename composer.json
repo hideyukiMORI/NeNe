@@ -59,6 +59,7 @@
         ],
         "test:all": "phpunit",
         "analyze": "phan --allow-polyfill-parser --load-baseline .phan/baseline.php",
+        "analyze:file": "bash tools/phan-file.sh",
         "format": "php-cs-fixer fix --config=.php-cs-fixer.dist.php",
         "format:check": "php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff",
         "check": [
