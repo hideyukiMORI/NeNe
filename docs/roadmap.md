@@ -186,7 +186,7 @@ Future candidates:
 
 ## 7. Field Trials
 
-Status: methodology adopted (ADR 0002). FT1–FT210 complete as of 2026-05-27 (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61).
+Status: methodology adopted (ADR 0002). FT1–FT228 complete as of 2026-05-28 (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61).
 
 Goal:
 
@@ -240,6 +240,7 @@ Completed (wave summary):
 - **FT186–FT195**: Xion fourth extended wave. 10 trials covering support ticketing, event sourcing log, daily digest accumulator, per-resource ACL, 2FA backup codes, typed global settings, ordered media gallery, entity reviews with ratings, FAQ articles, and gamification tier tracking. PRs #624–#633.
 - **FT196–FT200**: Xion fifth extended wave. 5 trials covering CSV import job tracking with per-row errors, topic-based pub/sub subscriptions, e-commerce orders with line items, deployment version history, and user cohort/segment assignment. PRs #635–#639.
 - **FT201–FT210**: Xion sixth extended wave. 10 trials covering inventory stock tracking with atomic reserve/commit, work time entries with start/stop timers, appointment time slot booking with capacity, external API call logging, GDPR data-subject request tracking, product/feature waitlist management, regional tax rate calculation, push notification device token management, flexible entity tagging with tag clouds, and advisory resource locking with TTL. PRs #641–#650.
+- **FT211–FT228**: Xion seventh extended wave. 18 trials covering product price catalog with tiers, compliance audit log with before/after snapshots, loyalty point ledger, flat entity comments, survey/form response collection, product bundle catalog, channel-agnostic notification queue, persistent stateful workflow instances, type-ahead search suggestion management, metered billing usage tracking, multiple entity identifier aliases, multi-device session management, ordered page builder content blocks, database-backed multilingual content, service health monitoring, page/resource view analytics, contact form inbox management, and time-bounded access delegation. PRs #652–#669.
 
 Future candidates:
 

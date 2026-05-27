@@ -14,7 +14,7 @@ This file is for **forward-looking** ideas — once a trial fires, its record mo
 
 ## Active candidates
 
-The Xion helper wave (FT78–FT210) is ongoing as of 2026-05-27. Trigger-based and structural candidates are listed in the next section.
+The Xion helper wave (FT78–FT228) is ongoing as of 2026-05-28. Trigger-based and structural candidates are listed in the next section.
 
 ---
 
@@ -226,6 +226,24 @@ When a candidate becomes a trial, move it to this section briefly so we can see 
 - **FT41 — Account lockout** (2026-05-27): `Nene\Xion\LoginAttemptTracker` — DB-backed failure counter; locks at threshold; reset on success; ACCOUNT-LOCKED (423). PR #473.
 - **FT40 — Batch operations** (2026-05-27): `Nene\Xion\BatchResult` — addSuccess/addFailure/httpStatus/toArray; 200/207/422 based on partial success. PR #472.
 - **FT39 — API versioning + deprecation headers** (2026-05-27): `Nene\Xion\ApiDeprecation` — RFC 8594 Deprecation/Sunset/Link headers; ADR-0013 URI prefix versioning. PR #471.
+- **FT228 — AccessGrant** (2026-05-28): `Nene\Xion\AccessGrant` — time-bounded delegated access; hasAccess() checks active+non-expired; myGrants()/grantsIGave() for both sides; purge(). PR #669.
+- **FT227 — ContactMessage** (2026-05-28): `Nene\Xion\ContactMessage` — contact form inbox; STATUS_UNREAD→READ→REPLIED/ARCHIVED; unreadCount(); ORDER BY submitted_at DESC, id DESC. PR #668.
+- **FT226 — PageView** (2026-05-28): `Nene\Xion\PageView` — page view analytics; count()/uniqueCount() with period prefix; topUrls()/dailyCounts(); purgeOlderThan(). PR #667.
+- **FT225 — HealthCheck** (2026-05-28): `Nene\Xion\HealthCheck` — service health monitoring; latestAll() MAX(id) subquery; avgResponseTime()/failureRate() over last N; STATUS_OK/DEGRADED/FAIL. PR #666.
+- **FT224 — MultiLangContent** (2026-05-28): `Nene\Xion\MultiLangContent` — DB-backed multilingual content; UNIQUE (content_key, locale); get() with fallback; cross-driver upsert. PR #665.
+- **FT223 — ContentBlock** (2026-05-28): `Nene\Xion\ContentBlock` — ordered page builder blocks; JSON content payload; reorder()/deactivate()/activate()/clear(). PR #664.
+- **FT222 — UserSession** (2026-05-28): `Nene\Xion\UserSession` — multi-device session management; SHA-256 token hash; findByToken() auto-marks expired; invalidateAll() force-logout. PR #663.
+- **FT221 — EntityAlias** (2026-05-28): `Nene\Xion\EntityAlias` — multiple identifier aliases; UNIQUE (entity_type, alias); idempotent register(); transfer() atomic reassignment; setPrimary(). PR #662.
+- **FT220 — BillingUsage** (2026-05-28): `Nene\Xion\BillingUsage` — metered usage tracking; sum()/summary()/overage(); period defaults to current month; reset()/purgeOlderThan(). PR #661.
+- **FT219 — SearchSuggestion** (2026-05-28): `Nene\Xion\SearchSuggestion` — type-ahead suggestions; record() cross-driver upsert; suggest() (weight+frequency) DESC; boost(); purge() TTL. PR #660.
+- **FT218 — WorkflowInstance** (2026-05-28): `Nene\Xion\WorkflowInstance` — persistent workflow tracking; two-table (instances+transitions); transition()/complete()/cancel(); forEntity(). PR #659.
+- **FT217 — NotificationQueue** (2026-05-28): `Nene\Xion\NotificationQueue` — channel-agnostic outbox queue; dequeue() respects scheduled_at+max_attempts; markFailed() CASE WHEN exhaustion. PR #658.
+- **FT216 — ProductBundle** (2026-05-28): `Nene\Xion\ProductBundle` — two-table bundle catalog; UNIQUE (bundle_key); addItem() upserts quantity; allActive(). PR #657.
+- **FT215 — SurveyResponse** (2026-05-28): `Nene\Xion\SurveyResponse` — two-table survey responses; answers(responseId); answerFrequency() analysis; forSurvey() pagination. PR #656.
+- **FT214 — EntityComment** (2026-05-28): `Nene\Xion\EntityComment` — flat comments with soft-delete; edit() blocked on deleted; author-only guards; purge() admin hard-delete. PR #655.
+- **FT213 — PointBalance** (2026-05-28): `Nene\Xion\PointBalance` — loyalty point ledger; earn()/spend() (guarded)/expire(); balance() = COALESCE(SUM(delta),0). PR #654.
+- **FT212 — AuditLog** (2026-05-28): `Nene\Xion\AuditLog` — compliance append-only entity change tracking; before/after JSON snapshots; forEntity()/byActor()/ofAction()/purgeOlderThan(). PR #653.
+- **FT211 — PriceList** (2026-05-28): `Nene\Xion\PriceList` — product price catalog with retail/wholesale/member tiers; effective/expiry windows; integer-cent; cross-driver upsert. PR #652.
 - **FT38 — Full-text search helper** (2026-05-27): `Nene\Func\SearchQuery` — escapeLike/likePattern/sanitizeFts/normalize; FTS5 patterns doc. PR #470.
 - **FT37 — Idempotency keys** (2026-05-27): `Nene\Xion\IdempotencyStore` — DB-backed get/put/hash; INSERT IGNORE/INSERT OR IGNORE; X-Idempotency-Key / X-Idempotent-Replayed. PR #469.
 - **FT35 — Feature flags** (2026-05-27): `Nene\Func\FeatureFlagService` — DB-backed; 3-tier priority (user override → global → rollout%); deterministic crc32 bucket. PR #468.
