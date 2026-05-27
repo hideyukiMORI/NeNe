@@ -94,10 +94,10 @@ final class ServiceAccount
     public function verify(string $clientId, string $rawSecret): ?array
     {
         $stmt = $this->db()->prepare(
-            "SELECT id, client_id, name, scopes, enabled, created_at, rotated_at
+            'SELECT id, client_id, name, scopes, enabled, created_at, rotated_at
              FROM service_accounts
              WHERE client_id = :cid AND secret_hash = :hash AND enabled = 1
-             LIMIT 1"
+             LIMIT 1'
         );
         $stmt->execute([':cid' => $clientId, ':hash' => hash('sha256', $rawSecret)]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
