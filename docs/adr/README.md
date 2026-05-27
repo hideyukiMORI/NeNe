@@ -35,3 +35,4 @@ Create an ADR when a change affects:
 - [`0010-session-storage-backend.md`](0010-session-storage-backend.md) (Accepted, FT18 #429): Pluggable session storage via `SessionHandlerFactory` + `RedisSessionHandler`; `NENE_SESSION_DSN` env; Redis default in Docker Compose.
 - [`0011-smarty-as-template-engine.md`](0011-smarty-as-template-engine.md) (Accepted retrospective, #437): Smarty v5 is the template engine. Records why Smarty was chosen over Twig / Blade / plain PHP and under what conditions to reconsider.
 - [`0012-php-version-policy.md`](0012-php-version-policy.md) (Accepted, #441): PHP >=8.4 declared in composer.json; upgrade cadence policy for minor bumps, future 8.5+ and 9.0 decisions.
+- [`0013-api-versioning.md`](0013-api-versioning.md) (Accepted, FT39): URI prefix versioning (`/v1/`, `/v2/`) with RFC 8594 `Deprecation`/`Sunset`/`Link` headers via `ApiDeprecation::sendHeaders()`.
