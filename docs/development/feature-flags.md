@@ -1,5 +1,34 @@
 # Feature Flags
 
+## Framework class: `FeatureFlagService`
+
+`Nene\Func\FeatureFlagService` ships with NeNe.
+
+| Method | Description |
+|--------|-------------|
+| `isEnabled(string $flag, ?int $userId): bool` | Evaluate flag for optional user context |
+
+### Priority chain
+
+1. **Per-user override** (`flag_overrides` table) — highest priority; works as grant or kill switch
+2. **Global `is_enabled`** (`feature_flags` table)
+3. **Rollout percentage** (`rollout_pct`) — deterministic bucket by `userId + flagName`
+4. **Default**: `false`
+
+```php
+$flags = new FeatureFlagService();
+
+// Global check (no user context)
+if ($flags->isEnabled('maintenance-mode')) {
+    return $this->API_RESPONSE->failure('MAINTENANCE');
+}
+
+// User-specific check (overrides + rollout apply)
+if ($flags->isEnabled('new-checkout', $userId)) {
+    // show new checkout
+}
+```
+
 Feature flags (feature toggles) let you deploy code dark, enable features for specific users, or roll back instantly without a deploy. The pattern shown here uses a database for persistence with a two-level priority model: global defaults overridden by per-user settings.
 
 ## Schema
@@ -9,17 +38,18 @@ Feature flags (feature toggles) let you deploy code dark, enable features for sp
 
 'feature_flags' => [
     'columns' => [
-        'id'         => ['type' => 'pk-bigint'],
-        'created_at' => ['type' => 'datetime-now'],
-        'updated_at' => ['type' => 'datetime-touch'],
-        'flag_name'  => ['type' => 'varchar:128'],
-        'is_enabled' => ['type' => 'bool', 'default' => 0],
+        'id'          => ['type' => 'pk-bigint'],
+        'created_at'  => ['type' => 'datetime-now'],
+        'updated_at'  => ['type' => 'datetime-touch'],
+        'flag_name'   => ['type' => 'varchar:128'],
+        'is_enabled'  => ['type' => 'bool', 'default' => 0],
+        'rollout_pct' => ['type' => 'tinyint', 'default' => 0],
     ],
     'unique' => [
         'feature_flags_name_unique' => ['flag_name'],
     ],
 ],
-'feature_flag_overrides' => [
+'flag_overrides' => [
     'columns' => [
         'id'         => ['type' => 'pk-bigint'],
         'created_at' => ['type' => 'datetime-now'],
@@ -29,7 +59,7 @@ Feature flags (feature toggles) let you deploy code dark, enable features for sp
         'is_enabled' => ['type' => 'bool', 'default' => 0],
     ],
     'unique' => [
-        'feature_flag_overrides_flag_user_unique' => ['flag_name', 'user_id'],
+        'flag_overrides_flag_user_unique' => ['flag_name', 'user_id'],
     ],
 ],
 ```
