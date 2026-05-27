@@ -55,4 +55,12 @@ return [
         'message' => 'Upload mime type is not allowed.',
         'httpStatus' => 415,
     ],
+    'TOKEN-EXPIRED' => [
+        'message' => 'The reset token has expired.',
+        'httpStatus' => 410,
+    ],
+    'TOKEN-ALREADY-USED' => [
+        'message' => 'The reset token has already been used.',
+        'httpStatus' => 409,
+    ],
 ];

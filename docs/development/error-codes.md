@@ -38,6 +38,8 @@ Every failure response uses the same envelope, documented in OpenAPI as `ApiFail
 | `UPLOAD-FILE-REQUIRED` | 400 | Upload file is required. | Thrown by `UploadedFile::validate()` when the upload is missing or `is_uploaded_file()` returns false. |
 | `UPLOAD-TOO-LARGE` | 413 | Upload exceeds size limit. | Thrown by `UploadedFile::validate(['maxBytes' => N])` when `size() > N`. |
 | `UPLOAD-MIME-REJECTED` | 415 | Upload mime type is not allowed. | Thrown by `UploadedFile::validate(['allowedMime' => [...]])` when `finfo` mime is not on the allowlist. |
+| `TOKEN-EXPIRED` | 410 | The reset token has expired. | Returned by password-reset complete endpoint when `PasswordResetToken::isExpired()` is true. |
+| `TOKEN-ALREADY-USED` | 409 | The reset token has already been used. | Returned by password-reset complete endpoint when `used_at` is not null. |
 
 ## Adding a new error code
 
