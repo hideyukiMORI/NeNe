@@ -23,170 +23,163 @@ final class PollTest extends TestCase
         $this->db->exec('
             CREATE TABLE polls (
                 id         INTEGER PRIMARY KEY AUTOINCREMENT,
-                question   TEXT        NOT NULL,
-                created_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP
-            );
-            CREATE TABLE poll_options (
-                id      INTEGER PRIMARY KEY AUTOINCREMENT,
-                poll_id INTEGER     NOT NULL,
-                label   VARCHAR(255) NOT NULL,
-                sort    INTEGER     NOT NULL DEFAULT 0
-            );
+                question   TEXT     NOT NULL,
+                options    TEXT     NOT NULL DEFAULT \'[]\',
+                closed_at  DATETIME DEFAULT NULL,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        ');
+        $this->db->exec('
             CREATE TABLE poll_votes (
-                poll_id   INTEGER      NOT NULL,
-                option_id INTEGER      NOT NULL,
-                user_id   VARCHAR(255) NOT NULL,
-                voted_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (poll_id, user_id)
-            );
+                poll_id    INTEGER      NOT NULL,
+                user_id    VARCHAR(255) NOT NULL,
+                option_key VARCHAR(100) NOT NULL,
+                voted_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (poll_id, user_id, option_key)
+            )
         ');
         $this->poll = new Poll($this->db);
     }
 
     // ── create ────────────────────────────────────────────────────────────────
 
-    public function testCreateReturnsIntId(): void
+    public function testCreateReturnsId(): void
     {
-        $id = $this->poll->create('Favourite colour?', ['Red', 'Blue', 'Green']);
-        $this->assertIsInt($id);
+        $id = $this->poll->create('Best colour?', ['red', 'blue']);
         $this->assertGreaterThan(0, $id);
+    }
+
+    public function testCreateStoresOptions(): void
+    {
+        $id   = $this->poll->create('Pick one', ['a', 'b', 'c']);
+        $poll = $this->poll->find($id);
+        $this->assertSame(['a', 'b', 'c'], $poll['options']);
     }
 
     public function testCreateThrowsOnEmptyQuestion(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->poll->create('', ['A', 'B']);
+        $this->poll->create('', ['a', 'b']);
     }
 
-    public function testCreateThrowsWithFewerThanTwoOptions(): void
+    public function testCreateThrowsOnEmptyOptions(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->poll->create('Q?', ['Only one']);
-    }
-
-    public function testCreateStoresQuestion(): void
-    {
-        $id  = $this->poll->create('Best PHP framework?', ['NeNe', 'Laravel']);
-        $row = $this->poll->get($id);
-        $this->assertNotNull($row);
-        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('Best PHP framework?', $row['question']);
-    }
-
-    // ── options ───────────────────────────────────────────────────────────────
-
-    public function testOptionsReturnsAllOptionsInOrder(): void
-    {
-        $id      = $this->poll->create('Q?', ['Alpha', 'Beta', 'Gamma']);
-        $options = $this->poll->options($id);
-        $this->assertCount(3, $options);
-        $this->assertSame('Alpha', $options[0]['label']);
-        $this->assertSame('Beta', $options[1]['label']);
-        $this->assertSame('Gamma', $options[2]['label']);
-    }
-
-    public function testOptionsReturnsEmptyForUnknownPoll(): void
-    {
-        $this->assertSame([], $this->poll->options(9999));
+        $this->poll->create('Question?', []);
     }
 
     // ── vote ──────────────────────────────────────────────────────────────────
 
     public function testVoteReturnsTrueOnSuccess(): void
     {
-        $pollId   = $this->poll->create('Q?', ['Yes', 'No']);
-        $options  = $this->poll->options($pollId);
-        $optionId = (int)$options[0]['id'];
-        $this->assertTrue($this->poll->vote($pollId, $optionId, 'user-1'));
+        $id = $this->poll->create('Q?', ['yes', 'no']);
+        $this->assertTrue($this->poll->vote($id, 'user-1', 'yes'));
     }
 
-    public function testVoteIsIdempotentForSameUser(): void
+    public function testVoteIsIdempotent(): void
     {
-        $pollId   = $this->poll->create('Q?', ['Yes', 'No']);
-        $options  = $this->poll->options($pollId);
-        $optionId = (int)$options[0]['id'];
-        $this->poll->vote($pollId, $optionId, 'user-1');
-        $this->assertFalse($this->poll->vote($pollId, $optionId, 'user-1')); // already voted
+        $id = $this->poll->create('Q?', ['yes', 'no']);
+        $this->poll->vote($id, 'user-1', 'yes');
+        $this->assertFalse($this->poll->vote($id, 'user-1', 'yes'));
     }
 
-    public function testVoteThrowsForWrongPoll(): void
+    public function testVoteThrowsOnInvalidOption(): void
     {
-        $pollId  = $this->poll->create('Q?', ['A', 'B']);
-        $pollId2 = $this->poll->create('R?', ['C', 'D']);
-        $options2 = $this->poll->options($pollId2);
+        $id = $this->poll->create('Q?', ['yes', 'no']);
         $this->expectException(\InvalidArgumentException::class);
-        $this->poll->vote($pollId, (int)$options2[0]['id'], 'user-1');
+        $this->poll->vote($id, 'user-1', 'maybe');
+    }
+
+    public function testVoteThrowsOnClosedPoll(): void
+    {
+        $id = $this->poll->create('Q?', ['yes', 'no']);
+        $this->poll->close($id);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->poll->vote($id, 'user-1', 'yes');
+    }
+
+    public function testMultipleUsersCanVote(): void
+    {
+        $id = $this->poll->create('Q?', ['yes', 'no']);
+        $this->poll->vote($id, 'user-1', 'yes');
+        $this->poll->vote($id, 'user-2', 'yes');
+        $this->poll->vote($id, 'user-3', 'no');
+        $results = $this->poll->results($id);
+        $this->assertSame(2, $results['yes']);
+        $this->assertSame(1, $results['no']);
+    }
+
+    // ── close ─────────────────────────────────────────────────────────────────
+
+    public function testCloseMarksClosedAt(): void
+    {
+        $id = $this->poll->create('Q?', ['a']);
+        $this->assertTrue($this->poll->close($id));
+        $poll = $this->poll->find($id);
+        $this->assertNotNull($poll['closed_at']);
+    }
+
+    public function testCloseReturnsFalseIfAlreadyClosed(): void
+    {
+        $id = $this->poll->create('Q?', ['a']);
+        $this->poll->close($id);
+        $this->assertFalse($this->poll->close($id));
     }
 
     // ── results ───────────────────────────────────────────────────────────────
 
-    public function testResultsReturnsZeroVotesInitially(): void
+    public function testResultsInitialisesToZero(): void
     {
-        $id      = $this->poll->create('Q?', ['Yes', 'No']);
+        $id      = $this->poll->create('Q?', ['a', 'b']);
         $results = $this->poll->results($id);
-        $this->assertCount(2, $results);
-        $this->assertSame(0, $results[0]['votes']);
-        $this->assertSame(0.0, $results[0]['percent']);
+        $this->assertSame(['a' => 0, 'b' => 0], $results);
     }
 
-    public function testResultsTallyCorrectly(): void
+    public function testResultsReflectsVotes(): void
     {
-        $pollId  = $this->poll->create('Q?', ['Yes', 'No']);
-        $options = $this->poll->options($pollId);
-        $yesId   = (int)$options[0]['id'];
-        $noId    = (int)$options[1]['id'];
-
-        $this->poll->vote($pollId, $yesId, 'user-1');
-        $this->poll->vote($pollId, $yesId, 'user-2');
-        $this->poll->vote($pollId, $noId, 'user-3');
-
-        $results = $this->poll->results($pollId);
-        $yes = $results[0];
-        $no  = $results[1];
-
-        $this->assertSame(2, $yes['votes']);
-        $this->assertSame(1, $no['votes']);
-        $this->assertEqualsWithDelta(66.7, $yes['percent'], 0.1);
-        $this->assertEqualsWithDelta(33.3, $no['percent'], 0.1);
+        $id = $this->poll->create('Q?', ['a', 'b']);
+        $this->poll->vote($id, 'user-1', 'a');
+        $this->poll->vote($id, 'user-2', 'a');
+        $this->poll->vote($id, 'user-3', 'b');
+        $results = $this->poll->results($id);
+        $this->assertSame(2, $results['a']);
+        $this->assertSame(1, $results['b']);
     }
 
-    // ── hasVoted / userVote ───────────────────────────────────────────────────
+    // ── hasVoted / votedFor ───────────────────────────────────────────────────
 
-    public function testHasVotedReturnsFalseBeforeVoting(): void
+    public function testHasVotedReturnsFalseInitially(): void
     {
-        $id = $this->poll->create('Q?', ['A', 'B']);
+        $id = $this->poll->create('Q?', ['a', 'b']);
         $this->assertFalse($this->poll->hasVoted($id, 'user-1'));
     }
 
     public function testHasVotedReturnsTrueAfterVoting(): void
     {
-        $pollId  = $this->poll->create('Q?', ['A', 'B']);
-        $options = $this->poll->options($pollId);
-        $this->poll->vote($pollId, (int)$options[0]['id'], 'user-1');
-        $this->assertTrue($this->poll->hasVoted($pollId, 'user-1'));
+        $id = $this->poll->create('Q?', ['a', 'b']);
+        $this->poll->vote($id, 'user-1', 'a');
+        $this->assertTrue($this->poll->hasVoted($id, 'user-1'));
     }
 
-    public function testUserVoteReturnsNullBeforeVoting(): void
+    public function testVotedForReturnsVotedOptions(): void
     {
-        $id = $this->poll->create('Q?', ['A', 'B']);
-        $this->assertNull($this->poll->userVote($id, 'user-1'));
+        $id = $this->poll->create('Q?', ['a', 'b', 'c']);
+        $this->poll->vote($id, 'user-1', 'a');
+        $this->assertSame(['a'], $this->poll->votedFor($id, 'user-1'));
     }
 
-    public function testUserVoteReturnsChosenOption(): void
+    // ── totalVotes ────────────────────────────────────────────────────────────
+
+    public function testTotalVotesReturnsCorrectCount(): void
     {
-        $pollId  = $this->poll->create('Q?', ['A', 'B']);
-        $options = $this->poll->options($pollId);
-        $this->poll->vote($pollId, (int)$options[1]['id'], 'user-1');
-        $vote = $this->poll->userVote($pollId, 'user-1');
-        $this->assertNotNull($vote);
-        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('B', $vote['label']);
+        $id = $this->poll->create('Q?', ['a', 'b']);
+        $this->poll->vote($id, 'user-1', 'a');
+        $this->poll->vote($id, 'user-2', 'b');
+        $this->assertSame(2, $this->poll->totalVotes($id));
     }
 
-    // ── get ───────────────────────────────────────────────────────────────────
-
-    public function testGetReturnsNullForMissingPoll(): void
+    public function testTotalVotesReturnsZeroForNoPoll(): void
     {
-        $this->assertNull($this->poll->get(9999));
+        $this->assertSame(0, $this->poll->totalVotes(999));
     }
 }
