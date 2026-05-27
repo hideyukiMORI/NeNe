@@ -6,9 +6,39 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT140 are complete (FT36 deferred as ADR-class); ADR-0001–0013 are in place. The Xion helper wave is complete — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-27: all non-promotion Issues are closed; FT1–FT165 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is complete — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
 
 ## Recently Completed
+
+### 2026-05-27 — FT141–FT165: Xion extended helper wave (25 trials)
+
+Continuous wave of 25 field trials extending the Xion helper library. All PRs #576–#600. FT112 (LeaderBoard) closed as conflicting with existing FT61 Leaderboard class.
+
+**FT141 — ConfigStore**: `ConfigStore` global app key-value config with namespace support. PR #576.
+**FT142 — CacheEntry**: `CacheEntry` DB-backed TTL cache; zero extra infrastructure fallback. PR #577.
+**FT143 — UserGroup**: `UserGroup` user group membership with per-member roles. PR #578.
+**FT144 — ChatMessage**: `ChatMessage` simple chat room message store with soft-delete. PR #579.
+**FT145 — ShoppingCart**: `ShoppingCart` cart item management with qty and integer-cent price tracking. PR #580.
+**FT146 — CronLog**: `CronLog` scheduled task execution log with status lifecycle. PR #581.
+**FT147 — ExportJob**: `ExportJob` async data export job tracking with status lifecycle. PR #582.
+**FT148 — IpBlocklist**: `IpBlocklist` global IP address blocklist with optional expiry. PR #583.
+**FT149 — ContentVersion**: `ContentVersion` append-only content versioning with rollback. PR #584.
+**FT150 — AlertRule**: `AlertRule` metric threshold alerts with condition evaluation and event log. PR #585.
+**FT151 — Announcement**: `Announcement` site-wide announcements with scheduling and per-user dismissal. PR #586.
+**FT152 — MagicLink**: `MagicLink` email-based passwordless auth; single-use time-limited tokens. PR #587.
+**FT153 — SlugRegistry**: `SlugRegistry` namespace-scoped URL slug generation and uniqueness enforcement. PR #588.
+**FT154 — EmailQueue**: `EmailQueue` DB-backed outgoing email queue with exponential backoff retry. PR #589.
+**FT155 — DocumentLock**: `DocumentLock` collaborative editing lock with TTL; holder-only refresh/release. PR #590.
+**FT156 — ApiUsageLog**: `ApiUsageLog` per-API-key request tracking with endpoint/status/latency logging. PR #591.
+**FT157 — OAuthToken**: `OAuthToken` OAuth2 access/refresh token storage with rotation; SHA-256 hashed. PR #592.
+**FT158 — UserActivity**: `UserActivity` user last-seen tracking and named action event log. PR #593.
+**FT159 — EmailTemplate**: `EmailTemplate` DB-stored email templates with {{variable}} substitution and locale support. PR #594.
+**FT160 — BatchJob**: `BatchJob` batch processing job tracking with progress lifecycle. PR #595.
+**FT161 — ServiceAccount**: `ServiceAccount` machine-to-machine auth credentials with key rotation. PR #596.
+**FT162 — ChangeLog**: `ChangeLog` human-readable entity change history with before/after JSON snapshots. PR #597.
+**FT163 — PushSubscription**: `PushSubscription` Web Push notification subscription registry. PR #598.
+**FT164 — CounterMetric**: `CounterMetric` named metric counters with daily/hourly bucket aggregation. PR #599.
+**FT165 — FileChunk**: `FileChunk` chunked file upload tracking and reassembly coordination. PR #600.
 
 ### 2026-05-27 — FT78–FT140: Xion helper wave (63 trials)
 
