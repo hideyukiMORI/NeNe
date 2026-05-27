@@ -117,6 +117,7 @@ final class SubscriptionTest extends TestCase
         $this->sub->subscribe('user-1', 'pro', $this->future());
         $this->assertTrue($this->sub->markPastDue('user-1', 'pro'));
         $row = $this->sub->find('user-1', 'pro');
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame('past_due', $row['status']);
     }
 
