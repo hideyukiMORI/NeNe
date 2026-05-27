@@ -25,9 +25,9 @@ final class CommentThreadTest extends TestCase
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 entity_type VARCHAR(100) NOT NULL,
                 entity_id   VARCHAR(255) NOT NULL,
-                user_id     VARCHAR(255) NOT NULL,
                 parent_id   INTEGER      DEFAULT NULL,
-                body        TEXT         NOT NULL,
+                author_id   VARCHAR(255) NOT NULL,
+                body        TEXT         NOT NULL DEFAULT \'\',
                 deleted_at  DATETIME     DEFAULT NULL,
                 created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -36,168 +36,154 @@ final class CommentThreadTest extends TestCase
         $this->ct = new CommentThread($this->db);
     }
 
-    // ── post ──────────────────────────────────────────────────────────────────
+    // ── add ───────────────────────────────────────────────────────────────────
 
-    public function testPostReturnsId(): void
+    public function testAddReturnsId(): void
     {
-        $id = $this->ct->post('post', '1', 'user-1', 'Hello!');
+        $id = $this->ct->add('post', '1', 'user-1', 'Hello!');
         $this->assertGreaterThan(0, $id);
     }
 
-    public function testPostCreatesTopLevelComment(): void
+    public function testAddStoresBody(): void
     {
-        $id  = $this->ct->post('post', '1', 'user-1', 'Hello!');
-        $row = $this->ct->get($id);
-        $this->assertNotNull($row);
-        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertNull($row['parent_id']);
-        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('Hello!', $row['body']);
+        $id  = $this->ct->add('post', '1', 'user-1', 'Great post!');
+        $row = $this->ct->find($id);
+        $this->assertSame('Great post!', $row['body']);
     }
 
-    public function testPostThrowsOnEmptyBody(): void
+    public function testAddWithParentId(): void
+    {
+        $id    = $this->ct->add('post', '1', 'user-1', 'Parent');
+        $reply = $this->ct->add('post', '1', 'user-2', 'Reply', $id);
+        $row   = $this->ct->find($reply);
+        $this->assertSame($id, (int)$row['parent_id']);
+    }
+
+    public function testAddThrowsOnEmptyBody(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->ct->post('post', '1', 'user-1', '');
+        $this->ct->add('post', '1', 'user-1', '');
     }
 
-    public function testPostThrowsOnEmptyEntityType(): void
+    public function testAddThrowsOnEmptyAuthorId(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->ct->post('', '1', 'user-1', 'Hello');
+        $this->ct->add('post', '1', '', 'Hello');
     }
 
-    // ── reply ─────────────────────────────────────────────────────────────────
-
-    public function testReplyLinksToParent(): void
+    public function testAddThrowsOnEmptyEntityType(): void
     {
-        $parentId = $this->ct->post('post', '1', 'user-1', 'Parent');
-        $replyId  = $this->ct->reply('post', '1', 'user-2', 'Reply', $parentId);
-        $row      = $this->ct->get($replyId);
-        $this->assertNotNull($row);
-        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame((string)$parentId, (string)$row['parent_id']);
-    }
-
-    public function testReplyThrowsIfParentNotExists(): void
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->ct->reply('post', '1', 'user-1', 'Reply', 999);
-    }
-
-    public function testReplyThrowsIfParentIsDeleted(): void
-    {
-        $parentId = $this->ct->post('post', '1', 'user-1', 'Parent');
-        $this->ct->delete($parentId);
-        $this->expectException(\RuntimeException::class);
-        $this->ct->reply('post', '1', 'user-2', 'Reply', $parentId);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->ct->add('', '1', 'user-1', 'Hello');
     }
 
     // ── edit ──────────────────────────────────────────────────────────────────
 
     public function testEditUpdatesBody(): void
     {
-        $id = $this->ct->post('post', '1', 'user-1', 'Original');
+        $id = $this->ct->add('post', '1', 'user-1', 'Original');
         $this->assertTrue($this->ct->edit($id, 'user-1', 'Updated'));
-        $row = $this->ct->get($id);
-        $this->assertNotNull($row);
-        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('Updated', $row['body']);
+        $this->assertSame('Updated', $this->ct->find($id)['body']);
     }
 
-    public function testEditReturnsFalseForWrongUser(): void
+    public function testEditReturnsFalseForWrongAuthor(): void
     {
-        $id = $this->ct->post('post', '1', 'user-1', 'Original');
-        $this->assertFalse($this->ct->edit($id, 'user-2', 'Hijack'));
+        $id = $this->ct->add('post', '1', 'user-1', 'Original');
+        $this->assertFalse($this->ct->edit($id, 'user-2', 'Hacked'));
     }
 
     public function testEditThrowsOnEmptyBody(): void
     {
-        $id = $this->ct->post('post', '1', 'user-1', 'Original');
+        $id = $this->ct->add('post', '1', 'user-1', 'Original');
         $this->expectException(\InvalidArgumentException::class);
         $this->ct->edit($id, 'user-1', '');
     }
 
-    // ── delete ────────────────────────────────────────────────────────────────
+    // ── delete (soft) ─────────────────────────────────────────────────────────
 
-    public function testDeleteReplacesBodyWithTombstone(): void
+    public function testDeleteSoftDeletesComment(): void
     {
-        $id = $this->ct->post('post', '1', 'user-1', 'Original');
+        $id = $this->ct->add('post', '1', 'user-1', 'Hello');
         $this->assertTrue($this->ct->delete($id, 'user-1'));
-        $row = $this->ct->get($id);
-        $this->assertNotNull($row);
-        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-        $this->assertSame('[deleted]', $row['body']);
-        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
+        $row = $this->ct->find($id);
+        $this->assertSame('', $row['body']);
         $this->assertNotNull($row['deleted_at']);
     }
 
-    public function testDeleteReturnsFalseForWrongUser(): void
+    public function testDeleteReturnsFalseForWrongAuthor(): void
     {
-        $id = $this->ct->post('post', '1', 'user-1', 'Original');
+        $id = $this->ct->add('post', '1', 'user-1', 'Hello');
         $this->assertFalse($this->ct->delete($id, 'user-2'));
     }
 
-    public function testDeleteWithNullUserIdForceDeletes(): void
+    public function testDeleteReturnsFalseIfAlreadyDeleted(): void
     {
-        $id = $this->ct->post('post', '1', 'user-1', 'Original');
-        $this->assertTrue($this->ct->delete($id, null));
+        $id = $this->ct->add('post', '1', 'user-1', 'Hello');
+        $this->ct->delete($id, 'user-1');
+        $this->assertFalse($this->ct->delete($id, 'user-1'));
     }
 
-    public function testDeleteIsIdempotentReturnsFalseSecondTime(): void
+    // ── remove (hard delete) ──────────────────────────────────────────────────
+
+    public function testRemoveDeletesCommentAndReplies(): void
     {
-        $id = $this->ct->post('post', '1', 'user-1', 'Original');
-        $this->ct->delete($id);
-        $this->assertFalse($this->ct->delete($id));
+        $id    = $this->ct->add('post', '1', 'user-1', 'Parent');
+        $reply = $this->ct->add('post', '1', 'user-2', 'Reply', $id);
+        $this->assertTrue($this->ct->remove($id));
+        $this->assertNull($this->ct->find($id));
+        $this->assertNull($this->ct->find($reply));
     }
 
-    // ── thread ────────────────────────────────────────────────────────────────
+    // ── list ──────────────────────────────────────────────────────────────────
 
-    public function testThreadReturnsAllComments(): void
+    public function testListReturnsAllComments(): void
     {
-        $this->ct->post('post', '1', 'user-1', 'A');
-        $this->ct->post('post', '1', 'user-2', 'B');
-        $this->assertCount(2, $this->ct->thread('post', '1'));
+        $this->ct->add('post', '1', 'user-1', 'A');
+        $this->ct->add('post', '1', 'user-2', 'B');
+        $list = $this->ct->list('post', '1');
+        $this->assertCount(2, $list);
     }
 
-    public function testThreadIncludesDeletedAsTombstone(): void
+    public function testListExcludesDeletedWhenRequested(): void
     {
-        $id = $this->ct->post('post', '1', 'user-1', 'A');
-        $this->ct->delete($id);
-        $this->assertCount(1, $this->ct->thread('post', '1'));
+        $id = $this->ct->add('post', '1', 'user-1', 'A');
+        $this->ct->add('post', '1', 'user-2', 'B');
+        $this->ct->delete($id, 'user-1');
+        $list = $this->ct->list('post', '1', false);
+        $this->assertCount(1, $list);
     }
 
-    public function testThreadIsEntityScoped(): void
+    public function testListIsEntityScoped(): void
     {
-        $this->ct->post('post', '1', 'user-1', 'A');
-        $this->ct->post('post', '2', 'user-1', 'B');
-        $this->assertCount(1, $this->ct->thread('post', '1'));
-    }
-
-    // ── topLevel / replies ────────────────────────────────────────────────────
-
-    public function testTopLevelExcludesReplies(): void
-    {
-        $parentId = $this->ct->post('post', '1', 'user-1', 'Parent');
-        $this->ct->reply('post', '1', 'user-2', 'Reply', $parentId);
-        $this->assertCount(1, $this->ct->topLevel('post', '1'));
-    }
-
-    public function testRepliesReturnsChildComments(): void
-    {
-        $parentId = $this->ct->post('post', '1', 'user-1', 'Parent');
-        $this->ct->reply('post', '1', 'user-2', 'Reply 1', $parentId);
-        $this->ct->reply('post', '1', 'user-3', 'Reply 2', $parentId);
-        $this->assertCount(2, $this->ct->replies($parentId));
+        $this->ct->add('post', '1', 'user-1', 'A');
+        $this->ct->add('post', '2', 'user-1', 'B');
+        $this->assertCount(1, $this->ct->list('post', '1'));
     }
 
     // ── count ─────────────────────────────────────────────────────────────────
 
-    public function testCountExcludesDeletedComments(): void
+    public function testCountIgnoresDeleted(): void
     {
-        $id = $this->ct->post('post', '1', 'user-1', 'A');
-        $this->ct->post('post', '1', 'user-2', 'B');
-        $this->ct->delete($id);
+        $id = $this->ct->add('post', '1', 'user-1', 'A');
+        $this->ct->add('post', '1', 'user-2', 'B');
+        $this->ct->delete($id, 'user-1');
         $this->assertSame(1, $this->ct->count('post', '1'));
+    }
+
+    // ── replies ───────────────────────────────────────────────────────────────
+
+    public function testRepliesReturnsChildComments(): void
+    {
+        $id     = $this->ct->add('post', '1', 'user-1', 'Parent');
+        $reply1 = $this->ct->add('post', '1', 'user-2', 'Reply 1', $id);
+        $reply2 = $this->ct->add('post', '1', 'user-3', 'Reply 2', $id);
+        $replies = $this->ct->replies($id);
+        $this->assertCount(2, $replies);
+    }
+
+    public function testRepliesReturnsEmptyForNoReplies(): void
+    {
+        $id = $this->ct->add('post', '1', 'user-1', 'Alone');
+        $this->assertSame([], $this->ct->replies($id));
     }
 }
