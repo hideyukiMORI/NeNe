@@ -115,6 +115,7 @@ final class MediaGalleryTest extends TestCase
 
         $cover = $this->gallery->getCover('post', '1');
         $this->assertNotNull($cover);
+        // @phan-suppress-next-line PhanTypeArraySuspiciousNullable
         $this->assertSame($id, (int)$cover['id']);
     }
 
