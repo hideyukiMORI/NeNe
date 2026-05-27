@@ -50,7 +50,8 @@ final readonly class JwtCodec
     public function __construct(
         private string $secret,
         private int $defaultTtl = 3600,
-    ) {}
+    ) {
+    }
 
     /**
      * Issue a new JWT with the given claims.
