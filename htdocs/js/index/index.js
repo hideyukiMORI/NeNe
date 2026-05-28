@@ -62,8 +62,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function SiteHeader() {
         return e('header', { className: 'developers__header' },
             e('a', { className: 'developers__brand', href: '/' },
-                e('span', { className: 'developers__brand-mark' }, 'N'),
-                e('span', null, 'Developers')
+                e('span', { className: 'developers__brand-mark' }, 'N::N'),
+                e('span', { className: 'developers__brand-cursor' }),
+                e('span', { className: 'developers__brand-name' }, 'nene-php'),
+                e('span', { className: 'developers__brand-ver' }, 'v0.2.0')
             ),
             e('nav', { className: 'developers__nav' },
                 e('a', { href: 'https://github.com/hideyukiMORI/NeNe' }, 'GitHub'),
@@ -88,6 +90,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function Hero() {
         return e('section', { className: 'developers__hero' },
+            e('p', { className: 'developers__prompt' },
+                e('span', { className: 'developers__prompt-user' }, 'you@local'),
+                e('span', { className: 'developers__prompt-sep' }, ':'),
+                e('span', { className: 'developers__prompt-path' }, '~/projects'),
+                e('span', { className: 'developers__prompt-sep' }, '$'),
+                e('span', { className: 'developers__prompt-cmd' }, 'git clone git@github.com:hideyukiMORI/NeNe.git')
+            ),
             e('p', { className: 'developers__eyebrow' }, 'Legacy PHP Framework'),
             e('h1', null, 'NeNe Developers'),
             e('p', { className: 'developers__lead' }, tagline),
@@ -668,4 +677,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     ReactDOM.createRoot(root).render(e(App));
+
+    // vim/tmux-style status bar (purely decorative; injected outside the React tree)
+    if (!document.querySelector('.nene-statusbar')) {
+        const statusbar = document.createElement('div');
+        statusbar.className = 'nene-statusbar';
+        statusbar.innerHTML =
+            '<span class="chunk mode">NORMAL</span>' +
+            '<span class="chunk"><span class="key">file:</span><span class="val">home.php</span></span>' +
+            '<span class="chunk sep">·</span>' +
+            '<span class="chunk"><span class="idot"></span><span class="val">v0.2.0</span></span>' +
+            '<span class="chunk sep">·</span>' +
+            '<span class="chunk"><span class="key">license:</span><span class="val">MIT</span></span>' +
+            '<span class="chunk right"><span class="key">php:</span><span class="val">8.4</span></span>' +
+            '<span class="chunk"><span class="key">utf-8</span></span>' +
+            '<span class="chunk"><span class="key" id="nene-sb-clock">--:--</span></span>';
+        document.body.appendChild(statusbar);
+
+        const sbClock = document.getElementById('nene-sb-clock');
+        const tick = function () {
+            const d = new Date();
+            const p = function (n) { return String(n).padStart(2, '0'); };
+            sbClock.textContent = p(d.getUTCHours()) + ':' + p(d.getUTCMinutes());
+        };
+        tick();
+        setInterval(tick, 1000);
+    }
 });
