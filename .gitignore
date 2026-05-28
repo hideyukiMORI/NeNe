@@ -12,3 +12,6 @@ data/*.sqlite
 data/*.sqlite3
 .phpunit.cache
 .php-cs-fixer.cache
+
+# Scratch / handoff artifacts (design specs, zips, etc.)
+var/
