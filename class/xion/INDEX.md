@@ -304,6 +304,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `DocumentSignature` | e-signature request workflow with multi-signatory support. |
 | `JobQueue` | simple DB-backed background job queue. |
 | `OptimisticLock` | — |
+| `RetrySchedule` | exponential-backoff retry tracking for arbitrary operations. |
 | `ScheduledTask` | cron-style task schedule registry with last-run tracking. |
 | `TokenBucket` | DB-backed token bucket algorithm for flexible rate limiting. |
 | `TransactionManager` | — |
