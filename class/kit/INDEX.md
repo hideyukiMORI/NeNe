@@ -184,6 +184,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `OrderLine` | e-commerce order header with line items. |
 | `PaymentRecord` | simple payment/transaction ledger. |
 | `Payout` | accrue amounts owed to payees and settle them in payout runs. |
+| `PledgeDrive` | crowdfunding / fundraising drive with monetary pledges. |
 | `PointBalance` | user loyalty/reward points with append-only ledger. |
 | `PointLedger` | Append-only point / loyalty system with negative-balance prevention. |
 | `PriceAlert` | notify users when an item's price drops to their target. |
