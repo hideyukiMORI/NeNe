@@ -176,6 +176,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `CreditNote` | financial credit notes / refund adjustments. |
 | `ExchangeRate` | effective-dated currency conversion rate table. |
 | `EventTicket` | event ticketing with capacity management and check-in tracking. |
+| `ExpenseClaim` | expense reimbursement claims with line items and approval. |
 | `GiftCard` | prepaid gift card balance with partial redemption support. |
 | `GiftRegistry` | wish-list of desired items that others can claim. |
 | `InventoryStock` | product/SKU stock tracking with atomic reserve/release/commit. |
