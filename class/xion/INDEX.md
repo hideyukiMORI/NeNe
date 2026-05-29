@@ -273,6 +273,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `Cors` | CORS (Cross-Origin Resource Sharing) header utility. |
 | `ExportJob` | async data export job tracking. |
 | `FeatureFlag` | DB-backed feature flags with global on/off and per-user overrides. |
+| `PercentageRollout` | gradual feature rollout by percentage with sticky bucketing. |
 | `HealthCheck` | service/component health monitoring log. |
 | `HttpCache` | HTTP cache header utilities for REST endpoints. |
 | `IdempotencyStore` | DB-backed idempotency key store for POST endpoints. |
