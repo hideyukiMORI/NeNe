@@ -24,20 +24,28 @@ composer test                        # PHPUnit unit suite
 
 ---
 
-## Scaffolding a New Xion Class
+## Scaffolding a New Helper (`Nene\Kit`) — the common case
+
+Per **ADR-0014**, framework core lives in `Nene\Xion` (`class/xion/`, ~55 classes)
+and the opt-in helper catalogue lives in `Nene\Kit` (`class/kit/`, ~227 classes).
+**Field-trial helpers go in `Nene\Kit`:**
 
 ```bash
-composer make:xion -- ClassName
+composer make:kit -- ClassName
 ```
 
-Creates `class/xion/ClassName.php` + `tests/Unit/Xion/ClassNameTest.php` with
-the PDO injection skeleton, **and automatically adds the class to the
-Uncategorized section of `class/xion/INDEX.md`**. Then:
+Creates `class/kit/ClassName.php` + `tests/Unit/Kit/ClassNameTest.php` with the
+PDO injection skeleton (including `use Nene\Xion\PdoConnection;`), and registers
+the class in the Uncategorized section of `class/kit/INDEX.md`. Then:
 
-1. Fill in the public API and table DDL
-2. Add the table to `class/xion/SchemaDefinition.php`
-3. Move the Uncategorized entry in `class/xion/INDEX.md` to the right section
-4. Run `composer analyze:file -- class/xion/ClassName.php tests/Unit/Xion/ClassNameTest.php`
+1. Fill in the public API and table DDL (in the class docblock; helpers are
+   self-contained and do **not** register in `SchemaDefinition`)
+2. Move the Uncategorized entry in `class/kit/INDEX.md` to the right section
+3. Run `composer analyze:file -- class/kit/ClassName.php tests/Unit/Kit/ClassNameTest.php`
+
+For a genuine **framework-core** class (rare), use `composer make:xion -- ClassName`
+(→ `class/xion/`, `Nene\Xion`) instead. A core class that ships sample-app schema
+also adds its table to `class/xion/SchemaDefinition.php`.
 
 ---
 
@@ -126,15 +134,20 @@ Never use a date that is only "near" the boundary and hope it works.
 
 ---
 
-## Xion Class Index
+## Class Indexes (consult before starting — avoid duplicates)
 
-`class/xion/INDEX.md` — all ~230 Xion classes grouped by domain.
-Consult it before starting a new Xion class to avoid duplicates.
+- `class/kit/INDEX.md` — the ~227 `Nene\Kit` helper classes grouped by domain.
+- `class/xion/INDEX.md` — the ~55 `Nene\Xion` framework-core classes.
+
+**Concept-scan, not just name-scan**, before adding a helper — grep the INDEX
+*descriptions* (`grep -i <keyword> class/kit/INDEX.md`) to catch conceptual
+duplicates (e.g. a "terms acceptance" idea already covered by `TermConsent`).
 
 To regenerate after adding classes:
 
 ```bash
-composer xion:index   # updates descriptions, adds new classes to Uncategorized
+composer kit:index    # class/kit/INDEX.md  (helpers)
+composer xion:index   # class/xion/INDEX.md (core)
 ```
 
 ---
