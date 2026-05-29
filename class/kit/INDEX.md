@@ -304,6 +304,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `RetrySchedule` | exponential-backoff retry tracking for arbitrary operations. |
 | `RoundRobinAssigner` | fair rotating assignment across a named pool. |
 | `ScheduledTask` | cron-style task schedule registry with last-run tracking. |
+| `StockTransfer` | multi-location stock ledger with location-to-location moves. |
 | `TokenBucket` | DB-backed token bucket algorithm for flexible rate limiting. |
 
 ---
