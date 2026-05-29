@@ -179,6 +179,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `Payout` | accrue amounts owed to payees and settle them in payout runs. |
 | `PointBalance` | user loyalty/reward points with append-only ledger. |
 | `PointLedger` | Append-only point / loyalty system with negative-balance prevention. |
+| `PriceAlert` | notify users when an item's price drops to their target. |
 | `PriceHistory` | append-only price change log for products or any priced entity. |
 | `PriceList` | product price catalog with multiple price tiers per SKU. |
 | `ProductBundle` | product bundle definitions with included items. |
