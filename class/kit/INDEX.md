@@ -139,6 +139,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `RecipientGroup` | mailing list / recipient group management. |
 | `Reminder` | user-set future reminders. |
 | `SessionFlash` | one-time flash messages stored in DB, consumed on next read. |
+| `Snooze` | temporarily hide an item until a wake-up time. |
 | `TopicSubscription` | user subscriptions to named topics for notification routing. |
 
 ---
@@ -317,4 +318,5 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 ---
 
 *Generated from PHPDoc descriptions. Run `composer kit:index` to refresh after adding classes.*
+
 
