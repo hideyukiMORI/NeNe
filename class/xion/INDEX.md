@@ -25,6 +25,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `OtpChallenge` | one-time password (OTP) challenge issuance and verification. |
 | `PasswordExpiry` | Password expiry policy enforcement. |
 | `PasswordHistory` | Password history — prevent users from reusing recent passwords. |
+| `PasswordPolicy` | configurable password complexity rules per scope. |
 | `PasswordResetToken` | Cryptographic helpers for password-reset token workflows. |
 | `PersonalAccessToken` | Personal Access Token (PAT) management for user-facing dashboards. |
 | `PinCode` | short PIN / OTP issuance with attempt limiting and expiry. |
