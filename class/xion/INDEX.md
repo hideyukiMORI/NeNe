@@ -323,6 +323,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `GenerateSchemaSqlCommand` | — |
 | `InitSqliteCommand` | — |
 | `Initialize` | — |
+| `MaintenanceWindow` | scheduled maintenance windows per service scope. |
 | `PdoConnection` | — |
 | `SchemaCompiler` | Compile {@see SchemaDefinition} into MySQL and SQLite DDL. |
 | `SchemaDefinition` | NeNe's sample-schema source of truth. |
