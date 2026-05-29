@@ -1,6 +1,6 @@
 # File Metadata
 
-`Nene\Xion\FileMetadata` — file storage metadata management with soft delete.
+`Nene\Kit\FileMetadata` — file storage metadata management with soft delete.
 
 Records file metadata (path, MIME type, size, owner, storage backend) in the database. Does **not** manage the physical file — upload and deletion of the actual bytes is the application's responsibility.
 

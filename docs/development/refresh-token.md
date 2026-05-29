@@ -1,6 +1,6 @@
 # Refresh Token
 
-`Nene\Xion\RefreshToken` manages long-lived refresh tokens for JWT access token rotation. Pair with `JwtCodec` for a complete access + refresh token flow.
+`Nene\Kit\RefreshToken` manages long-lived refresh tokens for JWT access token rotation. Pair with `JwtCodec` for a complete access + refresh token flow.
 
 ## Token lifecycle
 
@@ -46,7 +46,7 @@ CREATE INDEX idx_refresh_tokens_user ON refresh_tokens (user_id);
 
 ```php
 use Nene\Xion\JwtCodec;
-use Nene\Xion\RefreshToken;
+use Nene\Kit\RefreshToken;
 
 $codec   = new JwtCodec((string)getenv('NENE_JWT_SECRET'), defaultTtl: 300); // 5-min access tokens
 $refresh = new RefreshToken();

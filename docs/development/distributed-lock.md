@@ -1,6 +1,6 @@
 # Distributed Lock
 
-`Nene\Xion\DistributedLock` provides a DB-backed mutual exclusion lock for coordinating work across multiple processes or instances.
+`Nene\Kit\DistributedLock` provides a DB-backed mutual exclusion lock for coordinating work across multiple processes or instances.
 
 ## When to use
 
@@ -33,7 +33,7 @@ CREATE TABLE distributed_locks (
 ## Basic usage
 
 ```php
-use Nene\Xion\DistributedLock;
+use Nene\Kit\DistributedLock;
 
 $lock  = new DistributedLock();
 $owner = bin2hex(random_bytes(8)); // unique per process/request

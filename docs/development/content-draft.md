@@ -1,6 +1,6 @@
 # Content Draft
 
-`Nene\Xion\ContentDraft` manages a content lifecycle with three states: `draft → published → archived`. Reverse transitions are not allowed.
+`Nene\Kit\ContentDraft` manages a content lifecycle with three states: `draft → published → archived`. Reverse transitions are not allowed.
 
 ## State transitions
 
@@ -48,7 +48,7 @@ CREATE INDEX idx_contents_published ON contents (status, published_at);
 ## Basic usage
 
 ```php
-use Nene\Xion\ContentDraft;
+use Nene\Kit\ContentDraft;
 
 $content = new ContentDraft();
 

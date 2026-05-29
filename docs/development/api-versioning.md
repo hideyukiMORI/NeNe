@@ -44,7 +44,7 @@ declare(strict_types=1);
 namespace Nene\Controller\V1;
 
 use Nene\Xion\ControllerBase;
-use Nene\Xion\ApiDeprecation;
+use Nene\Kit\ApiDeprecation;
 
 final class NoteController extends ControllerBase
 {
@@ -105,6 +105,6 @@ Do not remove a version before the Sunset date — clients may still be using it
 
 ## Related
 
-- `class/xion/ApiDeprecation.php` — RFC 8594 header helper
+- `class/kit/ApiDeprecation.php` — RFC 8594 header helper
 - `docs/adr/0013-api-versioning.md` — versioning strategy ADR
 - `docs/development/json-only-api.md` — JSON API conventions

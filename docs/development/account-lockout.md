@@ -1,6 +1,6 @@
 # Account Lockout
 
-NeNe ships `Nene\Xion\LoginAttemptTracker` — a DB-backed class that counts consecutive failed login attempts per user and locks the account once a configurable threshold is reached.
+NeNe ships `Nene\Kit\LoginAttemptTracker` — a DB-backed class that counts consecutive failed login attempts per user and locks the account once a configurable threshold is reached.
 
 ## Why account lockout matters
 
@@ -38,7 +38,7 @@ For MySQL the `updated_at` column can be given `ON UPDATE CURRENT_TIMESTAMP` if 
 Check lock status before verifying credentials so that a locked account gets a `423` response before any password hash work:
 
 ```php
-use Nene\Xion\LoginAttemptTracker;
+use Nene\Kit\LoginAttemptTracker;
 use Nene\Xion\DomainException;
 
 $tracker = new LoginAttemptTracker();
@@ -98,7 +98,7 @@ $tracker = new LoginAttemptTracker($pdo, 3, 'login_attempts');
 
 ## Related files
 
-- `class/xion/LoginAttemptTracker.php` — implementation
+- `class/kit/LoginAttemptTracker.php` — implementation
 - `config/error_codes.php` — `ACCOUNT-LOCKED` entry (HTTP 423)
 - `docs/development/error-codes.md` — error code catalog
 - `docs/development/rate-limiting.md` — complementary per-IP rate limiting

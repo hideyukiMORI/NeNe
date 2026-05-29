@@ -1,6 +1,6 @@
 # Batch Operations
 
-Batch endpoints accept an array of items in a single POST request and process each item independently. A batch endpoint can partially succeed: some items may be created while others are rejected. The `Nene\Xion\BatchResult` class accumulates per-item outcomes and determines the correct HTTP status code for the response.
+Batch endpoints accept an array of items in a single POST request and process each item independently. A batch endpoint can partially succeed: some items may be created while others are rejected. The `Nene\Kit\BatchResult` class accumulates per-item outcomes and determines the correct HTTP status code for the response.
 
 ## Why batch operations
 
@@ -120,7 +120,7 @@ if (count($items) > self::MAX_ITEMS) {
 
 ## Related
 
-- `class/xion/BatchResult.php` — the value object implemented in this feature trial.
-- `tests/Unit/Xion/BatchResultTest.php` — unit test suite (15 tests).
+- `class/kit/BatchResult.php` — the value object implemented in this feature trial.
+- `tests/Unit/Kit/BatchResultTest.php` — unit test suite (15 tests).
 - `config/error_codes.php` — `BATCH-TOO-LARGE` and `BATCH-ITEM-FAILED` entries.
 - `docs/development/error-codes.md` — error code catalog.

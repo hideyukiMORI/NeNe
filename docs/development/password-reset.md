@@ -109,5 +109,5 @@ public function completePostRest(): array
 
 - `docs/development/invitation-tokens.md` — one-time token pattern (similar expiry/claim mechanics)
 - `docs/development/error-codes.md` — full error code catalog
-- `class/xion/PasswordResetToken.php` — framework helper implementation
+- `class/kit/PasswordResetToken.php` — framework helper implementation
 - `class/xion/Mailer.php` — email sending

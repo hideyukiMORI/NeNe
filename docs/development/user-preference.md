@@ -1,6 +1,6 @@
 # User Preference
 
-`Nene\Xion\UserPreference` — user preference key-value store with default-value fallback and type casting.
+`Nene\Kit\UserPreference` — user preference key-value store with default-value fallback and type casting.
 
 ## Schema
 

@@ -76,7 +76,8 @@ Do not treat legacy style as a defect by itself. In NeNe, some legacy shape is i
 
 NeNe keeps framework core and the bundled sample/application code in the same repository, but they have different responsibilities:
 
-- `class/xion/` is framework core. It contains dispatching, controller base behavior, request/session helpers, response helpers, database base classes, logging, and transaction boundaries.
+- `class/xion/` (`Nene\Xion`) is framework core. It contains dispatching, controller base behavior, request/session helpers, response helpers, database base classes, logging, and transaction boundaries. Kept small (~55 classes) so it can be read end-to-end.
+- `class/kit/` (`Nene\Kit`) is an opt-in helper catalogue: ~227 small, single-purpose, DB-backed feature building blocks (commerce, content, analytics, notifications, …) produced by the field-trial loop. None is required for the framework to boot — see ADR-0014 for the core-vs-helper boundary and the "boot test". New helpers scaffold here via `composer make:kit`.
 - `class/controller/`, `class/db/`, `class/model/`, and `class/func/` are the current sample/application-side namespaces. The bundled TODO, session, health, and documentation pages live here to show how a small NeNe service is built.
 - `view/source/`, `htdocs/css/`, and `htdocs/js/` are application-facing presentation assets discovered by convention.
 - `docs/api/`, `config/error_codes.php`, database setup scripts, and tests are part of the application contract whenever a sample or real service exposes public behavior.

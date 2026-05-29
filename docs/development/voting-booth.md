@@ -1,6 +1,6 @@
 # Voting Booth
 
-`Nene\Xion\VotingBooth` provides an upvote/downvote system with toggle semantics, score retrieval, and per-user vote state.
+`Nene\Kit\VotingBooth` provides an upvote/downvote system with toggle semantics, score retrieval, and per-user vote state.
 
 ## Toggle semantics
 
@@ -42,7 +42,7 @@ CREATE INDEX idx_votes_target ON votes (target_id);
 ## Basic usage
 
 ```php
-use Nene\Xion\VotingBooth;
+use Nene\Kit\VotingBooth;
 
 $booth = new VotingBooth();
 

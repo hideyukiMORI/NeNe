@@ -1,6 +1,6 @@
 # Job Queue
 
-`Nene\Xion\JobQueue` — simple DB-backed job queue for lightweight background task processing.
+`Nene\Kit\JobQueue` — simple DB-backed job queue for lightweight background task processing.
 
 ## Schema
 

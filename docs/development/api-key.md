@@ -1,6 +1,6 @@
 # API Key Management
 
-`Nene\Xion\ApiKey` provides API key generation, hashed storage, scope-based authorization, revocation, and rotation.
+`Nene\Kit\ApiKey` provides API key generation, hashed storage, scope-based authorization, revocation, and rotation.
 
 ## Key design
 
@@ -47,7 +47,7 @@ An `admin` key satisfies any scope requirement. A `read` key is rejected by endp
 ## Basic usage
 
 ```php
-use Nene\Xion\ApiKey;
+use Nene\Kit\ApiKey;
 
 $manager = new ApiKey();
 

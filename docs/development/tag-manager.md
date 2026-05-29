@@ -1,6 +1,6 @@
 # Tag Manager
 
-`Nene\Xion\TagManager` — generic M:N tag/label system for any entity type.
+`Nene\Kit\TagManager` — generic M:N tag/label system for any entity type.
 
 Tags are reusable and shared across entities. A tag named `'php'` exists once in the `tags` table and can be attached to any number of posts, products, tasks, etc. Entity identity uses `(entity_type, entity_id)` pairs to keep the helper application-agnostic.
 

@@ -1,6 +1,6 @@
 # Search History
 
-`Nene\Xion\SearchHistory` — per-user search history with deduplication, auto-trimming, and limit control.
+`Nene\Kit\SearchHistory` — per-user search history with deduplication, auto-trimming, and limit control.
 
 ## Schema
 

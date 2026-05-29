@@ -1,6 +1,6 @@
 # Point Ledger
 
-`Nene\Xion\PointLedger` — append-only point / loyalty system with negative-balance prevention.
+`Nene\Kit\PointLedger` — append-only point / loyalty system with negative-balance prevention.
 
 Points are stored as signed `delta` entries. The balance is the sum of all deltas. The ledger is never modified — only appended.
 

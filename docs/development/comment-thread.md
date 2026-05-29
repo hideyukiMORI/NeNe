@@ -1,6 +1,6 @@
 # Comment Thread
 
-`Nene\Xion\CommentThread` — threaded comment system with nesting depth limit and soft delete.
+`Nene\Kit\CommentThread` — threaded comment system with nesting depth limit and soft delete.
 
 ## Schema
 
