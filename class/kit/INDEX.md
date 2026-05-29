@@ -261,6 +261,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `TeamMembership` | organization/team membership with roles. |
 | `TimeEntry` | work time tracking with start/stop/duration. |
 | `TimeSlot` | appointment/time slot booking with availability. |
+| `Tournament` | single-elimination entrant tracking with match recording. |
 | `VotePoll` | simple polls with named options and one-vote-per-user enforcement. |
 | `VotingBooth` | Upvote / downvote system with toggle semantics and per-user vote state. |
 | `Waitlist` | manage sign-ups for gated access (beta, launches, events). |
