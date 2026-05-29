@@ -288,6 +288,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | Class | Description |
 |-------|-------------|
 | `AssetRegistry` | physical and digital asset inventory with assignment tracking. |
+| `BusinessCalendar` | working-day calendar with weekend and holiday awareness. |
 | `BatchJob` | batch processing job tracking with progress and status lifecycle. |
 | `BatchResult` | Accumulates per-item results for a batch operation. |
 | `CircuitBreaker` | — |
