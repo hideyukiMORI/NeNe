@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nene\Tests\Unit\Xion;
+namespace Nene\Tests\Unit\Kit;
 
-use Nene\Xion\MediaProcessing;
+use Nene\Kit\MediaProcessing;
 use PDO;
 use PHPUnit\Framework\TestCase;
 

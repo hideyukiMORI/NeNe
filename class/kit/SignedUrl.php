@@ -15,7 +15,10 @@
 
 declare(strict_types=1);
 
-namespace Nene\Xion;
+namespace Nene\Kit;
+
+use Nene\Xion\HttpTermination;
+use Nene\Xion\JsonResponder;
 
 /**
  * Generates and verifies HMAC-SHA256-signed URLs with expiry.

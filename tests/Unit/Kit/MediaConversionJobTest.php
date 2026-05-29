@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Xion;
+namespace Nene\Tests\Unit\Kit;
 
-use Nene\Xion\MediaConversionJob;
+use Nene\Kit\MediaConversionJob;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
