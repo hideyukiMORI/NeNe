@@ -206,6 +206,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | Class | Description |
 |-------|-------------|
 | `AccessLog` | Security-focused resource access log. |
+| `AffiliateClick` | affiliate click tracking and conversion attribution. |
 | `AlertRule` | metric-based alert rules with threshold evaluation and event log. |
 | `ApiUsageLog` | per-API-key request tracking with endpoint and status logging. |
 | `AuditLog` | compliance-grade record of who changed what on any entity. |
