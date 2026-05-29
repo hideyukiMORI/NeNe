@@ -60,6 +60,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 
 | Class | Description |
 |-------|-------------|
+| `Annotation` | per-user text highlights and notes over content ranges. |
 | `Announcement` | site-wide announcements with scheduling and per-user dismissal. |
 | `Checklist` | ordered checklist items attached to any entity. |
 | `CommentThread` | threaded comments attached to any entity. |
