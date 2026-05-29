@@ -176,6 +176,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `InventoryStock` | product/SKU stock tracking with atomic reserve/release/commit. |
 | `OrderLine` | e-commerce order header with line items. |
 | `PaymentRecord` | simple payment/transaction ledger. |
+| `Payout` | accrue amounts owed to payees and settle them in payout runs. |
 | `PointBalance` | user loyalty/reward points with append-only ledger. |
 | `PointLedger` | Append-only point / loyalty system with negative-balance prevention. |
 | `PriceHistory` | append-only price change log for products or any priced entity. |
