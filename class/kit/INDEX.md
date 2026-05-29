@@ -93,6 +93,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `Bookmark` | Generic per-user bookmark / saved-item manager. |
 | `BookmarkCollection` | user-curated collections of bookmarked entities. |
 | `ConsentLog` | immutable record of user consent grants and withdrawals. |
+| `DailyReward` | once-per-day claimable reward with a consecutive-day streak. |
 | `DailyStreak` | Track per-user daily activity streaks. |
 | `EntityAlias` | multiple identifier aliases for an entity. |
 | `FeatureTour` | per-user state for one-time UI tours / coachmarks. |
