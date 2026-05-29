@@ -218,6 +218,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `CounterMetric` | named metric counters with daily/hourly bucket aggregation. |
 | `CronLog` | scheduled task execution log. |
 | `DownloadCounter` | Download counter — track file/asset download events. |
+| `Escalation` | tiered escalation ladder for a work item. |
 | `EventLog` | append-only domain event log for event sourcing–lite patterns. |
 | `FunnelStep` | conversion-funnel step completion tracking. |
 | `IncidentLog` | IT/service incident tracking with severity and lifecycle. |
