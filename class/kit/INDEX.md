@@ -230,6 +230,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | Class | Description |
 |-------|-------------|
 | `AbTest` | A/B test variant assignment and conversion tracking. |
+| `Achievement` | progress-tracked, auto-unlocking achievements per user. |
 | `Approval` | single-approver workflow (request → approve / reject). |
 | `ChangeRequest` | formal RFC / change-management approval workflow. |
 | `Endorsement` | peer skill endorsements between users. |
