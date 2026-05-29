@@ -86,7 +86,20 @@ jobs:
         run: docker tag nene-app:ci nene-app
 
       - name: Start app
-        run: docker compose up -d app
+        # Retry: `docker compose up` pulls dependency images (mysql, redis) from
+        # Docker Hub, which intermittently fails with a transient registry error
+        # ("Head .../manifests/...: unknown"). Retry a few times before failing
+        # the job so a Hub blip doesn't force a manual re-run.
+        run: |
+          for attempt in 1 2 3; do
+            if docker compose up -d app; then
+              exit 0
+            fi
+            echo "compose up failed (attempt ${attempt}/3) — retrying in 15s…"
+            sleep 15
+          done
+          echo "compose up failed after 3 attempts" >&2
+          exit 1
 
       - name: Wait for /health to report healthStatus=ok
         run: |
