@@ -22,6 +22,8 @@ This directory contains project documentation for humans and AI agents.
 - `todo/current.md`: Current TODO summary.
 - `milestones/README.md`: Milestone management.
 - `adr/README.md`: Architecture decision records.
+- `../class/xion/INDEX.md`: Framework-core class catalogue (`Nene\Xion`).
+- `../class/kit/INDEX.md`: Opt-in helper class catalogue (`Nene\Kit`, see ADR-0014).
 - `api/README.md`: OpenAPI and API documentation policy.
 - `field-trials/README.md`: Field trial methodology and clone-based trial layout under `../NeNe-FT/`.
 - `templates/field-trial-report.md`: Report skeleton copied for each new trial.

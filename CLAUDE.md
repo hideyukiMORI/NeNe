@@ -27,7 +27,7 @@ composer test                        # PHPUnit unit suite
 ## Scaffolding a New Helper (`Nene\Kit`) — the common case
 
 Per **ADR-0014**, framework core lives in `Nene\Xion` (`class/xion/`, ~55 classes)
-and the opt-in helper catalogue lives in `Nene\Kit` (`class/kit/`, ~227 classes).
+and the opt-in helper catalogue lives in `Nene\Kit` (`class/kit/`, ~255 classes).
 **Field-trial helpers go in `Nene\Kit`:**
 
 ```bash
@@ -136,7 +136,7 @@ Never use a date that is only "near" the boundary and hope it works.
 
 ## Class Indexes (consult before starting — avoid duplicates)
 
-- `class/kit/INDEX.md` — the ~227 `Nene\Kit` helper classes grouped by domain.
+- `class/kit/INDEX.md` — the ~255 `Nene\Kit` helper classes grouped by domain.
 - `class/xion/INDEX.md` — the ~55 `Nene\Xion` framework-core classes.
 
 **Concept-scan, not just name-scan**, before adding a helper — grep the INDEX

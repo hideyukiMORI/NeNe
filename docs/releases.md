@@ -55,11 +55,11 @@ breaking changes to the public routing, controller, or REST conventions.
 
 ### Known follow-ups
 
-- The `class/xion/` namespace has grown large and now mixes framework-core
-  concerns with application-domain helpers. A post-`v0.3.0` review of the folder
-  structure and the framework-core vs. helper-library boundary is planned (see
-  `docs/`), and may lead to splitting the helpers into a separate package or an
-  explicitly-separated namespace before `v1.0.0`.
+- The `class/xion/` namespace had grown large and mixed framework-core concerns
+  with application-domain helpers. This was resolved immediately after `v0.3.0`
+  by **ADR-0014**, which split the helpers into the opt-in `Nene\Kit` catalogue
+  (`class/kit/`), leaving `Nene\Xion` as the small framework core. See
+  `docs/adr/0014-xion-core-vs-kit-helper-boundary.md`.
 
 ## v0.2.0
 

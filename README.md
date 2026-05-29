@@ -3,7 +3,7 @@
 Tiny renovated legacy-style PHP framework for reviewable small services.
 
 - Demo: <https://nene-php.com/>
-- Latest release: [`v0.2.0`](https://github.com/hideyukiMORI/NeNe/releases/tag/v0.2.0)
+- Latest release: [`v0.3.0`](https://github.com/hideyukiMORI/NeNe/releases/tag/v0.3.0)
 - License: MIT
 - Service tutorial: `docs/tutorials/building-a-service.md`
 - AI self-review checklists: `docs/ai/README.md`
