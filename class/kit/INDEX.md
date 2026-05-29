@@ -48,6 +48,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `IpAllowlist` | per-resource IP allowlist with CIDR range support. |
 | `IpBlocklist` | global IP address blocklist with optional expiry. |
 | `IpReputation` | running reputation score per IP address. |
+| `Pseudonymizer` | stable real-value → pseudonym token mapping for PII. |
 | `RedactionRule` | configurable PII/secret masking rules for text. |
 | `ResourceLock` | advisory lock on any entity to prevent concurrent edits. |
 | `TrustScore` | append-only fraud/trust score per user. |
