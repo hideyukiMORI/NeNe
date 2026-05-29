@@ -231,6 +231,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `FeatureRequest` | user-submitted feature requests with voting and status tracking. |
 | `Label` | colored label definitions with entity assignment. |
 | `Leaderboard` | Score-based leaderboard with best-score retention, ranking, and personal rank lookup. |
+| `QuizAttempt` | record and score quiz / assessment attempts per user. |
 | `Reaction` | emoji / symbol reactions on any entity. |
 | `ReactionCounter` | emoji/type reactions on any entity with per-user state. |
 | `Referral` | referral code generation, attribution, and conversion tracking. |
