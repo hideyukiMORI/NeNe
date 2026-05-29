@@ -54,6 +54,7 @@ The Xion helper wave (FT78–FT264) is ongoing as of 2026-05-28. Trigger-based a
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT265 — SequenceNumber** (2026-05-29): `Nene\Xion\SequenceNumber` — gapless per-scope sequential numbering (invoice/order/ticket numbers); atomic next(); formatted() prefix+padding; peek()/reset(); cross-driver via DbUpsert. PR #717.
 - **FT264 — PasswordExpiry** (2026-05-28): `Nene\Xion\PasswordExpiry` — password expiry policy; set() resets clock; forceChange() for incidents; expiringSoon() notification cron. PR #708.
 - **FT263 — AccessLog** (2026-05-28): `Nene\Xion\AccessLog` — append-only resource access log; forResource/byActor/byAction; purgeOlderThan(). PR #707.
 - **FT262 — TextTemplate** (2026-05-28): `Nene\Xion\TextTemplate` — body-only text template for SMS/push/Slack; {{variable}} substitution; locale fallback; cross-driver upsert. PR #706.
