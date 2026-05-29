@@ -1,0 +1,93 @@
+site_name: NeNe Documentation
+site_description: >-
+  HOW-TO guides, tutorial, and overview for NeNe — a tiny renovated
+  legacy-style PHP framework for reviewable small services.
+site_url: https://docs.nene-php.com/
+site_author: hideyukiMORI
+
+repo_url: https://github.com/hideyukiMORI/NeNe
+repo_name: hideyukiMORI/NeNe
+edit_uri: edit/main/docs/
+
+# The repository's docs/ folder is the source. Pages are built from it as-is;
+# navigation scope is curated in docs/.pages (awesome-pages plugin).
+docs_dir: docs
+
+# index.md is the site landing page; the in-repo folder index (docs/README.md,
+# meant for browsing the folder on GitHub) is not part of the site to avoid an
+# index/README URL collision. Nothing links to the top-level README.
+exclude_docs: |
+  /README.md
+
+theme:
+  name: material
+  language: en
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.action.edit
+
+plugins:
+  - search
+  - awesome-pages
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/hideyukiMORI/NeNe
+    - icon: material/web
+      link: https://nene-php.com/
+      name: Live demo
+
+# Unlisted pages (ADR, roadmap, field-trials, …) are still built so that
+# cross-links from the curated pages keep resolving; they just don't appear
+# in the navigation. Suppress the "not in nav" warning to keep CI clean.
+validation:
+  nav:
+    omitted_files: ignore
+  not_found: warn
