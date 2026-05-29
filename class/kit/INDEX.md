@@ -174,6 +174,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `CouponCode` | Coupon / promo code management with usage limits and per-user redemption tracking. |
 | `CreditLedger` | append-only double-entry credit/debit ledger per user. |
 | `CreditNote` | financial credit notes / refund adjustments. |
+| `Dispute` | transaction dispute / chargeback workflow. |
 | `ExchangeRate` | effective-dated currency conversion rate table. |
 | `EventTicket` | event ticketing with capacity management and check-in tracking. |
 | `ExpenseClaim` | expense reimbursement claims with line items and approval. |
@@ -339,5 +340,4 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 ---
 
 *Generated from PHPDoc descriptions. Run `composer kit:index` to refresh after adding classes.*
-
 
