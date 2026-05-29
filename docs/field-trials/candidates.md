@@ -54,6 +54,16 @@ The Xion helper wave (FT78–FT264) is ongoing as of 2026-05-28. Trigger-based a
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT316 — Escalation** (2026-05-29): `Nene\Xion\Escalation` — tiered escalation ladder for a work item.. PR #782.
+- **FT315 — SeatMap** (2026-05-29): `Nene\Xion\SeatMap` — named-seat reservation for a fixed venue layout.. PR #781.
+- **FT314 — SpaceOccupancy** (2026-05-29): `Nene\Xion\SpaceOccupancy` — live headcount for a capacity-limited physical space.. PR #780.
+- **FT313 — ShiftRoster** (2026-05-29): `Nene\Xion\ShiftRoster` — staff shift scheduling with coverage tracking.. PR #779.
+- **FT312 — PledgeDrive** (2026-05-29): `Nene\Xion\PledgeDrive` — crowdfunding / fundraising drive with monetary pledges.. PR #778.
+- **FT311 — Dispute** (2026-05-29): `Nene\Xion\Dispute` — transaction dispute / chargeback workflow.. PR #777.
+- **FT310 — Tournament** (2026-05-29): `Nene\Xion\Tournament` — single-elimination entrant tracking with match recording.. PR #776.
+- **FT309 — Kudos** (2026-05-29): `Nene\Xion\Kudos` — peer recognition / shout-outs between users.. PR #775.
+- **FT308 — ExpenseClaim** (2026-05-29): `Nene\Xion\ExpenseClaim` — expense reimbursement claims with line items and approval.. PR #774.
+- **FT307 — LeaveRequest** (2026-05-29): `Nene\Xion\LeaveRequest` — employee time-off requests with an approval workflow.. PR #773.
 - **FT306 — GiftRegistry** (2026-05-29): `Nene\Xion\GiftRegistry` — claimable gift registry with claimed-vs-desired accounting; addItem/claim (guarded)/unclaim/isFulfilled; distinct from Wishlist. PR #771.
 - **FT305 — Annotation** (2026-05-29): `Nene\Xion\Annotation` — per-user text highlights/notes over [start,end) ranges; add/forDocument/forUser/updateNote; distinct from EntityComment. PR #770.
 - **FT304 — QueueTicket** (2026-05-29): `Nene\Xion\QueueTicket` — take-a-number service queue; issue/callNext (advance now-serving)/position (1-based)/skip; distinct from JobQueue. PR #769.
