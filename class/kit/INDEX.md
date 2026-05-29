@@ -183,6 +183,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `PriceList` | product price catalog with multiple price tiers per SKU. |
 | `ProductBundle` | product bundle definitions with included items. |
 | `ProductReview` | entity reviews with ratings and helpfulness voting. |
+| `PurchaseLimit` | per-user purchase caps per SKU over a rolling window. |
 | `Quota` | plan-based resource quota management. |
 | `RecurringPayment` | Recurring payment schedule management. |
 | `ShippingZone` | region → shipping-zone rate lookup with free-shipping threshold. |
