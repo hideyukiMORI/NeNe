@@ -177,6 +177,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `ExchangeRate` | effective-dated currency conversion rate table. |
 | `EventTicket` | event ticketing with capacity management and check-in tracking. |
 | `GiftCard` | prepaid gift card balance with partial redemption support. |
+| `GiftRegistry` | wish-list of desired items that others can claim. |
 | `InventoryStock` | product/SKU stock tracking with atomic reserve/release/commit. |
 | `OrderLine` | e-commerce order header with line items. |
 | `PaymentRecord` | simple payment/transaction ledger. |
