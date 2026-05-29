@@ -186,7 +186,7 @@ Future candidates:
 
 ## 7. Field Trials
 
-Status: methodology adopted (ADR 0002). FT1–FT265 complete as of 2026-05-29 (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61).
+Status: methodology adopted (ADR 0002). FT1–FT266 complete as of 2026-05-29 (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61).
 
 Goal:
 
