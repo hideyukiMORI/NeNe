@@ -224,6 +224,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `KpiTracker` | KPI / OKR metric tracking with target vs. actual comparison. |
 | `PageView` | page and resource view analytics tracking. |
 | `SlaTracker` | SLA/SLO breach detection for timed work items. |
+| `UtmCampaign` | UTM marketing-attribution touch capture. |
 
 ---
 
