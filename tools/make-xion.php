@@ -51,7 +51,6 @@ declare(strict_types=1);
 
 namespace Nene\Xion;
 
-use Nene\Database\PdoConnection;
 use PDO;
 
 /**
@@ -82,7 +81,7 @@ $testBody = <<<PHP
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Xion;
+namespace Nene\Tests\Unit\Xion;
 
 use Nene\Xion\\{$name};
 use PDO;
