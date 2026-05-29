@@ -298,6 +298,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `BatchResult` | Accumulates per-item results for a batch operation. |
 | `CircuitBreaker` | — |
 | `DataImportJob` | CSV/data import job tracking with per-row error recording. |
+| `DeadLetterQueue` | parking lot for messages that exhausted their retries. |
 | `DistributedLock` | DB-backed distributed lock with TTL, owner enforcement, and stale-lock reclaim. |
 | `DocumentLock` | optimistic editing lock for collaborative document editing. |
 | `DocumentSignature` | e-signature request workflow with multi-signatory support. |
