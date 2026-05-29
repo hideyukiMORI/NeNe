@@ -184,6 +184,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `ProductReview` | entity reviews with ratings and helpfulness voting. |
 | `Quota` | plan-based resource quota management. |
 | `RecurringPayment` | Recurring payment schedule management. |
+| `ShippingZone` | region → shipping-zone rate lookup with free-shipping threshold. |
 | `ShoppingCart` | cart item management with quantity and price tracking. |
 | `Subscription` | track recurring subscription plans per user. |
 | `SubscriptionPlan` | user subscription lifecycle management. |
