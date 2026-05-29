@@ -319,6 +319,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `RetrySchedule` | exponential-backoff retry tracking for arbitrary operations. |
 | `RoundRobinAssigner` | fair rotating assignment across a named pool. |
 | `ScheduledTask` | cron-style task schedule registry with last-run tracking. |
+| `SeatMap` | named-seat reservation for a fixed venue layout. |
 | `ShiftRoster` | staff shift scheduling with coverage tracking. |
 | `SpaceOccupancy` | live headcount for a capacity-limited physical space. |
 | `StockTransfer` | multi-location stock ledger with location-to-location moves. |
