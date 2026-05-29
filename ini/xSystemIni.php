@@ -78,7 +78,7 @@ $getEnv = static function (string $name, string $default): string {
  * the runtime boolean flag; DEBUG_MODE remains the legacy integer equivalent
  * because templates and framework code expect 1 or 0.
  */
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 define('APP_ENV', $getEnv('NENE_APP_ENV', 'development'));
 define('APP_DEBUG', in_array(strtolower($getEnv('NENE_APP_DEBUG', APP_ENV === 'production' ? '0' : '1')), [
     '1',

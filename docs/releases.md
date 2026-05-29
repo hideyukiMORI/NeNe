@@ -2,6 +2,65 @@
 
 This file records human-readable release notes for NeNe framework tags.
 
+## v0.3.0
+
+Status: release tag.
+
+`v0.3.0` is the **Xion helper-library and field-trial release**. It keeps the
+renovated legacy framework shape and routing conventions from `v0.2.0`
+unchanged, while consolidating ~9 months of Phase 7 field-trial work: a large
+catalogue of small, single-purpose, fully-tested DB-backed helper classes
+under `class/xion/`, the developer tooling that makes them cheap to produce and
+review, and the architectural decisions recorded along the way.
+
+This release bundles 356 merged pull requests since `v0.2.0` (2026-05-09). No
+breaking changes to the public routing, controller, or REST conventions.
+
+### Highlights
+
+- **Xion helper catalogue (FT1–FT287).** ~200 new `Nene\Xion\*` helper classes
+  added through the field-trial loop, spanning auth/sessions, access control &
+  security, content/CMS, users/profiles, notifications, files/media, commerce &
+  billing, analytics & audit, social/community, API/integration, tasks/workflows,
+  and infrastructure. Every helper follows the same conventions: optional `?PDO`
+  constructor injection, cross-driver SQL (MySQL + SQLite), integer-cent money,
+  half-open date ranges, and an `asOf` seam for deterministic tests. See
+  `class/xion/INDEX.md` for the full grouped catalogue.
+- **Developer tooling.** `composer make:xion` scaffolding (with auto-INDEX
+  registration), `composer xion:index` description refresh, `composer ft:done`
+  three-file completion updater, `composer precommit` (format → analyze → test),
+  `composer analyze:file` targeted Phan runner, the `DbUpsert` cross-driver
+  upsert helper, and `CLAUDE.md` AI quick-reference.
+- **Architecture decisions.** Added ADR-0003 through ADR-0013, covering the
+  OpenAPI failure envelope, per-controller unauthorized-redirect hook, PHP-side
+  schema single source, Symfony Mailer dependency, response decoration boundary,
+  optional Bearer auth for agent/MCP routes, the schema-migration story,
+  pluggable session storage, Smarty as the template engine, the PHP version
+  policy, and the API versioning strategy.
+- **Production-readiness boundaries.** Pluggable Redis session backend
+  (`SessionHandlerFactory` / `RedisSessionHandler`, ADR-0010), observability
+  (`RequestId` + `X-Request-ID`, structured JSON logs, Server-Timing), security
+  headers (`ResponseDecorator`), agent Bearer auth (`BearerAuth`), operator-applied
+  schema diff (`composer schema:diff`), and email sending (`Mailer` + `MailMessage`).
+- **Documentation.** 96 field-trial reports under `docs/field-trials/`, the field
+  trial candidates backlog, AI self-review checklists, and the operator-console
+  top-page reskin.
+- Updated the runtime `VERSION` constant to `0.3.0`.
+
+### Verification
+
+- `composer precommit` (format → analyze → test); the unit suite is at 4856 tests.
+- GitHub Actions `unit` and `HTTP runtime smoke (Docker)` checks green on the
+  release-preparation PR.
+
+### Known follow-ups
+
+- The `class/xion/` namespace has grown large and now mixes framework-core
+  concerns with application-domain helpers. A post-`v0.3.0` review of the folder
+  structure and the framework-core vs. helper-library boundary is planned (see
+  `docs/`), and may lead to splitting the helpers into a separate package or an
+  explicitly-separated namespace before `v1.0.0`.
+
 ## v0.2.0
 
 Status: release tag.
