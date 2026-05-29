@@ -102,6 +102,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `ConsentLog` | immutable record of user consent grants and withdrawals. |
 | `DailyStreak` | Track per-user daily activity streaks. |
 | `EntityAlias` | multiple identifier aliases for an entity. |
+| `FeatureTour` | per-user state for one-time UI tours / coachmarks. |
 | `FollowRelation` | User follow/unfollow relationship management. |
 | `FriendRequest` | friend request lifecycle with pending/accepted/declined/cancelled states. |
 | `GdprRequest` | GDPR data-subject request tracking. |
