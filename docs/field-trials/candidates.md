@@ -54,6 +54,16 @@ The Xion helper wave (FT78–FT264) is ongoing as of 2026-05-28. Trigger-based a
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT286 — PinnedItem** (2026-05-29): `Nene\Xion\PinnedItem` — ordered pinned items per context; append-on-pin keeps position; moveToTop/moveToBottom reorder. PR #742.
+- **FT285 — Endorsement** (2026-05-29): `Nene\Xion\Endorsement` — peer skill endorsements; one per subject/skill/endorser; self-endorse rejected; topSkills by count. PR #741.
+- **FT284 — FunnelStep** (2026-05-29): `Nene\Xion\FunnelStep` — conversion-funnel step tracking; counts (distinct per step); conversionRate |F∩T|/|F|; drop-off analysis. PR #740.
+- **FT283 — UtmCampaign** (2026-05-29): `Nene\Xion\UtmCampaign` — UTM marketing attribution touch capture; first/last touch; countBy (whitelisted field); campaign analytics. PR #739.
+- **FT282 — AffiliateClick** (2026-05-29): `Nene\Xion\AffiliateClick` — affiliate click & conversion attribution; integer-cent revenue; convert() first-only; stats/conversionRate. PR #738.
+- **FT281 — FeatureTour** (2026-05-29): `Nene\Xion\FeatureTour` — per-user one-time UI tour/coachmark state; shouldShow/markSeen/complete/dismiss; no status regression; resetAll. PR #737.
+- **FT280 — IpReputation** (2026-05-29): `Nene\Xion\IpReputation` — running per-IP reputation score (atomic adjust); penalize/reward/isBad/worst/purgeBelow; feeds blocklist decisions. PR #736.
+- **FT279 — RedactionRule** (2026-05-29): `Nene\Xion\RedactionRule` — configurable PII/secret regex masking rules; priority order; validated patterns; preg_replace null-guarded. PR #735.
+- **FT278 — TermGlossary** (2026-05-29): `Nene\Xion\TermGlossary` — DB-backed term/definition glossary with categories; slug-keyed; LIKE-escaped search. PR #734.
+- **FT277 — WeightedPicker** (2026-05-29): `Nene\Xion\WeightedPicker` — weighted random selection from a named pool; deterministic roll for reproducibility; zero-weight retained but never picked. PR #733.
 - **FT276 — RoundRobinAssigner** (2026-05-29): `Nene\Xion\RoundRobinAssigner` — fair rotating pool assignment; persistent cursor; atomic next(); add/removeMember with cursor clamp. PR #731.
 - **FT275 — RetrySchedule** (2026-05-29): `Nene\Xion\RetrySchedule` — exponential-backoff retry tracking; arm/backoff/due; exhaustion terminal; hands off to DeadLetterQueue. PR #730.
 - **FT274 — DeadLetterQueue** (2026-05-29): `Nene\Xion\DeadLetterQueue` — parking lot for exhausted-retry messages; record/forQueue/requeue (atomic claim)/purgeOlderThan. PR #729.
