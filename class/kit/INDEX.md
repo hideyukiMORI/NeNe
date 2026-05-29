@@ -306,6 +306,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `DocumentSignature` | e-signature request workflow with multi-signatory support. |
 | `JobQueue` | simple DB-backed background job queue. |
 | `OptimisticLock` | — |
+| `QueueTicket` | take-a-number service queue with now-serving tracking. |
 | `ReportSchedule` | recurring report definitions with a next-run clock. |
 | `RetrySchedule` | exponential-backoff retry tracking for arbitrary operations. |
 | `RoundRobinAssigner` | fair rotating assignment across a named pool. |
