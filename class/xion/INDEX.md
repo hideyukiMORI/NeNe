@@ -173,6 +173,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `CouponCode` | Coupon / promo code management with usage limits and per-user redemption tracking. |
 | `CreditLedger` | append-only double-entry credit/debit ledger per user. |
 | `CreditNote` | financial credit notes / refund adjustments. |
+| `ExchangeRate` | effective-dated currency conversion rate table. |
 | `EventTicket` | event ticketing with capacity management and check-in tracking. |
 | `GiftCard` | prepaid gift card balance with partial redemption support. |
 | `InventoryStock` | product/SKU stock tracking with atomic reserve/release/commit. |
