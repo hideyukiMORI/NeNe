@@ -326,6 +326,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | Class | Description |
 |-------|-------------|
 | `CacheEntry` | DB-backed key-value cache with optional TTL. |
+| `ChecksumRegistry` | content integrity / tamper-detection registry. |
 | `ConfigStore` | global application key-value configuration store. |
 | `DatabaseInstaller` | Database setup and health checks for the sample runtime. |
 | `Command` | — |
