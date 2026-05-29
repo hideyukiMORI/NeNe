@@ -305,6 +305,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `JobQueue` | simple DB-backed background job queue. |
 | `OptimisticLock` | — |
 | `RetrySchedule` | exponential-backoff retry tracking for arbitrary operations. |
+| `RoundRobinAssigner` | fair rotating assignment across a named pool. |
 | `ScheduledTask` | cron-style task schedule registry with last-run tracking. |
 | `TokenBucket` | DB-backed token bucket algorithm for flexible rate limiting. |
 | `TransactionManager` | — |
