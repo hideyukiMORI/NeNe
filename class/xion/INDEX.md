@@ -325,6 +325,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `SchemaDefinition` | NeNe's sample-schema source of truth. |
 | `SchemaDiffCommand` | — |
 | `SchemaDiffer` | Schema-diff engine — compares a live database introspection against |
+| `SequenceNumber` | gapless sequential numbering per named scope. |
 | `SessionHandlerFactory` | — |
 | `SetupDatabaseCommand` | — |
 | `SystemSetting` | typed global application settings store. |
