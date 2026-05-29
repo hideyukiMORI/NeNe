@@ -315,6 +315,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `Command` | — |
 | `DataMapperBase` | — |
 | `DataModelBase` | — |
+| `DataRetention` | central table→TTL retention policy registry and purge driver. |
 | `DbUpsert` | Cross-driver upsert helper (MySQL + SQLite). |
 | `DomainException` | Throwable that carries a NeNe error code to the top-level request handler. |
 | `EnvLoader` | Minimal dotenv-style loader for CLI setup commands. |
