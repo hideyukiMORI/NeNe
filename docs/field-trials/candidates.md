@@ -54,6 +54,16 @@ The Xion helper wave (FT78–FT264) is ongoing as of 2026-05-28. Trigger-based a
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT306 — GiftRegistry** (2026-05-29): `Nene\Xion\GiftRegistry` — claimable gift registry with claimed-vs-desired accounting; addItem/claim (guarded)/unclaim/isFulfilled; distinct from Wishlist. PR #771.
+- **FT305 — Annotation** (2026-05-29): `Nene\Xion\Annotation` — per-user text highlights/notes over [start,end) ranges; add/forDocument/forUser/updateNote; distinct from EntityComment. PR #770.
+- **FT304 — QueueTicket** (2026-05-29): `Nene\Xion\QueueTicket` — take-a-number service queue; issue/callNext (advance now-serving)/position (1-based)/skip; distinct from JobQueue. PR #769.
+- **FT303 — Achievement** (2026-05-29): `Nene\Xion\Achievement` — progress-tracked auto-unlocking achievements; define/advance (true only on unlocking call)/progress/unlockedFor. PR #768.
+- **FT302 — DailyReward** (2026-05-29): `Nene\Xion\DailyReward` — once-per-day claimable reward with consecutive-day streak; claim/claimedToday/claimStreak; distinct from DailyStreak. PR #767.
+- **FT301 — Pseudonymizer** (2026-05-29): `Nene\Xion\Pseudonymizer` — stable real-value->pseudonym token mapping for PII; pseudonymize/reverse/forget; namespaced, reversible, concurrency-safe. PR #766.
+- **FT300 — ServiceStatus** (2026-05-29): `Nene\Xion\ServiceStatus` — public status-page component states with severity roll-up; setStatus/overall (worst)/isOperational. PR #765.
+- **FT299 — Petition** (2026-05-29): `Nene\Xion\Petition` — signature campaign toward a goal; sign (once per signer)/goalReached/progress/close; distinct from DocumentSignature. PR #764.
+- **FT298 — BulkDiscount** (2026-05-29): `Nene\Xion\BulkDiscount` — quantity-tiered percentage discounts per SKU; addTier/discountFor (highest qualifying)/priceFor (integer-cent half-up). PR #763.
+- **FT297 — StockTransfer** (2026-05-29): `Nene\Xion\StockTransfer` — multi-location stock ledger; receive/transfer (atomic, overdraw-guarded)/balance/totalStock/locations/history. PR #762.
 - **FT296 — PriceAlert** (2026-05-29): `Nene\Xion\PriceAlert` — notify users when an item price drops to their target; watch/check (fires target>=current)/pending/unwatch. PR #760.
 - **FT295 — PurchaseLimit** (2026-05-29): `Nene\Xion\PurchaseLimit` — per-user per-SKU purchase caps over a rolling window; setLimit/record/remaining/canPurchase. PR #759.
 - **FT294 — Raffle** (2026-05-29): `Nene\Xion\Raffle` — ticket-based prize draw with ticket-weighted distinct winner selection; enter/draw(seed)/participants. PR #758.
