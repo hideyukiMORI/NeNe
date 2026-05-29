@@ -217,6 +217,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `IntegrationLog` | outbound/inbound API call log with request and response data. |
 | `KpiTracker` | KPI / OKR metric tracking with target vs. actual comparison. |
 | `PageView` | page and resource view analytics tracking. |
+| `ServiceStatus` | public status-page component states with an overall roll-up. |
 | `SlaTracker` | SLA/SLO breach detection for timed work items. |
 | `UtmCampaign` | UTM marketing-attribution touch capture. |
 
