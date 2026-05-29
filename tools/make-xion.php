@@ -2,39 +2,59 @@
 <?php
 
 /**
- * Scaffold a new Xion class + matching test file.
+ * Scaffold a new Xion (framework-core) or Kit (helper-catalogue) class + test.
  *
  * Usage:
- *   php tools/make-xion.php ClassName
- *   composer make:xion -- ClassName
+ *   composer make:kit  -- ClassName     (→ class/kit/,  Nene\Kit)   ← field-trial helpers
+ *   composer make:xion -- ClassName     (→ class/xion/, Nene\Xion)  ← framework core (rare)
+ *   php tools/make-xion.php [--kit|--xion] ClassName
  *
- * Creates:
- *   class/xion/ClassName.php          — PDO injection skeleton
- *   tests/Unit/Xion/ClassNameTest.php — in-memory SQLite test skeleton
+ * Creates the class skeleton + an in-memory SQLite test skeleton and registers
+ * the class in the target INDEX.md. See ADR-0014 for the core/helper boundary.
  */
 
 declare(strict_types=1);
-
-// ── CLI guard ────────────────────────────────────────────────────────────────
 
 if (PHP_SAPI !== 'cli') {
     exit(1);
 }
 
-$name = $argv[1] ?? null;
+// ── Parse target flag + class name ────────────────────────────────────────────
+
+$target = 'xion';
+$args   = array_slice($argv, 1);
+if (($args[0] ?? '') === '--kit') {
+    $target = 'kit';
+    array_shift($args);
+} elseif (($args[0] ?? '') === '--xion') {
+    array_shift($args);
+}
+$name = $args[0] ?? null;
 
 if ($name === null || !preg_match('/^[A-Z][A-Za-z0-9]+$/', $name)) {
-    fwrite(STDERR, "Usage: php tools/make-xion.php ClassName\n");
+    fwrite(STDERR, "Usage: php tools/make-xion.php [--kit|--xion] ClassName\n");
     fwrite(STDERR, "  ClassName must be PascalCase (e.g. UserWidget)\n");
     exit(1);
 }
 
-// ── Paths ────────────────────────────────────────────────────────────────────
+// ── Target configuration ──────────────────────────────────────────────────────
 
-$root     = dirname(__DIR__);
-$classFile = "{$root}/class/xion/{$name}.php";
-$testFile  = "{$root}/tests/Unit/Xion/{$name}Test.php";
+$ns       = $target === 'kit' ? 'Nene\\Kit' : 'Nene\\Xion';
+$testNs    = $target === 'kit' ? 'Nene\\Tests\\Unit\\Kit' : 'Nene\\Tests\\Unit\\Xion';
+$root      = dirname(__DIR__);
+$classDir  = "{$root}/class/{$target}";
+$testDir   = "{$root}/tests/Unit/" . ($target === 'kit' ? 'Kit' : 'Xion');
+$classFile = "{$classDir}/{$name}.php";
+$testFile  = "{$testDir}/{$name}Test.php";
 
+// Kit classes live in a different namespace from PdoConnection (Nene\Xion).
+$pdoImport = $target === 'kit' ? "\nuse Nene\\Xion\\PdoConnection;" : '';
+
+foreach ([$classDir, $testDir] as $dir) {
+    if (!is_dir($dir)) {
+        mkdir($dir, 0777, true);
+    }
+}
 foreach ([$classFile, $testFile] as $path) {
     if (file_exists($path)) {
         fwrite(STDERR, "Error: already exists — {$path}\n");
@@ -49,8 +69,8 @@ $classBody = <<<PHP
 
 declare(strict_types=1);
 
-namespace Nene\Xion;
-
+namespace {$ns};
+{$pdoImport}
 use PDO;
 
 /**
@@ -81,9 +101,9 @@ $testBody = <<<PHP
 
 declare(strict_types=1);
 
-namespace Nene\Tests\Unit\Xion;
+namespace {$testNs};
 
-use Nene\Xion\\{$name};
+use {$ns}\\{$name};
 use PDO;
 use PHPUnit\Framework\TestCase;
 
@@ -116,7 +136,7 @@ file_put_contents($testFile,  $testBody  . "\n");
 
 $indexScript = __DIR__ . '/xion-index.php';
 if (file_exists($indexScript)) {
-    passthru("php {$indexScript}", $indexExit);
+    passthru("php {$indexScript} {$target}", $indexExit);
     if ($indexExit !== 0) {
         fwrite(STDERR, "Warning: xion-index.php exited with code {$indexExit}\n");
     }
@@ -124,14 +144,16 @@ if (file_exists($indexScript)) {
 
 // ── Summary ───────────────────────────────────────────────────────────────────
 
+$relClass = "class/{$target}/{$name}.php";
+$relTest  = 'tests/Unit/' . ($target === 'kit' ? 'Kit' : 'Xion') . "/{$name}Test.php";
+
 echo "Created:\n";
-echo "  class/xion/{$name}.php\n";
-echo "  tests/Unit/Xion/{$name}Test.php\n";
-echo "  class/xion/INDEX.md updated (Uncategorized)\n";
+echo "  {$relClass}\n";
+echo "  {$relTest}\n";
+echo "  class/{$target}/INDEX.md updated (Uncategorized)\n";
 echo "\n";
 echo "Next steps:\n";
 echo "  1. Edit the class body and add your public methods\n";
-echo "  2. Add the table DDL to class/xion/SchemaDefinition.php\n";
-echo "  3. Move the Uncategorized entry in class/xion/INDEX.md to the right section\n";
-echo "  4. Write your tests\n";
-echo "  5. composer analyze:file -- class/xion/{$name}.php tests/Unit/Xion/{$name}Test.php\n";
+echo "  2. Move the Uncategorized entry in class/{$target}/INDEX.md to the right section\n";
+echo "  3. Write your tests\n";
+echo "  4. composer analyze:file -- {$relClass} {$relTest}\n";

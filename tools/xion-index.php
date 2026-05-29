@@ -20,8 +20,15 @@ if (PHP_SAPI !== 'cli') {
     exit(1);
 }
 
-$root      = dirname(__DIR__);
-$indexPath = "{$root}/class/xion/INDEX.md";
+$root = dirname(__DIR__);
+
+// Target namespace directory: 'xion' (framework core) or 'kit' (helper catalogue).
+$target = $argv[1] ?? 'xion';
+if (!in_array($target, ['xion', 'kit'], true)) {
+    fwrite(STDERR, "Usage: php tools/xion-index.php [xion|kit]\n");
+    exit(1);
+}
+$indexPath = "{$root}/class/{$target}/INDEX.md";
 
 // ── Load existing INDEX ───────────────────────────────────────────────────────
 
@@ -38,7 +45,7 @@ assert(is_string($original));
 /** @var array<string,string> $classDesc  className => description */
 $classDesc = [];
 
-foreach (glob("{$root}/class/xion/*.php") ?: [] as $file) {
+foreach (glob("{$root}/class/{$target}/*.php") ?: [] as $file) {
     $base = basename($file, '.php');
     $src  = (string)file_get_contents($file);
 
@@ -130,8 +137,8 @@ file_put_contents($indexPath, $updated);
 // ── Report ────────────────────────────────────────────────────────────────────
 
 $countExisting = count($mentioned) - count($removed);
-echo "class/xion/INDEX.md updated\n";
-echo "  " . count($classDesc) . " classes in class/xion/\n";
+echo "class/{$target}/INDEX.md updated\n";
+echo "  " . count($classDesc) . " classes in class/{$target}/\n";
 echo "  {$countExisting} existing entries refreshed\n";
 
 if ($removed !== []) {
@@ -140,5 +147,5 @@ if ($removed !== []) {
 
 if ($newClasses !== []) {
     echo "  added to Uncategorized: " . implode(', ', $newClasses) . "\n";
-    echo "  → Move them to the correct section in class/xion/INDEX.md\n";
+    echo "  → Move them to the correct section in class/{$target}/INDEX.md\n";
 }
