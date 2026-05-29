@@ -52,6 +52,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `ImpersonationLog` | Admin impersonation session audit log. |
 | `IpAllowlist` | per-resource IP allowlist with CIDR range support. |
 | `IpBlocklist` | global IP address blocklist with optional expiry. |
+| `RedactionRule` | configurable PII/secret masking rules for text. |
 | `RedirectGuard` | Open-redirect guard for controllers that need to redirect to an |
 | `ResourceLock` | advisory lock on any entity to prevent concurrent edits. |
 | `RoleGuard` | — |
