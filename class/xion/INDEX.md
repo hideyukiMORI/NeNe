@@ -84,6 +84,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `NoticeBoard` | admin-posted announcements with per-user read-acknowledgment. |
 | `Poll` | create polls with options and record per-user votes. |
 | `Post` | — |
+| `TermGlossary` | DB-backed glossary of terms and definitions. |
 | `TextTemplate` | DB-backed general-purpose text templates with variable substitution. |
 
 ---
