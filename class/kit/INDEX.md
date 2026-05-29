@@ -239,6 +239,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `Endorsement` | peer skill endorsements between users. |
 | `EventRsvp` | event attendance management with accept/decline/maybe responses. |
 | `FeatureRequest` | user-submitted feature requests with voting and status tracking. |
+| `Kudos` | peer recognition / shout-outs between users. |
 | `Label` | colored label definitions with entity assignment. |
 | `Leaderboard` | Score-based leaderboard with best-score retention, ranking, and personal rank lookup. |
 | `Petition` | signature campaign toward a goal. |
