@@ -36,3 +36,4 @@ Create an ADR when a change affects:
 - [`0011-smarty-as-template-engine.md`](0011-smarty-as-template-engine.md) (Accepted retrospective, #437): Smarty v5 is the template engine. Records why Smarty was chosen over Twig / Blade / plain PHP and under what conditions to reconsider.
 - [`0012-php-version-policy.md`](0012-php-version-policy.md) (Accepted, #441): PHP >=8.4 declared in composer.json; upgrade cadence policy for minor bumps, future 8.5+ and 9.0 decisions.
 - [`0013-api-versioning.md`](0013-api-versioning.md) (Accepted, FT39): URI prefix versioning (`/v1/`, `/v2/`) with RFC 8594 `Deprecation`/`Sunset`/`Link` headers via `ApiDeprecation::sendHeaders()`.
+- [`0014-xion-core-vs-kit-helper-boundary.md`](0014-xion-core-vs-kit-helper-boundary.md) (Accepted, post-v0.3.0): Split `Nene\Xion` into framework core (`Nene\Xion`, ~75 classes) and an opt-in application helper catalogue (`Nene\Kit`, `class/kit/`, ~200 field-trial classes); migrate in INDEX-domain batches.
