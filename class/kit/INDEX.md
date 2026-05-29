@@ -234,6 +234,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `FeatureRequest` | user-submitted feature requests with voting and status tracking. |
 | `Label` | colored label definitions with entity assignment. |
 | `Leaderboard` | Score-based leaderboard with best-score retention, ranking, and personal rank lookup. |
+| `Petition` | signature campaign toward a goal. |
 | `QuizAttempt` | record and score quiz / assessment attempts per user. |
 | `Raffle` | ticket-based prize draw with weighted winner selection. |
 | `Reaction` | emoji / symbol reactions on any entity. |
