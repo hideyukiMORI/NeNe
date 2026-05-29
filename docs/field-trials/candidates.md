@@ -54,6 +54,16 @@ The Xion helper wave (FT78–FT264) is ongoing as of 2026-05-28. Trigger-based a
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT276 — RoundRobinAssigner** (2026-05-29): `Nene\Xion\RoundRobinAssigner` — fair rotating pool assignment; persistent cursor; atomic next(); add/removeMember with cursor clamp. PR #731.
+- **FT275 — RetrySchedule** (2026-05-29): `Nene\Xion\RetrySchedule` — exponential-backoff retry tracking; arm/backoff/due; exhaustion terminal; hands off to DeadLetterQueue. PR #730.
+- **FT274 — DeadLetterQueue** (2026-05-29): `Nene\Xion\DeadLetterQueue` — parking lot for exhausted-retry messages; record/forQueue/requeue (atomic claim)/purgeOlderThan. PR #729.
+- **FT273 — Heartbeat** (2026-05-29): `Nene\Xion\Heartbeat` — liveness/dead-man-switch per service; beat()/isAlive()/alive()/stale() over a freshness window. PR #728.
+- **FT272 — PercentageRollout** (2026-05-29): `Nene\Xion\PercentageRollout` — sticky percentage feature rollout; deterministic crc32 bucketing, monotonic membership; isEnabled/setPercentage. PR #727.
+- **FT271 — PasswordPolicy** (2026-05-29): `Nene\Xion\PasswordPolicy` — per-scope password complexity rules; validate() returns all violations; safe default when unconfigured. PR #726.
+- **FT270 — EmailSuppression** (2026-05-29): `Nene\Xion\EmailSuppression` — do-not-send list (bounce/complaint/unsubscribe/manual); filter() keeps deliverable addresses; case-insensitive. PR #725.
+- **FT269 — MaintenanceWindow** (2026-05-29): `Nene\Xion\MaintenanceWindow` — scheduled per-scope maintenance windows; isActive/activeWindow/upcoming over half-open intervals; purgeEnded. PR #724.
+- **FT268 — DataRetention** (2026-05-29): `Nene\Xion\DataRetention` — central table->TTL retention policy registry and purge driver; setPolicy/due/purge with strict identifier validation. PR #723.
+- **FT267 — ExchangeRate** (2026-05-29): `Nene\Xion\ExchangeRate` — effective-dated currency conversion rate table; integer-cent convertCents() with half-up rounding; rateAt/latest/history; no floats. PR #722.
 - **FT266 — BusinessCalendar** (2026-05-29): `Nene\Xion\BusinessCalendar` — working-day calendar with weekend+holiday awareness; isBusinessDay/addBusinessDays/businessDaysBetween over half-open ranges; per-calKey holidays; SLA & due-date arithmetic. PR #720.
 - **FT265 — SequenceNumber** (2026-05-29): `Nene\Xion\SequenceNumber` — gapless per-scope sequential numbering (invoice/order/ticket numbers); atomic next(); formatted() prefix+padding; peek()/reset(); cross-driver via DbUpsert. PR #717.
 - **FT264 — PasswordExpiry** (2026-05-28): `Nene\Xion\PasswordExpiry` — password expiry policy; set() resets clock; forceChange() for incidents; expiringSoon() notification cron. PR #708.
