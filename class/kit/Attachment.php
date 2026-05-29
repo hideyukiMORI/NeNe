@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nene\Xion;
+namespace Nene\Kit;
 
+use Nene\Xion\PdoConnection;
 use PDO;
 
 /**

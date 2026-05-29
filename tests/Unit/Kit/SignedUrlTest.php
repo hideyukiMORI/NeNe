@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Nene\Tests\Unit\Xion;
+namespace Nene\Tests\Unit\Kit;
 
-use Nene\Xion\SignedUrl;
+use Nene\Kit\SignedUrl;
 use PHPUnit\Framework\TestCase;
 
 final class SignedUrlTest extends TestCase

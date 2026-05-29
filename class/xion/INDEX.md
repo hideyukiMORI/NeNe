@@ -156,17 +156,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 
 | Class | Description |
 |-------|-------------|
-| `Attachment` | file attachments linked to any entity. |
-| `FileChunk` | chunked file upload tracking and reassembly coordination. |
-| `FileMetadata` | File storage metadata management. |
-| `FileQuarantine` | quarantine suspicious or policy-violating files with release/reject workflow. |
 | `FileUpload` | Safe wrapper for a single uploaded file ($_FILES entry). |
-| `MediaConversionJob` | async media processing job tracking. |
-| `MediaGallery` | ordered media item gallery attached to any entity. |
-| `MediaMetadata` | store and retrieve metadata for uploaded media files. |
-| `MediaProcessing` | track async media conversion/processing jobs. |
-| `SignedUrl` | — |
-| `StorageQuota` | per-owner storage usage tracking with configurable limits. |
 | `UploadedFile` | Typed wrapper around a single `$_FILES` entry. |
 
 ---

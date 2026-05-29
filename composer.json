@@ -31,7 +31,8 @@
 			"Nene\\Model\\"     : "class/model/",
 			"Nene\\Database\\"  : "class/db/",
 			"Nene\\Func\\"      : "class/func/",
-			"Nene\\Xion\\"      : "class/xion/"
+			"Nene\\Xion\\"      : "class/xion/",
+			"Nene\\Kit\\"       : "class/kit/"
         }
     },
     "require": {
