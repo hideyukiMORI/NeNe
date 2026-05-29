@@ -275,6 +275,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `FeatureFlag` | DB-backed feature flags with global on/off and per-user overrides. |
 | `PercentageRollout` | gradual feature rollout by percentage with sticky bucketing. |
 | `HealthCheck` | service/component health monitoring log. |
+| `Heartbeat` | liveness / dead-man-switch tracking per service. |
 | `HttpCache` | HTTP cache header utilities for REST endpoints. |
 | `IdempotencyStore` | DB-backed idempotency key store for POST endpoints. |
 | `MaintenanceMode` | Maintenance mode — global on/off flag with allowlist for bypass users. |
