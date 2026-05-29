@@ -132,6 +132,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `DailyDigest` | per-user daily digest item accumulator. |
 | `EmailBounce` | email bounce and complaint tracking for delivery health management. |
 | `EmailQueue` | DB-backed outgoing email queue with retry and exponential backoff. |
+| `EmailSuppression` | do-not-send list for email addresses. |
 | `MailMessage` | Plain immutable description of one outgoing email. |
 | `Mailer` | Thin wrapper around Symfony Mailer (ADR-0006). |
 | `NewsletterSubscription` | Newsletter / mailing-list subscription manager with double opt-in support. |
