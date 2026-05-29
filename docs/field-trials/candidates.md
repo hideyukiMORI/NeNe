@@ -54,6 +54,16 @@ The Xion helper wave (FT78–FT264) is ongoing as of 2026-05-28. Trigger-based a
 
 When a candidate becomes a trial, move it to this section briefly so we can see the recent flow.
 
+- **FT296 — PriceAlert** (2026-05-29): `Nene\Xion\PriceAlert` — notify users when an item price drops to their target; watch/check (fires target>=current)/pending/unwatch. PR #760.
+- **FT295 — PurchaseLimit** (2026-05-29): `Nene\Xion\PurchaseLimit` — per-user per-SKU purchase caps over a rolling window; setLimit/record/remaining/canPurchase. PR #759.
+- **FT294 — Raffle** (2026-05-29): `Nene\Xion\Raffle` — ticket-based prize draw with ticket-weighted distinct winner selection; enter/draw(seed)/participants. PR #758.
+- **FT293 — ReportSchedule** (2026-05-29): `Nene\Xion\ReportSchedule` — recurring report definitions with next-run clock; due/markGenerated (cadence-preserving)/pause/resume. PR #757.
+- **FT292 — QuizAttempt** (2026-05-29): `Nene\Xion\QuizAttempt` — record and score quiz attempts per user; bestScore/hasPassed/attempts/passRate; pass = score>=passMark. PR #756.
+- **FT291 — Payout** (2026-05-29): `Nene\Xion\Payout` — accrue and settle marketplace payouts; pending->paid|failed; pay() settles pending; pendingTotal/paidTotal/items. PR #755.
+- **FT290 — ShippingZone** (2026-05-29): `Nene\Xion\ShippingZone` — region shipping-zone rate lookup with integer-cent rates and free-shipping threshold; rateFor/zoneOf/regionsIn. PR #754.
+- **FT289 — Snooze** (2026-05-29): `Nene\Xion\Snooze` — defer an existing item until a wake time then resurface via due(); snoozed/due partition; clearWoken. PR #753.
+- **FT288 — QuietHours** (2026-05-29): `Nene\Xion\QuietHours` — per-user do-not-disturb time-of-day window; minutes-from-midnight half-open with overnight wrap; isQuiet/set/window. PR #752.
+- **FT287 — ChecksumRegistry** (2026-05-29): `Nene\Xion\ChecksumRegistry` — content integrity/tamper-detection registry; put/verify/matches; any hash_algos algorithm; hash_equals compare. PR #744.
 - **FT286 — PinnedItem** (2026-05-29): `Nene\Xion\PinnedItem` — ordered pinned items per context; append-on-pin keeps position; moveToTop/moveToBottom reorder. PR #742.
 - **FT285 — Endorsement** (2026-05-29): `Nene\Xion\Endorsement` — peer skill endorsements; one per subject/skill/endorser; self-endorse rejected; topSkills by count. PR #741.
 - **FT284 — FunnelStep** (2026-05-29): `Nene\Xion\FunnelStep` — conversion-funnel step tracking; counts (distinct per step); conversionRate |F∩T|/|F|; drop-off analysis. PR #740.
