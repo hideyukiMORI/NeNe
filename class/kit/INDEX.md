@@ -167,6 +167,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 |-------|-------------|
 | `BillingUsage` | metered usage tracking for billing. |
 | `BudgetTracker` | period-based budget allocation and spend tracking. |
+| `BulkDiscount` | quantity-tiered percentage discounts per SKU. |
 | `CouponCode` | Coupon / promo code management with usage limits and per-user redemption tracking. |
 | `CreditLedger` | append-only double-entry credit/debit ledger per user. |
 | `CreditNote` | financial credit notes / refund adjustments. |
