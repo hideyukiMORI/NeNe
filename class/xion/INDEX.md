@@ -109,6 +109,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `Mention` | track @-mentions of users within content items. |
 | `NotificationPreference` | Notification preference manager — per-user channel × type opt-in/opt-out. |
 | `OnlineStatus` | track user presence with heartbeat-based online/idle/offline states. |
+| `PinnedItem` | pin entities to the top of a context, in an ordered list. |
 | `PresenceChannel` | track which users are currently "in" a named channel. |
 | `PresenceTracker` | user online presence and last-seen tracking. |
 | `ProfileBadge` | Gamification badge award and management. |
