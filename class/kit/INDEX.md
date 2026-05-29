@@ -307,6 +307,7 @@ Quick reference for all opt-in helper classes in `class/kit/` (`Nene\Kit`). Grou
 | `DocumentLock` | optimistic editing lock for collaborative document editing. |
 | `DocumentSignature` | e-signature request workflow with multi-signatory support. |
 | `JobQueue` | simple DB-backed background job queue. |
+| `LeaveRequest` | employee time-off requests with an approval workflow. |
 | `OptimisticLock` | — |
 | `QueueTicket` | take-a-number service queue with now-serving tracking. |
 | `ReportSchedule` | recurring report definitions with a next-run clock. |
