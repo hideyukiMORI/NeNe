@@ -341,6 +341,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `SetupDatabaseCommand` | — |
 | `SystemSetting` | typed global application settings store. |
 | `TenantConfig` | per-tenant key-value configuration store. |
+| `WeightedPicker` | weighted random selection from a named pool. |
 
 ---
 
