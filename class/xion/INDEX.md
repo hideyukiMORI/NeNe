@@ -236,6 +236,7 @@ Quick reference for all classes in `class/xion/`. Grouped by functional domain.
 | `AbTest` | A/B test variant assignment and conversion tracking. |
 | `Approval` | single-approver workflow (request → approve / reject). |
 | `ChangeRequest` | formal RFC / change-management approval workflow. |
+| `Endorsement` | peer skill endorsements between users. |
 | `EventRsvp` | event attendance management with accept/decline/maybe responses. |
 | `FaqItem` | FAQ articles with categories, ordering, and helpfulness voting. |
 | `FeatureRequest` | user-submitted feature requests with voting and status tracking. |
