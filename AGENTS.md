@@ -45,6 +45,9 @@ This file is the first document for AI agents and automation working on NeNe.
 
 NeNe is a legacy, simple, lightweight PHP framework. It uses a front controller and URL segments to resolve controllers and action methods.
 
+- Framework core is `Nene\Xion` (`class/xion/`, kept small). Reusable feature
+  helpers live in the opt-in `Nene\Kit` catalogue (`class/kit/`, see
+  `class/kit/INDEX.md` and ADR-0014); scaffold new helpers with `composer make:kit`.
 - Follow PSR basics where practical.
 - Keep PHP, Composer packages, PHP CS Fixer, PHPDoc, security, and OpenAPI practices moving toward current stable standards.
 - Document architectural decisions in ADRs before making broad framework changes.

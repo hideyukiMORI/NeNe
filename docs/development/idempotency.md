@@ -46,7 +46,7 @@ Unicode keys are safe.
 ## Controller pattern
 
 ```php
-use Nene\Xion\IdempotencyStore;
+use Nene\Kit\IdempotencyStore;
 
 public function createPostRest(): array
 {
@@ -118,7 +118,7 @@ Content-Type: application/json
 
 ## IdempotencyStore API
 
-`class/xion/IdempotencyStore.php` — `Nene\Xion\IdempotencyStore`
+`class/kit/IdempotencyStore.php` — `Nene\Kit\IdempotencyStore`
 
 | Method | Signature | Description |
 |---|---|---|
@@ -175,6 +175,6 @@ their response.
 
 ## Related
 
-- `class/xion/IdempotencyStore.php` — implementation
-- `tests/Unit/Xion/IdempotencyStoreTest.php` — unit tests
+- `class/kit/IdempotencyStore.php` — implementation
+- `tests/Unit/Kit/IdempotencyStoreTest.php` — unit tests
 - `docs/development/ledger-systems.md` — UNIQUE constraint pattern (related concept)

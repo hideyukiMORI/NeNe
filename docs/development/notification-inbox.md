@@ -1,6 +1,6 @@
 # Notification Inbox
 
-`Nene\Xion\NotificationInbox` provides a user notification inbox: push delivery, list with unread filtering, single and bulk mark-as-read, and unread count for badge display.
+`Nene\Kit\NotificationInbox` provides a user notification inbox: push delivery, list with unread filtering, single and bulk mark-as-read, and unread count for badge display.
 
 ## Schema
 
@@ -39,7 +39,7 @@ Use a nullable `read_at` timestamp instead of a boolean `is_read` column:
 ## Basic usage
 
 ```php
-use Nene\Xion\NotificationInbox;
+use Nene\Kit\NotificationInbox;
 
 $inbox = new NotificationInbox();
 

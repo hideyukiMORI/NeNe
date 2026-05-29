@@ -1,6 +1,6 @@
 # Invitation Token
 
-`Nene\Xion\InvitationToken` provides a token-based user invitation system: existing users can invite new users by email with a time-limited, high-entropy token.
+`Nene\Kit\InvitationToken` provides a token-based user invitation system: existing users can invite new users by email with a time-limited, high-entropy token.
 
 ## Lifecycle
 
@@ -40,7 +40,7 @@ CREATE INDEX idx_invitations_token ON invitations (token);
 ## Basic usage
 
 ```php
-use Nene\Xion\InvitationToken;
+use Nene\Kit\InvitationToken;
 
 $inv = new InvitationToken();
 

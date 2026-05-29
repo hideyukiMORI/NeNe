@@ -1,6 +1,6 @@
 # CORS — Cross-Origin Resource Sharing
 
-This guide covers `Nene\Xion\Cors`, the utility class added in FT45 for emitting CORS response headers and handling OPTIONS preflight requests.
+This guide covers `Nene\Kit\Cors`, the utility class added in FT45 for emitting CORS response headers and handling OPTIONS preflight requests.
 
 For the relationship between CORS and CSRF protection, see `docs/development/cors-and-csrf.md`.
 
@@ -23,7 +23,7 @@ Non-browser callers (curl, Postman, server-to-server) are unaffected by CORS hea
 The most common pattern is to call `Cors::sendHeaders()` and then `Cors::handlePreflight()` from `ControllerBase::preAction()`:
 
 ```php
-use Nene\Xion\Cors;
+use Nene\Kit\Cors;
 
 final class ApiController extends ControllerBase
 {
@@ -157,7 +157,7 @@ Cors::sendHeaders(
 
 ## Related
 
-- `class/xion/Cors.php` — implementation
+- `class/kit/Cors.php` — implementation
 - `docs/development/cors-and-csrf.md` — CORS vs CSRF distinction
 - `docs/development/security-headers.md` — other response security headers
 - `class/xion/CsrfProtectionPolicy.php` — CSRF token enforcement

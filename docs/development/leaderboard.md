@@ -1,6 +1,6 @@
 # Leaderboard
 
-`Nene\Xion\Leaderboard` provides score submission with best-score retention, ranked listing, and personal rank lookup.
+`Nene\Kit\Leaderboard` provides score submission with best-score retention, ranked listing, and personal rank lookup.
 
 ## Schema
 
@@ -30,7 +30,7 @@ CREATE INDEX idx_lb_scores ON leaderboard_scores (leaderboard_id, score DESC);
 ## Basic usage
 
 ```php
-use Nene\Xion\Leaderboard;
+use Nene\Kit\Leaderboard;
 
 $lb = new Leaderboard();
 

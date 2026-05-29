@@ -1,6 +1,6 @@
 # Bookmark
 
-`Nene\Xion\Bookmark` — generic per-user bookmark / saved-item manager.
+`Nene\Kit\Bookmark` — generic per-user bookmark / saved-item manager.
 
 Users can bookmark any entity identified by `(entity_type, entity_id)`. An optional `collection` field groups bookmarks (e.g. `'wishlist'`, `'read-later'`, `'favourites'`).
 

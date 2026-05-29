@@ -1,6 +1,6 @@
 # Coupon Code
 
-`Nene\Xion\CouponCode` — coupon / promo code management with usage limits, expiry, and per-user redemption tracking.
+`Nene\Kit\CouponCode` — coupon / promo code management with usage limits, expiry, and per-user redemption tracking.
 
 ## Schema
 

@@ -1,6 +1,6 @@
 # Circuit Breaker
 
-`Nene\Xion\CircuitBreaker` is a DB-backed resilience primitive that prevents cascading failures when an external service (payment gateway, third-party API, etc.) becomes unavailable.
+`Nene\Kit\CircuitBreaker` is a DB-backed resilience primitive that prevents cascading failures when an external service (payment gateway, third-party API, etc.) becomes unavailable.
 
 ## Problem
 
@@ -66,7 +66,7 @@ CircuitBreaker::STATE_HALF_OPEN // 'half_open'
 Wrap every external call with the same try/catch pattern:
 
 ```php
-use Nene\Xion\CircuitBreaker;
+use Nene\Kit\CircuitBreaker;
 
 $cb = new CircuitBreaker('payment-api');
 
@@ -124,8 +124,8 @@ Guard the endpoint with authentication and audit-log the action.
 
 ## Related
 
-- `class/xion/CircuitBreaker.php` — implementation.
-- `tests/Unit/Xion/CircuitBreakerTest.php` — unit tests (SQLite `:memory:`).
+- `class/kit/CircuitBreaker.php` — implementation.
+- `tests/Unit/Kit/CircuitBreakerTest.php` — unit tests (SQLite `:memory:`).
 - `config/error_codes.php` — `CIRCUIT-OPEN` error code (HTTP 503).
 - NENE2 FT137 — Python-side circuit breaker trial that informed this design.
 - `docs/field-trials/2026-05-field-trial-43.md` — trial report.

@@ -6,7 +6,7 @@ NeNe has no built-in `If-Match` helper. This guide shows how to implement it in 
 
 ## Framework helper: `OptimisticLock`
 
-`Nene\Xion\OptimisticLock` provides the HTTP-layer primitives so controllers
+`Nene\Kit\OptimisticLock` provides the HTTP-layer primitives so controllers
 stay concise:
 
 | Method | Description |

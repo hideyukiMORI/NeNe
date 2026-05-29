@@ -1,6 +1,6 @@
 # Subscription
 
-`Nene\Xion\Subscription` — user subscription / plan management with history tracking.
+`Nene\Kit\Subscription` — user subscription / plan management with history tracking.
 
 ## Schema
 

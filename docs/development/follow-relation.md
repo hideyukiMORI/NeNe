@@ -1,6 +1,6 @@
 # Follow Relation
 
-`Nene\Xion\FollowRelation` — directed user follow/unfollow relationships with mutual-follow detection.
+`Nene\Kit\FollowRelation` — directed user follow/unfollow relationships with mutual-follow detection.
 
 ## Schema
 

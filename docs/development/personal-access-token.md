@@ -1,6 +1,6 @@
 # Personal Access Token
 
-`Nene\Xion\PersonalAccessToken` — user-managed Personal Access Tokens (PATs) with ability-based authorization and last-used tracking.
+`Nene\Kit\PersonalAccessToken` — user-managed Personal Access Tokens (PATs) with ability-based authorization and last-used tracking.
 
 PATs are long-lived credentials managed by users through a dashboard — analogous to GitHub's Personal Access Tokens. Each token carries a named set of abilities, and every successful authentication records a `last_used_at` timestamp.
 
