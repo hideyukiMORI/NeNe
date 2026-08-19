@@ -6,6 +6,36 @@ on:
     branches:
       - main
 
+  # 週次 schedule（フリート配布・_work/handoff-nene2-python-2026-08-12-schedule-rollout-note.md）。
+  #
+  # 検知したいのは「コードの変化」ではなく **外界の変化**。上の `composer audit` ステップは
+  # push / PR でしか走らないので、コミットが止まっている間に新しく公開された advisory は
+  # 誰も踏まない。NeNe は 2026-07-06 → 08-14 の間コミットが無く、その静止期間中に
+  # smarty/smarty の CVE 2件が報告された（2026-08-07）。lock は動いていないのに
+  # 危険度だけが上がる — advisory は我々のコミットではなく、それ自身の時計で公開されるため。
+  #
+  # cron の「分」はフリート内で艦ごとにずらしてある（同時刻の stampede 回避）。
+  # 0時台 00〜55 と 1時台 05=profile / 10=serve / 15=suite / 20=nene2-node が使用済みで、
+  # NeNe は次の空きである 25 を取る。
+  #
+  # 🔴 KNOWN LIMITATION: public リポの scheduled workflow は、リポジトリの activity が
+  #    60 日無いと GitHub に自動無効化される。**休眠リポほどこの検査を必要とするのに、
+  #    休眠リポでこそ静かに止まる。** リポ内で塞げる穴ではなく、外部からの死活監視
+  #    （hub 側の別課題）が要る。origin/main の最終コミットは 2026-08-14 なので、
+  #    しきい値到達は概ね 2026-10 中旬。
+  schedule:
+    - cron: '25 1 * * 1' # 月曜 01:25 UTC = 10:25 JST
+
+  # 次の週次実行を待たずに手で叩いて確認するための口。
+  workflow_dispatch:
+
+# 🔴 group に github.event_name を含めること。含めないと schedule / workflow_dispatch の
+#    実行が同じ ref の push に cancel され、「設定したのに走らない」が静かに起きる
+#    （nene2-python が対照実験で実証）。
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
 jobs:
   unit:
     runs-on: ubuntu-latest
