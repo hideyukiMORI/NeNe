@@ -1,113 +1,71 @@
-# Session State — 2026-05-29
+# Session State — 2026-08-20
 
 ## Current Branch
-`main` — FT265 merged and up to date.
+`docs/refresh-2026-08-state` (docs) / `ci/weekly-schedule-audit` (PR #793, CI 待ち).
+`main` = `4d9bd68`, origin と同期済み.
 
-## This session
-1. **Repo cleanup** — removed 28 stale git worktrees (`.claude/worktrees/`, leftover
-   parallel-agent run, pid 40898 dead) and 233 merged/superseded local branches.
-   Only `feat/ft112-leader-board` was intentionally kept earlier, then the FT265
-   branches were cleaned after merge. Remotes untouched.
-2. **FT265 — SequenceNumber** ✅ shipped:
-   - **PR #717** (feat) — `class/xion/SequenceNumber.php` + 20 tests; INDEX (Infrastructure & DB);
-     report `docs/field-trials/2026-05-field-trial-265.md`.
-   - **PR #718** (docs) — `composer ft:done` output (current.md / roadmap.md / candidates.md → FT1–FT265).
-   - Both auto-merged (squash) after CI green.
+## この艦の担当リナについて
+2026-08-20 に `handles.tsv` へ **handle `nene` / port 8839** で登録された新規レーン。
+それまで NeNe には担当リナが居なかった。横断連絡は chat-relay（hub = 8790）。
 
-## FT265 F-1 follow-up — scaffold bug FIXED ✅ (PR #719)
-`composer make:xion` template (`tools/make-xion.php`) had two correctness bugs,
-both fixed in **PR #719**:
-- removed the wrong `use Nene\Database\PdoConnection;` (PdoConnection is
-  `Nene\Xion`); production `$db === null` would have fatal'd + full Phan flagged it.
-- corrected test stub namespace `Tests\Unit\Xion` → `Nene\Tests\Unit\Xion`
-  (PSR-4-autoloadable; bootstrap maps `Nene\Tests\` → `tests/`).
-Newly scaffolded classes are now namespace- and Phan-clean out of the box.
+## リポの現況（2026-08-20 実測）
+- 1,065 commit / 最終コミット `4d9bd68` = 2026-08-14 18:16 JST
+- class 311本（`class/xion/` 55 ＝ framework-core、`class/kit/` 256 ＝ helper）/ 69,972 行
+- テスト 5,249 メソッド・315 ファイル / ADR 0001–0014 / 最新タグ v0.3.0
+- open PR・open Issue ともにゼロ、CI 緑、未コミット変更なし
+- **判定: 「休眠だが健全」**。機能開発は 2026-07-06 で止まっており、以降は依存と CI の保守のみ。
 
-## FT266 — BusinessCalendar ✅ (this session)
-Working-day calendar (weekend + per-calKey holidays) for SLA / due-date math.
-`isBusinessDay` / `addBusinessDays` (±N, skips weekends+holidays) /
-`businessDaysBetween` (half-open `[from,to)`) / `next`+`previousBusinessDay` /
-`addHoliday`+`removeHoliday`+`holidays`. Round-trip date validation. 24 tests.
-- **PR #720** (feat) + **PR #721** (docs), both auto-merged after CI green.
-- Clean trial, no findings; FT265 scaffold fix (#719) held.
+## このセッションでやったこと
+1. **repo-status 一巡**（読み取り）→ hub へ relay 報告。
+2. **hub の誤りを2件差し戻し**（下記「hub との往復」）。
+3. **stale ローカルブランチ2本を削除**（根拠を明記して消した・下記）。
+4. **PR #793** — 週次 `schedule` + `workflow_dispatch` + `concurrency` を `tests.yml` へ追加。
+5. **docs 更新**（このファイル ＋ `docs/todo/current.md`）。
 
-## 🏷️ v0.3.0 RELEASED (2026-05-29)
-Tag `v0.3.0` + GitHub Release created; `VERSION` 0.2.0→0.3.0; `docs/releases.md`
-notes added. Bundled 356 PRs since v0.2.0 (Xion catalogue FT1–FT287, DX tooling,
-ADR-0003–0013, prod-readiness). Tagging cadence going forward: per ~10-FT docs
-wave or monthly, not per-FT; VERSION bump tied to the release-prep PR.
+## 削除したブランチと、その根拠（根拠の種類を必ず区別すること）
+hub の指摘: **「main に含まれるから安全」と「作業が close 済みだから安全」は別の根拠**。
 
-## ✅ ADR-0014 — Xion core vs Kit helper split (DONE)
-Executed across 3 PRs: #747 (Files&Media pilot), #748 (remaining 217), #749
-(tooling+catalogue+docs). **Final: `class/xion/` = 55 framework-core, `class/kit/`
-= 227 `Nene\Kit` helpers.** `tools/migrate-to-kit.php` (preflight+move) drove it.
-- **FT288+ now scaffold with `composer make:kit -- Name`** (→ `Nene\Kit`,
-  `class/kit/`, test ns `Nene\Tests\Unit\Kit`, auto `use Nene\Xion\PdoConnection;`).
-  `make:xion` is for rare framework-core additions only.
-- Indexes: `composer kit:index` (helpers) / `composer xion:index` (core).
-- Dedup: concept-scan `class/kit/INDEX.md` descriptions before new helpers.
-- STAY allowlist (what stayed core) is embedded in `tools/migrate-to-kit.php`.
+| ブランチ | 根拠の種類 | 実測 | 復元 |
+|---|---|---|---|
+| `feat/ft314-punchcard` | **A: main 含有** | `merge-base --is-ancestor` 成立・`--not main` の差分 0 commit・`git branch -d` が成功 | `2b9884d`（main 上にある） |
+| `feat/ft112-leader-board` | **B: 作業 close 済み** | main に**未含有**（差分 1 commit）。FT112 は「FT61 と競合」で close 済み（`docs/roadmap.md:189` / `current.md:155`）。競合相手 `class/kit/Leaderboard.php` の実在も確認。`-D` で強制削除 | `5dabe1e`（main には無い・必要なら SHA から復元） |
 
-## 🔁 AUTONOMOUS WAVE (paused at 21/50) — user asked to "run ~FT50 continuously"
-Running FT267→~FT316 self-driven. Workflow per FT: scaffold → implement →
-tests → report → precommit → feat PR → auto-merge → sync. **Docs (`ft:done`)
-are BATCHED every 10 FTs into one wave PR** (not per-FT) to cut PR/CI count.
+⚠️ **リモートブランチ 351本は未処理**。施主判断へ上げてあり、投資判断（下記）が出るまで保留。
 
-**Batch 1 DONE (10/50):** FT267–FT276 code + docs all merged. Docs wave PR #732
-advanced current.md/roadmap to **FT1–FT276 complete**. Branches cleaned.
-Classes: ExchangeRate, DataRetention, MaintenanceWindow, EmailSuppression,
-PasswordPolicy, PercentageRollout, Heartbeat, DeadLetterQueue, RetrySchedule,
-RoundRobinAssigner.
+## 未処理・次にやること
+- **PR #793 のマージ後、`workflow_dispatch` で手動発火して DoD を実測**し hub へ報告する（未実施）。
+- 🔴 **board の投資判断（`due:2026-08-27`・@hide）**: NeNe を維持するか休眠リポ棚卸しへ送るか。
+  **セキュリティは理由にならない**（下記のとおり解決済み）。この結論次第でリモート351本の掃除の要否も決まる。
+- 60日ルール: scheduled workflow は activity 60日で自動無効化。**2026-10 中旬**が閾値（2026-08-14 起算）。
 
-**Batch 2 DONE (20/50):** FT277–286 code + docs all merged (docs wave PR #743).
-WeightedPicker, TermGlossary, RedactionRule, IpReputation, FeatureTour,
-AffiliateClick, UtmCampaign, FunnelStep, Endorsement, PinnedItem.
-current.md/roadmap now at **FT1–FT286 complete**.
+## セキュリティの現況（誤解が繰り返されている箇所）
+- `composer.lock` の smarty は **v5.8.4**（#790 / `6e2c55e`・2026-08-14）。
+- CVE-2026-62996（`<5.8.4`）/ CVE-2026-62992（`<5.8.2`）**とも範囲外＝両方解消済み**。
+- `composer audit --no-interaction` は `tests.yml` に**独立ステップ**として実在（#792）。
+  `composer check` に畳まないこと（run ログに痕跡が残らず「走らなかった」と「無い」が区別できなくなる）。
 
-**Batch 3 DONE (30/50):** FT287–296 code + docs all merged (docs wave #761).
-ChecksumRegistry, QuietHours, Snooze, ShippingZone, Payout, QuizAttempt,
-ReportSchedule, Raffle, PurchaseLimit, PriceAlert. current.md at **FT1–FT296**.
-FT288+ all scaffolded via `composer make:kit` into `Nene\Kit` — workflow proven.
+## hub との往復（差し戻し2件・作法として残す）
+1. **smarty「未対応」判定は誤り** — hub のローカルが `origin/main` より2コミット古く、
+   古い木で測っていた。**着手前に `git fetch` して自艦を実測**する型で防げる。
+2. **指示書の訂正の取りこぼし2箇所** — 散文は直っていたのに、**表（lock が v5.8.0 のまま）と
+   日付（60日しきい値の起算が hub のローカル HEAD の 07-06）だけが古いまま残っていた**。
+   🔑 **訂正したら、その文書内を古い値（`5.8.0` / `07-06`）で grep する。**
+   表・日付・コード例は訂正の視線から外れるが、**次に読む人が最初に見るのはそこ**。
+3. **board の鳴らし方** — 完了済みのセキュリティ玉を security due のまま置くと毎週
+   「期限切れ」で鳴り続けて実体を見失う（実際4日鳴っていた）。⇒ 性質を投資判断へ書き換え。
+   ⚠️ ただし **due は外さず付け替える**（期日の無い玉は板から消えるため）。
 
-**Batch 4 DONE (40/50):** FT297–306 code + docs all merged (docs wave #772).
-StockTransfer, BulkDiscount, Petition, ServiceStatus, Pseudonymizer, DailyReward,
-Achievement, QueueTicket, Annotation, GiftRegistry. current.md at **FT1–FT306**.
+## 権限の線引き（艦隊の作法）
+🔴 **hub の GO は施主の承認ではない。** リポを変更する権限は hub からは出せない。
+今回も hub が玉2 に GO を出した後、**施主の承認を別途取ってから**着手した。
+records / fleet-tooling も独立に同じ判断へ到達している。
 
-**Batch 5 DONE (50/50) ✅ — WAVE COMPLETE.** FT307–316 code + docs all merged
-(docs wave PR #783). current.md/roadmap now at **FT1–FT316 complete**.
-Classes: LeaveRequest, ExpenseClaim, Kudos, Tournament, Dispute, PledgeDrive,
-ShiftRoster, SpaceOccupancy, SeatMap, Escalation (PRs #773–#782).
-- **FT314 pivot:** PunchCard dropped as a concept-dup of `TimeEntry`
-  (start/stop/duration) → built **SpaceOccupancy** (capacity-enforced live
-  headcount) instead. The FT281 dedup discipline working as intended.
-- **FT313 finding:** `Nene\Kit` helpers using `DbUpsert` must
-  `use Nene\Xion\DbUpsert;` (the scaffold only imports PdoConnection).
+## 記録: この艦は艦隊の金額規約の正典の起点
+`docs/development/money.md` の `| JPY | yen (integer) | Money::of(1500,'JPY') | ¥1,500 |` が
+艦隊で最古の金額単位の定義。2026-08-20 に艦隊が `*_cents` の読みで 3対3 に割れた際、
+施主裁定で **正典＝円(1:1)** が確定した。**この記述は正しいので動かさないこと。**
+全数調査は `_work/reports/2026-08-20-money-unit-archaeology.md`。
 
-**⚠️ DEDUP LESSON:** name-only checks miss concept dups. Originally-queued
-TermsAcceptance was dropped (duplicated existing **TermConsent**); CookieConsent
-dropped (overlaps **ConsentLog**); AttributionTouch/AnnouncementRead dropped
-(overlap Referral / ReadProgress+Announcement). ALWAYS concept-scan INDEX
-descriptions (`grep -i <keyword> class/xion/INDEX.md`) before starting a class.
-
-**Batch 3 candidates (re-verify each):** PinnedItem done→286; then ChecksumRegistry
-(integrity), plus generate ~9 more clearly-novel for FT287–316.
-
-## FT status
-- **FT1–FT316 complete & docs-recorded.** The 50-trial autonomous `Nene\Kit`
-  wave (FT267–316) is finished; markers in current.md/roadmap.md at FT1–FT316.
-- No wave in progress. Next FT work is on-request only.
-- Trigger-based candidates (FT36 background jobs, OTel, multi-tenancy) remain
-  parked in `docs/field-trials/candidates.md` — do NOT pre-implement.
-
-## FT workflow (FT288+ — Nene\Kit)
-1. Concept-scan `class/kit/INDEX.md` descriptions for dups, THEN `composer make:kit -- ClassName`
-2. Implement class + tests (if it uses `DbUpsert`, add `use Nene\Xion\DbUpsert;` — see FT313)
-3. `composer kit:index` to refresh desc, then move the orphan INDEX row into the right section alphabetically (strip the trailing orphan with `perl -0pi -e`)
-4. Write `docs/field-trials/2026-05-field-trial-<N>.md`
-5. `composer precommit`
-6. Push + PR (feat) + auto-merge; wait CI (rerun --failed on Docker Hub flake)
-7. Sync main, delete merged branch
-8. Docs (`composer ft:done -- FT<N> ClassName "desc" <PR#>`) BATCHED every ~10 FTs into one wave PR
-
-## Nothing uncommitted
-All work committed and merged.
+## 注意（前回のこのファイルにあった誤り）
+旧版に「`VERSION` 0.2.0→0.3.0」とあったが、**`VERSION` ファイルは git 履歴上一度も存在しない**。
+版は **git tag ＋ `docs/releases.md`** で管理されている。

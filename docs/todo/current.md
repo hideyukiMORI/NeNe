@@ -6,9 +6,37 @@ This file summarizes short-term work for humans and AI agents. GitHub Issues rem
 
 No open Issues. Promotion articles (#178 Qiita / #179 DEV Community / #180 Reddit・HN) are closed — outreach is managed in a separate repository.
 
-The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-29: all non-promotion Issues are closed; FT1–FT316 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0013 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
+The Phase 6 (reviewable small-service delivery) and Phase 7 (field trials) loops have been running continuously. As of 2026-05-29: all non-promotion Issues are closed; FT1–FT316 are complete (FT36 deferred as ADR-class; FT112 closed as conflicting with FT61); ADR-0001–0014 are in place. The Xion helper wave is ongoing — see **Field Trials** for the full log and **Backlog Candidates** for trigger-based future work.
+
+**Feature work has been dormant since 2026-07-06.** What has landed since then is
+dependency and CI maintenance only (see 2026-08 below). Whether NeNe stays under
+active investment or moves to the dormant-repo inventory is an open decision held
+by the owner — it is a strategy question, not a security one.
 
 ## Recently Completed
+
+### 2026-08 — dependency + CI maintenance (no feature work)
+
+**2026-08-14 — smarty/smarty 5.8.0 → 5.8.4** (PR #790, `6e2c55e`). Dependabot bump,
+`composer.lock` only. Clears CVE-2026-62996 (stream restriction bypass, `>=5.0.0,<5.8.4`)
+and CVE-2026-62992 (symlink path traversal, `<4.5.7` | `>=5.0.0,<5.8.2`), both reported
+2026-08-07. **Both advisories are resolved** — `composer.lock` on `main` is v5.8.4.
+
+**2026-08-14 — `composer audit` gate in CI** (PR #791 → #792). Added as its **own step**
+in `.github/workflows/tests.yml` rather than folded into `composer check`, so the job log
+shows whether the audit ran at all: a check that leaves no trace cannot be distinguished
+from a check that is missing. Measured 0 findings before adding the gate, so it went in green.
+
+**2026-08-20 — weekly `schedule` on the Tests workflow** (PR #793). The audit step above
+only fires on `pull_request` / `push:main`, so advisories published while the repo is quiet
+are never seen. NeNe is the proof: no commits between 2026-07-06 and 2026-08-14, and the two
+smarty CVEs were reported inside that gap. Adds `schedule` (`25 1 * * 1` — minute allocated
+from the fleet-wide free list), `workflow_dispatch`, and a `concurrency` group that includes
+`github.event_name` (without it, scheduled runs get cancelled by pushes on the same ref).
+🔴 **Known limitation:** GitHub auto-disables scheduled workflows after 60 days of repository
+inactivity — the dormant repo that most needs this check is the one where it silently stops.
+Threshold is roughly mid-October 2026 counting from 2026-08-14. No in-repo fix; needs external
+liveness monitoring.
 
 ### 2026-05-28 — FT255–FT264: Xion tenth extended wave (10 trials)
 
