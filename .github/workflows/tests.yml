@@ -201,7 +201,13 @@ jobs:
       - name: Create or update the failure issue
         run: |
           set -euo pipefail
-          existing="$(gh issue list --state open --limit 100 --json number,title \
+          # 🔴 --limit は 100 では足りない。open が 100 件を超えると同名を取りこぼして
+          #    重複起票へフォールバックする。しかも壊れ方が悪い——壊れた側の挙動が
+          #    「毎週新しい issue が立つ」で一見すると装置が動いて見え、かつ発現条件
+          #    （open 100 件超）は「通知が読まれず溜まっている状態」そのもの。
+          #    ＝この仕掛けが守ろうとしているものを、最も必要なときに自分で壊す。
+          #    （vault #379 発見・NENE2 #1656 起票・2026-08-22 の横断実測では最大 61 件）
+          existing="$(gh issue list --state open --limit 1000 --json number,title \
             | jq -r --arg t "$ISSUE_TITLE" 'map(select(.title == $t)) | .[0].number // empty')"
           body="週次の schedule 実行が失敗しました。 実行: ${RUN_URL}"
           if [ -n "$existing" ]; then
