@@ -29,6 +29,11 @@ on:
   # 次の週次実行を待たずに手で叩いて確認するための口。
   workflow_dispatch:
 
+    inputs:
+      simulate_failure:
+        description: 'Intentionally fail the job to verify the failure-notification path'
+        type: boolean
+        default: false
 # 🔴 group に github.event_name を含めること。含めないと schedule / workflow_dispatch の
 #    実行が同じ ref の push に cancel され、「設定したのに走らない」が静かに起きる
 #    （nene2-python が対照実験で実証）。
@@ -42,6 +47,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # 🔴 Checkout の「直後」に置く。literally first に置くと working tree が無くて
+      # 落ちるので、意図した exit 1 ではない別の失敗をリハーサルしてしまう（NENE2 実証 2026-08-22）。
+      - name: Simulate failure (rehearsal only)
+        if: inputs.simulate_failure
+        run: exit 1
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -176,7 +187,7 @@ jobs:
 
   notify-failure:
     name: Open an issue when the scheduled run fails
-    if: failure() && github.event_name == 'schedule'
+    if: failure() && (github.event_name == 'schedule' || inputs.simulate_failure)
     needs: [unit, runtime-smoke]
     runs-on: ubuntu-latest
     permissions:
