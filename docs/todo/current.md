@@ -35,8 +35,55 @@ from the fleet-wide free list), `workflow_dispatch`, and a `concurrency` group t
 `github.event_name` (without it, scheduled runs get cancelled by pushes on the same ref).
 🔴 **Known limitation:** GitHub auto-disables scheduled workflows after 60 days of repository
 inactivity — the dormant repo that most needs this check is the one where it silently stops.
-Threshold is roughly mid-October 2026 counting from 2026-08-14. No in-repo fix; needs external
-liveness monitoring.
+Threshold is roughly mid-October 2026 counting from 2026-08-14 (⚠️ superseded — activity
+resumed 2026-08-31, see below). No in-repo fix; needs external liveness monitoring.
+
+**2026-08-31 — failure notification, then telling the two failures apart** (PR #795, #797).
+The first weekly `schedule` run to actually fail did so on 2026-08-31
+([run 33367156425](https://github.com/hideyukiMORI/NeNe/actions/runs/33367156425)), and it
+failed for a reason nobody had planned for: packagist returned `HTTP/2 502` for
+`/api/security-advisories/`, so `composer audit` could not fetch the advisory list at all.
+
+Two things were wrong, in different layers:
+
+1. **Nobody was told.** The run went red and no issue was opened. PR #795 (the
+   notify-failure job) had been sitting open since 2026-08-21 — the device that would have
+   reported it existed only on an unmerged branch. Merged as `01fd1bf`.
+2. **The message would have been wrong anyway.** The audit step was a bare
+   `run: composer audit --no-interaction`, which collapses two unrelated events into the
+   same red. Measured on composer 2.9.8: **advisory found → exit 1**, **advisory could not
+   be fetched → exit 100**. The distinction was already there; the step was discarding it.
+   With #795 merged, the next 502 would have auto-filed an issue that reads as a
+   vulnerability report. PR #797 (`7a0558d`) classifies the exit code, carries the verdict
+   to the notification through `unit.outputs.audit_status`, and gives the upstream case its
+   own 🟠 issue title so dedup never mixes it with a real advisory.
+
+Deliberately not done:
+
+- **`--ignore-unreachable`** would turn a fetch failure green. "No advisories" and "could not
+  check" would become indistinguishable — which is precisely what keeping the audit as its own
+  step (#792, above) exists to prevent. The upstream case stays **red**; only its *reason* is
+  made legible.
+- **`--locked`** is not used in CI, because `composer install` runs immediately before, so
+  installed == lock, and auditing what is installed is closer to what actually runs.
+  ⚠️ **Locally the opposite holds.** Plain `composer audit` inspects `vendor/`, so a stale
+  worktree reports advisories that the lock already resolved — during this work a local run
+  flagged both smarty CVEs as live because `vendor/` still held v5.8.0 from 2026-05-26 while
+  `composer.lock` had v5.8.4. **Use `composer audit --locked` when auditing by hand.**
+
+Retry (`0/60/300 s`) was added but is only insurance against brief blips: the 2026-08-31
+outage lasted at least **26 min 49 s** (NeNe failed at 07:09:48Z; nene-vault's weekly audit
+succeeded at 07:36:37Z), so this retry would not have saved that run. The classification is
+what does the work, not the retry.
+
+Verified end-to-end on real CI, not just locally: `simulate_audit_exit=100`
+([run 33400091895](https://github.com/hideyukiMORI/NeNe/actions/runs/33400091895)) produced
+`unit=failure`, `runtime-smoke=success`, `notify-failure=success`, and issue #798 opened under
+the 🟠 title — which is also the proof that **job outputs survive a failed job**, the one thing
+that could not be checked with stubs.
+
+Note on the known limitation above: repository activity resumed on 2026-08-31, so the 60-day
+auto-disable threshold moves from mid-October to roughly **late October 2026**.
 
 ### 2026-05-28 — FT255–FT264: Xion tenth extended wave (10 trials)
 
