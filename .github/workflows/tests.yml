@@ -34,6 +34,15 @@ on:
         description: 'Intentionally fail the job to verify the failure-notification path'
         type: boolean
         default: false
+      # 🟠 パス（上流障害）のリハーサル口。simulate_failure は Setup PHP より前で
+      #    exit 1 するので audit ステップに到達せず、分類も outputs も動かない。
+      #    ＝あれでは「advisory を取得できなかった」通知は一度も実行されない。
+      #    ここに終了コードを渡すと audit が composer を呼ばずにその値を返し、
+      #    分類 → outputs → notify-failure の伝播までを実 CI で1回通せる。
+      simulate_audit_exit:
+        description: 'composer audit の終了コードを強制して分類と通知経路を検証する（0 / 1 / 100。空なら通常実行）'
+        type: string
+        default: ''
 # 🔴 group に github.event_name を含めること。含めないと schedule / workflow_dispatch の
 #    実行が同じ ref の push に cancel され、「設定したのに走らない」が静かに起きる
 #    （nene2-python が対照実験で実証）。
@@ -102,8 +111,16 @@ jobs:
       #      実際に踏みかけた: lock=v5.8.4 なのに vendor=v5.8.0 で smarty の CVE 2件が出た。）
       - name: composer audit
         id: audit
+        env:
+          SIMULATE_AUDIT_EXIT: ${{ inputs.simulate_audit_exit }}
         run: |
           set +e
+          # リハーサル時は composer を呼ばず、渡された終了コードをそのまま使う。
+          # リトライも回さない（60+300 秒待つ意味がないため）。
+          if [ -n "${SIMULATE_AUDIT_EXIT:-}" ]; then
+            code="${SIMULATE_AUDIT_EXIT}"
+            echo "::warning::simulate_audit_exit=${code} — composer audit は実行していません（経路の検証）。"
+          else
           # 短い瞬断だけを吸うための保険。
           # ⚠️ 解決ではない。2026-08-31 の障害は実測 26分49秒
           #    （NeNe 失敗 07:09:48Z → nene-vault の Weekly audit success 07:36:37Z）で、
@@ -115,6 +132,7 @@ jobs:
             [ "$code" -ne 100 ] && break
             echo "::warning::advisory の取得に失敗しました (exit 100)。再試行します。"
           done
+          fi
           set -e
 
           if [ "$code" -eq 100 ]; then
@@ -236,7 +254,15 @@ jobs:
 
   notify-failure:
     name: Open an issue when the scheduled run fails
-    if: failure() && (github.event_name == 'schedule' || inputs.simulate_failure)
+    # 🔴 simulate_audit_exit をここに足すのを忘れないこと。audit ステップだけが
+    #    input を読む形にすると、リハーサルは分類までしか届かず、
+    #    **検証したい伝播（needs.unit.outputs）が一度も評価されない**。
+    if: >-
+      failure() && (
+        github.event_name == 'schedule'
+        || inputs.simulate_failure
+        || (github.event_name == 'workflow_dispatch' && inputs.simulate_audit_exit != '')
+      )
     needs: [unit, runtime-smoke]
     runs-on: ubuntu-latest
     permissions:
