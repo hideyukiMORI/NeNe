@@ -34,6 +34,15 @@ on:
         description: 'Intentionally fail the job to verify the failure-notification path'
         type: boolean
         default: false
+      # 🟠 パス（上流障害）のリハーサル口。simulate_failure は Setup PHP より前で
+      #    exit 1 するので audit ステップに到達せず、分類も outputs も動かない。
+      #    ＝あれでは「advisory を取得できなかった」通知は一度も実行されない。
+      #    ここに終了コードを渡すと audit が composer を呼ばずにその値を返し、
+      #    分類 → outputs → notify-failure の伝播までを実 CI で1回通せる。
+      simulate_audit_exit:
+        description: 'composer audit の終了コードを強制して分類と通知経路を検証する（0 / 1 / 100。空なら通常実行）'
+        type: string
+        default: ''
 # 🔴 group に github.event_name を含めること。含めないと schedule / workflow_dispatch の
 #    実行が同じ ref の push に cancel され、「設定したのに走らない」が静かに起きる
 #    （nene2-python が対照実験で実証）。
@@ -44,6 +53,12 @@ concurrency:
 jobs:
   unit:
     runs-on: ubuntu-latest
+    # composer audit が「advisory を検出した」のか「advisory を取得できなかった」のかを
+    # notify-failure ジョブへ渡す。ジョブ間なので $GITHUB_ENV では届かない（別ランナー）。
+    # ⚠️ このジョブが失敗しても needs.unit.outputs は読める（出力を書いた step が
+    #    走っていれば良い）。audit ステップは出力を書いてから exit する順序にしてある。
+    outputs:
+      audit_status: ${{ steps.audit.outputs.status }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,8 +91,60 @@ jobs:
       # `composer check`, so the job log (and any cross-repo tooling that reads it)
       # can tell whether the audit ran at all. A check that leaves no trace cannot be
       # distinguished from a check that is missing.
+      #
+      # 🔴 exit code を潰さないこと。composer は別々の事象を別々のコードで返す:
+      #      1   = advisory を検出した         → 本物。赤で正しい。
+      #      100 = advisory を取得できなかった → 上流障害。監査は「実行されていない」。
+      #    素の `run: composer audit` は両方を同じ赤にする。そのため 2026-08-31 の
+      #    packagist 502（run 33367156425 / `HTTP/2 502` → `exit code 100`）が
+      #    脆弱性の検出と見分けられなかった。実測（composer 2.9.8・NeNe レーン）=
+      #    advisory あり → 1 ／ 到達不能 proxy で取得を潰す → 100。
+      #
+      # 🔴 --ignore-unreachable は使わない。取得失敗が exit 0 になり、「advisory が無い」と
+      #    「確かめられなかった」が同じ緑に潰れる。上のコメントがこのステップを独立させた
+      #    理由（走ったかどうかが判ること）を、それ自身で無効化する。
+      #
+      # ⚠️ --locked は付けない。CI は直前に `composer install` を通しているので
+      #    installed == lock であり、installed を測る方が「実際に動く木」に近い。
+      #    （手元で叩くときは逆に --locked が要る。素の audit は installed を見るので、
+      #      vendor が古いと解消済みの CVE が再燃して見える。2026-08-31 に NeNe レーンが
+      #      実際に踏みかけた: lock=v5.8.4 なのに vendor=v5.8.0 で smarty の CVE 2件が出た。）
       - name: composer audit
-        run: composer audit --no-interaction
+        id: audit
+        env:
+          SIMULATE_AUDIT_EXIT: ${{ inputs.simulate_audit_exit }}
+        run: |
+          set +e
+          # リハーサル時は composer を呼ばず、渡された終了コードをそのまま使う。
+          # リトライも回さない（60+300 秒待つ意味がないため）。
+          if [ -n "${SIMULATE_AUDIT_EXIT:-}" ]; then
+            code="${SIMULATE_AUDIT_EXIT}"
+            echo "::warning::simulate_audit_exit=${code} — composer audit は実行していません（経路の検証）。"
+          else
+          # 短い瞬断だけを吸うための保険。
+          # ⚠️ 解決ではない。2026-08-31 の障害は実測 26分49秒
+          #    （NeNe 失敗 07:09:48Z → nene-vault の Weekly audit success 07:36:37Z）で、
+          #    この 約6分 のリトライでは救えなかった。効くのは下の分類のほう。
+          for delay in 0 60 300; do
+            [ "$delay" -gt 0 ] && sleep "$delay"
+            composer audit --no-interaction
+            code=$?
+            [ "$code" -ne 100 ] && break
+            echo "::warning::advisory の取得に失敗しました (exit 100)。再試行します。"
+          done
+          fi
+          set -e
+
+          if [ "$code" -eq 100 ]; then
+            echo "status=upstream_unavailable" >> "$GITHUB_OUTPUT"
+            echo "::error::packagist から advisory を取得できませんでした（上流障害）。監査は実行されていません。脆弱性の検出ではありません。"
+            exit "$code"
+          fi
+          if [ "$code" -ne 0 ]; then
+            echo "status=advisory_found" >> "$GITHUB_OUTPUT"
+            exit "$code"
+          fi
+          echo "status=clean" >> "$GITHUB_OUTPUT"
 
       - name: Validate Composer metadata
         run: composer validate
@@ -187,13 +254,31 @@ jobs:
 
   notify-failure:
     name: Open an issue when the scheduled run fails
-    if: failure() && (github.event_name == 'schedule' || inputs.simulate_failure)
+    # 🔴 simulate_audit_exit をここに足すのを忘れないこと。audit ステップだけが
+    #    input を読む形にすると、リハーサルは分類までしか届かず、
+    #    **検証したい伝播（needs.unit.outputs）が一度も評価されない**。
+    if: >-
+      failure() && (
+        github.event_name == 'schedule'
+        || inputs.simulate_failure
+        || (github.event_name == 'workflow_dispatch' && inputs.simulate_audit_exit != '')
+      )
     needs: [unit, runtime-smoke]
     runs-on: ubuntu-latest
     permissions:
       issues: write
     env:
-      ISSUE_TITLE: '🔴 NeNe: 週次 CI（schedule）が失敗しています'
+      # 🔴 題名は固定しない。上流障害（packagist が advisory を返せない）と
+      #    advisory の検出は、読み手にとって意味がまるで違う。同じ題名にすると
+      #    dedup が両者を1本のスレッドへ畳み、502 の通知が脆弱性としてしか読めなくなる。
+      #    題名を分ければ dedup は題名ごとに効き、混ざらない。
+      ISSUE_TITLE_FAILURE: '🔴 NeNe: 週次 CI（schedule）が失敗しています'
+      ISSUE_TITLE_UPSTREAM: '🟠 NeNe: 週次 CI が上流障害で完走できていません（脆弱性ではありません）'
+      # unit ジョブの composer audit がどちらだったか（clean / advisory_found /
+      # upstream_unavailable。ジョブが飛べば空）。
+      AUDIT_STATUS: ${{ needs.unit.outputs.audit_status }}
+      # job id にハイフンが入るので needs['runtime-smoke'] のブラケット記法が要る。
+      SMOKE_RESULT: ${{ needs['runtime-smoke'].result }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GH_REPO: ${{ github.repository }}
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -207,9 +292,30 @@ jobs:
           #    （open 100 件超）は「通知が読まれず溜まっている状態」そのもの。
           #    ＝この仕掛けが守ろうとしているものを、最も必要なときに自分で壊す。
           #    （vault #379 発見・NENE2 #1656 起票・2026-08-22 の横断実測では最大 61 件）
+
+          # 上流障害と断定してよいのは、audit が取得に失敗し **かつ** 他の面が緑のとき
+          # だけ。runtime-smoke まで落ちているなら本当に壊れている可能性があるので、
+          # 「脆弱性ではありません」と言い切らずに通常の赤へ倒す。
+          if [ "${AUDIT_STATUS}" = "upstream_unavailable" ] && [ "${SMOKE_RESULT}" = "success" ]; then
+            ISSUE_TITLE="$ISSUE_TITLE_UPSTREAM"
+            body="$(printf '%s\n' \
+              'packagist から advisory を取得できなかったため、週次の依存監査が **実行されていません**。' \
+              '' \
+              '- これは脆弱性の検出ではありません（`composer audit` は exit 100 = 取得失敗）。' \
+              '- 監査していないので「安全だと確認できた」わけでもありません。次の週次で再検査されます。' \
+              '- 急ぐ場合は Actions から Tests を workflow_dispatch で再実行してください。' \
+              '' \
+              "実行: ${RUN_URL}")"
+          else
+            ISSUE_TITLE="$ISSUE_TITLE_FAILURE"
+            body="週次の schedule 実行が失敗しました。 実行: ${RUN_URL}"
+            if [ "${AUDIT_STATUS}" = "advisory_found" ]; then
+              body="${body}"$'\n\n''🔴 `composer audit` が advisory を検出しています（exit 1）。run のログを確認してください。'
+            fi
+          fi
+
           existing="$(gh issue list --state open --limit 1000 --json number,title \
             | jq -r --arg t "$ISSUE_TITLE" 'map(select(.title == $t)) | .[0].number // empty')"
-          body="週次の schedule 実行が失敗しました。 実行: ${RUN_URL}"
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body "$body"
           else
